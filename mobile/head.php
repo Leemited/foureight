@@ -232,6 +232,7 @@ while($row = sql_fetch_array($res)){
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
             <form name="write_from" id="write_from" method="post" action="">
+                <input type="hidden" name="up_pd_id" id="up_pd_id" value="">
                 <h2>상태변경</h2>
                 <div>
                     <ul class="modal_sel">
@@ -334,13 +335,13 @@ while($row = sql_fetch_array($res)){
             <input type="hidden" value="<?php echo $_SESSION["list_type"];?>" name="set_list_type" id="set_list_type">
 			<div class="sch_top">
 				<select name="cate" id="cate" class="sel_cate input01s" required >
-					<option value="">1차 카테고리</option>
+					<option value="">전체</option>
 					<?php for($i=0;$i<count($category1);$i++){ ?>
 					<option value="<?php echo $category1[$i]["cate_name"];?>" id="<?php echo $category1[$i]["ca_id"];?>" <?php if($schopt["sc_cate1"]!=""){if($schopt["sc_cate1"] == $category1[$i]["cate_name"]){?>selected<?php } }?>><?php echo $category1[$i]["cate_name"];?></option>
 					<?php } ?>
 				</select>
 				<select name="cate2" id="cate2" class="sel_cate input01s" required >
-					<option value="">2차 카테고리</option>
+					<option value="">전체</option>
                     <?php if($sc_id && $schopt["sc_cate2"]!=""){
                         for($i=0;$i<count($set_cate2);$i++){
                         ?>
@@ -355,9 +356,13 @@ while($row = sql_fetch_array($res)){
 					<span class="slider2 round">팝니다</span>
 				</label>
 				<label class="radio_tag" for="eight">
-					<input type="radio" name="type2" id="eight" value="4" <?php if($schopt["sc_type2"]=="4"){?>checked<?php } ?>>
-					<span class="slider2 round">삽니다</span>
-				</label>
+                    <input type="radio" name="type2" id="eight" value="4" <?php if($schopt["sc_type2"]=="4"){?>checked<?php } ?>>
+                    <span class="slider2 round">삽니다</span>
+                </label>
+                <label class="radio_tag" for="mb_level">
+                    <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($schopt["sc_level"]==4){?>checked<?php } ?>>
+                    <span class="slider2 round">전문가</span>
+                </label>
 			</div>
 			<div class="sch_ord">
                 <?php if(count($order)==0 || $schopt["sc_align"] == ""){?>
@@ -413,6 +418,9 @@ while($row = sql_fetch_array($res)){
 		<span></span>
 		<div class="menu">
 			<div class="user_box">
+                <div class="close">
+                    <img src="<?php echo G5_IMG_URL?>/ic_close.png" alt="">
+                </div>
 				<?php if(!$member["mb_id"]){?>
 				<p><a href="<?php echo G5_URL?>/mobile/page/login_intro.php">로그인</a></p>
 				<?php }else{?>
@@ -552,6 +560,12 @@ function fnkeywordon(){
 }
 
 $(function(){
+    $(".mobile_menu .menu .close ").click(function(){
+        $(".mobile_menu").fadeOut(300,function(){
+            $(".mobile_menu").removeClass("active");
+        });
+    });
+
     var active = '';
 
     $("input[name^=orders]").each(function(e){

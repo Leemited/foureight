@@ -2,6 +2,11 @@
 include_once("../../../common.php");
 include_once(G5_MOBILE_PATH."/head.login.php");
 
+if(!$is_member){
+    alert("로그인이 필요합니다.",G5_BBS_URL.'/login.php?url='.G5_MOBILE_URL."/page/mypage/mypage.php");
+    return false;
+}
+
 if($pro_id){
     $mb_id = $pro_id;
     if(!$type){

@@ -420,6 +420,8 @@ a.btn_admin:focus, a.btn_admin:hover {text-decoration:none}
 .user_box > p a{font-size:2.8vw;font-family:"nsr";color:#fff}
 .user_box div {padding:4vw 0;}
 .user_box div img{width:18vw;}
+.user_box div.close {position:absolute;left:0;top:0;padding:3vw;}
+.user_box div.close img{width:4vw}
 .user_box div img.user_profile{width:15.8vw;height:15.8vw;border:1vw solid #fff;border-radius:50%;}
 .user_box span{color:#dfdfdf;font-size:3vw;padding:5px 0;font-family:"nsr"}
 .user_box h4{color:#FFF;font-size:3.6vw;font-family:"nsr"}
@@ -642,7 +644,7 @@ a.btn_admin:focus, a.btn_admin:hover {text-decoration:none}
 .radio_tag {
   position: relative;
   display: inline-block;
-  width: calc(50vw - 7vw);
+  width: calc(33.33vw - 7vw);
   height: 7vw;
   color:#fff;
   margin-left:2vw;

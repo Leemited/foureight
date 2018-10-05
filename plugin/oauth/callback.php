@@ -137,7 +137,7 @@ if($g5['social_member_table']) {
 
             // 정보수정에서 연동일 때 처리
             echo '<script>'.PHP_EOL;
-            echo 'window.android.setLogin(\''.$mb[mb_id].'\');'.PHP_EOL;
+            echo 'window.android.setLogin("'.$mb['mb_id'].'");'.PHP_EOL;
             echo 'var $opener = window.opener;'.PHP_EOL;
             echo '$opener.$("#sns-'.$service.'").removeClass("sns-icon-not");'.PHP_EOL;
             echo 'window.close();'.PHP_EOL;

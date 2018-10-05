@@ -2,15 +2,19 @@
 if (!defined('_GNUBOARD_')) exit; // 개별 페이지 접근 불가
 
 // 네이버로그인 API 정보
-define('G5_NAVER_OAUTH_CLIENT_ID',  '9IGpu13N3AyXVWpor3Xx');
-define('G5_NAVER_OAUTH_SECRET_KEY', 'p5ZblEd3sy');
+/*define('G5_NAVER_OAUTH_CLIENT_ID',  '9IGpu13N3AyXVWpor3Xx');
+define('G5_NAVER_OAUTH_SECRET_KEY', 'p5ZblEd3sy');*/
+define('G5_NAVER_OAUTH_CLIENT_ID',  '');
+define('G5_NAVER_OAUTH_SECRET_KEY', '');
 
 // 카카오로그인 API 정보
 define('G5_KAKAO_OAUTH_REST_API_KEY', '5b6d7ba88184ecfb18e83eaa901b44c1');
 
 // 페이스북로그인 API 정보
-define('G5_FACEBOOK_CLIENT_ID',  '409805699479065');
-define('G5_FACEBOOK_SECRET_KEY', '60308cbb3476d76a45c6a6f49dde8daa');
+/*define('G5_FACEBOOK_CLIENT_ID',  '409805699479065');
+define('G5_FACEBOOK_SECRET_KEY', '60308cbb3476d76a45c6a6f49dde8daa');*/
+define('G5_FACEBOOK_CLIENT_ID',  '');
+define('G5_FACEBOOK_SECRET_KEY', '');
 
 // 구글+ 로그인 API 정보
 define('G5_GOOGLE_CLIENT_ID',  '');
