@@ -285,7 +285,7 @@ for($i=0;$i<count($list);$i++){
 				<div>
 					<ul>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
-						<?php if($chkMobile){?>
+						<?php if($app){?>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_loc<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><?php echo $dist;?></li>
 						<?php }?>
 					</ul>

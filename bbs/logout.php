@@ -10,6 +10,17 @@ set_cookie('ck_mb_id', '', 0);
 set_cookie('ck_auto', '', 0);
 // 자동로그인 해제 end --------------------------------
 
+$mAgent = array("iPhone","iPod","Android","Blackberry",
+    "Opera Mini", "Windows ce", "Nokia", "sony" );
+$chkMobile = false;
+for($i=0; $i<sizeof($mAgent); $i++){
+    if(stripos($_SERVER["HTTP_USER_AGENT"], "foureight") || stripos( $_SERVER['HTTP_USER_AGENT'], $mAgent[$i] )){
+        $chkMobile = true;
+    }else {
+        $chkMobile = false;
+    }
+}
+
 if ($url) {
     if ( substr($url, 0, 2) == '//' )
         $url = 'http:' . $url;

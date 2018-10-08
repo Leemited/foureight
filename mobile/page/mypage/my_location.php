@@ -30,7 +30,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 				<li>
                     <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[0])?$mylocations[0]:"";?>">
                     <div class="map_set">
-                        <?php if($chkMobile){?>
+                        <?php if($app){?>
                         <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(1);">
                         <?php }?>
                         <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(1)">
@@ -39,7 +39,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 				<li>
                     <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[1])?$mylocations[1]:"";?>">
                     <div class="map_set">
-                        <?php if($chkMobile){?>
+                        <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(2);">
                         <?php }?>
                         <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(2)">
@@ -48,7 +48,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 				<li>
                     <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[2])?$mylocations[2]:"";?>">
                     <div class="map_set">
-                        <?php if($chkMobile){?>
+                        <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(3);">
                         <?php }?>
                         <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(3)">
@@ -57,7 +57,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 				<li>
                     <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[3])?$mylocations[3]:"";?>">
                     <div class="map_set">
-                        <?php if($chkMobile){?>
+                        <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(4);">
                         <?php }?>
                         <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(4)">
@@ -66,7 +66,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 				<li>
                     <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[4])?$mylocations[4]:"";?>">
                     <div class="map_set">
-                        <?php if($chkMobile){?>
+                        <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(5);">
                         <?php }?>
                         <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(5)">
@@ -169,7 +169,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
     }
 
     function nowLoc(num){
-        if(lat && lng){
+        <?php if(!$app) {?>
             alert(lat + "//" + lng);
             var position = new daum.maps.LatLng(lat,lng);
             searchDetailAddrFromCoords(position, function(result, status) {
@@ -183,7 +183,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                     });
                 }
             });
-        }else {
+        <?php }else { ?>
             var latlng = window.android.getLocation();
             alert(latlng);
             if(latlng!=""){
@@ -201,7 +201,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                     }
                 });
             }
-        }
+        <?php }?>
 
     }
 </script>

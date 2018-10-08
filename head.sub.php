@@ -37,19 +37,20 @@ $g5['lo_url'] = addslashes(clean_xss_tags($_SERVER['REQUEST_URI']));
 if (strstr($g5['lo_url'], '/'.G5_ADMIN_DIR.'/') || $is_admin == 'super') $g5['lo_url'] = '';
 
 $app = false;
-if(stripos($_SERVER["SERVER_AGENT"],"foureight")){
+if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
 	$app = true;
 }
 
-$mAgent = array("iPhone","iPod","Android","Blackberry", 
-    "Opera Mini", "Windows ce", "Nokia", "sony" );
+$mAgent = array("iphone","ipod","android","blackberry", "opera mini", "windows ce", "nokia", "sony" );
 $chkMobile = false;
-for($i=0; $i<sizeof($mAgent); $i++){
-    if(stripos($_SERVER["HTTP_USER_AGENT"], "foureight") || stripos( $_SERVER['HTTP_USER_AGENT'], $mAgent[$i] )){
+
+for($i=0;$i<count($mAgent);$i++) {
+    if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), $mAgent[$i]) || strpos($_SERVER["HTTP_USER_AGENT"], "foureight")) {
         $chkMobile = true;
-    }else {
-		$chkMobile = false;
-	}
+        break;
+    } else {
+        $chkMobile = false;
+    }
 }
 
 if($lat && $lng){
@@ -120,15 +121,15 @@ var g5_admin_url = "<?php echo G5_ADMIN_URL; ?>";
 <?php } ?>
 </script>
 
-<?php if($app || $chkMobile){?>
+<?php /*if($app || $chkMobile){*/?>
 <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-<script src="http://code.jquery.com/ui/1.8.21/jquery-ui.min.js"></script>
+<script src="<?php echo G5_JS_URL?>/jquery-ui.js"></script>
 <script src="<?php echo G5_JS_URL ?>/jquery.ui.touch-punch.js"></script>
 <!-- <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script> -->
-<?php }else{ ?>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="<?php echo G5_JS_URL?>/jquery-ui.js"></script>
-<?php } ?>
+<?php /*}else{ */?><!--
+<script src="https://ajax.googleapis.com/ajaxajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="<?php /*echo G5_JS_URL*/?>/jquery-ui.js"></script>
+--><?php /*} */?>
 <script src="<?php echo G5_JS_URL ?>/jquery.menu.js?ver=<?php echo G5_JS_VER; ?>"></script>
 <script src="<?php echo G5_JS_URL ?>/common.js?ver=<?php echo G5_JS_VER; ?>"></script>
 <script src="<?php echo G5_JS_URL ?>/wrest.js?ver=<?php echo G5_JS_VER; ?>"></script>

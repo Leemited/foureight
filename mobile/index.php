@@ -207,7 +207,7 @@ while($row = sql_fetch_array($res)){
 					<input type="text" name="title" id="wr_title" placeholder="" required>
 				</div>
 				<div>
-					<input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="<?php if($chkMobile){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" >	
+					<input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" >
 				</div>
 			</form>
 		</div>
@@ -327,7 +327,7 @@ while($row = sql_fetch_array($res)){
 								<div>
 									<ul>
 										<li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
-										<?php if($chkMobile || $list[$i]["distance"]){?><li><img src="<?php echo G5_IMG_URL?>/ic_loc.svg" alt="">
+										<?php if($app || $list[$i]["distance"]){?><li><img src="<?php echo G5_IMG_URL?>/ic_loc.svg" alt="">
                                             <?php echo $dist;?>
                                             </li><?php }?>
 									</ul>
@@ -699,7 +699,7 @@ $(document).ready(function(){
 });
 function fnlist(num,list_type){
 	//사고팔고/ /카테코리1/카테고리2/가격시작/가격끝/정렬순서1/정렬순서2/정렬순서3/정렬순서4/정렬순서5
-	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,chkMobile,mb_id,sc_id,align;
+	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align;
 
 	if(num == 1){
 		page=0;
@@ -708,7 +708,7 @@ function fnlist(num,list_type){
 	var pchk = $("#paplur").is(":checked");
 	if(pchk == false) align = 1;
 	var latlng = '';
-	<?php if($chkMobile){?>
+	<?php if($app){?>
 	if(align == 1){
 	    latlng = window.android.getLocation();
     }
@@ -716,7 +716,7 @@ function fnlist(num,list_type){
     sc_id = $("#sc_id").val();
 
     stx = $("#stx").val();
-    chkMobile = "<?php echo $chkMobile;?>";
+    app = "<?php echo $app;?>";
     type1 = $("#set_type").val();
     type2 = $("#type2").val();
     cate1 = $("#cate1").val();
@@ -734,7 +734,7 @@ function fnlist(num,list_type){
 	$.ajax({
 		url:g5_url+"/mobile/page/ajax/ajax.index.list.php",
 		method:"POST",
-		data:{page:page,list_type:list_type,stx:stx,chkMobile:chkMobile,type1:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,align:align,latlng:latlng,pd_ids:pd_ids},
+		data:{page:page,list_type:list_type,stx:stx,app:app,type1:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,align:align,latlng:latlng,pd_ids:pd_ids},
 		beforeSend:function(){
             $('.loader').show();
 		},
