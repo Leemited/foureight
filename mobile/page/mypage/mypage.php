@@ -19,6 +19,20 @@ if($pro_id){
         $type = 1;
     }
     $mode = "profile";
+
+
+    $sql = "select * from `wish_product` where mb_id = '{$mb_id}'";
+    $wish_id = sql_query($sql);
+    $i=0;
+    while($rec = sql_fetch_array($wish_id)){
+        if($i==0){
+            $pd_ids = "'".$rec["pd_id"]."'";
+        }else{
+            $pd_ids .= ",'".$rec["pd_id"]."'";
+        }
+        $i++;
+    }
+    $search .= " and pd_id in ({$pd_ids})";
 }
 if($mode != "profile" && $member["mb_id"]==""){
 	alert("로그인이 필요합니다.", G5_BBS_URL."/login.php?url=".G5_MOBILE_URL."/page/mypage/mypage.php");
@@ -27,7 +41,9 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$mb_id}
 
 $mb=get_member($mb_id);
 $total=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}'");
-$wish =sql_fetch("select count(*) as cnt from `wish_product` as w LEFT JOIN `product` as p on w.pd_id = p.pd_id  where w.mb_id = '{$mb_id}' and p.pd_id != ''");
+if($wish_id) {
+    $wish = sql_fetch("select count(*) as cnt from `wish_product` where mb_id = '{$mb_id}' and pd_id != '' {$search}");
+}
 $total1=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 1");
 $total2=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 2");
 
@@ -36,13 +52,34 @@ $wishtotal = $wish["cnt"];
 $total1 = $total1["cnt"];
 $total2 = $total2["cnt"];
 
-$sql = "select * from `product` where mb_id = '{$mb_id}' order by pd_date desc";
+$sql = "select * from `product` where mb_id = '{$mb_id}' and pd_type = 1 order by pd_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $list[] = $row;
 }
 
 ?>
+    <div id="id03" class="w3-modal w3-animate-opacity no-view">
+        <div class="w3-modal-content w3-card-4">
+            <div class="w3-container">
+                <form name="write_from" id="write_from" method="post" action="">
+                    <input type="hidden" name="up_pd_id" id="up_pd_id" value="">
+                    <h2>상태변경</h2>
+                    <div>
+                        <ul class="modal_sel">
+                            <li id="status1" class="active" >판매중</li>
+                            <li id="status2" class="" >거래중</li>
+                            <li id="status3" class="" >판매보류</li>
+                            <li id="status4" class="" >판매완료</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="fnStatusUpdate();" >
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 <div id="id0s" class="w3-modal w3-animate-opacity">
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
@@ -436,6 +473,10 @@ function fnlist2(num,type1,type,mb_id){
         }
     }).done(function(data){
         console.log(data);
+        if(data.indexOf("no-member")>0){
+            alert("회원정보가 없습니다.");
+            return false;
+        }
         if(data.indexOf("no-list")==-1){
             if(num == 1){
                 //새리스트

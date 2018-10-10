@@ -97,7 +97,7 @@ if(!$pd_id) {
             </div>-->
             <div>
                 <div class="map_set">
-                    <input type="text" value="" name="locs1" id="locs1" value="<?php if($write["pd_location"]!=""){echo $write["pd_location"];}?>" placeholder="예)신림역 2번 춮구" required>
+                    <input type="text" value="" name="locs1" id="locs1" value="<?php if($write["pd_location"]!=""){echo $write["pd_location"];}?>" placeholder="예)신림역 2번 출구" required>
                     <?php if($chkMobile){?>
                         <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc();">
                     <?php }?>

@@ -5,7 +5,7 @@ $page = $_REQUEST["page"];
 
 
 //검색 
-$search = "pd_status = 0 ";
+$search = " 1 ";
 
 //정렬
 $od = " order by pd_date desc";
@@ -23,8 +23,6 @@ if($mb_id){
 
 
 $sql = "select * from `product` where  {$search} order by pd_date desc";
-
-//echo $sql;
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;

@@ -74,6 +74,7 @@ include_once(G5_PATH.'/head.sub.php');
 
 <script>
 $(function() {
+    window.android.setLogin('<?php echo $member["mb_id"];?>');
     document.location.href = "<?php echo $query; ?>";
 });
 </script>

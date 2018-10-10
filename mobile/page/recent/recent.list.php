@@ -46,14 +46,14 @@ while($row = sql_fetch_array($res)){
                                 <?php if($list[$i]["sc_priceFrom"] != 0){?>
                                 <h2><?php echo $list[$i]["sc_type2"];?></h2>
                                 <?php }else{?>
-
+                                            
                                 <?php }?>
                             </div>
                             <div class="cont" onclick="fnSearch('<?php echo $list[$i]["sc_id"];?>')">
                                 <p><?php echo $list[$i]["sc_datetime"];?></p>
                                 <?php if($list[$i]["sc_priceFrom"] != 0){?>
-                                <h3><?php echo $list[$i]["sc_cate1"];?>|<?php echo number_format($list[$i]["sc_priceFrom"]);?> 원 ~ <?php echo number_format($list[$i]["sc_priceTo"]);?> 원</h3>
-                                <span><?php echo $list[$i]["sc_cate2"];?></span>
+                                <h3><?php if($list[$i]["sc_cate1"]){echo $list[$i]["sc_cate1"];}else{echo "전체검색 ";}?>|<?php echo number_format($list[$i]["sc_priceFrom"]);?> 원 ~ <?php echo number_format($list[$i]["sc_priceTo"]);?> 원</h3>
+                                <span><?php if($list[$i]["sc_cate2"]){echo $list[$i]["sc_cate2"];}else{echo "전체검색";}?></span>
                                 <?php  }else{ ?>
                                     <h3>간편검색 : <?php if($list[$i]["sc_type"]==1){echo "<span>[물건]</span>";}else{echo "<span>[능력]</span>";}?><?php echo $list[$i]["sc_tag"];?>
                                 <?php }?>

@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 21.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!-- Generator: Adobe Illustrator 22.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 141.7 57.7" style="enable-background:new 0 0 141.7 57.7;" xml:space="preserve">
+	 viewBox="0 0 150 150" style="enable-background:new 0 0 150 150;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#EF4423;}
-	.st1{fill:#FFFFFF;}
+	.st0{fill:#FFCB00;}
+	.st1{font-family:'NanumSquareEB';}
+	.st2{font-size:75.7606px;}
 </style>
-<path class="st0" d="M123.4,4.4h-105c-9.1,0-16.5,7.4-16.5,16.5v16c0,9.1,7.4,16.5,16.5,16.5h105c9.1,0,16.5-7.4,16.5-16.5v-16
-	C139.9,11.8,132.5,4.4,123.4,4.4z"/>
-<g>
-	<path class="st1" d="M31.6,13.5l11.9,20.7c0.3,0.5,0.7,1.2,1,1.9c0.4,0.8,0.8,1.6,1.1,2.5V13.5h3.9v30.7h-4.8L32.9,23.6
-		c-0.3-0.6-0.7-1.2-1-2c-0.4-0.8-0.8-1.6-1.1-2.5v25.1h-3.9V13.5H31.6z"/>
-	<path class="st1" d="M75.7,13.5v3.6H60.8v9.5h14v3.6h-14v10.3H76v3.6H56.6V13.5H75.7z"/>
-	<path class="st1" d="M118.8,13.5l-8.5,30.7h-4.2l-6.8-25.1l-6.9,25.1h-4.3l-8.4-30.7h4.4l6.3,25.1l6.8-25.1h4.1l6.8,25.1l6.4-25.1
-		H118.8z"/>
-</g>
+<polygon class="st0" points="0,150 0,0 150,0 "/>
+<text transform="matrix(1 0 0 1 15.6891 68.3346)" class="st1 st2">N</text>
 </svg>

@@ -3,6 +3,10 @@ include_once('./_common.php');
 include_once(G5_PLUGIN_PATH.'/oauth/functions.php');
 include_once(G5_LIB_PATH.'/mailer.lib.php');
 
+$app = false;
+if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
+    $app = true;
+}
 //var_dump($_REQUEST); exit;
 
 $req_mb_id   = get_session('ss_oauth_request_mb_id');
@@ -137,7 +141,9 @@ if($g5['social_member_table']) {
 
             // 정보수정에서 연동일 때 처리
             echo '<script>'.PHP_EOL;
-            echo 'window.android.setLogin("'.$mb['mb_id'].'");'.PHP_EOL;
+            if($app) {
+                echo 'window.android.setLogin("' . $mb['mb_id'] . '");' . PHP_EOL;
+            }
             echo 'var $opener = window.opener;'.PHP_EOL;
             echo '$opener.$("#sns-'.$service.'").removeClass("sns-icon-not");'.PHP_EOL;
             echo 'window.close();'.PHP_EOL;

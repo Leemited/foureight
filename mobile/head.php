@@ -139,7 +139,6 @@ $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$category1[] = $row;
 }
-
 if($schopt["sc_cate1"] && $schopt["sc_cate2"]){
     $sql = "select ca_id from `categorys` where `cate_name` = '{$schopt[sc_cate1]}' and `cate_depth` = 1 ";
     $ca_id = sql_fetch($sql);
@@ -236,10 +235,10 @@ while($row = sql_fetch_array($res)){
                 <h2>상태변경</h2>
                 <div>
                     <ul class="modal_sel">
-                        <li class="active" >판매중</li>
-                        <li class="" id="status_buy">거래중</li>
-                        <li class="" id="status_">판매보류</li>
-                        <li class="" >판매완료</li>
+                        <li id="status1" class="active" >판매중</li>
+                        <li id="status2" class="" >거래중</li>
+                        <li id="status3" class="" >판매보류</li>
+                        <li id="status4" class="" >판매완료</li>
                     </ul>
                 </div>
                 <div>
@@ -296,7 +295,7 @@ while($row = sql_fetch_array($res)){
 			<form action="./" method="get" name="simplesearch" id="simplesearch" >
                 <input type="text" style="display:none;">
                 <input type="hidden" value="simple" name="set" id="set">
-                <input type="hidden" name="set_type" id="set_type" value="hidden" >
+                <input type="hidden" name="set_type" id="set_type" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" >
                 <input type="hidden" name="set_sc_id" id="set_sc_id" value="<?php echo $sc_id;?>" >
                 <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
                 <input type="text" name="stx" id="stx" value="<?php echo $schopt["sch_tag"];?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
@@ -875,14 +874,14 @@ function fnSaveSch(){
         alert("검색어를 입력해 주세요");
         return false;
     }
-    if($("#cate").val() == ""){
+    /*if($("#cate").val() == ""){
         alert("1차 카테고리를 선택해 주세요.");
         return false;
     }
     if($("#cate2").val() == ""){
         alert("2차 카테고리를 선택해 주세요.");
         return false;
-    }
+    }*/
     $(".search_setting").attr("id","");
     $(".search_setting").css("top","-100vh");
     $("#id05").css("display","block");
@@ -906,14 +905,14 @@ function list_search(){
         alert("검색어를 입력해주세요.");
         return false;
     }
-    if($("#cate").val() == ""){
+    /*if($("#cate").val() == ""){
         alert("1차 카테고리를 선택해 주세요.");
         return false;
     }
     if($("#cate2").val() == ""){
         alert("2차 카테고리를 선택해 주세요.");
         return false;
-    }
+    }*/
     document.savesch.submit();
 }
 

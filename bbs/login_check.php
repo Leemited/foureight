@@ -91,20 +91,17 @@ if ($url) {
 } else  {
     $link = G5_URL;
 }
+
+$app = false;
+if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
+    $app = true;
+}
 ?>
-<!--<script>
-    <?php /*if($chkMobile){*/?>
-    console.log("A");
-    //var chk = window.android.setLogin('<?php /*echo $mb['mb_id'];*/?>');
-    if(chk == "true") {
-        location.href = '<?php /*echo $link;*/?>';
-    }else{
-        location.href = g5_url;
-    }
-    <?php /*}else{*/?>
-        location.href = g5_url;
-    <?php /*}*/?>
-</script>-->
+<script>
+    <?php if($app){?>
+    window.android.setLogin('<?php echo $mb['mb_id'];?>');
+    <?php }?>
+</script>
 <?php
 goto_url($link);
 ?>

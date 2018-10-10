@@ -64,7 +64,7 @@ function fn_viewer(id){
     window.oriScroll = $(document).scrollTop();
     $.ajax({
         url : url,
-        method:"post",
+        method:"POST",
         data:{pd_id:id,dWidth:width,dHeight:height}
     }).done(function(data){
         location.hash = "#view";
@@ -93,6 +93,66 @@ function fnRecent(){
 		page=1;	
 	});*/
 }
+
+
+function fnStatus(pd_id,status){
+    $("#up_pd_id").val(pd_id);
+    if("<?php echo $view["pd_type"];?>"=="2"){
+        $("#status_buy").css("display","none");
+    }
+
+    console.log(status);
+    switch (status){
+        case "0":
+            $("#status1").addClass("active");
+            $("#status2").removeClass("active");
+            $("#status3").removeClass("active");
+            $("#status4").removeClass("active");
+            break;
+        case "1":
+            $("#status1").removeClass("active");
+            $("#status2").addClass("active");
+            $("#status3").removeClass("active");
+            $("#status4").removeClass("active");
+            break;
+        case "2":
+            $("#status1").removeClass("active");
+            $("#status2").removeClass("active");
+            $("#status3").addClass("active");
+            $("#status4").removeClass("active");
+            break;
+        case "3":
+            $("#status1").removeClass("active");
+            $("#status2").removeClass("active");
+            $("#status3").removeClass("active");
+            $("#status4").addClass("active");
+            break;
+    }
+
+    $("#id03").css({"display":"block","z-index":"9999999"});
+    $("#id03 .w3-modal-content").css({"height":"62vw","margin-top":"-32vw"});
+    location.hash="#modal";
+}
+
+function fnStatusUpdate(){
+    var status = $("#id03 ul.modal_sel li.active").text();
+    var pd_id = $("#up_pd_id").val();
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.product_status_update.php",
+        method:"POST",
+        data:{status:status,pd_id:pd_id}
+    }).done(function(data){
+        console.log(data);
+        if(data=="1"){
+            alert("상태변경이 완료 되었습니다.");
+            modalClose();
+        }else{
+            alert("상태변경 오류 입니다. 다시 시도해 주세요.");
+            modalClose();
+        }
+    });
+}
+
 
 $(function() {
 

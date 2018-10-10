@@ -202,7 +202,7 @@ if($myset["comment_secret_set"]=="1"){
                     ?>
                 <input type="button" value="업하기" onclick="fnProductUp();" class="point">
                 <?php } ?>
-                <input type="button" value="상태변경" onclick="fnStatus();" >
+                <input type="button" value="상태변경" onclick="fnStatus('<?php echo $view["pd_id"];?>','<?php echo $view["pd_status"];?>');" >
                 <input type="button" value="글수정" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/write.php?pd_id=<?php echo $pd_id;?>'">
                 <input type="button" value="삭제" onclick="fnDelete('<?php echo $view[pd_id];?>')">
             <?php }else{
@@ -998,21 +998,6 @@ function fnRecom(cm_id,mb_id,mb_name,cm_status){
 }
 
 
-function fnStatus(){
-    if("<?php echo $view["pd_type"];?>"=="2"){
-        $("#status_buy").css("display","none");
-    }
-    $("#id03").css({"display":"block","z-index":"9999999"});
-    $("#id03 .w3-modal-content").css({"height":"62vw","margin-top":"-32vw"});
-    location.hash="#modal";
-}
-
-function fnStatusUpdate(){
-    var status = $("#id03 ul.modal_sel li.active").text();
-    if(status == "판매중"){
-
-    }
-}
 
 </script>
 <?php

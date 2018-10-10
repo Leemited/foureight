@@ -101,7 +101,7 @@ if($schopt){
                 case "pd_loc":
                     $align_active[$i] = $schopt["sc_od_loc"];
                     if($_SESSION["lat"] && $_SESSION["lng"]){
-                        $sel = " , IF( p.pd_lat != '', (6371*acos(cos(radians({$list_lat}))*cos(radians(p.pd_lat))*cos(radians(p.pd_lng)-radians({$list_lng}))+sin(radians({$list_lat}))*sin(radians(p.pd_lat)))) AS distance , 0 as distance )";
+                        $sel = " , 6371*acos(cos(radians({$_SESSION["lat"]}))*cos(radians(p.pd_lat))*cos(radians(p.pd_lng)-radians({$_SESSION["lng"]}))+sin(radians({$_SESSION["lat"]}))*sin(radians(p.pd_lat)))) AS distance";
                         if($schopt["sc_od_loc"]==1){
                             if($od==" order by "){
                                 $od .= " `p.location` desc";
@@ -118,7 +118,7 @@ if($schopt){
 }else{
     if($_SESSION["type1"]==1){
         $search .= " and p.pd_type = 1";
-    }else{
+    }else if($_SESSION["type1"]==2){
         $search .= " and p.pd_type = 2";
     }
 }
@@ -140,6 +140,7 @@ if($member["mb_id"]){
 }
 
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
+//echo $sql;
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;
@@ -233,7 +234,7 @@ while($row = sql_fetch_array($res)){
 				<?php
 				for($i=0;$i<count($list);$i++){
 				    if($list[$i]["distance"] == 0 ){
-				        $dist = "거리정보 없음";
+				        $dist = "정보없음";
                     }else {
                         $dist = round($list[$i]["distance"],1) . "km";
                     }
