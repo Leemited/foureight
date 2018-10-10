@@ -7,6 +7,6 @@
 	.st1{font-family:'NanumSquareEB';}
 	.st2{font-size:75.7606px;}
 </style>
-<polygon class="st0" points="0,150 0,0 150,0 "/>
-<text transform="matrix(1 0 0 1 15.6891 68.3346)" class="st1 st2">N</text>
+<polygon class="st0" points="0,0 150,0 150,150 "/>
+<text transform="matrix(1 0 0 1 84.9391 68.3346)" class="st1 st2">N</text>
 </svg>

@@ -89,6 +89,19 @@ while($row = sql_fetch_array($res)){
         </div>
     </div>
 </div>
+    <div id="id06" class="w3-modal w3-animate-opacity no-view">
+        <div class="w3-modal-content w3-card-4">
+            <div class="w3-container">
+                <h2>사유보기</h2>
+                <div class="con">
+                    <p></p>
+                </div>
+                <div>
+                    <input type="button" value="확인" onclick="modalClose(this)">\
+                </div>
+            </div>
+        </div>
+    </div>
 <div class="loader" >
     <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
     <!--<div style="background-color:#000;opacity: 0.4;width:100%;height:100%;position:absolute;top:0;left:0;"></div>-->
@@ -189,7 +202,7 @@ while($row = sql_fetch_array($res)){
                     <div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" onclick="<?php if($list[$i]["pd_blind"]<10){?>fn_viewer('<?php echo $list[$i]["pd_id"];?>')<?php }?>">
                         <?php if($list[$i]["pd_blind"]>=10){?>
                             <div class="blind_bg">
-                                <input type="button" value="사유보기" class="list_btn"  onclick="fnBlind('<?php echo $list[$i]["pd_id"];?>')">
+                                <input type="button" value="사유보기" class="list_btn"  onclick="fnBlindView('<?php echo $list[$i]["pd_id"];?>')">
                             </div>
                         <?php }?>
                         <div>
@@ -319,6 +332,8 @@ $(document).ready(function(){
                 $(".sub_ul").css("display","none");
             }else{
                 $(".sub_ul").css("display","inline-block");
+                $(".sub_ul li").removeClass("active");
+                $(".sub_ul #mul").addClass("active");
             }
             fnlist2(1,type1,1,"<?php echo $mb_id;?>");
         }

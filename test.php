@@ -2,13 +2,9 @@
 include_once ("./common.php");
 include_once (G5_MOBILE_PATH."/head.login.php");
 ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
-<script src="<?php echo G5_URL?>/client.js"></script>
-
-<div>
-    <input type="text" id="test">
-    <button onclick="send();">전송</button>
-</div>
+<form action="http://222.122.203.143:3000" method="post" name="form">
+    <input type="submit" value="이동">
+</form>
 <?php
 include_once (G5_MOBILE_PATH."/tail.view.php");
 ?>

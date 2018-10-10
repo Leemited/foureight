@@ -14,7 +14,7 @@ while($row = sql_fetch_array($res)){
 	$cate1[] = $row;
 }
 ?>
-<option value="">1차 카테고리</option>
+<option value="">전체</option>
 <?php
 for($i=0;$i<count($cate1);$i++){
 ?>

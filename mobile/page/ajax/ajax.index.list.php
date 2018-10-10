@@ -8,7 +8,7 @@ if($_REQUEST["latlng"]) {
 }
 
 //검색 기본값
-$search = "p.pd_status = 0";
+$search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
 
 //검색 정렬 기본값
 if($_SESSION["list_basic_order"]=="location"){
@@ -101,9 +101,9 @@ if($schopt){
                     $align_active[$i] = $schopt["sc_od_hit"];
                     if($schopt["sc_od_hit"]==1){
                         if($od==" order by "){
-                            $od .= " p.pd_hit desc";
+                            $od .= " p.pd_hits desc";
                         }else {
-                            $od .= " , p.pd_hit desc";
+                            $od .= " , p.pd_hits desc";
                         }
                     }
                     break;
@@ -158,10 +158,6 @@ while($row = sql_fetch_array($res)){
     $list[] = $row;
 }
 
-if($pd_ids){
-    $save_pd_id_all = explode(",",$pd_ids);
-}
-
 //ad 가져오기
 $today = date("Y-m-d");
 $sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= ad_from and '{$today}' < ad_to ";
@@ -176,6 +172,8 @@ $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $wished[] = $row;
 }
+
+
 
 for($i=0;$i<count($list);$i++){
     if($list[$i]["distance"] == 0 ){
@@ -251,10 +249,7 @@ for($i=0;$i<count($list);$i++){
 		$rand = rand(1,13);
 		?>
 		<div class="bg rand_bg<?php echo $rand;?> item_images" >
-            <?php echo $search;?>
 			<div class="tags">
-                <?php echo "<br><br><br><br><br><br><br>".$align;?>
-
                 <?php for($k=0;$k<count($tags);$k++){
 					$rand_font = rand(3,6);
 				?>

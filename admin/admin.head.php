@@ -3,10 +3,10 @@ include_once("./_common.php");
 // 접근 권한 검사
 if (!$member['mb_id'])
 {
-    alert('로그인 하십시오.', G5_BBS_URL.'/login.php?sub=login&url=' . urlencode(G5_URL."/admin/"));
-}else if ($member["mb_level"] < 4)
+    alert('로그인이 필요합니다..', G5_BBS_URL.'/login.php?sub=login&url=' . urlencode(G5_URL."/admin/"));
+}else if ($member["mb_level"] < 10)
 {
-	alert("접근 권한이 없습니다.");
+	alert("접근 권한이 없습니다.",G5_URL);
 }
 include_once(G5_LIB_PATH.'/visit.lib.php');
 include_once(G5_LIB_PATH.'/connect.lib.php');

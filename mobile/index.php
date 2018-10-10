@@ -9,8 +9,9 @@ include_once(G5_EXTEND_PATH."/image.extend.php");
 
 include_once(G5_MOBILE_PATH.'/head.php');
 
+
 //검색 기본값
-$search = "p.pd_status = 0";
+$search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
 
 //검색 정렬 기본값
 if($_SESSION["list_basic_order"]=="location"){
@@ -92,9 +93,9 @@ if($schopt){
                     $align_active[$i] = $schopt["sc_od_hit"];
                     if($schopt["sc_od_hit"]==1){
                         if($od==" order by "){
-                            $od .= " p.pd_hit desc";
+                            $od .= " p.pd_hits desc";
                         }else {
-                            $od .= " , p.pd_hit desc";
+                            $od .= " , p.pd_hits desc";
                         }
                     }
                     break;
@@ -139,13 +140,21 @@ if($member["mb_id"]){
 	$search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$ss_id}') ";
 }
 
+//내 게시글 블라인드 처리 확인
+$sql = "select * from `product` where mb_id = '{$wished_id}' and pd_blind >= 10 and pd_blind_status = 1 order by pd_date asc limit 0 , 1";
+$myblind = sql_fetch($sql);
+
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
-//echo $sql;
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;
-	$pd_ids[] = $row["pd_id"];
 }
+$sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od}";
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $pd_ids[] = $row["pd_id"];
+}
+
 
 //검색 최근 목록 저장
 if($schopt) {
@@ -213,6 +222,19 @@ while($row = sql_fetch_array($res)){
 			</form>
 		</div>
 	</div>
+</div>
+<div id="id06" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
+            <h2>알림</h2>
+            <div class="con">
+                <p>회원님의 게시물이 블라인드 처리되었습니다.</p>
+            </div>
+            <div>
+                <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="사유보기" style="width:auto" onclick="fnBlindView('<?php echo $myblind["pd_id"];?>');" >
+            </div>
+        </div>
+    </div>
 </div>
 <div id="container" >
 	<!--<input type="hidden" value="<?php /*if($schopt["sc_type"]){echo $schopt["sc_type"];}else{echo "1";}*/?>" name="write_type" id="write_type">-->
@@ -425,6 +447,10 @@ function initpkgd(){
 }
 
 $(document).ready(function(){
+    <?php if($myblind["pd_id"]){?>
+    $("#id06").css("display","block");
+    <?php }?>
+
     console.log("<?php echo $_SESSION["list_type"];?>");
     <?php if($stx){?>
     $("#stx").val("<?php echo $stx;?>");

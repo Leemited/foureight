@@ -254,12 +254,33 @@ while($row = sql_fetch_array($res)){
             <form name="write_from" id="write_from" method="post" action="">
                 <h2>블라인드 사유</h2>
                 <div>
+                    <input type="text" name="like_content" id="like_content" placeholder="평가 내용을 입력해주세요." required>
+                </div>
+                <div>
+                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="제시하기" onclick="fnPricingUpdate();" >
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="id07" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
+            <form name="write_from" id="write_from" method="post" action="">
+                <input type="hidden" name="p_pd_id" id="p_pd_id" value="">
+                <h2>제시하기</h2>
+                <div>
+                    <select name="prcing_pd_id" id="prcing_pd_id" required>
+                        <option value="">게시물 선택</option>
+                    </select>
                     <ul class="blind_ul">
-
+                        <li>
+                            <input type="text" placeholder="제시내용을 입력하세요" name="pricing_content" id="pricing_content" required>
+                        </li>
                     </ul>
                 </div>
                 <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="fnStatusUpdate();" >
+                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="제시등록" style="width:auto" onclick="fnPricingUpdate();" >
                 </div>
             </form>
         </div>
@@ -639,7 +660,7 @@ $(function(){
 				$("#cate option").remove();
 				$("#cate").append(data);
 				$("#cate2 option").remove();
-				$("#cate2").append("<option value=''>2차 카테고리</option>");
+				$("#cate2").append("<option value=''>전체</option>");
 			});
 		}else{
 			$(this).html("능력");
@@ -654,7 +675,7 @@ $(function(){
 				$("#cate option").remove();
 				$("#cate").append(data);
 				$("#cate2 option").remove();
-				$("#cate2").append("<option value=''>2차 카테고리</option>");
+				$("#cate2").append("<option value=''>전체</option>");
 			});
 		}
 	});

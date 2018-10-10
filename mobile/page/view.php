@@ -27,10 +27,17 @@ if(strpos($_SESSION["pd_id"],$pd_id)===false){
 }
 
 //댓글 가져오기
-$sql = "select *,m.mb_id as member_id from `product_comment` as c left join `g5_member` as m  on c.mb_id = m.mb_id where c.pd_id = '{$pd_id}' order by comment_datetime asc";
+$sql = "select *,m.mb_id as member_id from `product_comment` as c left join `g5_member` as m  on c.mb_id = m.mb_id where c.pd_id = '{$pd_id}' and comment_re = 0 order by comment_datetime asc";
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
     $comment[] = $row;
+}
+
+//제시목록
+$sql = "select *,m.mb_id as member_id from `product_pricing` as c left join `g5_member` as m  on c.mb_id = m.mb_id where c.pd_id = '{$pd_id}'order by sign_date asc";
+$res = sql_query($sql);
+while($row=sql_fetch_array($res)){
+    $pricing[] = $row;
 }
 
 $sql = "select * from `product` where pd_id = {$pd_id}";
@@ -213,11 +220,11 @@ if($myset["comment_secret_set"]=="1"){
                         $width = 2; ?>
                     <input type="button" value="흥정하기">
                     <?php }?>
-                    <input type="button" value="구매하기" class="point">
+                    <input type="button" value="구매예약" class="point">
                 <?php }else if($view["pd_type2"] == 4){
                     $width = 2;
                     ?>
-                    <input type="button" value="제시하기">
+                    <input type="button" value="제시하기" onclick="fnPricing('<?php echo $view["pd_id"];?>')">
                     <input type="button" value="대화하기">
                 <?php }?>
             <?php }?>
@@ -304,6 +311,8 @@ if($myset["comment_secret_set"]=="1"){
                     <?php } ?>
                 </div>
                 <?php } ?>
+                <?php if($view["pd_location"]){
+                    if($view["pd_lat"]&&$view["pd_lng"]){?>
                 <div class="maps">
                     <div class="times">
                         <img src="<?php echo G5_IMG_URL?>/view_time.svg" alt=""><?php echo $time_gep;?>
@@ -317,7 +326,7 @@ if($myset["comment_secret_set"]=="1"){
                     </div>-->
                     <div id="map" onclick="fnMapView('<?php echo $pd_id;?>','<?php echo $view["pd_location"];?>')"></div>
                 </div>
-                <?php if($view["pd_location"]){ ?>
+                    <?php }?>
                 <h4>거래선호 위치</h4>
                 <ul class="my_loc">
                         <li><?php echo $view["pd_location"];?></li>
@@ -353,33 +362,61 @@ if($myset["comment_secret_set"]=="1"){
 <!--                        메시지를 입력하세요 <input type='text' id='txtChat' name="txtChat">-->
 <!--                    </div>-->
 <!--                </div>-->
+                <?php if(count($pricing)>0){?>
+                <div class="comment">
+                    <h2>제시목록</h2>
+                    <div class="pricing cm_box">
+                        <ul class="pri_container">
+                            <?php for($i=0;$i<count($pricing);$i++){?>
+                            <li>
+                                <!--<div class="profile"  >
+                                    <?php /*if ($pricing[$i]["mb_profile"]) { */?>
+                                        <img src="<?php /*echo $pricing[$i]["mb_profile"]; */?>" alt="" id="profile">
+                                    <?php /*} else if ($pricing[$i]["mb_profile"] == "") { */?>
+                                        <img src="<?php /*echo G5_IMG_URL */?>/no-profile.svg" alt="">
+                                    <?php /*}*/?>
+                                </div>-->
+                                <div class="coms">
+                                    <p><?php echo $pricing[$i]["mb_name"];?> / <?php echo $pricing[$i]["sign_date"];?></p>
+                                    <h2><?php echo $pricing[$i]["pricing_content"];?></h2>
+                                    <div class="product_vi">
+                                        <input type="button" value="물건보기" onclick="fn_viewer2('<?php echo $pricing[$i]["pricing_pd_id"];?>')">
+                                    </div>
+                                </div>
+                            </li>
+                            <?php }?>
+                        </ul>
+                    </div>
+                </div>
+                <?php }?>
                 <div class="comment">
                     <input type="hidden" name="comment_re" id="comment_re" value="">
                     <input type="hidden" name="comment_re_mb_id" id="comment_re_mb_id" value="">
                     <input type="hidden" name="comment_re_cm_id" id="comment_re_cm_id" value="">
-                    <h2><?php if($view["pd_type2"]=="8"){echo "댓글";}else if($view["pd_type2"]=="4"){echo "제시";}?></h2>
+                    <h2>댓글</h2>
                     <div class="cm_box">
-
-                        <ul>
+                        <ul class="cm_container">
                             <?php for($i=0;$i<count($comment);$i++){
+                                $sql = "select *,m.mb_id as member_id from `product_comment` as p left join `g5_member` as m on p.mb_id = m.mb_id where p.parent_cm_id = {$comment[$i]["cm_id"]} order by p.comment_datetime asc";
+                                $recm_res = sql_query($sql);
+                                while($row = sql_fetch_array($recm_res)) {
+                                    $recomment[] = $row;
+                                }
+
                                 ?>
-                                <li class="<?php if($view["mb_id"]!=$member["mb_id"]){if($comment[$i]["comment_status"]=="3" || $is_comment){echo "cm_lock ";} } if($comment[$i]["comment_re"]=="1"){echo "cm_re ";}?>" id="cmt<?php echo $comment[$i][cm_id];?>">
-                                    <div class="profile" <?php if($comment[$i]["member_id"] != $member["mb_id"]){ echo "onclick=fnRecom('".$comment[$i]["cm_id"]."','".$member["mb_id"]."','".$member["mb_name"]."','".$comment[$i]["comment_status"]."')";} ?> >
+                                <li class="<?php if($view["mb_id"]!=$member["mb_id"]){if($comment[$i]["comment_status"]=="3" || $is_comment){echo "cm_lock ";} } ?>" id="cmt<?php echo $comment[$i][cm_id];?>">
+                                    <div class="profile" <?php if($comment[$i]["member_id"] != $member["mb_id"]){ echo "onclick=fnRecom('".$comment[$i]["cm_id"]."','".$comment[$i]["member_id"]."','".$comment[$i]["mb_name"]."','".$comment[$i]["comment_status"]."')";} ?> >
                                         <?php if($view["mb_id"]!=$member["mb_id"]){if($comment[$i]["comment_status"]=="3"  || $is_comment){ ?>
                                         <img src="<?php echo G5_IMG_URL?>/profile_lock.svg" alt="" id="profile">
-                                        <?php
-                                        }else if($comment[$i]["mb_profile"]){?>
+                                        <?php }else if($comment[$i]["mb_profile"]){?>
                                             <img src="<?php echo $comment[$i]["mb_profile"];?>" alt="" id="profile">
                                         <?php }else if($comment[$i]["mb_profile"] ==""){ ?>
                                             <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="">
-                                        <?php } }else {
-                                            if ($comment[$i]["mb_profile"]) { ?>
-                                                <img src="<?php echo $comment[$i]["mb_profile"]; ?>" alt=""
-                                                     id="profile">
-                                            <?php } else if ($comment[$i]["mb_profile"] == "") { ?>
-                                                <img src="<?php echo G5_IMG_URL ?>/no-profile.svg" alt="">
-                                            <?php }
-                                        }?>
+                                        <?php } }else { if ($comment[$i]["mb_profile"]) { ?>
+                                                <img src="<?php echo $comment[$i]["mb_profile"]; ?>" alt="" id="profile">
+                                        <?php } else if ($comment[$i]["mb_profile"] == "") { ?>
+                                            <img src="<?php echo G5_IMG_URL ?>/no-profile.svg" alt="">
+                                        <?php }}?>
                                     </div>
                                     <div class="coms">
                                         <p><?php echo $comment[$i]["mb_name"];?> / <?php echo $comment[$i]["comment_datetime"];?></p>
@@ -412,16 +449,70 @@ if($myset["comment_secret_set"]=="1"){
                                         <?php }?>
                                     </div>
                                 </li>
-                            <?php } ?>
+                            <?php 
+                                if(count($recomment)!=0) {
+                                    for($j=0;$j<count($recomment);$j++){
+                            ?>
+                                <li class="re_cm <?php if($view["mb_id"]!=$member["mb_id"]){if($recomment[$j]["comment_status"]=="3" || $is_comment){echo "cm_lock ";} } ?>" id="cmt<?php echo $recomment[$j][parent_cm_id];?>">
+                                    <div class="profile" <?php if($recomment[$j]["member_id"] != $member["mb_id"]){ echo "onclick=fnRecom('".$recomment[$j]["cm_id"]."','".$recomment[$j]["member_id"]."','".$recomment[$j]["mb_name"]."','".$recomment[$j]["comment_status"]."')";} ?> >
+                                        <?php if($view["mb_id"]!=$member["mb_id"]){if($recomment[$j]["comment_status"]=="3"  || $is_comment){ ?>
+                                            <img src="<?php echo G5_IMG_URL?>/profile_lock.svg" alt="" id="profile">
+                                        <?php }else if($recomment[$j]["mb_profile"]){?>
+                                            <img src="<?php echo $recomment[$j]["mb_profile"];?>" alt="" id="profile">
+                                        <?php }else if($recomment[$j]["mb_profile"] ==""){ ?>
+                                            <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="">
+                                        <?php } }else { if ($recomment[$j]["mb_profile"]) { ?>
+                                            <img src="<?php echo $recomment[$j]["mb_profile"]; ?>" alt="" id="profile">
+                                        <?php } else if ($recomment[$j]["mb_profile"] == "") { ?>
+                                            <img src="<?php echo G5_IMG_URL ?>/no-profile.svg" alt="">
+                                        <?php }}?>
+                                    </div>
+                                    <div class="coms">
+                                        <p><?php echo $recomment[$j]["mb_name"];?> / <?php echo $recomment[$j]["comment_datetime"];?></p>
+                                        <?php if($view["mb_id"]!=$member["mb_id"]){if($recomment[$j]["comment_status"]=="3"  || $is_comment ){?>
+                                            <h2 class="loctitle">비공개</h2>
+                                        <?php }else{ ?>
+                                            <h2><?php echo $recomment[$j]["comment_content"];?></h2>
+                                            <ul>
+                                                <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $view["pd_id"];?>','<?php echo $recomment[$j]["cm_id"];?>');">신고</li>
+                                                <?php if($recomment[$j]["comment_re"]== 0){?>
+                                                    <li>댓글 <span><?php echo number_format($recomment[$j]["re_comment_cnt"]);?></span></li>
+                                                <?php }?>
+                                                <?php if($recomment[$j]["mb_id"]!=$member["mb_id"]){?>
+                                                    <li onclick="fnLike('no','<?php echo $recomment[$j]["cm_id"];?>')">반대 <span class="unlike<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["unlike"]);?></span></li>
+                                                    <li onclick="fnLike('yes','<?php echo $recomment[$j]["cm_id"];?>')">추천 <span class="like<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["like"]);?></span></li>
+                                                <?php }  ?>
+                                            </ul>
+                                        <?php }}else{ ?>
+                                            <h2><?php echo $recomment[$j]["comment_content"];?></h2>
+                                            <ul>
+                                                <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $view["pd_id"];?>','<?php echo $recomment[$j]["cm_id"];?>');">신고</li>
+                                                <?php if($recomment[$j]["comment_re"]== 0){?>
+                                                    <li>댓글 <span><?php echo number_format($recomment[$j]["re_comment_cnt"]);?></span></li>
+                                                <?php }?>
+                                                <?php if($recomment[$j]["mb_id"]!=$member["mb_id"]){?>
+                                                    <li onclick="fnLike('no','<?php echo $recomment[$j]["cm_id"];?>')">반대 <span class="unlike<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["unlike"]);?></span></li>
+                                                    <li onclick="fnLike('yes','<?php echo $recomment[$j]["cm_id"];?>')">추천 <span class="like<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["like"]);?></span></li>
+                                                <?php }?>
+                                            </ul>
+                                        <?php }?>
+                                    </div>
+                                </li>
+                            <?php }
+                                }
+                                unset($recomment);
+                                }
+                            ?>
                             <?php if(count($comment) == 0){?>
-                                <li class="no-comment">등록된 <?php if($view["pd_type2"]=="8"){echo "댓글이";}else if($view["pd_type2"]=="4"){echo "제시가";}?> 없습니다.</li>
+                                <li class="no-comment">등록된 댓글이 없습니다.</li>
                             <?php }?>
                         </ul>
                         <div class="cm_in">
                             <p class="re_com" style="padding:0;margin:0;font-size:2.8vw;position:absolute;top:1vw;left:2vw;"></p>
                             <div <?php if($is_comment){?>style="display:none"<?php }?>>
-                            <input type="checkbox" id="secret" name="secret" value="3" style="display:none;" <?php if($is_comment){?>checked<?php }?>><label for="secret" class="secret">비공개</label>
+                                <input type="checkbox" id="secret" name="secret" value="3" style="display:none;" <?php if($is_comment){?>checked<?php }?>><label for="secret" class="secret">비공개</label>
                             </div>
+                            <div class="recm_cancel">X</div>
                             <input type="text" id="comment_content" placeholder="댓글을 남겨주세요" class="comment_input"><input type="button" class="comment_btn" id="comment_btn" value="등록">
                         </div>
                     </div>
@@ -507,7 +598,6 @@ if($myset["comment_secret_set"]=="1"){
 
 <script>
 // Slide functions
-
 var index = 0;
 var list = "";
 $(function(){
@@ -535,15 +625,23 @@ $(function(){
         $(".view_detail").css({"height":"calc(100vh - 46vw)","margin-bottom":"22.6vh"});
     });
 
+    $(".recm_cancel").click(function(){
+        console.log("cancel");
+        $("#comment_re").val('');
+        $("#comment_re_mb_id").val('');
+        $("#comment_re_cm_id").val('');
+        $(".comment_input").attr("placeholder","댓글을 남겨주세요");
+        $(this).css("display","none");
+    });
 
     $("#comment_btn").click(function(){
         var comment = $(".comment_input").val();
-        var secret = $(".secret").val();
+        var secret = $("#secret").val();
         var mb_id = "<?php echo $member["mb_id"];?>";
         var pd_id = "<?php echo $pd_id;?>";
-        var commnet_re = $("#comment_re").val();
-        var commnet_re_mb_id = $("#comment_re_mb_id").val();
-        var commnet_re_cm_id = $("#comment_re_cm_id").val();
+        var comment_re = $("#comment_re").val();
+        var comment_re_mb_id = $("#comment_re_mb_id").val();
+        var comment_re_cm_id = $("#comment_re_cm_id").val();
         var cm_type = '';
         if(comment_re ==""){
             cm_type = "u";
@@ -559,20 +657,33 @@ $(function(){
         $.ajax({
             url:g5_url+"/mobile/page/ajax/ajax.comment_update.php",
             method:"post",
-            data:{comment:comment,mb_id:"<?php echo $member["mb_id"];?>",pd_id:pd_id,secret:secret,cm_type:cm_type}
+            data:{comment:comment,mb_id:"<?php echo $member["mb_id"];?>",pd_id:pd_id,secret:secret,cm_type:cm_type,pd_mb_id:"<?php echo $view["mb_id"];?>",comment_re:comment_re,comment_re_mb_id:comment_re_mb_id,comment_re_cm_id:comment_re_cm_id}
         }).done(function(data){
             console.log(data);
             var cls= "";
+            if(data=="0"){
+                alert("게시물 정보가 없습니다.");
+                return false;
+            }
             if(data=="1"){
-                $(".comment_input").val('');
-            }else if(data=="2"){
+                alert("댓글 내용을 입력해주세요.");
+                return false;
+            }
+            if(data=="2"){
+                alert("로그인이 필요합니다.");
+                return false;
+            }if(data=="3"){
                 alert("댓글 등록에 실패하였습니다. 다시 시도해 주세요.");
             }else{
-                if(data=="로그인이 필요합니다."){
-                    location.href=g5_bbs_url+'/login.php?url='+g5_url+"/mobile/page/view.php?pd_id="+pd_id;
-                }else{
-                    $(".cm_box").append(data);
+                $(".comment_input").val('');
+                if(comment_re == 1){
+                    $("#cmt"+comment_re_cm_id+":last-child").appendTo(data);
+                }else {
+                    $(".cm_box .cm_container").append(data);
                 }
+                var height = $(".cm_box .cm_container").height();
+                console.log(height);
+                $(".cm_box .cm_container").scrollTop(height);
             }
         })
     });
@@ -691,6 +802,28 @@ function slide2 (index) {
 }
 function gotolist(){
     location.href=g5_url+'/';
+}
+
+function fnPricing(pd_id){
+    $("#p_pd_id").val(pd_id);
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.my_product.php",
+        method:"POST",
+        data:{}
+    }).done(function(data){
+        if(data=="1"){
+            alert("로그인이 필요합니다.");
+            location.href=g5_bbs_url+"/login.php";
+            return false;
+        }
+        if(data == "2"){
+            alert("등록한 게시물이 없습니다.");
+            return false;
+        }
+
+        $("#id07 select").append(data);
+    })
+    $("#id07").css("display","block");
 }
 
 function fnwished(pd_id){
@@ -917,9 +1050,6 @@ function fnProductUp(){
     });
 }
 
-function fnComBlind(){
-
-}
 
 function fnLike(t,id){
     var cm_id = id;
@@ -984,6 +1114,7 @@ function fnRecom(cm_id,mb_id,mb_name,cm_status){
     $("#comment_re").val(1);
     $(".comment_input").attr("placeholder",mb_name+"에게 답변");
     $(".comment_input").focus();
+    $(".recm_cancel").css("display","block");
     if(cm_status==3){
         $(".secret").css("display","none");
         $("#secret").attr("checked","true");

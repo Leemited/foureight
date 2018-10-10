@@ -106,10 +106,12 @@ while($data=sql_fetch_array($query)){
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_view.php?page=".$page."&pd_id=".$list[$i]["pd_id"]."&sfl=".$sfl."&stx=".$stx."&sch_id=".$sch_id."&pd_type=".$pd_type."&order=".$order."&desc=".$desc; ?>'"><?php echo $list[$i]["pd_blind"]; ?></td>
                             <td class="">
                                 <?php if($list[$i]["pd_blind"]>=10){ ?>
-                                <a href="<?php echo G5_URL."/admin/product_blind_view.php?pd_id=".$list[$i]['pd_id']; ?>"><img src="<?php echo G5_IMG_URL?>/ic_blind.png" alt=""></a>
-                                <?php } ?>
-                                <a href="<?php echo G5_URL."/admin/product_view.php?pd_id=".$list[$i]['pd_id']; ?>"><img src="<?php echo G5_IMG_URL?>/ic_edit.png" alt=""></a>
-                                <a href="<?php echo G5_BBS_URL."/delete.php?"; ?>" class=""><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt=""></a>
+                                <a href="<?php echo G5_URL."/admin/product_blind_view.php?page=".$page."&pd_id=".$list[$i]['pd_id']; ?>"><img src="<?php echo G5_IMG_URL?>/ic_blind.png" alt=""></a>
+                                <?php }else{ ?>
+                                <a href="javascript:fnBlind('<?php echo G5_URL."/admin/product_blind_update.php?page=".$page."&pd_id=".$list[$i]['pd_id']; ?>')"><img src="<?php echo G5_IMG_URL?>/ic_blind_edit.png" alt=""></a>
+                                <?php }?>
+                                <a href="<?php echo G5_URL."/admin/product_view.php?page=".$page."&pd_id=".$list[$i]['pd_id']; ?>"><img src="<?php echo G5_IMG_URL?>/ic_edit.png" alt=""></a>
+                                <a href="<?php echo G5_URL."/admin/product_delete.php?page=".$page."&pd_id=".$list[$i]['pd_id']; ?>" class=""><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt=""></a>
                             </td>
 
                         </tr>
@@ -173,6 +175,13 @@ function fnOrder(url,order,desc){
         desc = "asc";
     }
     location.href=url+order+"&desc="+desc;
+}
+function fnBlind(url){
+    if(confirm("해당 게시글을 블라인드 처리하시겠습니까?")){
+        location.href=url;
+    }else{
+        return false;
+    }
 }
 </script>
 <?php
