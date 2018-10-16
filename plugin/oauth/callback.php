@@ -55,7 +55,7 @@ if($is_member && $req_mode == 'connect' && $req_service == $service) {
 
     if($mb['mb_id'] && $mb['mb_id'] == get_session('ss_mb_id')) {
         // 기존연동체크
-        $sql = " select sm_id from {$g5['social_member_table']} where sm_id = '{$member['mb_id']}' and mb_id = '{$mb['mb_id']}' and sm_service = '$service' ";
+        $sql = " select sm_id from {$g5['social_member_table']} where sm_id = '{$mb['mb_id']}' and mb_id = '{$mb['mb_id']}' and sm_service = '$service' ";
         $row = sql_fetch($sql);
 
         if($row['sm_id']) {
@@ -141,9 +141,9 @@ if($g5['social_member_table']) {
 
             // 정보수정에서 연동일 때 처리
             echo '<script>'.PHP_EOL;
-            if($app) {
+            /*if($app) {
                 echo 'window.android.setLogin("' . $mb['mb_id'] . '");' . PHP_EOL;
-            }
+            }*/
             echo 'var $opener = window.opener;'.PHP_EOL;
             echo '$opener.$("#sns-'.$service.'").removeClass("sns-icon-not");'.PHP_EOL;
             echo 'window.close();'.PHP_EOL;
@@ -154,10 +154,10 @@ if($g5['social_member_table']) {
 }
 
 // 회원가입처리
-if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $member['mb_id']) {
+if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $mb['mb_id']) {
     if(defined('G5_OAUTH_MEMBER_REGISTER_SELECT') && G5_OAUTH_MEMBER_REGISTER_SELECT) {
         $mb_reg = get_session('ss_oauth_member_register');
-        $mb = get_member($member['mb_id'], 'mb_id');
+        $mb = get_member($mb['mb_id'], 'mb_id');
 
         if($mb['mb_id']) {
             reset_social_info();
@@ -169,7 +169,7 @@ if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $member['m
             $url2 = G5_PLUGIN_URL.'/oauth/login.php?service='.$service.'&register=N';
             $url3 = G5_URL;
 
-            confirm($config['cf_title'].' 사이트에 회원가입 하시겠습니까?', $url1, $url2, $url3);
+            confirm($config['cf_title'].' 사이트에 회원가입 하시겠습니까?'.$mb_reg, $url1, $url2, $url3);
         }
 
         unset($_SESSION['ss_oauth_member_register']);

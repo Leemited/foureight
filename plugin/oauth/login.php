@@ -55,7 +55,6 @@ if($member['mb_id']) {
 if(defined('G5_OAUTH_MEMBER_REGISTER_SELECT') && G5_OAUTH_MEMBER_REGISTER_SELECT) {
     if(!isset($_SESSION['ss_oauth_member_register']))
         set_session('ss_oauth_member_register', 'R');
-
     if($_GET['register'] == 'Y')
         set_session('ss_oauth_member_register', 'Y');
     else if($_GET['register'] == 'N')
@@ -74,7 +73,7 @@ include_once(G5_PATH.'/head.sub.php');
 
 <script>
 $(function() {
-    window.android.setLogin('<?php echo $member["mb_id"];?>');
+    //window.android.setLogin('<?php echo $member["mb_id"];?>');
     document.location.href = "<?php echo $query; ?>";
 });
 </script>

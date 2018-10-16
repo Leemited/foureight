@@ -3421,4 +3421,47 @@ function string_star($str,$cut_len=3,$type='right',$star="*"){
     }
     return $ref;
 }
+
+// gps 거리 계산
+function _deg2rad($deg) {
+    $radians = 0.0;
+    $radians = $deg * M_PI/180.0;
+    return($radians);
+}
+
+function geoDistance($lat1, $lon1, $lat2, $lon2, $unit="k") {
+    $theta = $lon1 - $lon2;
+    $dist = sin(_deg2rad($lat1)) * sin(_deg2rad($lat2)) + cos(_deg2rad($lat1)) * cos(_deg2rad($lat2)) * cos(_deg2rad($theta));
+    $dist = acos($dist);
+    $dist = rad2deg($dist);
+    $miles = $dist * 60 * 1.1515;
+    $unit = strtolower($unit);
+
+    if ($unit == "k") {
+        return ($miles * 1.609344);
+    } else {
+        return $miles;
+    }
+}
+//단위변경
+function distTran($dist){
+    $dist = round($dist);
+    if(strlen($dist) == 4){
+        $dist = substr($dist,0,2);
+        $dist = preg_split('//', $dist, -1, PREG_SPLIT_NO_EMPTY);
+        $dist = $dist[0].".".$dist[1]."km";
+    }else if(strlen($dist) == 5){
+        $dist = substr($dist,0,3);
+        $dist = preg_split('//', $dist, 3, PREG_SPLIT_NO_EMPTY);
+        $dist = $dist[0].$dist[1].".".$dist[2]."km";
+    }else if(strlen($dist) == 6){
+        $dist = substr($dist,0,4);
+        $dist = preg_split('//', $dist, 4, PREG_SPLIT_NO_EMPTY);
+        $dist = $dist[0].$dist[1].$dist[2].".".$dist[3]."km";
+    }else if(strlen($dist) <= 3){
+        $dist = $dist."m";
+    }
+    return $dist;
+}
+
 ?>

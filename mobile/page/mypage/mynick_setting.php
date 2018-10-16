@@ -5,13 +5,7 @@ if($member["mb_id"]==""){
 	alert("로그인이 필요합니다.", G5_BBS_URL."/login.php?url=".G5_MOBILE_URL."/page/mypage/settings.php");
 }
 
-$sql = "select * from `mysetting` where mb_id = '{$member[mb_id]}'";
-$settings = sql_fetch($sql);
-
-$mywords = explode(",",$settings["my_words"]);
-
 $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
-
 ?>
 <style>
 #settings .setting_wrap ul li{padding:2.88vw;}
@@ -22,7 +16,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 	<!-- <div class="sub_add">추가</div> -->
 </div>
 <div id="settings">
-	<form action="<?php echo G5_MOBILE_URL?>/page/mypage/my_word_update.php" method="post">
+	<form action="<?php echo G5_MOBILE_URL?>/page/mypage/mynick_update.php" method="post">
 		<div class="setting_wrap">
 			<h2>현재 닉네임</h2>
 			<ul>

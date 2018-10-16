@@ -412,6 +412,8 @@ function fnBlind(pd_id){
        console.log(data);
     });
     $("#id06").css("display","block");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
 }
 
 function fnlist(num,type1,mb_id){

@@ -464,7 +464,7 @@ while($row = sql_fetch_array($res)){
 			</div>
 			<ul>
 				<li class="menu1"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
-				<li class="menu2"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
+				<li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/talk/talk.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
 				<li class="menu3"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
 				<li class="menu4"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
 				<li class="menu6"><a href="<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
@@ -906,6 +906,8 @@ function fnSaveSch(){
     $(".search_setting").attr("id","");
     $(".search_setting").css("top","-100vh");
     $("#id05").css("display","block");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
     location.hash="#modal";
 }
 

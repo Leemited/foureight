@@ -61,6 +61,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 			<?php }?> <span><?php echo ($member["mb_id"])?$member["mb_id"]:"아이디를 표시할 수 없습니다.";?></span></li>
 			<li onclick="fnEditNick();">닉네임 <span><?php echo ($member["mb_nick"])?$member["mb_nick"]:"닉네임이 설정되지 않았습니다.";?></span></li>
 			<li onclick="fnEditTel('<?php echo $member["mb_hp"];?>');">전화번호 <span><?php if($member["mb_certify"]!="hp"){echo "미인증"; }else{echo "인증완료";}?>&nbsp;&nbsp;<?php echo ($member["mb_hp"])?$member["mb_hp"]:"연락처를 표시 할 수 없습니다.";?></span></li>
+			<li class="set_sex">성별설정 <span><input type="radio" value="" name="mb_sex" id="no-sex" <?php if($member["mb_sex"]==""){?>checked<?php }?>><label for="no-sex">비공개</label><input type="radio" value="W" name="mb_sex" id="woman" <?php if($member["mb_sex"]=="W"){?>checked<?php }?>><label for="woman">여성</label> <input type="radio" value="M" name="mb_sex" id="man" <?php if($member["mb_sex"]=="M"){?>checked<?php }?>><label for="man">남성</label></span></li>
 			<li>연락처 비공개 설정 <label class="switch2"><input type="checkbox" id="show_hp" name="show_hp" <?php if($settings["show_hp"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/password_settings.php'">비밀번호 변경</li>
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/address_settings.php'">주소변경</li>
@@ -76,9 +77,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 	<div class="setting_wrap">
 		<h2>알림 설정</h2>
 		<ul>
-			<li>소리 <label class="switch2"><input type="checkbox" id="sound_set" name="sound_set" <?php if($settings["sound_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li>진동 <label class="switch2"><input type="checkbox" id="vibrate_set" name="vibrate_set" <?php if($settings["vibrate_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/push_settings.php'">푸시 알림 설정</li>
+			<li class="single" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/push_settings.php'">푸시 알림 설정</li>
 		</ul>
 	</div>
 	<div class="setting_wrap">
@@ -115,8 +114,25 @@ $(function(){
 			}
 		});
 	});
+
+	$(".set_sex label").click(function(){
+	   var type = $(this).prev().attr("name");
+	   var status = $(this).prev().val();
+	   fnSetUpdate3(type,status);
+    });
 });
 function fnSetUpdate(type,state){
+    if(type=="show_hp" && state == 1){
+        $("#hp_set").attr("checked",false);
+        $("#sms_set").attr("checked",false);
+        fnSetUpdate2("hp_set",0);
+        fnSetUpdate2("sms_set",0);
+    }else if(type=="show_hp" && state == 0){
+        $("#hp_set").attr("checked",true);
+        $("#sms_set").attr("checked",true);
+        fnSetUpdate2("hp_set",1);
+        fnSetUpdate2("sms_set",1);
+    }
 	$.ajax({
 		url:g5_url+"/mobile/page/mypage/ajax.settings_update.php",
 		data:{type:type,state:state},
@@ -125,6 +141,27 @@ function fnSetUpdate(type,state){
 		console.log(data);
 	});
 }
+
+function fnSetUpdate2(type,state){
+    $.ajax({
+        url:g5_url+"/mobile/page/mypage/ajax.settings_update.php",
+        data:{type:type,state:state},
+        method:"POST"
+    }).done(function(data){
+        console.log(data);
+    });
+}
+
+function fnSetUpdate3(type,state){
+    $.ajax({
+        url:g5_url+"/mobile/page/mypage/ajax.settings_update2.php",
+        data:{type:type,state:state},
+        method:"POST"
+    }).done(function(data){
+        console.log(data);
+    });
+}
+
 function fnEditNick(){
 	if(confirm("닉네임 변경시 이전 기록에 영향을 줄 수 있습니다.\n변경하시겠습니까?")){
 		location.href=g5_url+'/mobile/page/mypage/mynick_setting.php';

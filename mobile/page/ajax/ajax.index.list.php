@@ -305,7 +305,7 @@ for($i=0;$i<count($list);$i++){
                         break;
                 }
                 ?>
-                <h2><?php echo $pt2." ".$list[$i]["pd_name"];?></h2>
+                <h2><?php echo $pt2." ".$list[$i]["pd_tag"];?></h2>
             <?php }?>
 			<div>
 				<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>

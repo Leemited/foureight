@@ -212,13 +212,24 @@ while($row = sql_fetch_array($res)){
 				<input type="hidden" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" name="type" id="type">
                 <input type="hidden" name="cate1" id="c" value="<?php echo $schopt['pd_cate'];?>">
 				<input type="hidden" name="cate2" id="sc" value="<?php echo $schopt['pd_cate2'];?>">
+                <div class="type2_box">
+                    <label class="switch schtype2" >
+                        <input type="checkbox" id="wr_type2" name="wr_type2" value="4">
+                        <span class="slider round" >판매</span>
+                    </label>
+                </div>
 				<h2>검색어</h2>
 				<div>
 					<input type="text" name="title" id="wr_title" placeholder="" required>
 				</div>
 				<div>
-					<input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" >
+					<input type="button" value="확인" style="background-color:yellow" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types1">
+					<input type="button" value="간편등록" onclick="fnSimpleWrite();" class="types2">
+					<input type="button" value="상세등록" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types2">
 				</div>
+                <div class="modal_close" onclick="modalClose();">
+                    <img src="<?php echo G5_IMG_URL?>/ic_modal_close.png" alt="">
+                </div>
 			</form>
 		</div>
 	</div>
@@ -375,7 +386,7 @@ while($row = sql_fetch_array($res)){
                                         break;
                                 }
 							    ?>
-							<h2><?php echo $pt2." ".$list[$i]["pd_name"];?></h2>
+							<h2><?php echo $pt2." ".$list[$i]["pd_tag"];?></h2>
 							<?php }?>
 							<div>
 								<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
@@ -449,9 +460,10 @@ function initpkgd(){
 $(document).ready(function(){
     <?php if($myblind["pd_id"]){?>
     $("#id06").css("display","block");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
+    location.hash = "#modal";
     <?php }?>
-
-    console.log("<?php echo $_SESSION["list_type"];?>");
     <?php if($stx){?>
     $("#stx").val("<?php echo $stx;?>");
     <?php } ?>
@@ -465,7 +477,6 @@ $(document).ready(function(){
         dataType:"json",
         data:{width:width,height:height}
     }).done(function(data){
-        console.log(data.dWidth);
         $("#dWidth").val(data.dWidth);
         $("#dHeight").val(data.dHeight);
     });
@@ -519,7 +530,24 @@ $(document).ready(function(){
 			fnlist(1,'');
 		}
 	});
-	
+
+	//검색어 등록시 판매 구매 선택
+    $(".schtype2 .slider").click(function(){
+        if($(this).prev().prop("checked")==true){
+            $(this).html('판매');
+            $(this).css("text-align","right");
+            //등록 버튼 수정
+            $(".types1").css("display","inline-block");
+            $(".types2").css("display","none");
+        }else{
+            $(this).html('구매');
+            $(this).css("text-align","left");
+            //등록 버튼 수정
+            $(".types1").css("display","none");
+            $(".types2").css("display","inline-block");
+        }
+    })
+
 	//인기 거리
 	$(".align .slider").click(function(){
 		if($(this).prev().prop("checked") == true){
@@ -618,6 +646,8 @@ $(document).ready(function(){
                 });
                 cateClose();
                 $("#id01").css("display","block");
+                $("html, body").css("overflow","hidden");
+                $("html, body").css("height","100vh");
                 location.hash="#modal";
                 $("#id01 #wr_title").focus();
             }else{
@@ -885,6 +915,15 @@ function fnLikeUpdate(){
         $(".txt span").html(data.count);
         modalClose();
     });
+}
+
+function fnSimpleWrite(){
+    if(confirm('간편등록 하시겠습니까?')){
+        document.write_form.action = g5_url+"/mobile/page/write_simple_update.php";
+        document.write_form.submit();
+    }else{
+        return false;
+    }
 }
 
 </script>

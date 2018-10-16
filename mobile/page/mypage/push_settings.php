@@ -22,6 +22,13 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 	<h2>푸시 알림 설정</h2>
 </div>
 <div id="settings">
+    <div class="setting_wrap">
+        <h2>소리/진동 설정</h2>
+        <ul>
+            <li>소리 <label class="switch2"><input type="checkbox" id="sound_set" name="sound_set" <?php if($settings["sound_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+            <li>진동 <label class="switch2"><input type="checkbox" id="vibrate_set" name="vibrate_set" <?php if($settings["vibrate_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+        </ul>
+    </div>
 	<div class="setting_wrap">
 		<h2>기본 설정</h2>
 		<ul>

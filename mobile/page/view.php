@@ -1,6 +1,7 @@
 <?php 
 include_once("../../common.php");
 include_once(G5_EXTEND_PATH."/image.extend.php");
+
 //접속 카운트
 
 if($member["mb_id"]){
@@ -33,8 +34,15 @@ while($row=sql_fetch_array($res)){
     $comment[] = $row;
 }
 
+
+
 //제시목록
-$sql = "select *,m.mb_id as member_id from `product_pricing` as c left join `g5_member` as m  on c.mb_id = m.mb_id where c.pd_id = '{$pd_id}'order by sign_date asc";
+if($_SESSION["lat"] && $_SESSION["lng"]) {
+    $sql = "select *, 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' order by c.sign_date asc";
+}else{
+    $sql = "select *,'거리정보 없음' as distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' order by c.sign_date asc";
+}
+$sing = $sql;
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
     $pricing[] = $row;
@@ -44,9 +52,25 @@ $sql = "select * from `product` where pd_id = {$pd_id}";
 $view = sql_fetch($sql);
 $photo = explode(",",$view["pd_images"]);
 
-
+//게시글 설정
 $sql = "select * from `g5_member` as m left join `mysetting` as s on m.mb_id = s.mb_id where s.mb_id = '{$view[mb_id]}'";
 $profile = sql_fetch($sql);
+
+$mb_id = $member["mb_id"];
+if($mb_id == ""){
+    $mb_id = session_id();
+}
+
+//해당 제품의 대화목록
+$sql = "select  * from `product_chat` where pd_id = {$pd_id} and (send_mb_id = '{$mb_id}' or read_mb_id = '{$mb_id}') order by msg_datetime asc";
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $talk_list[] = $row;
+    $talk_ids[] = $row["id"];
+}
+if(count($talk_ids) > 0) {
+    $talk_read_ids = implode(",", $talk_ids);
+}
 
 if($view["pd_date"]) {
     $loc_data = $view["pd_date"];
@@ -105,6 +129,36 @@ if($myset["comment_secret_set"]=="1"){
     .DetailImage .close {position:absolute;top:4vw;right:4vw;width:10vw;height:10vw;}
     .DetailImage .list2{white-space: nowrap;position: relative;font-size: 0;width: 100%;height: 100%;;-webkit-transition: all 500ms;-moz-transition: all 500ms;-ms-transition: all 500ms;-o-transition: all 500ms;transition: all 500ms;}
     .DetailImage .list2 .item2{width:100%;height:100%;display:inline-block;}
+    .talk{width:100%;height:100%;position:absolute;z-index:90000;top:0;left:0;overflow: hidden;transform:translate(0, 0)}
+    .talk .close {position: absolute;top:3vw;left:5vw;width:7vw;height:7vw;z-index:900;}
+    .msg_container{height:calc(100% - 55.3vw);width:100%;overflow-y:scroll;margin-top:12vw}
+    .msg_container .msg_bg{height:calc(100% - 30vw);width:100%;position:absolute;top:0;left:0;background-color:#fff;opacity: 0.9;z-index:2}
+    .msg_container .no-list{border-radius:10vw;position:relative;z-index:3}
+    .msg_container .no-list p{padding: 4px 0;width: calc(100% - 4vw);margin: 2vw;border-radius: 10vw;text-align: center;background: RGBA(0,0,0,0.5);color: #FFF;font-size:3vw;}
+    .msg_container .msg_box{width:100%;position: relative;z-index: 10;margin:3vw 0;display: inline-block;}
+    .msg_container .msg_box.my_msg .in_box{width:100%;float:right;display:inline-block;}
+    .msg_container .msg_box.read_msg .in_box{width:calc(100% - 3vw);display: inline-block;margin-left:3vw;}
+    .msg_container .msg_box.read_msg .in_box .box_con{display: inline-block;width: calc(100% - 18vw);margin-left: 2vw;}
+    .msg_container .msg_box.my_msg{text-align:right;}
+    .msg_container .msg_box.my_msg .msg{max-width:65vw;background-color: #ffe701;color: #000;font-size: 3.6vw;background-image: url();padding: 3vw;font-weight: bold;border-radius: 4vw;display: inline-block;position: relative;margin-right: 3vw;text-align:right;-ms-word-wrap: break-word;word-wrap: break-word;}
+    .msg_container .msg_box.my_msg .date{display: inline-block;vertical-align: bottom;margin-right: 2vw;font-size:3vw;}
+    .msg_container .msg_box.read_msg{text-align:left}
+    .msg_container .msg_box.read_msg .read_profile{display: inline-block;vertical-align: top;}
+    .msg_container .msg_box.read_msg .in_box .box_con .read_name{font-size:3.6vw;font-weight:bold;}
+    .msg_container .msg_box.read_msg .in_box .box_con .msg{padding: 3vw;font-size: 3.6vw;font-weight: bold;background-color: #fff;border-radius: 4vw;margin: 2vw 0 0 1vw;max-width: 50vw;display: inherit;word-break: break-all;}
+    .msg_container .msg_box.read_msg .in_box .box_con .date{display: inline-table;vertical-align: bottom;margin-right: 2vw;font-size:3vw;}
+    .msg_controls {padding:4vw 2vw;width:calc(100% - 4vw);background-color:#fff;position: relative;z-index:9;}
+    .msg_controls input[type='text']{border:none;font-size:4.6vw;width:60vw}
+    .msg_controls .send_msg{border:none;position:absolute;right:3vw;top:2.6vw;-webkit-border-radius:3vw;-moz-border-radius:3vw;border-radius:3vw;background-color:#fee801;padding: 1.6vw 3vw;font-size: 4vw;font-weight: bold;font-family: "nsr",sans-serif;}
+    .msg_controls .option{position:absolute;right:24vw;top:2.6vw;-webkit-border-radius:3vw;-moz-border-radius:3vw;border-radius:3vw;background-image:url("<?php echo G5_IMG_URL?>/ic_menu_btn.svg");background-repeat:no-repeat;background-size:80% 80%;background-position:center;background-color:#fee801;width:8vw;height:8vw;}
+    .msg_controls .option div{position:absolute;opacity:0;bottom:0;font-size:3.8vw;color:#fff;width:16vw;text-shadow: 0 0 1vw RGBA(0,0,0,0.6);-webkit-transition: all 0.4s ease-in-out;-moz-transition: all 0.4s ease-in-out;-ms-transition: all 0.4s ease-in-out;-o-transition: all 0.4s ease-in-out;transition: all 0.4s ease-in-out;}
+    .msg_controls .option .menu1{background-image:url("<?php echo G5_IMG_URL?>/");}
+    .msg_controls .option.active .menu1{bottom:13vw;opacity:1;}
+    .talk .price {height:31vw;display:table;width:100%;position:relative}
+    .talk .price p{color:#fff;font-size:4vw;text-align:center;position:absolute;vertical-align: middle;top:5vw;width:100%}
+    .talk .price h2{color:#ffdf00;font-size:9vw;text-align: center;display:table-cell;vertical-align: middle;}
+    .talk .price .price_bg{width:100%;height:100%;background-color:#000;opacity:0.8;position: absolute;top: 0;left: 0;z-index: -1;}
+
 </style>
 <div class="DetailImage" id="DetailImage">
     <div id="imgs">
@@ -119,19 +173,79 @@ if($myset["comment_secret_set"]=="1"){
     </div>
     <div class="close" onclick="$('.DetailImage').hide()"><img src="<?php echo G5_IMG_URL?>/ic_view_close.svg" alt=""></div>
 </div>
-<!--<div class="talk">
-    <div class="msg_container">
-
+<div class="talk">
+    <div class="close" onclick="modalCloseTalk();">
+        <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
+    </div>
+    <div class="msg_container" id="msg_container">
+        <div class="msg_bg"></div>
+        <?php if(count($talk_list)==0){?>
+            <div class="no-list">
+                <p>대화방에 참여 하였습니다.</p>
+            </div>
+        <?php }else {
+            $today = date("Y-m-d");
+            for ($i = 0; $i < count($talk_list); $i++) {
+                if($talk_list[$i]["msg_date"] == $today){
+                    $date = (date("a",strtotime($talk_list[$i]["msg_time"]))=="am")?"오전":"오후";
+                    $date .= " ".substr($talk_list[$i]["msg_time"],0,5);
+                }else{
+                    $ampm = (date("a",strtotime($talk_list[$i]["msg_time"]))=="am")?"오전":"오후";
+                    $date = $talk_list[$i]["msg_date"]."<br>".$ampm." ".substr($talk_list[$i]["msg_time"],0,5);
+                }
+                if ($mb_id == $talk_list[$i]["send_mb_id"]) {?>
+                    <div class="msg_box my_msg">
+                        <div class="in_box">
+                            <div class="date">
+                                <?php echo $date;?>
+                            </div>
+                            <div class="msg">
+                                <?php echo $talk_list[$i]["message"];?>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                <?php } else {
+                    $mb = get_member($talk_list[$i]["send_mb_id"]);
+                    ?>
+                    <div class='msg_box read_msg'>
+                        <div class="in_box">
+                            <div class="read_profile" style="position:relative;<?php if($mb['mb_profile']){?>background-image:url('<?php echo $mb["mb_profile"];?>')<?php }else{?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg')<?php }?>;background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;
+                                    border: 3px solid #fff;"></div>
+                            <div class="box_con">
+                                <div class="read_name"><?php echo $mb["mb_nick"];?></div>
+                                <div class='msg'><?php echo $talk_list[$i]["message"];?></div>
+                                <div class='date'>
+                                    <?php echo $date;?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                <?php }
+                }
+            }?>
     </div>
     <div class="msg_controls">
-        <input type="text" name="talk_content" value="">
+        <input type="hidden" value="<?php echo $talk_read_ids;?>" id="talk_ids">
+        <input type="text" name="talk_content" id="message" value="" placeholder="메세지를 입력하세요.">
+        <input type="button" value="보내기" class="send_msg" onclick="fnSendMsg();">
+        <div class="option">
+            <div class="menu1">개인문구</div>
+            <?php if($mb_id==$view["mb_id"]){?>
+                <?php if($view["pd_type"]==2){?>
+                <div class="menu2">거래유의사항</div>
+            <?php } }?>
+        </div>
     </div>
-    <?php /*if($view["pd_discount"]==1){*/?>
+    
     <div class="price">
-
+        <p><?php if($view['pd_type']==1){ if($view['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($view['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></p>
+        <h2><?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]);}else{echo "0원";}?></h2>
+        <div class="price_bg"></div>
     </div>
-    <?php /*}*/?>
-</div>-->
+    
+</div>
 <div class="view_containter">
     <div class="view_top">
 <!--        <div class="close" onclick="gotolist();">-->
@@ -158,7 +272,7 @@ if($myset["comment_secret_set"]=="1"){
             <?php if($profile["mb_id"]!=$member["mb_id"]){?>
             <div class="profile_menu active">
                 <div class="menu1" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/mypage/mypage.php?mode=profile&pro_id=<?php echo $view["mb_id"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_profile.svg" alt=""></div><div class="text_box">프로필보기</div></div>
-                <div class="menu2"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_talk.svg" alt=""></div><div class="text_box">간편대화</div></div>
+                <div class="menu2" onclick="fnTalk();"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_talk.svg" alt=""></div><div class="text_box">간편대화</div></div>
                 <?php if($profile["mb_hp"]){?>
                 <?php if($profile["sms_set"]==1){?>
                 <div class="menu3" onclick="location.href='sms:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_msg.svg" alt=""></div><div class="text_box">메시지</div></div>
@@ -181,7 +295,7 @@ if($myset["comment_secret_set"]=="1"){
                 <?php } ?>
             </div>
             <span class="txt">
-                <div><?php echo $profile[mb_name];?></div>
+                <div><?php echo $profile[mb_nick];?></div>
             </span>
                 <?php if($profile["like_set"]== 1){?>
             <div class="pd_like">
@@ -195,7 +309,7 @@ if($myset["comment_secret_set"]=="1"){
             <h2><?php echo $view["pd_tag"];?></h2>
             <?php }?>
             <?php if($view["pd_price"]==0){?>
-                <h1><?php echo "구매예상가격 ￦ ".number_format($view["pd_price"]);?></h1>
+                <h1><?php echo "제시요망";?></h1>
             <?php }else{ ?>
                 <h1><?php echo "￦ ".number_format($view["pd_price"]);?></h1>
             <?php }?>
@@ -367,21 +481,30 @@ if($myset["comment_secret_set"]=="1"){
                     <h2>제시목록</h2>
                     <div class="pricing cm_box">
                         <ul class="pri_container">
-                            <?php for($i=0;$i<count($pricing);$i++){?>
-                            <li>
-                                <!--<div class="profile"  >
-                                    <?php /*if ($pricing[$i]["mb_profile"]) { */?>
-                                        <img src="<?php /*echo $pricing[$i]["mb_profile"]; */?>" alt="" id="profile">
-                                    <?php /*} else if ($pricing[$i]["mb_profile"] == "") { */?>
-                                        <img src="<?php /*echo G5_IMG_URL */?>/no-profile.svg" alt="">
-                                    <?php /*}*/?>
-                                </div>-->
+                            <?php for($i=0;$i<count($pricing);$i++){
+                                $rand = rand(1,13);
+                                $pd_tag = explode("/",$pricing[$i]["pd_tag"]);
+                                ?>
+                            <li onclick="fn_viewer2('<?php echo $pricing[$i]["pricing_pd_id"];?>')">
+                                <div class="profile <?php if(!$pricing[$i]["pd_images"] || $pricing[$i]["pd_images"]==""){echo "rand_bg".$rand; }?>"  >
+                                    <?php
+                                    if($pricing[$i]["pd_images"]){
+                                        $img = explode(",",$pricing[$i]["pd_images"]);
+                                        $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
+                                    ?>
+                                        <img src="<?php echo G5_DATA_URL."/product/".$img1;?>" alt="">
+                                    <?php }else{
+                                        for($s=0;$s<count($pd_tag);$s++){
+                                            echo "#".$pd_tag[$s];
+                                        }
+                                    } ?>
+                                </div>
                                 <div class="coms">
-                                    <p><?php echo $pricing[$i]["mb_name"];?> / <?php echo $pricing[$i]["sign_date"];?></p>
+                                    <p><?php echo "￦ ".number_format($pricing[$i]["pd_price"]);?> / <?php echo distTran($pricing[$i]["distance"]);?></p>
                                     <h2><?php echo $pricing[$i]["pricing_content"];?></h2>
-                                    <div class="product_vi">
-                                        <input type="button" value="물건보기" onclick="fn_viewer2('<?php echo $pricing[$i]["pricing_pd_id"];?>')">
-                                    </div>
+<!--                                    <div class="product_vi">
+                                        <input type="button" value="물건보기" onclick="fn_viewer2('<?php /*echo $pricing[$i]["pricing_pd_id"];*/?>')">
+                                    </div>-->
                                 </div>
                             </li>
                             <?php }?>
@@ -419,7 +542,7 @@ if($myset["comment_secret_set"]=="1"){
                                         <?php }}?>
                                     </div>
                                     <div class="coms">
-                                        <p><?php echo $comment[$i]["mb_name"];?> / <?php echo $comment[$i]["comment_datetime"];?></p>
+                                        <p><?php echo $comment[$i]["mb_nick"];?> / <?php echo $comment[$i]["comment_datetime"];?></p>
                                         <?php if($view["mb_id"]!=$member["mb_id"]){if($comment[$i]["comment_status"]=="3"  || $is_comment ){?>
                                             <h2 class="loctitle">비공개</h2>
                                         <?php }else{ ?>
@@ -602,6 +725,7 @@ var index = 0;
 var list = "";
 $(function(){
     $(".DetailImage").hide();
+    $(".talk").hide();
     var height = $(window).height();
     var width = $(window).width();
     var topheight = $(".top_header").height();
@@ -824,6 +948,9 @@ function fnPricing(pd_id){
         $("#id07 select").append(data);
     })
     $("#id07").css("display","block");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
+    location.hash = "#modal";
 }
 
 function fnwished(pd_id){
@@ -1020,9 +1147,16 @@ $(function(){
         var pd_id = $(this).attr("id");
         $("#like_id").val(pd_id)
         $("#id02").css({"display":"block","z-index":"9000000"});
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
         location.hash="#modal";
     })
     <?php }?>
+
+    //채팅옵션
+    $(".option").click(function(){
+       $(this).toggleClass("active");
+    });
 });
 function fnProfileMenu(){
     <?php if($profile["mb_id"]==$member["mb_id"]){?>
@@ -1090,6 +1224,8 @@ function fnBlind(pd_id,cm_id){
         $("#id01s").css({"display":"block","z-index":"9002"})
         $("#id01s .con").html('');
         $("#id01s .con").append(data);
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
         location.hash = "#blind";
     })
 }
@@ -1102,6 +1238,8 @@ function fnMapView(pd_id,location){
     }).done(function(data){
         console.log(data);
         $("#id01s").css({"display":"block","z-index":"9002"})
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
         $("#id01s .con").html('');
         $("#id01s .con").append(data);
         location.hash = "#blind";
@@ -1128,7 +1266,114 @@ function fnRecom(cm_id,mb_id,mb_name,cm_status){
     });*/
 }
 
+//간편대화 시작
+//내게시글이 아닐때 이무로 게시물 작성자는 무조건 read_mb_id로 선언
+var talkID = "<?php echo $view["pd_id"]?>";
 
+function fnTalk(){
+    var mb_id = "<?php echo $member["mb_id"];?>";
+    if(mb_id == ""){
+        alert("로그인이 필요합니다.");
+        location.href=g5_bbs_url+"/login.php";
+        return false;
+    }
+    $(".view_detail").hide();
+    $(".view_bottom").hide();
+    $(".DetailImage").hide();
+    $(".profile_menu").removeClass("active");
+    $(".view_top").css("display","block");
+    $(".view_detail").css("top","100vh");
+    $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
+    $(".talk").show();
+    var element = document.getElementById("msg_container");
+    element.scrollTop = element.scrollHeight;
+    //대화 갱신
+    talkID = setInterval(function(){
+        var pd_id = "<?php echo $view["pd_id"];?>";
+        var mb_id = "<?php echo $member["mb_id"];?>";
+        if(mb_id == ""){
+            mb_id = "<?php echo session_id();?>";
+        }
+        var read_mb_id = "<?php echo $view["mb_id"];?>";
+        //누적 메시지 체크
+        var read_id = $("#talk_ids").val();
+
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.read_msg.php",
+            method:"post",
+            data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,read_id:read_id},
+            dataType:'json'
+        }).done(function(data){
+            if(data.cnt > 0) {
+                for (var i = 0; i < data.cnt; i++) {
+                    $(".msg_container").append(data.msg[i]);
+                }
+                element.scrollTop = element.scrollHeight;
+            }
+            if(data.ids) {
+                $("#talk_ids").val(data.ids);
+            }
+        });
+    },1000);
+}
+
+function fnSendMsg(){
+    var pd_id = "<?php echo $view["pd_id"];?>";
+    var mb_id = "<?php echo $member["mb_id"];?>";
+    if(mb_id == ""){
+        mb_id = "<?php echo session_id();?>";
+    }
+    var read_mb_id = "<?php echo $view["mb_id"];?>";
+    var message = $("#message").val();
+
+    //누적 메시지 체크
+    var read_id = $("#talk_ids").val();
+    
+    //스크롤 위치
+    var element = document.getElementById("msg_container");
+
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.send_msg.php",
+        method:"post",
+        data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id},
+        dataType:"json"
+    }).done(function(data){
+        console.log(data);
+        if(data.status=="success"){
+            $(".msg_container").append(data.msg);
+            element.scrollTop = element.scrollHeight;
+            $("#talk_ids").val(data.ids);
+            $("#message").val('');
+        }else{
+            alert("통신 오류 입니다.");
+        }
+    });
+}
+function fnReadMsg(){
+    var pd_id = "<?php echo $view["pd_id"];?>";
+    var mb_id = "<?php echo $member["mb_id"];?>";
+    if(mb_id == ""){
+        mb_id = "<?php echo session_id();?>";
+    }
+    var read_mb_id = "<?php echo $view["mb_id"];?>";
+    //누적 메시지 체크
+    var read_id = $("#talk_ids").val();
+
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.read_msg.php",
+        method:"post",
+        data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,read_id:read_id},
+        dataType:'json'
+    }).done(function(data){
+        if(data.msg.length > 1) {
+            for (var i = 0; i < data.msg.length; i++) {
+                console.log(data.msg[i]);
+                $(".msg_container").append(data.msg[i]);
+            }
+        }
+        $("#talk_ids").val(data.ids);
+    });
+}
 
 </script>
 <?php

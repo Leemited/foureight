@@ -192,6 +192,8 @@ function fnStatus(pd_id,status){
 
     $("#id03").css({"display":"block","z-index":"9999999"});
     $("#id03 .w3-modal-content").css({"height":"62vw","margin-top":"-32vw"});
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
     location.hash="#modal";
 }
 
@@ -220,9 +222,11 @@ function fnBlindView(pd_id){
         method:"POST",
         data:{pd_id:pd_id}
     }).done(function(data){
-        console.log($("#id06").css("display"));
         if($("#id06").css("display")=="none"){
             $("#id06").css("display","block");
+            $("html, body").css("overflow","hidden");
+            $("html, body").css("height","100vh");
+            location.hash = "#modal";
         }
         $("#id06 .con p").html(data);
     });

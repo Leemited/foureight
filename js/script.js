@@ -183,6 +183,8 @@ function fnsuggestion(){
 		});
 	}
 	$("#id00").css({"display":"block","z-index":"100000"});
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
     location.hash="#modal";
 }
 
@@ -201,6 +203,14 @@ function modalCloseThis(){
     $(document).scrollTop(window.oriScroll);
 }
 
+function modalCloseTalk(){
+    $(".talk").hide();
+    $(".view_bottom").show();
+    $(".view_detail").show();
+    clearInterval(talkID);
+    location.hash='';
+}
+
 function modalClose(){
     $("html").css("overflow","auto");
     $("body").css("overflow","unset");
@@ -216,12 +226,16 @@ function fnSetting(){
         $("#set").val(1);
         $(".search_setting").attr("id","");
         $(".search_setting").css("top","-100vh");
+        $("html").css("overflow","auto");
+        $("body").css("overflow","unset");
         location.hash='';
     }else{
         $("#set").val(2);
         location.hash = "#search";
         $(".search_setting").attr("id","menuon");
         $(".search_setting").css("top","20vw");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
     }
 }
 

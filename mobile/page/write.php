@@ -1,6 +1,7 @@
 <?php
 include_once("../../common.php");
 include_once(G5_EXTEND_PATH."/image.extend.php");
+
 if(!$is_member){
     alert("로그인이 필요합니다.",G5_BBS_URL."/login.php?url=".G5_MOBILE_URL."/page/write.php");
 }
@@ -105,7 +106,7 @@ if(!$pd_id) {
                 </div>
             </div>
             <div>
-                <input type="button" value="취소" onclick="modalClose()"><input type="button" value="확인" onclick="fnLocs();">
+                <input type="button" value="취소" onclick="modalClose()"><!--<input type="button" value="확인" onclick="fnLocs();">-->
             </div>
         </div>
     </div>
@@ -154,11 +155,11 @@ if(!$pd_id) {
                         </select>
                     </div>
                     <?php }?>
-					<div class="write_title">
-						<input type="text" class="write_input width_80" name="wr_subject" id="wr_subject" value="<?php echo $write["pd_name"];?>" required placeholder="<?php echo ($cateholder["info_text"])?$cateholder["info_text"]:"제목을 입력해주세요.";?>">
+					<div class="write_title" style="display:none;">
+						<input type="text" class="write_input width_80" name="wr_subject" id="wr_subject" value="<?php echo $write["pd_name"];?>" placeholder="<?php echo ($cateholder["info_text"])?$cateholder["info_text"]:"제목을 입력해주세요.";?>">
 						<label class="switch selltype">
-							<input type="checkbox" name="sellcode" value="1" <?php if($write["pd_type2"]=="4"){?>checked<?php }?>>
-							<span class="slider round" <?php if($write["pd_type2"]=="4"){?>style="text-align:left"<?php }?>><?php if($write["pd_type2"]=="4"){?>구매<?php }else{?>판매<?php }?></span>
+							<input type="checkbox" name="sellcode" value="1" <?php if($write["pd_type2"]=="4" || $wr_type2){?>checked<?php }?>>
+							<span class="slider round" <?php if($write["pd_type2"]=="4" || $wr_type2){?>style="text-align:left"<?php }?>><?php if($write["pd_type2"]=="4" || $wr_type2){?>구매<?php }else{?>판매<?php }?></span>
 						</label>
 					</div>
 					<div class="write_con">
@@ -169,7 +170,7 @@ if(!$pd_id) {
 								<div><?php echo $mywords[$i];?><span class="delBtn">X</span><input type="hidden" name="words[]" value="<?php echo $mywords[$i];?>" id="words" class="words"></div>
 							<?php }
 							}	?>
-							<input type="button" value="+ 추가하기" class="word_add" onclick="addMyword()">
+							<input type="button" value="+ 개인문구 추가하기" class="word_add" onclick="addMyword()">
 						</div>
 						<div class="content">
 							<textarea name="wr_content" id="wr_content" class="autosize" placeholder="상세 설명"><?php echo str_replace("<br/>","\n", $write["pd_content"]);?></textarea>
@@ -318,8 +319,8 @@ if(!$pd_id) {
 			<article>
 				<div>
 					<div class="prices">
-						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php echo $write["pd_price"];?>" placeholder="판매가격" name="price" id="price" required class="write_input2 width_80" onkeyup="number_only(this);"/>
-                        <?php if($type==1){?><input type="checkbox" name="discount_use" style="display:none;" id="discount_use"><label for="discount_use">흥정가능</label><?php }?>
+						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php echo $write["pd_price"];?>" placeholder="<?php if($wr_type2){?>구매예상금액<?php }else{?>판매가격<?php }?>" name="price" id="price" required class="write_input2" onkeyup="number_only(this);"/>
+                        <?php if($type==1 && !$wr_type2){?><input type="checkbox" name="discount_use" style="display:none;" id="discount_use"><label for="discount_use"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt="">흥정가능</label><?php }?>
                         <?php if($type==2){?>계약금<?php }?>
                     </div>
                     <?php if($type==2){?>
@@ -356,10 +357,8 @@ if(!$pd_id) {
             <article>
                 <div>
                     <div class="videoArea sc avility">
-                        <h2>거래 조건 및 유의 사항</h2>
-                    </div>
-                    <div class="">
-                        <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" required placeholder="거래시 유의사항을 적어주세요. 1:1대화에서 구매 안내에 사용됩니다."></textarea>
+                        <h2>거래 조건 및 유의 사항</h2><br><br>
+                        <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" required placeholder="거래시 유의사항을 적어주세요. 대화하기에서 구매 안내에 사용됩니다."></textarea>
                     </div>
                 </div>
             </article>
@@ -370,11 +369,16 @@ if(!$pd_id) {
 		</div>
 	</form>
     <div id="map_sel" style="">
-        <img src="<?php echo G5_IMG_URL?>/view_pin.svg" alt="" class="map_pin">
+        <!--<img src="<?php /*echo G5_IMG_URL*/?>/view_pin.svg" alt="" class="map_pin">-->
         <div id="map" style="width:100%;height:40vh;"></div>
+        <div class="loc_list">
+            <ul class="loc_ul_list">
+
+            </ul>
+        </div>
         <div style="padding:2.8vw 0;text-align:center;">
             <input type="button" value="취소" onclick="mapSelect('')" style="border:none;width:48%;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #000;color:#fff;font-size:3vw;padding:2vw 0;">
-            <input type="button" value="확인" onclick="mapSet();" style="border:none;width:48%;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #ffe100;color:#000;font-size:3vw;padding:2vw 0;">
+            <input type="button" value="등록" onclick="mapSet();" style="border:none;width:48%;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #ffe100;color:#000;font-size:3vw;padding:2vw 0;">
         </div>
     </div>
 </div>
@@ -420,6 +424,8 @@ $("textarea.autosize").on('keydown keyup', function () {
 //문구등록
 function addMyword(){
 	$("#id01").css("display","block");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
 	location.hash="#modal";
 	//var item = '<div>'+mytext+'<span class="delBtn">X</span><input type="hidden" name="loc[]" value="'+mytext+'"></div>';
 }
@@ -440,10 +446,14 @@ function addLoc(){
 		}
 	});
 	$("#id02").css("display","block");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
 	var height = $("#id02 .w3-container").height();
 	$(".w3-modal-content").css({"height":height+"px","margin-top":"-"+(height/2)+"px"});
 	<?php }else{?>
     $("#id03").css("display","block");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
     <?php }?>
     location.hash="#modal";
 }
@@ -534,30 +544,33 @@ function fnSubmit(){
 
 var mapon = false;
 function mapSelect(num){
+    if($("#locs1").val()==""){
+        alert("거래위치를 입력해주세요");
+        return false;
+    }
+    var loc = $("#locs1").val();
+    ps.keywordSearch(loc, placesSearchCB);
+
     if(mapon==false) {
         $("#setnum").val(num);
-        $("#map_sel").css({"bottom": "0","top":"50%","margin-top":"-25vh"});
+        $("#map_sel").css({"bottom": "0","top":"16vw"});
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
         mapon = true;
     }else if(mapon==true || num == ''){
         $("#setnum").val('');
         $("#addr").val('');
-        $("#map_sel").css({"bottom": "-50vh","top":"unset","margin-top":"unset"});
+        $("#map_sel").css({"bottom": "-50vh","top":"unset"});
         mapon = false;
     }
 }
-
+var locitem = "";
 function mapSet(){
-    var num = $("#setnum").val();
-    var addr = $("#addr").val();
-    $("input[name^='mylocation']").each(function(e){
-        if((e+1)==num){
-            $(this).val(addr);
-        }
-    });
-    $("#setnum").val('');
-    $("#addr").val('');
     $("#map_sel").css({"bottom": "-50vh","top":"unset","margin-top":"unset"});
+
+    $(".loclist").append(locitem);
     mapon = false;
+    modalClose();
 }
 
 function nowLoc(num){
@@ -570,6 +583,12 @@ function nowLoc(num){
 
 }
 
+    $(document).on("click",".loc_ul_list li",function(){
+       if(!$(this).hasClass("active")){
+           $(this).addClass("active");
+           $(".loc_ul_list li").not($(this)).removeClass("active");
+       }
+    });
 $(function(){
 
     $("#cate_up").change(function(){
@@ -633,36 +652,88 @@ var marker = new daum.maps.Marker({
     position: markerPosition
 });
 
+var infowindow = new daum.maps.InfoWindow({zIndex:9002});
+
 // 마커가 지도 위에 표시되도록 설정합니다
 marker.setMap(map);
 
 marker.setDraggable(true);
 
+// 장소 검색 객체를 생성합니다
+var ps = new daum.maps.services.Places();
 
-// 지도가 이동, 확대, 축소로 인해 중심좌표가 변경되면 마지막 파라미터로 넘어온 함수를 호출하도록 이벤트를 등록합니다
-daum.maps.event.addListener(map, 'center_changed', function() {
-    marker=null;
-    // 지도의 중심좌표를 얻어옵니다
-    var latlng = map.getCenter();
 
-    searchDetailAddrFromCoords(latlng, function(result, status) {
-        if (status === daum.maps.services.Status.OK) {
-            $(".loclist").html('');
-            $("#locs1").val(result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name);
-            itemadd = '<div class="myloc">'+result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name+'" name="locs" id=""/></div>';
-            addrs = result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name;
+// 키워드 검색 완료 시 호출되는 콜백함수 입니다
+function placesSearchCB (data, status, pagination) {
+    if (status === daum.maps.services.Status.OK) {
+        $(".loc_ul_list").html('');
+        // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+        // LatLngBounds 객체에 좌표를 추가합니다
+        var bounds = new daum.maps.LatLngBounds();
+        var item="";
+        for (var i=0; i<data.length; i++) {
+            displayMarker(data[i]);
+            bounds.extend(new daum.maps.LatLng(data[i].y, data[i].x));
+            item += "<li onclick=\"setCenter(\'"+data[i].y+"\',\'"+data[i].x+"\',\'"+data[i].place_name+"\',\'"+data[i].road_addresss_name+"\',\'"+i+"\')\" >";
+            item += data[i].place_name;
+            item += "</li>";
         }
+        if(item!="") {
+            $(".loc_ul_list").append(item);
+        }else{
+            $(".loc_ul_list").append("<li>검색된 목록이 없습니다.</li>");
+        }
+        // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+        map.setBounds(bounds);
+    }else{
+        $(".loc_ul_list").append("<li>검색된 목록이 없습니다.</li>");
+    }
+}
+var markers = [];
+
+var imageSrc = 'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', // 마커이미지의 주소입니다
+    imageSize = new daum.maps.Size(64, 69), // 마커이미지의 크기입니다
+    imageOption = {offset: new daum.maps.Point(27, 69)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
+
+function setCenter(lat,lng,place_name,place_address,num) {
+    // 이동할 위도 경도 위치를 생성합니다
+    var moveLatLon = new daum.maps.LatLng(lat,lng);
+
+    //markers[num].setMap(map)
+    // 지도 중심을 이동 시킵니다
+    map.setCenter(moveLatLon);
+
+    locitem = '<div class="myloc">'+place_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+place_address+'" name="locs" id=""/><input type="hidden" value="'+place_name+'" name="locs_name" id=""/>' +
+        '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
+}
+
+// 지도에 마커를 표시하는 함수입니다
+function displayMarker(place) {
+
+    // 마커를 생성하고 지도에 표시합니다
+    var marker = new daum.maps.Marker({
+        map: map,
+        position: new daum.maps.LatLng(place.y, place.x)
     });
 
-});
+    // 마커에 클릭이벤트를 등록합니다
+    daum.maps.event.addListener(marker, 'click', function() {
+        // 마커를 클릭하면 장소명이 인포윈도우에 표출됩니다
+        infowindow.setContent('<div style="padding:5px;font-size:12px;">' + place.place_name + '</div>');
+        infowindow.open(map, marker);
+        $(".loc_ul_list li").each(function(){
+           if(place.place_name == $(this).text()){
+               $(this).addClass("active");
+               $(".loc_ul_list li").not($(this)).removeClass("active");
+           }
+        });
+    });
 
-function searchDetailAddrFromCoords(coords,callback) {
-    // 좌표로 법정동 상세 주소 정보를 요청합니다
-    geocoder.coord2Address(coords.getLng(), coords.getLat(),callback);
+    markers.push(marker);
 }
 
 function fnLocs(){
-
+/*
     if(itemadd != '') {
         if(confirm("고객의 위치정보 보호를 위해 대략적인 위치로 표시됩니다.")) {
             $(".loclist").append(itemadd);
@@ -685,7 +756,7 @@ function fnLocs(){
             return false;
         }
     }
-
+*/
     modalClose();
 }
 

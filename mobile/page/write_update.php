@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once("../../common.php");
 
 if(!$wr_subject){
@@ -73,7 +73,8 @@ if(!$pd_id || $pd_id == ""){
 			pd_video = '{$videoname}',
 			pd_content = '{$wr_content}',
 			pd_tag = '{$sub_title}',
-			pd_location = '{$locs}',
+			pd_location = '{$locs_name}',
+			pd_location_name = '{$locs}',
 			pd_price = '{$price}',
 			pd_price2 = '{$price2}',
 			pd_status = 0,
@@ -89,7 +90,7 @@ if(!$pd_id || $pd_id == ""){
 	if(!sql_query($sql)){
 	    alert("입력 오류 입니다.다시 요청해 주세요");
     }
-	
+
 	$pd_id = sql_insert_id();
 }else{
 //수정
@@ -103,7 +104,8 @@ if(!$pd_id || $pd_id == ""){
 			pd_video = '{$videoname}',
 			pd_content = '{$wr_content}',
 			pd_tag = '{$sub_title}',
-			pd_location = '{$locs}',
+			pd_location = '{$locs_name}',
+			pd_location_name = '{$locs}',
 			pd_price = '{$price}',
 			pd_price2 = '{$price2}',
 			mb_id = '{$mb_id}',

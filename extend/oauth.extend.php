@@ -33,7 +33,7 @@ define('G5_OAUTH_ID_DELIMITER', '_');
 define('G5_OAUTH_MEMBER_REGISTER', true);
 
 // 회원가입 선택여부
-define('G5_OAUTH_MEMBER_REGISTER_SELECT', true);
+define('G5_OAUTH_MEMBER_REGISTER_SELECT', false);
 
 // 소셜 회원가입 테이블 생성, 테이블 생성 후 false 로 변경
 define('G5_OAUTH_TABLE_CREATE', true);
