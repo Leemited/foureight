@@ -3,7 +3,7 @@ include_once("../../../common.php");
 include_once(G5_MOBILE_PATH."/head.login.php");
 
 if(!$is_member){
-    alert("로그인이 필요합니다.",G5_BBS_URL.'/login.php?url='.G5_MOBILE_URL."/page/mypage/mypage.php");
+    alert("로그인이 필요합니다.",G5_MOBILE_URL.'/page/login_intro.php?url='.G5_MOBILE_URL."/page/mypage/mypage.php");
     return false;
 }
 
@@ -35,7 +35,7 @@ if($pro_id){
     $search .= " and pd_id in ({$pd_ids})";
 }
 if($mode != "profile" && $member["mb_id"]==""){
-	alert("로그인이 필요합니다.", G5_BBS_URL."/login.php?url=".G5_MOBILE_URL."/page/mypage/mypage.php");
+	alert("로그인이 필요합니다.", G5_MOBILE_URL."/page/login_intro.php?url=".G5_MOBILE_URL."/page/mypage/mypage.php");
 }
 $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$mb_id}'");
 
@@ -97,7 +97,7 @@ while($row = sql_fetch_array($res)){
                     <p></p>
                 </div>
                 <div>
-                    <input type="button" value="확인" onclick="modalClose(this)">\
+                    <input type="button" value="확인" onclick="modalClose(this)">
                 </div>
             </div>
         </div>
@@ -202,7 +202,10 @@ while($row = sql_fetch_array($res)){
                     <div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" onclick="<?php if($list[$i]["pd_blind"]<10){?>fn_viewer('<?php echo $list[$i]["pd_id"];?>')<?php }?>">
                         <?php if($list[$i]["pd_blind"]>=10){?>
                             <div class="blind_bg">
-                                <input type="button" value="사유보기" class="list_btn"  onclick="fnBlindView('<?php echo $list[$i]["pd_id"];?>')">
+                                <div>
+                                    <input type="button" value="사유보기" class="list_btn"  onclick="fnBlindView('<?php echo $list[$i]["pd_id"];?>')">
+                                    <input type="button" value="게시물보기" class="list_btn"  onclick="fn_viewer('<?php echo $list[$i]["pd_id"];?>')">
+                                </div>
                             </div>
                         <?php }?>
                         <div>
@@ -211,7 +214,7 @@ while($row = sql_fetch_array($res)){
                                 $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
                                 if(is_file(G5_DATA_PATH."/product/".$img1)){
                                     ?>
-                                    <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
+                                    <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;min-height: 28vw;">
                                         <?php if($img1!=""){?>
                                             <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
                                         <?php }else{ ?>

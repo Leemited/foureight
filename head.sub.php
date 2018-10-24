@@ -120,7 +120,6 @@ var g5_cookie_domain = "<?php echo G5_COOKIE_DOMAIN ?>";
 var g5_admin_url = "<?php echo G5_ADMIN_URL; ?>";
 <?php } ?>
 </script>
-
 <?php /*if($app || $chkMobile){*/?>
 <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 <script src="<?php echo G5_JS_URL?>/jquery-ui.js"></script>
@@ -137,14 +136,17 @@ var g5_admin_url = "<?php echo G5_ADMIN_URL; ?>";
 <script src="<?php echo G5_JS_URL ?>/owl.carousel.js"></script>
 <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.js"></script>
 <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js"></script>
+<script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=783007f3286be92823591204b3588de6&libraries=services"></script>
 <script src="<?php echo G5_JS_URL?>/hammer.js"></script>
-<script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
 <script src="<?php echo G5_URL?>/node_modules/clipboard/dist/clipboard.min.js"></script>
+
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 <?php
+include_once(G5_PATH .'/' . G5_PLUGIN_DIR . '/nodejs_connect/init.php');
+
 if(G5_IS_MOBILE) {
     echo '<script src="'.G5_JS_URL.'/modernizr.custom.70111.js"></script>'.PHP_EOL; // overflow scroll 감지
 }
@@ -160,6 +162,7 @@ if(!defined('G5_IS_ADMIN'))
 <!-- <div class="loader_con">
 <div class="loader"></div>
 </div> -->
+
 <?php
 
 //내 검색저장설정 가져오기

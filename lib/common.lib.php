@@ -159,7 +159,7 @@ function alert($msg='', $url='', $error=true, $post=false)
     if (isset($g5['title'])) {
         $header = $g5['title'];
     }
-    include_once(G5_BBS_PATH.'/alert.php');
+    include_once(G5_BBS_PATH.'/alarm.php');
     exit;
 }
 

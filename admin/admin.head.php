@@ -3,7 +3,7 @@ include_once("./_common.php");
 // 접근 권한 검사
 if (!$member['mb_id'])
 {
-    alert('로그인이 필요합니다..', G5_BBS_URL.'/login.php?sub=login&url=' . urlencode(G5_URL."/admin/"));
+    alert('로그인이 필요합니다..', G5_MOBILE_URL.'/page/login_intro.php?sub=login&url=' . urlencode(G5_URL."/admin/"));
 }else if ($member["mb_level"] < 10)
 {
 	alert("접근 권한이 없습니다.",G5_URL);

@@ -26,8 +26,8 @@ if(strpos($agent,"foureight")!==false){
 		<input type="hidden" name="url" value="<?php echo $login_url ?>">
             <input type="hidden" name="regid" id="regid" value="">
 		<div id="login_frm">
-			<input type="text" name="mb_id" id="login_id" placeholder="이메일" required class="frm_input" maxLength="20" placeholder="" autocomplete="off">
-			<input type="password" name="mb_password" id="login_pw" placeholder="비밀번호" required class="frm_input" maxLength="20" autocomplete="off">
+			<input type="text" name="mb_id" id="login_id" placeholder="이메일" required class="frm_input" placeholder="" autocomplete="off" value="<?php echo $_REQUEST["mb_id"];?>">
+			<input type="password" name="mb_password" id="login_pw" placeholder="비밀번호" required class="frm_input" autocomplete="off">
 			<!-- <div>
 				<input type="checkbox" name="auto_login" id="login_auto_login">
 				<label for="login_auto_login">자동로그인</label>
@@ -40,6 +40,10 @@ if(strpos($agent,"foureight")!==false){
 			</div>
 			<div>
 				<input type="submit" value="로그인" class="btn_submit">
+                <?php
+                // 소셜로그인 버튼
+                include_once(G5_PLUGIN_PATH.'/oauth/login.skin.inc.php');
+                ?>
 			</div>
 			<div class="login_link">
 				계정이 없으신가요?<a href="./register_form.php" class="register_link"> 회원 가입 하기</a>

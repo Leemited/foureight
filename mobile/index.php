@@ -15,7 +15,7 @@ $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
 
 //검색 정렬 기본값
 if($_SESSION["list_basic_order"]=="location"){
-    $od = " order by p.pd_update desc, p.pd_date desc";
+    $od = " order by ISNULL(p.pd_lat) asc,  distance asc, p.pd_update desc, p.pd_date desc";
 }else {
     $od = " order by p.pd_update desc, p.pd_date desc";
 }
@@ -102,12 +102,11 @@ if($schopt){
                 case "pd_loc":
                     $align_active[$i] = $schopt["sc_od_loc"];
                     if($_SESSION["lat"] && $_SESSION["lng"]){
-                        $sel = " , 6371*acos(cos(radians({$_SESSION["lat"]}))*cos(radians(p.pd_lat))*cos(radians(p.pd_lng)-radians({$_SESSION["lng"]}))+sin(radians({$_SESSION["lat"]}))*sin(radians(p.pd_lat)))) AS distance";
                         if($schopt["sc_od_loc"]==1){
                             if($od==" order by "){
-                                $od .= " `p.location` desc";
+                                $od .= " distance desc";
                             }else {
-                                $od .= " , `p.location` desc";
+                                $od .= " , distance desc";
                             }
                         }
                     }
@@ -122,6 +121,10 @@ if($schopt){
     }else if($_SESSION["type1"]==2){
         $search .= " and p.pd_type = 2";
     }
+}
+
+if($_SESSION["lat"] && $_SESSION["lng"]){
+    $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
 }
 
 $total=sql_fetch("select count(*) as cnt from `product` where {$search} ");
@@ -145,6 +148,7 @@ $sql = "select * from `product` where mb_id = '{$wished_id}' and pd_blind >= 10 
 $myblind = sql_fetch($sql);
 
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
+$iada = $sql;
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;
@@ -209,7 +213,7 @@ while($row = sql_fetch_array($res)){
 	<div class="w3-modal-content w3-card-4">
 		<div class="w3-container">
 			<form name="write_form" id="write_form" method="post" action="">
-				<input type="hidden" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" name="type" id="type">
+                <input type="hidden" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" name="type" id="type">
                 <input type="hidden" name="cate1" id="c" value="<?php echo $schopt['pd_cate'];?>">
 				<input type="hidden" name="cate2" id="sc" value="<?php echo $schopt['pd_cate2'];?>">
                 <div class="type2_box">
@@ -220,7 +224,7 @@ while($row = sql_fetch_array($res)){
                 </div>
 				<h2>검색어</h2>
 				<div>
-					<input type="text" name="title" id="wr_title" placeholder="" required>
+					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 #으로 해주세요" required>
 				</div>
 				<div>
 					<input type="button" value="확인" style="background-color:yellow" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types1">
@@ -249,7 +253,7 @@ while($row = sql_fetch_array($res)){
 </div>
 <div id="container" >
 	<!--<input type="hidden" value="<?php /*if($schopt["sc_type"]){echo $schopt["sc_type"];}else{echo "1";}*/?>" name="write_type" id="write_type">-->
-	<div class="write" onclick="<?php if(!$is_member){?>alert('로그인이 필요합니다.');location.href=g5_url+'/bbs/login.php'; <?php }else if($member["mb_certify"]==""){ ?>alert('본인인증이 필요합니다.');location.href=g5_url+'/mobile/page/mypage/hp_certify.php';<?php }else if($member["mb_id"]){ ?>fnwrite();<?php } ?> ">
+	<div class="write" onclick="<?php if(!$is_member){?>alert('로그인이 필요합니다.');location.href=g5_url+'/mobile/page/login_intro.php'; <?php }else if($member["mb_certify"]==""){ ?>alert('본인인증이 필요합니다.');location.href=g5_url+'/mobile/page/mypage/hp_certify.php';<?php }else if($member["mb_id"]){ ?>fnwrite();<?php } ?> ">
 		<div class="write_btn">
             <?php if($schopt["sc_type"]==1 || $_SESSION["type1"] == 1){?>
             <img src="<?php echo G5_IMG_URL?>/ic_write_btn.svg" alt="">
@@ -389,7 +393,15 @@ while($row = sql_fetch_array($res)){
 							<h2><?php echo $pt2." ".$list[$i]["pd_tag"];?></h2>
 							<?php }?>
 							<div>
+                                <?php if($list[$i]["pd_type2"]==4){?>
+                                    <?php if($list[$i]["pd_price"]==0){?>
+								        <h1>가격 제시</h1>
+                                    <?php }else{ ?>
+								        <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                                    <?php }?>
+                                <?php }else{?>
 								<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                                <?php }?>
 								<?php
 								if($flag){
 								?>
@@ -458,6 +470,11 @@ function initpkgd(){
 }
 
 $(document).ready(function(){
+    <?php if(count($list) == 0){?>
+        fnSetting();
+        $(".search_setting .no-list").show();
+    <?php } ?>
+
     <?php if($myblind["pd_id"]){?>
     $("#id06").css("display","block");
     $("html, body").css("overflow","hidden");
@@ -622,7 +639,7 @@ $(document).ready(function(){
 		$("."+id).addClass("active");
 		$(".category2 ul").not($("."+id)).removeClass("active");
 	});
-	$(".category2 ul li").click(function(){
+	$(".category_menu .category2 ul li, .category_menu2 .category2 ul li").click(function(){
         var c = $(this).parent().parent().prev().children().find("li.active a").text();
         var sc = $(this).find("a").text();
         var type = $("#type").val();
@@ -756,7 +773,7 @@ $(document).ready(function(){
 });
 function fnlist(num,list_type){
 	//사고팔고/ /카테코리1/카테고리2/가격시작/가격끝/정렬순서1/정렬순서2/정렬순서3/정렬순서4/정렬순서5
-	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align;
+	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align,orderactive,typecompany;
 
 	if(num == 1){
 		page=0;
@@ -775,23 +792,33 @@ function fnlist(num,list_type){
     stx = $("#stx").val();
     app = "<?php echo $app;?>";
     type1 = $("#set_type").val();
-    type2 = $("#type2").val();
-    cate1 = $("#cate1").val();
+    if($("#four").prop("checked") == true){
+        type2 = 8;
+    }else {
+        type2 = 4;
+    }
+    if($("#mb_level").prop("checked")==true) {
+        typecompany = 4;
+    }else{
+        typecompany = '';
+    }
+    cate1 = $("#cate").val();
     cate2 = $("#cate2").val();
     priceFrom = $("#priceFrom").val();
     priceTo = $("#priceTo").val();
     sorts = $("#order_sort").val();
     mb_id = $("#mb_id").val();
     align = $("#order_sort").val();
+    orderactive = $("#order_sort_active").val();
     var list_type = $("#set_list_type").val();
     var pd_ids = "<?php echo $saves["pd_ids"];?>";
 
-    console.log("sc_id : "+sc_id);
+    console.log(type1+"//"+type2+"//"+cate1+"//"+cate2+"//"+priceFrom+"//"+priceTo+"//"+sorts+"//"+align+"//"+mb_id+"//"+list_type+"//"+stx+"//"+pd_ids+"//"+orderactive+"//"+typecompany);
 
 	$.ajax({
 		url:g5_url+"/mobile/page/ajax/ajax.index.list.php",
 		method:"POST",
-		data:{page:page,list_type:list_type,stx:stx,app:app,type1:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,align:align,latlng:latlng,pd_ids:pd_ids},
+		data:{page:page,list_type:list_type,stx:stx,app:app,type1:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,align:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany},
 		beforeSend:function(){
             $('.loader').show();
 		},
@@ -799,7 +826,7 @@ function fnlist(num,list_type){
 			$(".loader").css("display","none");
 		}
 	}).done(function(data){
-	    console.log(data);
+	    //console.log(data);
 		if(data.indexOf("no-list")==-1){
 			if(num == 1){
                 //새리스트
@@ -822,6 +849,7 @@ function fnlist(num,list_type){
                 var noitem = '<div class="no-list">검색된 리스트가 없습니다.</div>';
                 $("#test").html(noitem);
             }
+
 			$("#debug").addClass("active");
 			$("#debug").html("목록이 없습니다.");
 			setTimeout(removeDebug,1500);
@@ -829,8 +857,8 @@ function fnlist(num,list_type){
 		scrollchk=true;
         $('#container').off('scroll mousedown DOMMouseScroll mousewheel keyup');
 	});
-
 }
+
 function fnwrite(){
 	var type = $("#set_type").val();
 	if(type == 1){
@@ -850,6 +878,7 @@ function fnwrite(){
 		return false;
 	}
 }
+
 
 function fnWriteStep2(url){
 	document.write_form.action = url;

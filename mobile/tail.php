@@ -19,7 +19,7 @@ if(defined('G5_THEME_PATH')) {
 			</li>
 			<li onclick="location.href=g5_url+'/mobile/page/wish/wish.list.php'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_02.svg" alt="위시리스트" class="wished_tail"></li>
 			<?php if($p == "index"){?>
-			<li onclick="scroll_top()"><img src="<?php echo G5_IMG_URL?>/bottom_icon_05.svg" alt="최상위로"></li>
+			<li id="home" onclick="location.href='<?php echo G5_URL;?>'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="최상위로"></li>
 			<?php }else{?>
 			<li onclick="location.href='<?php echo G5_URL?>'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="홈"></li>
 			<?php }?>
@@ -61,7 +61,7 @@ function fnPricingUpdate(){
        console.log(data);
        if(data=="0"){
            alert("로그인이 필요합니다.");
-           location.href=g5_bbs_url+'/login.php';
+           location.href=g5_url+'/mobile/page/login_intro.php';
            return false;
        }if(data=="1"){
            alert("게시글 정보가 없습니다.");
@@ -100,6 +100,7 @@ function fn_viewer(id){
         method:"POST",
         data:{pd_id:id,dWidth:width,dHeight:height}
     }).done(function(data){
+        //console.log(data);
         location.hash = "#view";
         $("#id0s div.con").html('');
         $("#id0s div.con").append(data);
@@ -215,8 +216,9 @@ function fnStatusUpdate(){
         }
     });
 }
-
 function fnBlindView(pd_id){
+
+    //window.oriScroll = $(document).scrollTop();
     $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.blind_view.php",
         method:"POST",
@@ -233,7 +235,19 @@ function fnBlindView(pd_id){
 }
 
 $(function() {
-
+    $(document).scroll(function(){
+        if($(this).scrollTop() <= 0){
+            console.log("A");
+            var home = "<?php echo G5_IMG_URL;?>/bottom_icon_home.svg";
+            $("#home").attr("onclick","location.href='<?php echo G5_URL;?>'");
+            $("#home img").attr("src",home);
+        }else{
+            console.log("B");
+            var home = "<?php echo G5_IMG_URL;?>/bottom_icon_05.svg";
+            $("#home").attr("onclick","scroll_top()");
+            $("#home img").attr("src",home);
+        }
+    });
     // 폰트 리사이즈 쿠키있으면 실행
     font_resize("container", get_cookie("ck_font_resize_rmv_class"), get_cookie("ck_font_resize_add_class"));
 

@@ -94,6 +94,7 @@ function get_images($srcfile,$dWidth="",$dHeight=""){
     if($size[2] == 2 && function_exists('exif_read_data')) {
         $degree = 0;
         $exif = @exif_read_data($srcfile);
+        //print_r2($exif);
         if(!empty($exif['Orientation'])) {
             switch($exif['Orientation']) {
                 case 8:

@@ -1,20 +1,24 @@
 <?php
 include_once("../../../common.php");
-
-$mb_id = $member["mb_id"];
-if($_REQUEST["myword"]){
-	$words = implode(",",$_REQUEST["myword"]);
+if($mb_id=="") {
+    $mb_id = $member["mb_id"];
 }
-
-$sql = "update `mysetting` set `my_words` = '{$words}' where mb_id='{$mb_id}' ";
-
-sql_query($sql);
+if($_REQUEST["myword1"]){
+	$words = implode("!@~",$_REQUEST["myword1"]);
+}
 
 if($_REQUEST["myword2"]){
-	$words2 = implode(",",$_REQUEST["myword2"]);
+	$words2 = implode("!@~",$_REQUEST["myword2"]);
 }
 
-$sql = "update `mysetting` set `my_word` = '{$words2}' where mb_id='{$mb_id}' ";
+if($_REQUEST["myword3"]){
+    $words3 = implode("!@~",$_REQUEST["myword3"]);
+}
+
+$myword = $words . ":@!" . $words2 . ":@!" . $words3;
+
+$sql = "update `mysetting` set `my_word` = '{$myword}' where id = {$id} and mb_id='{$mb_id}' ";
+
 
 if(sql_query($sql)){
 	alert("등록완료");

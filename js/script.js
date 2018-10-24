@@ -199,6 +199,7 @@ function modalCloseThis(){
     $("html").css({"overflow":"auto","height":"100%"});
     $("body").css({"overflow":"unset","height":"auto"});
     $("#id0s").css("display","none");
+
     location.hash='';
     $(document).scrollTop(window.oriScroll);
 }
@@ -210,7 +211,6 @@ function modalCloseTalk(){
     clearInterval(talkID);
     location.hash='';
 }
-
 function modalClose(){
     $("html").css("overflow","auto");
     $("body").css("overflow","unset");
@@ -219,6 +219,7 @@ function modalClose(){
     });
     //$("#id01").css("display","none");
     location.hash='';
+    //$(document).scrollTop(window.oriScroll);
 }
 
 function fnSetting(){
@@ -228,6 +229,25 @@ function fnSetting(){
         $(".search_setting").css("top","-100vh");
         $("html").css("overflow","auto");
         $("body").css("overflow","unset");
+        location.hash='';
+    }else{
+        $("#set").val(2);
+        location.hash = "#search";
+        $(".search_setting").attr("id","menuon");
+        $(".search_setting").css("top","20vw");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+    }
+}
+
+function fnSetting2(){
+    if($(".search_setting").attr("id") == "menuon"){
+        $("#set").val(1);
+        $(".search_setting").attr("id","");
+        $(".search_setting").css("top","-100vh");
+        $("html").css("overflow","auto");
+        $("body").css("overflow","unset");
+        fnlist(1,'');
         location.hash='';
     }else{
         $("#set").val(2);
@@ -252,8 +272,8 @@ function hideDetail(){
 }
 
 function cateClose(){
-    $(".category_menu, .category_menu2").fadeOut(300,function(){
-        $(".category_menu, .category_menu2").removeClass("active");
+    $(".category_menu, .category_menu2, .category_menu3, .category_menu4").fadeOut(300,function(){
+        $(".category_menu, .category_menu2, .category_menu3, .category_menu4").removeClass("active");
         location.hash = '';
     });
 }
@@ -262,3 +282,6 @@ function blindClose(){
 	$("#id01s").css("display","none");
 	location.hash = '';
 }
+
+
+

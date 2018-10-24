@@ -8,19 +8,46 @@ include_once (G5_PATH."/head.sub.php");
  */
 $back_url = G5_MOBILE_URL."/page/talk/talk.php";
 
-$sql = "select *,c.id as id from `product_chat` as c left join `product` as p on p.pd_id = c.pd_id where c.pd_id = {$pd_id} and (c.send_mb_id = '{$member[mb_id]}' or c.read_mb_id = '{$member[mb_id]}') order by msg_datetime";
+$sql = "select *,c.id as id from `product_chat` as c left join `product` as p on p.pd_id = c.pd_id where c.pd_id = {$pd_id} and room_id = '{$roomid}' order by msg_datetime asc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $talk_list[] = $row;
     $talk_ids[] = $row["id"];
+    $img = explode(",",$row["pd_images"]);
+    $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
+    //$roomid = $row["room_id"];
+    if($member["mb_id"] != $row["send_mb_id"]){
+        $sell_mb_id = $row["send_mb_id"];
+    }else if($member["mb_id"] != $row["read_mb_id"]){
+        $sell_mb_id = $row["read_mb_id"];
+    }
 }
 if(count($talk_ids) > 0){
     $talk_read_ids = implode(",",$talk_ids);
 }
 
-$img = explode(",",$talk_list[0]["pd_images"]);
-$img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
+//게시글 설정
+$sql = "select * from `g5_member` as m left join `mysetting` as s on m.mb_id = s.mb_id where s.mb_id = '{$member[mb_id]}'";
+$myset = sql_fetch($sql);
+//대화시 간편대화 불러오기
+$mywords = explode(":@!",$myset["my_word"]);
+$mywordss = explode("!@~",$mywords[2]);
 ?>
+<div id="id01" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
+            <input type="hidden" value="<?php echo $sell_mb_id;?>" name="sell_mb_id" id="sell_mb_id">
+            <input type="hidden" value="<?php echo $pd_id;?>" name="pd_id" id="pd_id">
+            <h2>판매등록</h2>
+            <div>
+                <input type="text" value="<?php if($talk_list[0]["pd_price"]>0){echo $talk_list[0]["pd_price"];}?>" name="price" id="price" placeholder="판매가격" required>
+            </div>
+            <div>
+                <input type="button" value="취소" onclick="modalClose()"><input type="button" value="이회원에게 판매" onclick="addSell();" style="width:auto" >
+            </div>
+        </div>
+    </div>
+</div>
 <div class="talk talk_view_container" style="<?php if($img1!=""){?>background-image:url('<?php echo G5_DATA_URL."/product/".$img1;?>');<?php }?>background-size:cover;background-repeat:no-repeat;background-position:center;">
     <div class="close" onclick="location.href='<?php echo $back_url;?>'">
         <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
@@ -30,6 +57,12 @@ $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
         <?php if(count($talk_list)==0){?>
             <div class="no-list">
                 <p>대화방에 참여 하였습니다.</p>
+                <?php
+                $sql = "select * from `product` where pd_id = {$pd_id}";
+                $pro = sql_fetch($sql);
+                if($pro["pd_desc"])
+                ?>
+                <!--<p><?php /*echo $pro[""];*/?></p>-->
             </div>
         <?php }else {
             $today = date("Y-m-d");
@@ -50,6 +83,7 @@ $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
                             <div class="msg">
                                 <?php echo $talk_list[$i]["message"];?>
                             </div>
+                            <div class="arrow"><img src="<?php echo G5_IMG_URL?>/ic_chat.png" alt=""></div>
                         </div>
                         <div class="clear"></div>
                     </div>
@@ -74,27 +108,45 @@ $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
             }
         }?>
     </div>
+    <?php if(count($mywordss)>0){?>
+        <div class="my_word">
+            <ul>
+                <?php for($i=0;$i<count($mywordss);$i++){
+                    if($mywordss[$i]!=""){
+                    ?>
+                    <li><?php echo $mywordss[$i];?></li>
+                <?php }
+                }?>
+            </ul>
+        </div>
+    <?php }?>
     <div class="msg_controls">
         <input type="hidden" value="<?php echo $talk_read_ids;?>" id="talk_ids">
         <input type="text" name="talk_content" id="message" value="" placeholder="메세지를 입력하세요.">
         <input type="button" value="보내기" class="send_msg" onclick="fnSendMsg();">
-        <div class="option">
+        <!--<div class="option">
             <div class="menu1">개인문구</div>
-            <?php if($member["mb_id"]==$talk_list[$i]["mb_id"]){?>
-                <?php if($talk_list[$i]["pd_type"]==2){?>
-                    <div class="menu2">거래유의사항</div>
-                <?php } }?>
-        </div>
+            <?php /*if($talk_list[0]["pd_type"]==2){*/?>
+                <div class="menu2">거래유의사항</div>
+            <?php /* }*/?>
+        </div>-->
     </div>
 
     <div class="price">
-        <p><?php if($talk_list[$i]['pd_type']==1){ if($talk_list[$i]['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($talk_list[$i]['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></p>
-        <h2><?php if($talk_list[$i]["pd_price"]>0){echo "￦ ".number_format($talk_list[$i]["pd_price"]);}else{echo "0원";}?></h2>
+        <p><?php if($talk_list[0]['pd_type']==1){ if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></p>
+        <h2><?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]);}else{echo "0원";}?></h2>
+        <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8){?>
+        <div class="sell_btn">
+            <input type="button" value="이 회원에게 판매하기" class="btn" onclick="fnSell();">
+        </div>
+        <?php }?>
         <div class="price_bg"></div>
     </div>
 
 </div>
 <script>
+    var roomid = "<?php echo $roomid;?>";
+
     $(function(){
         var element = document.getElementById("msg_container");
         element.scrollTop = element.scrollHeight;
@@ -108,15 +160,16 @@ $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
             var read_id = $("#talk_ids").val();
 
             $.ajax({
-                url:g5_url+"/mobile/page/ajax/ajax.read_msg.php",
+                url:g5_url+"/mobile/page/ajax/ajax.read_msg2.php",
                 method:"post",
-                data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,read_id:read_id},
+                data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,read_id:read_id,roomid:roomid},
                 dataType:'json'
             }).done(function(data){
-                console.log(data);
                 if(data.cnt > 0) {
                     for (var i = 0; i < data.cnt; i++) {
-                        $(".msg_container").append(data.msg[i]);
+                        var text = JSON.stringify(data.msg[i]);
+                        text = text.replace(/\"/g,"");
+                        $(".msg_container").append(text);
                     }
                     element.scrollTop = element.scrollHeight;
                 }
@@ -130,15 +183,23 @@ $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
         $(".option").click(function(){
             $(this).toggleClass("active");
         });
+
+        //채팅 간편글
+        $(".my_word li").click(function(){
+            fnSendMsSimple($(this).text());
+        });
     });
-    
+
     // 내게시글이므로 read_mb_id는 대화 상대에따라 변경
     function fnSendMsg(){
         var pd_id = "<?php echo $pd_id;?>";
         var mb_id = "<?php echo $member["mb_id"];?>";
         var read_mb_id = "<?php echo $send_mb_id;?>";
         var message = $("#message").val();
-
+        if(message == ""){
+            alert('메세지를 입력해 주세요');
+            return false;
+        }
         //누적 메시지 체크
         var read_id = $("#talk_ids").val();
 
@@ -148,19 +209,80 @@ $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
         $.ajax({
             url:g5_url+"/mobile/page/ajax/ajax.send_msg.php",
             method:"post",
-            data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id},
+            data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id,roomid:roomid},
             dataType:"json"
         }).done(function(data){
             console.log(data);
             if(data.status=="success"){
-                $(".msg_container").append(data.msg);
-                element.scrollTop = element.scrollHeight;
-                $("#talk_ids").val(data.ids);
+                if(roomid=="") {
+                    $(".msg_container").append(data.msg);
+                    element.scrollTop = element.scrollHeight;
+                    $("#talk_ids").val(data.ids);
+                }
                 $("#message").val('');
             }else{
                 alert("통신 오류 입니다.");
             }
         });
+    }
+
+
+    function fnSendMsSimple(msg){
+        var pd_id = "<?php echo $pd_id;?>";
+        var mb_id = "<?php echo $member["mb_id"];?>";
+        var read_mb_id = "<?php echo $send_mb_id;?>";
+        var message = msg;
+        if(message == ""){
+            alert('메세지를 입력해 주세요');
+            return false;
+        }
+        //누적 메시지 체크
+        var read_id = $("#talk_ids").val();
+
+        //스크롤 위치
+        var element = document.getElementById("msg_container");
+
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.send_msg.php",
+            method:"post",
+            data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id,roomid:roomid},
+            dataType:"json"
+        }).done(function(data){
+            console.log(data);
+            if(data.status=="success"){
+                if(roomid=="") {
+                    $(".msg_container").append(data.msg);
+                    element.scrollTop = element.scrollHeight;
+                    $("#talk_ids").val(data.ids);
+                }
+                $("#message").val('');
+            }else{
+                alert("통신 오류 입니다.");
+            }
+        });
+    }
+    function fnSell(){
+        $("#id01").css({"display":"block","z-index":"91"});
+        location.hash = "modal";
+    }
+
+    function addSell(){
+        var price = $("#price").val();
+        var pd_id = $("#pd_id").val();
+        var sell_mb_id = $("#sell_mb_id").val();
+
+        if(confirm("해당 판매글의 상태가 판매중으로 변경됩니다.\r판매 하시겠습니까?")) {
+            //바로 지목 판매이므로 상태는 판매중으로 변경
+            $.ajax({
+                url: g5_url + "/mobile/page/ajax/ajax.insert_cart.php",
+                method: "POST",
+                data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1}
+            }).done(function (data) {
+                console.log(data);
+            });
+        }else{
+            return false;
+        }
     }
 </script>
 <?php

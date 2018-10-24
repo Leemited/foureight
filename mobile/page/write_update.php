@@ -32,6 +32,11 @@ for($i=0;$i<count($filter);$i++){
         alert("검색어에 부적절한 단어[{$text}]가 포함되어 있습니다.");
         exit;
     }
+    if(strpos($pd_infos,$filter[$i])!==false){
+        $text = string_star($filter[$i],'harf','left');
+        alert("능력 거래 조건 및 유의 사항에 부적절한 단어[{$text}]가 포함되어 있습니다.");
+        exit;
+    }
 }
 
 if($type==""){
@@ -60,6 +65,8 @@ if(count($links) > 1) {
     $links = '';
 }
 
+
+
 if(!$pd_id || $pd_id == ""){
 
 	//등록
@@ -77,6 +84,7 @@ if(!$pd_id || $pd_id == ""){
 			pd_location_name = '{$locs}',
 			pd_price = '{$price}',
 			pd_price2 = '{$price2}',
+			pd_infos = '{$pd_infos}',
 			pd_status = 0,
 			mb_id = '{$mb_id}',
 			pd_words = '{$words}',
@@ -108,6 +116,7 @@ if(!$pd_id || $pd_id == ""){
 			pd_location_name = '{$locs}',
 			pd_price = '{$price}',
 			pd_price2 = '{$price2}',
+			pd_infos = '{$pd_infos}',
 			mb_id = '{$mb_id}',
 			pd_words = '{$words}',
 			pd_video_link = '{$links}',

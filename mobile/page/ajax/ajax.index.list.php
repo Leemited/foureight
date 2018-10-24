@@ -12,7 +12,7 @@ $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
 
 //검색 정렬 기본값
 if($_SESSION["list_basic_order"]=="location"){
-    $od = " order by p.pd_update desc, p.pd_date desc";
+    $od = " order by distance asc, p.pd_update desc, p.pd_date desc";
 }else {
     $od = " order by p.pd_update desc, p.pd_date desc";
 }
@@ -110,12 +110,11 @@ if($schopt){
                 case "pd_loc":
                     $align_active[$i] = $schopt["sc_od_loc"];
                     if($_SESSION["lat"] && $_SESSION["lng"]){
-                        $sel = " , IF( p.pd_lat != '', (6371*acos(cos(radians({$_SESSION["lat"] }))*cos(radians(p.pd_lat))*cos(radians(p.pd_lng)-radians({$_SESSION["lng"]}))+sin(radians({$_SESSION["lat"] }))*sin(radians(p.pd_lat)))) AS distance , 0 as distance )";
                         if($schopt["sc_od_loc"]==1){
                             if($od==" order by "){
-                                $od .= " `p.location` desc";
+                                $od .= " distance desc";
                             }else {
-                                $od .= " , `p.location` desc";
+                                $od .= " , distance desc";
                             }
                         }
                     }
@@ -130,6 +129,20 @@ if($schopt){
     }else if($_SESSION["type1"]==2){
         $search .= " and p.pd_type = 2";
     }
+    if($cate1){
+        $search .= " and p.pd_cate = '{$cate1}' ";
+    }
+    if($cate2){
+        $search .= " and p.pd_cate2 = '{$cate2}' ";
+    }
+}
+
+if($mb_level){
+    $where .= " and m.mb_level = 4";
+}
+
+if($_SESSION["lat"] && $_SESSION["lng"]){
+    $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
 }
 
 
@@ -308,7 +321,15 @@ for($i=0;$i<count($list);$i++){
                 <h2><?php echo $pt2." ".$list[$i]["pd_tag"];?></h2>
             <?php }?>
 			<div>
-				<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                <?php if($list[$i]["pd_type2"]==4){?>
+                    <?php if($list[$i]["pd_price"]==0){?>
+                        <h1>가격 제시</h1>
+                    <?php }else{ ?>
+                        <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                    <?php }?>
+                <?php }else{?>
+                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                <?php }?>
 				<?php 
 				if($flag){?>
 

@@ -1,32 +1,49 @@
-var app = require('http').createServer(handler);
-var io = require('socket.io').listen(app);
-var fs = require('fs');
 
-var counter = 0;
+var port = 3000;
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
-app.listen(3000);
+var socket_ids = [];
+var pd_ids = [];
+var pd_ids_cnt = [];
+var pd_id;
 
-function handler (req,res){
-   fs.readFile('./test.html',
-   function (err, data){
-      if(err){
-         res.writeHead(500);
-         return res.end('Error loading test.html');
-      }
-      res.writeHead(200);
-      res.end(data);
+io.on('connection', function(socket){
 
-   })
-}
+    socket_ids.push(socket.id);
 
-io.sockets.on('connection',function(socket){
-   socket.on('addme',function(username){
-      socket.name = username;
-      console.log(socket.id);
-      socket.emit('chat','SERVER','You have connected');
-      socket.broadcast.emit('chat','SERVER',username+' is on deck');
-   });
-   socket.on('sendchat',function(){
-      io.sockets.emit('chat',socket.username,data);
-   });
+    socket.on('add connect', function(data){
+        console.log(data.pd_id);
+        pd_id = "'"+data.pd_id+"'";
+        dis_pd_id = data.pd_id;
+        if(pd_ids.indexOf(data.pd_id)!=-1){
+            console.log("find");
+            if(pd_ids_cnt[pd_id]<0){
+                console.log("find2");
+                pd_ids_cnt[pd_id] = 0;
+            }
+            pd_ids_cnt[pd_id]++;
+        }else{
+            console.log("nofind");
+            pd_ids.push(data.pd_id);
+            pd_ids_cnt[pd_id] = 1;
+        }
+
+        io.to(socket.id).emit('view connect', pd_ids_cnt[pd_id]);
+        socket.broadcast.emit('insert connect', pd_ids_cnt[pd_id]);
+    });
+
+    socket.on('disconnect', function(){
+        pd_ids_cnt[pd_id]--;
+        if(pd_ids_cnt[pd_id]<=0){
+            pd_ids_cnt[pd_id] = 0;
+        }
+        io.to(socket.id).emit('view connect', pd_ids_cnt[pd_id]);
+        socket.broadcast.emit('insert connect', pd_ids_cnt[pd_id]);
+    });
+});
+
+http.listen(port, function(){
+    console.log('listening on : ' + port);
 });

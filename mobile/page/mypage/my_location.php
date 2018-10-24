@@ -2,10 +2,10 @@
 include_once("../../../common.php");
 include_once(G5_MOBILE_PATH."/head.login.php");
 if($member["mb_id"]==""){
-	alert("로그인이 필요합니다.", G5_BBS_URL."/login.php?url=".G5_MOBILE_URL."/page/mypage/settings.php");
+	alert("로그인이 필요합니다.", G5_MOBILE_URL."/page/login_intro.php?url=".G5_MOBILE_URL."/page/mypage/settings.php");
 }
 $chkMobile = true;
-$sql = "select * from `mysetting` where mb_id = '{$member[mb_id]}'";
+$sql = "select * from `mysetting` where id= {$id} and mb_id = '{$member["mb_id"]}'";
 $settings = sql_fetch($sql);
 
 $mylocations = explode(",",$settings["my_locations"]);
@@ -28,48 +28,48 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 			<h2>거래 위치 목록</h2>
 			<ul>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[0])?$mylocations[0]:"";?>">
+                    <input type="text" class="setting_input" name="mylocation[]" id="locs1"  placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[0])?$mylocations[0]:"";?>">
                     <div class="map_set">
                         <?php if($app){?>
                         <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(1);">
                         <?php }?>
-                        <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(1)">
+                        <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(1)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[1])?$mylocations[1]:"";?>">
+                    <input type="text" class="setting_input" name="mylocation[]"  id="locs2"  placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[1])?$mylocations[1]:"";?>">
                     <div class="map_set">
                         <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(2);">
                         <?php }?>
-                        <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(2)">
+                        <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(2)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[2])?$mylocations[2]:"";?>">
+                    <input type="text" class="setting_input" name="mylocation[]"  id="locs3" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[2])?$mylocations[2]:"";?>">
                     <div class="map_set">
                         <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(3);">
                         <?php }?>
-                        <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(3)">
+                        <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(3)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[3])?$mylocations[3]:"";?>">
+                    <input type="text" class="setting_input" name="mylocation[]"  id="locs4" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[3])?$mylocations[3]:"";?>">
                     <div class="map_set">
                         <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(4);">
                         <?php }?>
-                        <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(4)">
+                        <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(4)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  placeholder="예) 강남역 1번 출구" value="<?php echo ($mylocations[4])?$mylocations[4]:"";?>">
+                    <input type="text" class="setting_input" name="mylocation[]"  id="locs5" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[4])?$mylocations[4]:"";?>">
                     <div class="map_set">
                         <?php if($app){?>
                             <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(5);">
                         <?php }?>
-                        <img src="<?php echo G5_IMG_URL?>/setting_map.svg" alt="" onclick="mapSelect(5)">
+                        <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(5)">
                     </div>
                 </li>
 			</ul>
@@ -78,24 +78,31 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 			</div>
 		</div>
 	</form>
-    <div id="map_sel" style="">
-        <input type="hidden" name="addr" id="addr">
-        <input type="hidden" name="setnum" id="setnum">
-        <img src="<?php echo G5_IMG_URL?>/view_pin.svg" alt="" class="map_pin">
-        <div id="map" style="width:100%;height:63vw;"></div>
-        <div style="padding:2.8vw 0;text-align:center;">
-            <input type="button" value="취소" onclick="mapSelect('')" style="border:none;width:48%;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #000;color:#fff;font-size:3vw;padding:2vw 0;">
-            <input type="button" value="확인" onclick="mapSet();" style="border:none;width:48%;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #ffe100;color:#000;font-size:3vw;padding:2vw 0;">
-        </div>
+</div>
+<div id="map_sel" style="z-index:900">
+    <input type="hidden" id="setnum" value="">
+    <!--<img src="<?php /*echo G5_IMG_URL*/?>/view_pin.svg" alt="" class="map_pin">-->
+    <div id="map" style="width:100%;height:40vh;"></div>
+    <div class="loc_list">
+        <ul class="loc_ul_list">
+
+        </ul>
+    </div>
+    <div style="padding:2.8vw 0;text-align:center;">
+        <input type="button" value="취소" onclick="mapSelect('')" style="border:none;width:48%;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #000;color:#fff;font-size:3vw;padding:2vw 0;">
+        <input type="button" value="등록" onclick="mapSet();" style="border:none;width:48%;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #ffe100;color:#000;font-size:3vw;padding:2vw 0;">
     </div>
 </div>
 <script>
+    var itemadd = '',addrs = '';
     var lat = '33.450701';
     var lng = '126.570667';
     <?php if($_SESSION["lat"] && $_SESSION["lng"]){?>
-        lat = "<?php echo $_SESSION["lat"];?>";
-        lng = "<?php echo $_SESSION["lng"];?>";
+    lat = "<?php echo $_SESSION["lat"];?>";
+    lng = "<?php echo $_SESSION["lng"];?>";
     <?php }?>
+    var geocoder = new daum.maps.services.Geocoder();
+
     var mapContainer = document.getElementById('map'), // 지도를 표시할 div
         mapOption = {
             center: new daum.maps.LatLng(lat, lng), // 지도의 중심좌표
@@ -112,98 +119,129 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
         position: markerPosition
     });
 
+    var infowindow = new daum.maps.InfoWindow({zIndex:9002});
+
     // 마커가 지도 위에 표시되도록 설정합니다
     marker.setMap(map);
 
-    var geocoder = new daum.maps.services.Geocoder();
+    marker.setDraggable(true);
 
-    var imageSrc = g5_url+'/img/view_pin.svg', // 마커이미지의 주소입니다
-        imageSize = new daum.maps.Size(36, 52), // 마커이미지의 크기입니다
-        imageOption = {offset: new daum.maps.Point(12, 52)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
+    // 장소 검색 객체를 생성합니다
+    var ps = new daum.maps.services.Places();
 
-
-    // 지도가 이동, 확대, 축소로 인해 중심좌표가 변경되면 마지막 파라미터로 넘어온 함수를 호출하도록 이벤트를 등록합니다
-    daum.maps.event.addListener(map, 'center_changed', function() {
-        marker=null;
-        // 지도의 중심좌표를 얻어옵니다
-        var latlng = map.getCenter();
-
-        searchDetailAddrFromCoords(latlng, function(result, status) {
-            if (status === daum.maps.services.Status.OK) {
-                $("#addr").val(result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name);
+    // 키워드 검색 완료 시 호출되는 콜백함수 입니다
+    function placesSearchCB (data, status, pagination) {
+        if (status === daum.maps.services.Status.OK) {
+            $(".loc_ul_list").html('');
+            // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+            // LatLngBounds 객체에 좌표를 추가합니다
+            var bounds = new daum.maps.LatLngBounds();
+            var item="";
+            for (var i=0; i<data.length; i++) {
+                console.log(data[i]);
+                displayMarker(data[i]);
+                bounds.extend(new daum.maps.LatLng(data[i].y, data[i].x));
+                item += "<li onclick=\"setCenter(\'"+data[i].y+"\',\'"+data[i].x+"\',\'"+data[i].place_name+"\',\'"+data[i].road_address_name+"\',\'"+i+"\')\" >";
+                item += data[i].place_name;
+                item += "</li>";
             }
+            if(item!="") {
+                $(".loc_ul_list").append(item);
+            }else{
+                $(".loc_ul_list").append("<li>검색된 목록이 없습니다.</li>");
+            }
+            // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+            map.setBounds(bounds);
+        }else{
+            $(".loc_ul_list").append("<li>검색된 목록이 없습니다.</li>");
+        }
+    }
+
+    var markers = [];
+
+    var imageSrc = 'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', // 마커이미지의 주소입니다
+        imageSize = new daum.maps.Size(64, 69), // 마커이미지의 크기입니다
+        imageOption = {offset: new daum.maps.Point(27, 69)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
+    var locitem;
+    function setCenter(lat,lng,place_name,place_address,num) {
+        // 이동할 위도 경도 위치를 생성합니다
+        var moveLatLon = new daum.maps.LatLng(lat,lng);
+
+        //markers[num].setMap(map)
+        // 지도 중심을 이동 시킵니다
+        map.setCenter(moveLatLon);
+        locitem = "["+place_name+"]"+place_address;
+    }
+
+    // 지도에 마커를 표시하는 함수입니다
+    function displayMarker(place) {
+
+        // 마커를 생성하고 지도에 표시합니다
+        var marker = new daum.maps.Marker({
+            map: map,
+            position: new daum.maps.LatLng(place.y, place.x)
         });
 
-    });
+        // 마커에 클릭이벤트를 등록합니다
+        daum.maps.event.addListener(marker, 'click', function() {
+            // 마커를 클릭하면 장소명이 인포윈도우에 표출됩니다
+            infowindow.setContent('<div style="padding:5px;font-size:12px;">' + place.place_name + '</div>');
+            infowindow.open(map, marker);
+            $(".loc_ul_list li").each(function(){
+                if(place.place_name == $(this).text()){
+                    $(this).addClass("active");
+                    $(".loc_ul_list li").not($(this)).removeClass("active");
+                }
+            });
+        });
 
-    function searchDetailAddrFromCoords(coords,callback) {
-        // 좌표로 법정동 상세 주소 정보를 요청합니다
-        geocoder.coord2Address(coords.getLng(), coords.getLat(),callback);
+        markers.push(marker);
     }
+
     var mapon = false;
     function mapSelect(num){
+        if($("#locs"+num).val()==""){
+            alert("거래위치를 입력해주세요");
+            return false;
+        }
+        var loc = $("#locs"+num).val();
+        ps.keywordSearch(loc, placesSearchCB);
+
         if(mapon==false) {
             $("#setnum").val(num);
-            $("#map_sel").css({"bottom": "0"});
+            $("#map_sel").css({"bottom": "0","top":"16vw"});
+            $("html, body").css("overflow","hidden");
+            $("html, body").css("height","100vh");
             mapon = true;
         }else if(mapon==true || num == ''){
             $("#setnum").val('');
             $("#addr").val('');
-            $("#map_sel").css({"bottom": "-100vh"});
+            $("#map_sel").css({"bottom": "-100vw","top":"unset"});
             mapon = false;
         }
     }
 
     function mapSet(){
         var num = $("#setnum").val();
-        var addr = $("#addr").val();
-        $("input[name^='mylocation']").each(function(e){
-            if((e+1)==num){
-                $(this).val(addr);
-            }
-        });
+        $("#locs"+num).val(locitem);
         $("#setnum").val('');
-        $("#addr").val('');
-        $("#map_sel").css({"bottom": "-50vh"});
+        //$("#addr").val('');
+        $("#map_sel").css({"bottom": "-100vw","top":"unset"});
         mapon = false;
     }
 
     function nowLoc(num){
-        <?php if(!$app) {?>
-            alert(lat + "//" + lng);
-            var position = new daum.maps.LatLng(lat,lng);
-            searchDetailAddrFromCoords(position, function(result, status) {
-                if (status === daum.maps.services.Status.OK) {
-                    $("#addr").val(result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name);
-                    var addr = result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name;
-                    $("input[name^=mylocation]").each(function(e){
-                        if(e == (num-1)){
-                            $(this).val(addr);
-                        }
-                    });
-                }
-            });
-        <?php }else { ?>
-            var latlng = window.android.getLocation();
-            alert(latlng);
-            if(latlng!=""){
-                var loc = latlng.split("/");
-                var position = new daum.maps.LatLng(loc[0],loc[1]);
-                searchDetailAddrFromCoords(position, function(result, status) {
-                    if (status === daum.maps.services.Status.OK) {
-                        $("#addr").val(result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name);
-                        var addr = result[0].address.region_1depth_name+" "+result[0].address.region_2depth_name+" "+result[0].address.region_3depth_name;
-                        $("input[name^=mylocation]").each(function(e){
-                           if(e == (num-1)){
-                               $(this).val(addr);
-                           }
-                        });
-                    }
-                });
-            }
-        <?php }?>
 
     }
+
+    $(function(){
+        $(document).on("click",".loc_ul_list li",function(){
+            if(!$(this).hasClass("active")){
+                $(this).addClass("active");
+                $(".loc_ul_list li").not($(this)).removeClass("active");
+            }
+        });
+    })
 </script>
 <?php 
 include_once(G5_PATH."/tail.php");

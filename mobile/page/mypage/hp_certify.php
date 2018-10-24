@@ -2,7 +2,7 @@
 include_once("../../../common.php");
 include_once(G5_MOBILE_PATH."/head.login.php");
 if($member["mb_id"]==""){
-    alert("로그인이 필요합니다.", G5_BBS_URL."/login.php?url=".G5_MOBILE_URL."/page/mypage/settings.php");
+    alert("로그인이 필요합니다.", G5_MOBILE_URL."/page/login_intro.php?url=".G5_MOBILE_URL."/page/mypage/settings.php");
 }
 
 $sql = "select * from `mysetting` where mb_id = '{$member[mb_id]}'";
@@ -38,7 +38,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                 <h2>변경 번호</h2>
                 <ul>
                     <li class="single">
-                        <input type="text" class="setting_input" name="mb_hp" id="mb_hp" placeholder="" value="">
+                        <input type="text" class="setting_input" name="mb_hp" id="mb_hp" placeholder="" value="" style="width:50%;">
                         <input type="button" value="인증하기" id="win_hp_cert" class="addr_btn">
                     </li>
                 </ul>

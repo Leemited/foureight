@@ -47,7 +47,7 @@ for($i=0;$i<count($list);$i++){
             $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
             if(is_file(G5_DATA_PATH."/product/".$img1)){
                 ?>
-                <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
+                <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;min-height: 28vw;">
                     <?php if($img1!=""){?>
                         <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
                     <?php }else{ ?>

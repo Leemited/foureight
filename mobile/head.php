@@ -19,12 +19,14 @@ if($sc_id){
     $schopt = sql_fetch($sql);
 }
 
+if($member["mb_id"]){
+    $mb_id = $member["mb_id"];
+}else{
+    $mb_id = session_id();
+}
+
 if($stx && $set == "simple"){
-    if($member["mb_id"]){
-        $mb_id = $member["mb_id"];
-    }else{
-        $mb_id = session_id();
-    }
+
     $filter = explode(",",$config["cf_filter"]);
 
     for($i=0;$i<count($filter);$i++){
@@ -162,6 +164,12 @@ $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$help[] = $row;
 }
+
+//새알림
+$start = date("Y-m-d");
+$end = date("Y-m-d", strtotime("-3 month"));
+$sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}'";
+$alarms = sql_fetch($sql);
 
 ?>
 <div id="id01s" class="w3-modal w3-animate-opacity">
@@ -316,7 +324,7 @@ while($row = sql_fetch_array($res)){
 			<form action="./" method="get" name="simplesearch" id="simplesearch" >
                 <input type="text" style="display:none;">
                 <input type="hidden" value="simple" name="set" id="set">
-                <input type="hidden" name="set_type" id="set_type" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" >
+                <input type="hidden" name="set_type" id="set_type" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>">
                 <input type="hidden" name="set_sc_id" id="set_sc_id" value="<?php echo $sc_id;?>" >
                 <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
                 <input type="text" name="stx" id="stx" value="<?php echo $schopt["sch_tag"];?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
@@ -343,7 +351,7 @@ while($row = sql_fetch_array($res)){
 	<div class="search_setting">
 		<form action="<?php echo G5_URL?>/mobile/page/savesearch/save_search.php" method="post" name="savesch" id="savesch" >
 			<input type="hidden" name="sc_id" id="sc_id" value="<?php echo $sc_id;?>" >
-			<input type="hidden" name="set_type" id="set_type" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" >
+			<input type="hidden" name="set_type" id="set_type2" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" >
 			<input type="hidden" value="<?php if($schopt["sc_priceFrom"]!=""){echo $schopt['sc_priceFrom'];}?>" id="sc_priceFrom" name="priceFrom">
 			<input type="hidden" value="<?php if($schopt["sc_priceTo"]!=""){echo $schopt['sc_priceTo'];}?>" id="sc_priceTo" name="priceTo">
 			<input type="hidden" value="<?php if($schopt["sc_tag"]!=""){echo $schopt['sc_tag'];}?>" name="sch_text" id="sch_text" >
@@ -353,24 +361,28 @@ while($row = sql_fetch_array($res)){
             <input type="hidden" value="<?php echo $schopt["sc_align_disabled"];?>" name="un_order_sort" id="un_order_sort">
             <input type="hidden" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
             <input type="hidden" value="<?php echo $_SESSION["list_type"];?>" name="set_list_type" id="set_list_type">
+            <input type="hidden" value="<?php echo $schopt["sc_cate1"];?>" name="cate" id="cate">
+            <input type="hidden" value="<?php echo $schopt["sc_cate2"];?>" name="cate2" id="cate2">
 			<div class="sch_top">
-				<select name="cate" id="cate" class="sel_cate input01s" required >
+                <input type="button" value="카테고리 선택" class="sch_btn" onclick="fnwrite2();">
+				<!--<select name="cate" id="cate" class="sel_cate input01s" required >
 					<option value="">전체</option>
-					<?php for($i=0;$i<count($category1);$i++){ ?>
-					<option value="<?php echo $category1[$i]["cate_name"];?>" id="<?php echo $category1[$i]["ca_id"];?>" <?php if($schopt["sc_cate1"]!=""){if($schopt["sc_cate1"] == $category1[$i]["cate_name"]){?>selected<?php } }?>><?php echo $category1[$i]["cate_name"];?></option>
-					<?php } ?>
+					<?php /*for($i=0;$i<count($category1);$i++){ */?>
+					<option value="<?php /*echo $category1[$i]["cate_name"];*/?>" id="<?php /*echo $category1[$i]["ca_id"];*/?>" <?php /*if($schopt["sc_cate1"]!=""){if($schopt["sc_cate1"] == $category1[$i]["cate_name"]){*/?>selected<?php /*} }*/?>><?php /*echo $category1[$i]["cate_name"];*/?></option>
+					<?php /*} */?>
 				</select>
 				<select name="cate2" id="cate2" class="sel_cate input01s" required >
 					<option value="">전체</option>
-                    <?php if($sc_id && $schopt["sc_cate2"]!=""){
+                    <?php /*if($sc_id && $schopt["sc_cate2"]!=""){
                         for($i=0;$i<count($set_cate2);$i++){
-                        ?>
-                            <option value="<?php echo $set_cate2[$i]["cate_name"];?>" id="<?php echo $set_cate2[$i]["ca_id"];?>" <?php if($schopt["sc_cate2"]!=""){if($schopt["sc_cate2"] == $set_cate2[$i]["cate_name"]){?>selected<?php } }?>><?php echo $set_cate2[$i]["cate_name"];?></option>
-                    <?php } }?>
-				</select>
+                        */?>
+                            <option value="<?php /*echo $set_cate2[$i]["cate_name"];*/?>" id="<?php /*echo $set_cate2[$i]["ca_id"];*/?>" <?php /*if($schopt["sc_cate2"]!=""){if($schopt["sc_cate2"] == $set_cate2[$i]["cate_name"]){*/?>selected<?php /*} }*/?>><?php /*echo $set_cate2[$i]["cate_name"];*/?></option>
+                    <?php /*} }*/?>
+				</select>-->
                 <a href="javascript:fnsuggestion();">제안하기</a>
 			</div>
 			<div class="types sch_mid">
+                <p id="cates"><?php if($schopt["sc_cate1"] && $schopt["sc_cate2"]){?><span><?php echo $schopt['sc_cate1'];?></span> > <span><?php echo $schopt['sc_cate2'];?></span><?php }?></p>
 				<label class="radio_tag" for="four">
 					<input type="radio" name="type2" id="four" value="8" <?php if($schopt["sc_type2"]=="8" || $schopt["sc_type2"] == ""){?>checked<?php  }?>>
 					<span class="slider2 round">팝니다</span>
@@ -428,11 +440,14 @@ while($row = sql_fetch_array($res)){
 				<input type="button" value="검색" class="sch_btn" onclick="list_search();">
 				<input type="button" value="삽니다 간편등록" class="sch_btn sch_save_write" onClick="fnWrite();">
 			</div>
-            <div class="search_close" onclick="fnSetting()">
+            <div class="search_close" onclick="fnSetting2()">
                 <img src="<?php echo G5_IMG_URL?>/search_close.png" alt="">
             </div>
             <div class="header_bg"></div>
 		</form>
+        <div class="no-list" style="display:">
+            <p>목록이 없습니다.</p>
+        </div>
 	</div>
 	<div class="mobile_menu">
 		<span></span>
@@ -455,18 +470,21 @@ while($row = sql_fetch_array($res)){
 				</div>
 				<?php if(!$member["mb_id"]){?>
 				<h4>지금 로그인하세요</h4>
-				<span>로그인 상태가 아닙니다.</span>
+				<div class="addr">로그인 상태가 아닙니다.</div>
 				<?php }else{?>
-				<h4><?php echo $member["mb_name"];?></h4>
-				<span><?php echo ($member["mb_addr1"])?$member["mb_addr1"]:"저장된 주소가 없습니다.";?></span>
-
+				<h4><?php echo $member["mb_nick"];?></h4>
+				<div class="addr"><?php echo ($member["mb_addr1"])?$member["mb_addr1"]:"저장된 주소가 없습니다.";?></div>
+                <div class="alert" onclick="fnAlertView();">
+                    <?php if($alarms['cnt'] > 0){?><div><?php echo $alarms['cnt'];?></div><?php }?>
+                    <img src="<?php echo G5_IMG_URL?>/ic_alert.svg " alt="">
+                </div>
 				<?php }?>
 			</div>
 			<ul>
 				<li class="menu1"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
 				<li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/talk/talk.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
-				<li class="menu3"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
-				<li class="menu4"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
+				<li class="menu3"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/cart.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
+				<li class="menu4"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/orders.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
 				<li class="menu6"><a href="<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
                 <li class="menu6"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=notice"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
 				<li class="menu7"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">도움말</a></li>
@@ -508,6 +526,35 @@ while($row = sql_fetch_array($res)){
 		</div>
 		<?php include_once(G5_MOBILE_PATH."/subcategory2.php"); ?>
 	</div>
+    <div class="category_menu3">
+        <div class="cate_header">
+            <img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt="" onclick="cateClose();">
+            <h2>카테고리 설정</h2>
+        </div>
+        <div class="category catetype1">
+            <ul>
+                <?php for($i=0;$i<count($category1);$i++){ ?>
+                    <li class="cate<?php echo $category1[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
+                <?php } ?>
+                <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
+            </ul>
+        </div>
+        <?php include_once(G5_MOBILE_PATH."/subcategory3.php"); ?>
+    </div>
+    <div class="category_menu4">
+        <div class="cate_header">
+            <img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt="" onclick="cateClose();">
+            <h2>카테고리 설정</h2>
+        </div>
+        <div class="category catetype2">
+            <ul>
+                <?php for($i=0;$i<count($category2);$i++){ ?>
+                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
+                <?php } ?>
+            </ul>
+        </div>
+        <?php include_once(G5_MOBILE_PATH."/subcategory4.php"); ?>
+    </div>
 	<div class="search_etc">
 		<div class="sort">
             <div class="left">
@@ -651,6 +698,7 @@ $(function(){
 			$(this).html("물품");
 			$(this).css({"text-align":"right"});
             $("#set_type").val(1);
+            $("#set_type2").val(1);
 			//카테고리 설정
 			$.ajax({
 				url:g5_url+"/mobile/page/ajax/ajax.category.php",
@@ -666,6 +714,7 @@ $(function(){
 			$(this).html("능력");
 			$(this).css({"text-align":"left"});
 			$("#set_type").val(2);
+			$("#set_type2").val(2);
 			//카테고리 설정
 			$.ajax({
 				url:g5_url+"/mobile/page/ajax/ajax.category.php",
@@ -683,7 +732,6 @@ $(function(){
 	$("#cate").change(function(){
 		var type1 = $(".schtype .slider").text();
 		var ca_id = $("#cate option:selected").attr("id");
-		console.log(ca_id);
 		var text = $("#cate option:checked").text();
 
 		$.ajax({
@@ -693,7 +741,7 @@ $(function(){
 		}).done(function(data){
 			$("#cate2 option").remove();
 			$("#cate2").append(data);
-			$("#cate1").val(text);
+			$("#cate").val(text);
 		});
 	});
 
@@ -718,10 +766,36 @@ $(function(){
 		});
 	});
 
+    $(".category_menu3 .category2 ul li, .category_menu4 .category2 ul li").click(function(){
+        var c = $(this).parent().parent().prev().children().find("li.active a").text();
+        var sc = $(this).find("a").text();
+        var type = $("#type").val();
+        var msg = '';
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.category_info.php",
+            method:"post",
+            data:{cate:c,type:type}
+        }).done(function(data){
+            msg = data;
+            //if(confirm(msg+ "\r\n해당 ")){
+            $("#type").val(type);
+            $("#cate").val(c);
+            $("#cate2").val(sc);
+
+            //$("#id01").css("display","block");
+            //$("html, body").css("overflow","hidden");
+            //$("html, body").css("height","100vh");
+            $("#cates").html("<span>"+c+"</span> > <span>"+sc+"</span>");
+            cateClose();
+        });
+    });
+
 	$(".radio_tag").click(function(){
 		if($("#eight").prop("checked") == true){
+		    $("#type2").val(8);
 			$(".sch_save_write").css("display","none");
 		}else{
+            $("#type2").val(4);
 			$(".sch_save_write").css("display","inline");
 		}
 	});
@@ -959,5 +1033,32 @@ function fnWrite(){
         return false;
     }
     document.savesch.submit();
+}
+
+
+function fnwrite2(){
+    var type = $("#set_type").val();
+    if(type == 1){
+        //물건
+        $(".category_menu3").fadeIn(300,function(){
+            $(".category_menu3").addClass("active");
+            location.hash='#category';
+        });
+    }else if(type == 2){
+        //능력
+        $(".category_menu4").fadeIn(300,function(){
+            $(".category_menu4").addClass("active");
+            location.hash='#category';
+        });
+    }else{
+        alert("정상적인 방법으로 등록 바랍니다.");
+        return false;
+    }
+}
+
+
+
+function fnAlertView(){
+    location.href=g5_url+'/mobile/page/mypage/alarm.php';
 }
 </script>

@@ -30,29 +30,31 @@ if($comment_re != "1") {
         $sql = "select * from `product_comment` as p left join `g5_member` as m on m.mb_id = p.mb_id where p.pd_id ='{$pd_id}' order by p.comment_datetime desc limit 0 , 1";
         $cm = sql_fetch($sql);
         ?>
-        <li class="<?php if($pd_mb_id!=$mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} } ?>" id="cmt<?php echo $cm[cm_id];?>">
-            <div class="profile" <?php if($cm["member_id"] != $mb_id){ echo "onclick=fnRecom('".$cm["cm_id"]."','".$mb_id."','".$member["mb_name"]."','".$cm["comment_status"]."')";} ?> >
-                <?php if($pd_mb_id!=$mb_id){
-                    if($cm["comment_status"]=="3"  || $secret == "3"){ ?>
-                    <img src="<?php echo G5_IMG_URL?>/profile_lock.svg" alt="" id="profile">
-                <?php }else if($cm["mb_profile"]){?>
-                    <img src="<?php echo $cm["mb_profile"];?>" alt="" id="profile">
-                <?php }else if($cm["mb_profile"] ==""){ ?>
-                    <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="">
-                <?php }
+        <li class="<?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} } ?>" id="cmt<?php echo $cm[cm_id];?>">
+            <!--<div class="profile" <?php /*if($cm["member_id"] != $mb_id){ echo "onclick=fnRecom('".$cm["cm_id"]."','".$mb_id."','".$member["mb_name"]."','".$cm["comment_status"]."')";} */?> >
+                <?php /*if($pd_mb_id!=$mb_id){
+                    if($cm["comment_status"]=="3"  || $secret == "3"){ */?>
+                    <img src="<?php /*echo G5_IMG_URL*/?>/profile_lock.svg" alt="" id="profile">
+                <?php /*}else if($cm["mb_profile"]){*/?>
+                    <img src="<?php /*echo $cm["mb_profile"];*/?>" alt="" id="profile">
+                <?php /*}else if($cm["mb_profile"] ==""){ */?>
+                    <img src="<?php /*echo G5_IMG_URL*/?>/no-profile.svg" alt="">
+                <?php /*}
                 }else {
-                    if ($cm["mb_profile"]) { ?>
-                    <img src="<?php echo $cm["mb_profile"]; ?>" alt="" id="profile">
-                <?php } else if ($cm["mb_profile"] == "") { ?>
-                    <img src="<?php echo G5_IMG_URL ?>/no-profile.svg" alt="">
-                <?php }
-                }?>
-            </div>
+                    if ($cm["mb_profile"]) { */?>
+                    <img src="<?php /*echo $cm["mb_profile"]; */?>" alt="" id="profile">
+                <?php /*} else if ($cm["mb_profile"] == "") { */?>
+                    <img src="<?php /*echo G5_IMG_URL */?>/no-profile.svg" alt="">
+                <?php /*}
+                }*/?>
+            </div>-->
             <div class="coms">
-                <p><?php echo $cm["mb_name"];?> / <?php echo $cm["comment_datetime"];?></p>
-                <?php if($pd_mb_id!=$mb_id){if($cm["comment_status"]=="3"  || $secret == "3" ){?>
+                <?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3"  || $secret == "3" ){?>
+                    <p>비공개 / <?php echo $cm["comment_datetime"];?></p>
                     <h2 class="loctitle">비공개</h2>
+                    <ul><li>비공개</li></ul>
                 <?php }else{ ?>
+                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
                     <h2><?php echo $cm["comment_content"];?></h2>
                     <ul>
                         <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
@@ -64,7 +66,9 @@ if($comment_re != "1") {
                             <li onclick="fnLike('yes','<?php echo $cm["cm_id"];?>')">추천 <span class="like<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["like"]);?></span></li>
                         <?php }  ?>
                     </ul>
-                <?php }}else{ ?>
+                <?php }
+                }else{ ?>
+                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
                     <h2><?php echo $cm["comment_content"];?></h2>
                     <ul>
                         <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
@@ -91,29 +95,31 @@ if($comment_re != "1") {
         $sql = "select * from `product_comment` as p left join `g5_member` as m on m.mb_id = p.mb_id where p.pd_id ='{$pd_id}' order by p.comment_datetime desc limit 0 , 1";
         $cm = sql_fetch($sql);
         ?>
-        <li class="re_cm <?php if($pd_mb_id!=$mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} }?> " id="cmt<?php echo $cm[cm_id];?>">
-            <div class="profile" <?php if($cm["member_id"] != $mb_id){ echo "onclick=fnRecom('".$cm["cm_id"]."','".$mb_id."','".$member["mb_name"]."','".$cm["comment_status"]."')";} ?> >
-                <?php if($pd_mb_id!=$mb_id){
-                    if($cm["comment_status"]=="3"  || $secret == "3"){ ?>
-                        <img src="<?php echo G5_IMG_URL?>/profile_lock.svg" alt="" id="profile">
-                    <?php }else if($cm["mb_profile"]){?>
-                        <img src="<?php echo $cm["mb_profile"];?>" alt="" id="profile">
-                    <?php }else if($cm["mb_profile"] ==""){ ?>
-                        <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="">
-                    <?php }
+        <li class="re_cm <?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} }?> " id="cmt<?php echo $cm[cm_id];?>">
+            <!--<div class="profile" <?php /*if($cm["member_id"] != $mb_id){ echo "onclick=fnRecom('".$cm["cm_id"]."','".$mb_id."','".$member["mb_name"]."','".$cm["comment_status"]."')";} */?> >
+                <?php /*if($pd_mb_id!=$mb_id){
+                    if($cm["comment_status"]=="3"  || $secret == "3"){ */?>
+                        <img src="<?php /*echo G5_IMG_URL*/?>/profile_lock.svg" alt="" id="profile">
+                    <?php /*}else if($cm["mb_profile"]){*/?>
+                        <img src="<?php /*echo $cm["mb_profile"];*/?>" alt="" id="profile">
+                    <?php /*}else if($cm["mb_profile"] ==""){ */?>
+                        <img src="<?php /*echo G5_IMG_URL*/?>/no-profile.svg" alt="">
+                    <?php /*}
                 }else {
-                    if ($cm["mb_profile"]) { ?>
-                        <img src="<?php echo $cm["mb_profile"]; ?>" alt="" id="profile">
-                    <?php } else if ($cm["mb_profile"] == "") { ?>
-                        <img src="<?php echo G5_IMG_URL ?>/no-profile.svg" alt="">
-                    <?php }
-                }?>
-            </div>
+                    if ($cm["mb_profile"]) { */?>
+                        <img src="<?php /*echo $cm["mb_profile"]; */?>" alt="" id="profile">
+                    <?php /*} else if ($cm["mb_profile"] == "") { */?>
+                        <img src="<?php /*echo G5_IMG_URL */?>/no-profile.svg" alt="">
+                    <?php /*}
+                }*/?>
+            </div>-->
             <div class="coms">
-                <p><?php echo $cm["mb_name"];?> / <?php echo $cm["comment_datetime"];?></p>
-                <?php if($pd_mb_id!=$mb_id){if($cm["comment_status"]=="3"  || $secret == "3" ){?>
+                <?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id ){if($cm["comment_status"]=="3"  || $secret == "3" ){?>
+                    <p>비공개 / <?php echo $cm["comment_datetime"];?></p>
                     <h2 class="loctitle">비공개</h2>
+                    <ul><li>비공개</li></ul>
                 <?php }else{ ?>
+                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
                     <h2><?php echo $cm["comment_content"];?></h2>
                     <ul>
                         <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
@@ -126,6 +132,7 @@ if($comment_re != "1") {
                         <?php }  ?>
                     </ul>
                 <?php }}else{ ?>
+                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
                     <h2><?php echo $cm["comment_content"];?></h2>
                     <ul>
                         <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
