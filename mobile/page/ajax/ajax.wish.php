@@ -3,6 +3,12 @@ include_once("../../../common.php");
 $mb_id = $_REQUEST["mb_id"];
 if($mode=="insert"){
 	if($mb_id){
+	    $sql = "select mb_id from `product` where pd_id = '{$pd_id}'";
+	    $mypro = sql_fetch($sql);
+	    if($mb_id==$mypro["mb_id"]){
+            echo "myproduct";
+            return false;
+        }
 		$now = date("Y-m-d");
 		$recent = sql_query("select * from `wish_product` where mb_id = '{$mb_id}' and pd_id = '{$pd_id}' and ws_date = '{$now}'");
 		$cnt = 0;

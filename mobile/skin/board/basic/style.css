@@ -236,3 +236,7 @@
 #bo_vc_sns:after {display:block;visibility:hidden;clear:both;content:""}
 #bo_vc_sns li {float:left;margin:0 10px 0 0}
 #bo_vc_sns input {margin:0 0 0 5px}
+
+#allchk {margin:3vw 0;}
+#allchk label{padding: 1vw 2vw;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;background-color: #7e7e7e;color: #fff;font-size: 3vw;}
+#allchk input:checked + label{background-color: #000;color: #fff;font-size: 3vw;}

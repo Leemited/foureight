@@ -9,29 +9,6 @@ if(defined('G5_THEME_PATH')) {
 
 <div id="debug" style="">삭제상태</div>
 
-<div id="ft">
-    <!-- <?php echo popular('basic'); // 인기검색어 ?>
-    <?php echo visit('basic'); // 방문자수 ?> -->
-    <div id="ft_copy">
-        <ul>
-			<li onclick="location.href=g5_url+'/mobile/page/mypage/mypage.php'">
-				<img src="<?php echo G5_IMG_URL?>/bottom_icon_01.svg" alt="마이페이지">
-			</li>
-			<li onclick="location.href=g5_url+'/mobile/page/wish/wish.list.php'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_02.svg" alt="위시리스트" class="wished_tail"></li>
-			<?php if($p == "index"){?>
-			<li id="home" onclick="location.href='<?php echo G5_URL;?>'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="최상위로"></li>
-			<?php }else{?>
-			<li onclick="location.href='<?php echo G5_URL?>'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="홈"></li>
-			<?php }?>
-			<li onclick="fnRecent()"><img src="<?php echo G5_IMG_URL?>/bottom_icon_03.svg" alt="최근본항목"></li>
-			<li onclick="location.href=g5_url+'/mobile/page/productmap/'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_04.svg" alt="지도보기"></li>
-		</ul>
-    </div>
-    <!--<div class="footer">
-        <img src="<?php /*echo G5_IMG_URL*/?>/footer_img.svg" alt="">
-    </div>-->
-</div>
-
 <?php
 //if(G5_DEVICE_BUTTON_DISPLAY && G5_IS_MOBILE) { 
 ?>
@@ -162,6 +139,8 @@ function fnStatus(pd_id,status){
     if("<?php echo $view["pd_type"];?>"=="2"){
         $("#status_buy").css("display","none");
     }
+
+    console.log(status);
     switch (status){
         case "0":
             $("#status1").addClass("active");
@@ -235,10 +214,12 @@ function fnBlindView(pd_id){
 $(function() {
     $(document).scroll(function(){
         if($(this).scrollTop() <= 0){
+            console.log("A");
             var home = "<?php echo G5_IMG_URL;?>/bottom_icon_home.svg";
             $("#home").attr("onclick","location.href='<?php echo G5_URL;?>'");
             $("#home img").attr("src",home);
         }else{
+            console.log("B");
             var home = "<?php echo G5_IMG_URL;?>/bottom_icon_05.svg";
             $("#home").attr("onclick","scroll_top()");
             $("#home img").attr("src",home);
@@ -249,7 +230,7 @@ $(function() {
 
 });
 function removeDebug(){
-    $("#debug").removeClass("active");
+	$("#debug").removeClass("active");
     $("#mobile_header #mobile_menu_btn").removeClass("active");
 }
 

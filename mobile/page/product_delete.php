@@ -11,11 +11,10 @@ $sql = "select pd_images, pd_video from `product` where pd_id = '{$pd_id}'";
 $file = sql_fetch($sql);
 $path = G5_DATA_URL."/product/";
 
-
-$sql = "delete from `product` where pd_id = '{$pd_id}'";
+$sql = "update `product` set pd_status = 10 where pd_id = '{$pd_id}'";
 
 if(sql_query($sql)){
-    if($file["pd_images"] != ""){
+    /*if($file["pd_images"] != ""){
         $images = explode(",",$file["pd_images"]);
         for($i=0;$i<count($images);$i++) {
             @unlink($path.$images[$i]);
@@ -23,10 +22,7 @@ if(sql_query($sql)){
     }
     if($file["pd_video"]!=""){
         @unlink($path.$file["pd_video"]);
-    }
-
-    $sql = "delete from `product` where pd_id = '{$pd_id}'";
-    sql_query($sql);
+    }*/
 
     alert("삭제되었습니다.",G5_URL);
 }else {

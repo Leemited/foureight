@@ -373,6 +373,8 @@ header .left .lnb{position:relative;top:0;z-index:2}
 
 .cate_tab li{padding:5px 10px;font-size:16px;color:#fff;background-color:#aaa;float:left;border:1px solid #6e6e6e;border-bottom:0;cursor:pointer;}
 .cate_tab li:hover,.cate_tab li.active{background-color:#000;color:#fff;}
+
+/*
 @media all and (max-width: 1000px){
 	.pcT{display:none}
 	.pcT2{display:none}
@@ -461,3 +463,4 @@ header .left .lnb{position:relative;top:0;z-index:2}
 	.div label.lb{width:calc(100% - 20px );position:relative;display:block;margin:10px 0;text-align:center}
 	.div label.lb.active{width:calc(100% - 20px );position:relative;display:block;margin:10px 0;}
 }
+*/

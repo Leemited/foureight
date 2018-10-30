@@ -97,7 +97,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
         <h2>결제설정</h2>
         <ul>
             <li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_card.php?id=<?php echo $settings['id'];?>'">카드등록</li>
-            <li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_acount.php?id=<?php echo $settings['id'];?>'">계좌등록</li>
+            <li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_bank.php?id=<?php echo $settings['id'];?>'">계좌등록</li>
         </ul>
     </div>
 	<div class="setting_wrap">
@@ -107,6 +107,12 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_location.php?id=<?php echo $settings['id'];?>'">거래 위치 설정</li>
 		</ul>
 	</div>
+    <div class="setting_wrap ">
+        <h2>회원탈퇴</h2>
+        <ul>
+            <li class="single" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/member_leave.php?id=<?php echo $settings['id'];?>'">회원탈퇴</li>
+        </ul>
+    </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js" integrity="sha384-FzT3vTVGXqf7wRfy8k4BiyzvbNfeYjK+frTVqZeNDFl8woCbF0CYG6g2fMEFFo/i" crossorigin="anonymous"></script>
 <script>
@@ -115,11 +121,38 @@ $(function(){
 	$("input[type=checkbox]").each(function(){
 		$(this).click(function(){
 			var type = $(this).attr("id");
-			if($(this).is(":checked")==true){
-				fnSetUpdate(type,1,id);
-			}else{
-				fnSetUpdate(type,0,id);
-			}
+			if(type == "hp_set" || type == "sms_set"){
+			    //두개 체크 여부 확인
+                var hp_chk = $("#hp_set").prop("checked");
+                var sms_chk = $("#sms_set").prop("checked");
+                if(hp_chk == sms_chk){
+                    console.log("A");
+                    if(hp_chk == false){
+                        $("#show_hp").attr("checked",true);
+                        fnSetUpdate("hp_set",0,id);
+                        fnSetUpdate("sms_set",0,id);
+                        //fnSetUpdate("show_hp",1,id);
+                    }else{
+                        $("#show_hp").attr("checked",false);
+                        fnSetUpdate("hp_set",1,id);
+                        fnSetUpdate("sms_set",1,id);
+                        //fnSetUpdate("show_hp",0,id);
+                    }
+                }else{
+                    if ($(this).is(":checked") == true) {
+                        fnSetUpdate(type, 1, id);
+                    } else {
+                        fnSetUpdate(type, 0, id);
+                    }
+                }
+            }else {
+                console.log("B");
+                if ($(this).is(":checked") == true) {
+                    fnSetUpdate(type, 1, id);
+                } else {
+                    fnSetUpdate(type, 0, id);
+                }
+            }
 		});
 	});
 
@@ -129,6 +162,7 @@ $(function(){
 	   fnSetUpdate3(type,status);
     });
 });
+
 function fnSetUpdate(type,state){
     if(type=="show_hp" && state == 1){
         $("#hp_set").attr("checked",false);

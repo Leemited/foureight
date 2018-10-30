@@ -411,7 +411,7 @@ $alarms = sql_fetch($sql);
 					<span class="round">추천순</span>
 				</label>
 				<label class="align" id="sortable" for="pd_hit">
-					<input type="checkbox" name="orders[]" value="pd_hit" id="pd_hit" checked>
+					<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" checked>
 					<span class="round">인기순</span>
 				</label>
 				<label class="align" id="sortable" for="pd_loc">
@@ -484,9 +484,10 @@ $alarms = sql_fetch($sql);
 				<li class="menu1"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
 				<li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/talk/talk.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
 				<li class="menu3"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/cart.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
-				<li class="menu4"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/orders.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
+				<li class="menu4"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/order_history.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
 				<li class="menu6"><a href="<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
                 <li class="menu6"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=notice"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
+                <li class="menu6"><a href="<?php echo G5_BBS_URL?>/page/company/company.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">회사소개</a></li>
 				<li class="menu7"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">도움말</a></li>
 				<li class="menu8"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/settings.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_settings.svg" alt="">설정</a>
                     <div class="sugg"><a href="javascript:fnsuggestion();">제안하기</a></div>
@@ -631,6 +632,8 @@ $(function(){
         $(".mobile_menu").fadeOut(300,function(){
             $(".mobile_menu").removeClass("active");
         });
+        $("html").css("overflow","auto");
+        $("body").css("overflow","unset");
     });
 
     var active = '';
@@ -660,6 +663,7 @@ $(function(){
     })
 
     $("#stx").on("focus", function(){
+        $(this).attr("placeholder","");
         $(".write").hide();
        $("#ft").hide();
     });
@@ -733,7 +737,7 @@ $(function(){
 		var type1 = $(".schtype .slider").text();
 		var ca_id = $("#cate option:selected").attr("id");
 		var text = $("#cate option:checked").text();
-
+        console.log("A");
 		$.ajax({
 			url:g5_url+"/mobile/page/ajax/ajax.category2.php",
 			method:"POST",
@@ -785,7 +789,8 @@ $(function(){
             //$("#id01").css("display","block");
             //$("html, body").css("overflow","hidden");
             //$("html, body").css("height","100vh");
-            $("#cates").html("<span>"+c+"</span> > <span>"+sc+"</span>");
+            //$("#cates").html("<span>"+c+"</span> > <span>"+sc+"</span>");
+            $(".sch_btn").val(c+" > "+sc);
             cateClose();
         });
     });

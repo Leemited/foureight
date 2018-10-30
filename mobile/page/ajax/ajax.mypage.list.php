@@ -46,7 +46,7 @@ for($i=0;$i<count($list);$i++){
 		}
 	}
 ?>
-<div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" onclick="fn_viewer('<?php echo $list[$i]["pd_id"];?>')">
+<div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" <?php if($list[$i]["pd_blind"]<10){?>onclick="fn_viewer('<?php echo $list[$i]["pd_id"];?>')"<?php }?>>
     <?php if($list[$i]["pd_blind"]>=10){?>
         <div class="blind_bg">
             <div>

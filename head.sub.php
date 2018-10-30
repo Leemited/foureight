@@ -13,7 +13,7 @@ if($app_mb_id){
     $app_mb = get_member($app_mb_id);
     // 회원아이디 세션 생성
     set_session('ss_mb_id', $app_mb['mb_id']);
-// FLASH XSS 공격에 대응하기 위하여 회원의 고유키를 생성해 놓는다. 관리자에서 검사함 - 110106
+    // FLASH XSS 공격에 대응하기 위하여 회원의 고유키를 생성해 놓는다. 관리자에서 검사함 - 110106
     set_session('ss_mb_key', md5($app_mb['mb_datetime'] . $_SERVER['HTTP_USER_AGENT']));
 }
 
@@ -140,7 +140,8 @@ var g5_admin_url = "<?php echo G5_ADMIN_URL; ?>";
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=783007f3286be92823591204b3588de6&libraries=services"></script>
 <script src="<?php echo G5_JS_URL?>/hammer.js"></script>
 <script src="<?php echo G5_URL?>/node_modules/clipboard/dist/clipboard.min.js"></script>
-
+<!-- iamport.payment.js -->
+<script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
@@ -156,6 +157,13 @@ if(!defined('G5_IS_ADMIN'))
 <script>
     // // 사용할 앱의 JavaScript 키를 설정해 주세요.
     Kakao.init('783007f3286be92823591204b3588de6');
+
+    <?php if($app){
+    if($is_member){
+    ?>
+    window.android.setLogin('<?php echo $member["mb_id"];?>');
+    <?php }
+    } ?>
 </script>
 </head>
 <body>

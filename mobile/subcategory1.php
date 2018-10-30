@@ -60,7 +60,8 @@ while($row=sql_fetch_array($res)){
 			$scate[17][] = $row;
 			break;
 	}
-	
+
+    $parent[] = $row["parent_ca_id"];
 }
 ?>
 <div class="category2">
@@ -69,7 +70,8 @@ while($row=sql_fetch_array($res)){
 		<?php for($j=0;$j<count($scate[$i]);$j++){?>
 		<li id="<?php echo $scate[$i][$j]["cate_code"];?>"><a href="#"><?php echo $scate[$i][$j]["cate_name"];?></a></li>
 		<?php }?>
-	</ul>
+        <li onclick="fnsuggestion2('<?php echo $parent[$i];?>');">제안하기</li>
+    </ul>
 	<?php }?>
 
 </div>

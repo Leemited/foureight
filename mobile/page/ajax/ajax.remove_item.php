@@ -2,7 +2,15 @@
 include_once("../../../common.php");
 
 $pd_id = $_REQUEST["pd_id"];
+
+$sql = "select * from `product` where pd_id = '{$pd_id}'";
+$id_chk = sql_fetch($sql);
+
 $chk = true;
+if($member["mb_id"]==$id_chk["mb_id"]){
+    echo "3";
+    return false;
+}
 if($member["mb_id"]){
 	$sql = "select pd_id from `my_trash` where mb_id = '{$member[mb_id]}'";
 	$res = sql_query($sql);

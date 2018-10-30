@@ -32,27 +32,28 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 	<div class="setting_wrap">
 		<h2>기본 설정</h2>
 		<ul>
-			<li class="single">전체 푸시알림 켜짐 <label class="switch2"><input type="checkbox" id="push_set" name="push_set" <?php if($settings["push_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+			<li class="single">전체 푸시알림 켜짐 <label class="switch2" for="push_set"><input type="checkbox" id="push_set" name="push_set" <?php if($settings["push_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 		</ul>
 	</div>
 	<div class="setting_wrap">
 		<h2>알림 종류</h2>
 		<ul>
-			<li>안전 결제 진행 <label class="switch2"><input type="checkbox" id="safe_pay_set" name="safe_pay_set" <?php if($settings["safe_pay_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li>채팅 대화 알림 <label class="switch2"><input type="checkbox" id="chat_alarm_set" name="chat_alarm_set" <?php if($settings["chat_alram_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+			<li>구매예약 <label class="switch2" for="pay_reser_set"><input type="checkbox" id="pay_reser_set" name="pay_reser_set" <?php if($settings["pay_reser_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+			<li>흥정하기 <label class="switch2" for="pricing_set"><input type="checkbox" id="pricing_set" name="pricing_set" <?php if($settings["pricing_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+			<li>채팅 대화 알림 <label class="switch2" for="chat_alarm_set"><input type="checkbox" id="chat_alarm_set" name="chat_alarm_set" <?php if($settings["chat_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 		</ul>
 	</div>
 	<div class="setting_wrap">
 		<h2>댓글 알림 설정</h2>
 		<ul>
-			<li>댓글, 답변, 대화 알림 <label class="switch2"><input type="checkbox" id="comment_alram_set" name="comment_alram_set" <?php if($settings["comment_alram_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li>기본 알림 (게시글, 검색) <label class="switch2"><input type="checkbox" id="notice_alram_set" name="notice_alram_set" <?php if($settings["notice_alram_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+			<li>댓글, 답변, 대화 알림 <label class="switch2" for="comment_alarm_set"><input type="checkbox" id="comment_alarm_set" name="comment_alarm_set" <?php if($settings["comment_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+			<li>기본 알림 (게시글, 검색) <label class="switch2" for="notice_alarm_set"><input type="checkbox" id="notice_alarm_set" name="notice_alarm_set" <?php if($settings["notice_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 		</ul>
 	</div>
 	<div class="setting_wrap">
 		<h2>시간 설정</h2>
 		<ul>
-			<li>에티켓 시간 설정 <label class="switch2"><input type="checkbox" id="etiquette_set" name="etiquette_set" <?php if($settings["etiquette_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+			<li>에티켓 시간 설정 <label class="switch2" for="etiquette_set"><input type="checkbox" id="etiquette_set" name="etiquette_set" <?php if($settings["etiquette_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li class="select_time">시작시간 <select id="etiquette_time_start" class="setting_input" name="etiquette_time_start"><?php for($i=0;$i<24;$i++){?><option value="<?php $time = (count($i)<0)?"0".$i:$i; echo $time?>" <?php if($settings["etiquette_time_start"]==$time){?>selected<?php }?>><?php echo $time;?>시</option><?php }?></select></li>
 			<li class="select_time">종료시간 <select id="etiquette_time_end" class="setting_input" name="etiquette_time_end"><?php for($i=0;$i<24;$i++){?><option value="<?php $time2 = (count($i)<0)?"0".$i:$i;?>"  <?php if($settings["etiquette_time_end"]==$time2){?>selected<?php }?>><?php echo $time2;?>시</option><?php }?></select></li>
 		</ul>
@@ -60,6 +61,17 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 </div>
 <script>
 $(function(){
+
+    $("#push_set").click(function(){
+        if($(this).prop("checked")==true){
+            //전체 온
+            $("#etiquette_set,#comment_alarm_set,#notice_alarm_set,#pricing_set,#pay_reser_set,#chat_alarm_set").attr("checked",true);
+        }else{
+            //전체 오프
+            $("#etiquette_set,#comment_alarm_set,#notice_alarm_set,#pricing_set,#pay_reser_set,#chat_alarm_set").attr("checked",false);
+        }
+    })
+
 	$("input[type=checkbox]").each(function(){
 		$(this).click(function(){
 			var type = $(this).attr("id");

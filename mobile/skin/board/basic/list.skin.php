@@ -58,20 +58,20 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
             </nav>
             <?php } ?>
 
-            <div class="bo_fx">
-                <!--<div id="bo_list_total">
+            <!--<div class="bo_fx">
+                <div id="bo_list_total">
                     <span>Total <?php /*echo number_format($total_count) */?>건</span>
                     <?php /*echo $page */?> 페이지
-                </div>-->
+                </div>
 
-                <?php if ($rss_href || $write_href) { ?>
+                <?php /*if ($rss_href || $write_href) { */?>
                 <ul class="btn_bo_user">
-                    <?php if ($rss_href) { ?><li><a href="<?php echo $rss_href ?>" class="btn_b01">RSS</a></li><?php } ?>
-                    <?php if ($admin_href) { ?><li><a href="<?php echo $admin_href ?>" class="btn_admin">관리자</a></li><?php } ?>
-                    <?php if ($write_href) { ?><li><a href="<?php echo $write_href ?>" class="btn_b02">글쓰기</a></li><?php } ?>
+                    <?php /*if ($rss_href) { */?><li><a href="<?php /*echo $rss_href */?>" class="btn_b01">RSS</a></li><?php /*} */?>
+                    <?php /*if ($admin_href) { */?><li><a href="<?php /*echo $admin_href */?>" class="btn_admin">관리자</a></li><?php /*} */?>
+                    <?php /*if ($write_href) { */?><li><a href="<?php /*echo $write_href */?>" class="btn_b02">글쓰기</a></li><?php /*} */?>
                 </ul>
-                <?php } ?>
-            </div>
+                <?php /*} */?>
+            </div>-->
 
             <form name="fboardlist" id="fboardlist" action="./board_list_update.php" onsubmit="return fboardlist_submit(this);" method="post">
             <input type="hidden" name="bo_table" value="<?php echo $bo_table ?>">
@@ -83,14 +83,29 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
             <input type="hidden" name="page" value="<?php echo $page ?>">
             <input type="hidden" name="sw" value="">
 
+            <?php if ($is_checkbox) { ?>
+                <div id="allchk">
+                    <label for="chkall" >전체선택</label>
+                    <input type="checkbox" id="chkall" onclick="if (this.checked) all_checked(true); else all_checked(false);" style="display:none">
+                </div>
+            <?php } ?>
+            <div class="clear"></div>
             <div class="tbl_head01 tbl_wrap">
                 <div class="notice">
                     <?php
                     for ($i=0; $i<count($list); $i++) {
                     ?>
-                    <div class="notice_list" onclick="location.href='<?php echo $list[$i]['href'] ?>';">
-                        <p><?php echo $list[$i]["datetime"];?></p>
-                        <h2><?php echo $list[$i]["wr_subject"];?></h2>
+                    <div class="notice_list" >
+                        <div onclick="location.href='<?php echo $list[$i]['href'] ?>';">
+                            <p><?php echo $list[$i]["datetime"];?></p>
+                            <h2><?php echo $list[$i]["wr_subject"];?></h2>
+                        </div>
+                        <div>
+                        <?php if ($is_checkbox) { ?>
+                            <label for="chk_wr_id_<?php echo $i ?>" ></label>
+                            <input type="checkbox" name="chk_wr_id[]" value="<?php echo $list[$i]['wr_id'] ?>" id="chk_wr_id_<?php echo $i ?>" style="display:none;">
+                        <?php } ?>
+                        </div>
                     </div>
                     <?php }?>
                     <?php if (count($list) == 0) { echo '<div class="no-list">게시물이 없습니다.</div>'; } ?>

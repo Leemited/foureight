@@ -18,9 +18,6 @@ if($_FILES["com_sign"]["tmp_name"]){
 
     $error .= move_uploaded_file($_FILES["com_sign"]["tmp_name"],$uploadfile);
 
-    if($error){
-        var_dump($error);
-    }
 
     $infile = " , com_sign = '{$filename}'";
 }
@@ -38,6 +35,7 @@ com_addr3 = '{$com_addr3}',
 com_addr_jibeon = '{$com_addr_jibeon}',
 com_tel = '{$com_tel}',
 status = 0,
+mb_id = '{$member["mb_id"]}'
 com_datetime = now() {$infile}";
 
 

@@ -22,8 +22,14 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
     </style>
     <div class="sub_head">
         <div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
-        <h2>계좌정보 등록</h2>
-        <!-- <div class="sub_add">추가</div> -->
+        <h2>거래내역</h2>
+        <div class="all_clear" onclick="fnOrderDelete();"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash_all.svg" alt=""></div>
+    </div>
+    <div class="mycart_tab">
+        <ul>
+            <li onclick="location.href=g5_url+'/mobile/page/mypage/order_history.php'">거래내역관리</li>
+            <li class="active">계좌등록/변경</li>
+        </ul>
     </div>
     <div id="settings">
         <div class="setting_wrap">

@@ -127,7 +127,11 @@ function get_images($srcfile,$dWidth="",$dHeight=""){
         else if($ratio < 1){
             $dWidth = $size[0]/2;
         }
+    }else{
+        $dWidth = $size[0];
     }
+
+
     // 썸네일 높이
     $thumb_height = round(($dWidth * $size[1]) / $size[0]);
     $filename = basename($srcfile);

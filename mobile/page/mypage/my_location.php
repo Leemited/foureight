@@ -14,6 +14,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 
 ?>
 <style>
+body{overflow: hidden}
 #settings{height:calc(100vh - 42vw);overflow:hidden;position:relative}
 #settings .setting_wrap ul li{padding:2.88vw;}
 </style>
@@ -79,7 +80,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 		</div>
 	</form>
 </div>
-<div id="map_sel" style="z-index:900">
+<div id="map_sel" style="z-index:900;background-color: #fff;">
     <input type="hidden" id="setnum" value="">
     <!--<img src="<?php /*echo G5_IMG_URL*/?>/view_pin.svg" alt="" class="map_pin">-->
     <div id="map" style="width:100%;height:40vh;"></div>
@@ -94,6 +95,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
     </div>
 </div>
 <script>
+    var locitem = "";
     var itemadd = '',addrs = '';
     var lat = '33.450701';
     var lng = '126.570667';
@@ -132,17 +134,29 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
     // 키워드 검색 완료 시 호출되는 콜백함수 입니다
     function placesSearchCB (data, status, pagination) {
         if (status === daum.maps.services.Status.OK) {
+            marker = null;
             $(".loc_ul_list").html('');
             // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
             // LatLngBounds 객체에 좌표를 추가합니다
             var bounds = new daum.maps.LatLngBounds();
             var item="";
             for (var i=0; i<data.length; i++) {
-                console.log(data[i]);
                 displayMarker(data[i]);
-                bounds.extend(new daum.maps.LatLng(data[i].y, data[i].x));
-                item += "<li onclick=\"setCenter(\'"+data[i].y+"\',\'"+data[i].x+"\',\'"+data[i].place_name+"\',\'"+data[i].road_address_name+"\',\'"+i+"\')\" >";
-                item += data[i].place_name;
+                var addr = data[i].address_name.split(" ");
+                var addr_simple = "["+addr[0]+" "+addr[1]+"]";
+                if(lat && lng) {
+                    bounds.extend(new daum.maps.LatLng(lat, lng));
+                }else{
+                    bounds.extend(new daum.maps.LatLng(data[i].y,data[i].x));
+                }
+                var address = "";
+                if(data[i].road_address_name){
+                    address = data[i].road_address_name;
+                }else{
+                    address = data[i].address_name;
+                }
+                item += "<li onclick=\"setCenter(\'"+data[i].y+"\',\'"+data[i].x+"\',\'"+data[i].place_name+"\',\'"+address+"\',\'"+i+"\')\" >";
+                item += addr_simple+data[i].place_name;
                 item += "</li>";
             }
             if(item!="") {
@@ -170,6 +184,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
         //markers[num].setMap(map)
         // 지도 중심을 이동 시킵니다
         map.setCenter(moveLatLon);
+
         locitem = "["+place_name+"]"+place_address;
     }
 
@@ -200,33 +215,36 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 
     var mapon = false;
     function mapSelect(num){
+        console.log($("#locs"+num).val());
         if($("#locs"+num).val()==""){
             alert("거래위치를 입력해주세요");
             return false;
         }
         var loc = $("#locs"+num).val();
-        ps.keywordSearch(loc, placesSearchCB);
+
 
         if(mapon==false) {
+            ps.keywordSearch(loc, placesSearchCB);
             $("#setnum").val(num);
-            $("#map_sel").css({"bottom": "0","top":"16vw"});
+            $("#map_sel").css({"bottom": "0","top":"6vw","height":"100vh"});
             $("html, body").css("overflow","hidden");
             $("html, body").css("height","100vh");
             mapon = true;
         }else if(mapon==true || num == ''){
             $("#setnum").val('');
             $("#addr").val('');
-            $("#map_sel").css({"bottom": "-100vw","top":"unset"});
+            $("#map_sel").css({"bottom": "-100vw","top":"unset","height":"100vw"});
             mapon = false;
         }
     }
 
     function mapSet(){
         var num = $("#setnum").val();
+        $(".loclist").html('');
         $("#locs"+num).val(locitem);
         $("#setnum").val('');
         //$("#addr").val('');
-        $("#map_sel").css({"bottom": "-100vw","top":"unset"});
+        $("#map_sel").css({"bottom": "-100vw","top":"unset","height":"100vw"});
         mapon = false;
     }
 

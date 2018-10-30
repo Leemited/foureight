@@ -1,6 +1,8 @@
 <?php
 include_once("../../common.php");
 
+$wr_subject = $sub_title;
+
 if(!$wr_subject){
 	alert("제목을 입력해 주세요");
 	return false;
@@ -65,7 +67,8 @@ if(count($links) > 1) {
     $links = '';
 }
 
-
+$price = str_replace(",","",$price);
+$price2 = str_replace(",","",$price2);
 
 if(!$pd_id || $pd_id == ""){
 
@@ -106,8 +109,8 @@ if(!$pd_id || $pd_id == ""){
 			pd_name = '{$wr_subject}',
 			pd_type = '{$type}',
 			pd_type2 = '{$pd_type2}',
-			pd_cate = '{$cate_up}',
-			pd_cate2 = '{$cate2_up}',
+			pd_cate = '{$cate1}',
+			pd_cate2 = '{$cate2}',
 			pd_images = '{$filename}',
 			pd_video = '{$videoname}',
 			pd_content = '{$wr_content}',

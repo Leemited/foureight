@@ -81,9 +81,9 @@ if($schopt){
                     $align_active[$i] = $schopt["sc_od_price"];
                     if($schopt["sc_od_price"]==1){
                         if($od==" order by "){
-                            $od .= " p.pd_price desc";
+                            $od .= " p.pd_price asc";
                         }else {
-                            $od .= " , p.pd_price desc";
+                            $od .= " , p.pd_price asc";
                         }
                     }
                     break;
@@ -97,7 +97,7 @@ if($schopt){
                         }
                     }
                     break;
-                case "pd_hit":
+                case "pd_hits":
                     $align_active[$i] = $schopt["sc_od_hit"];
                     if($schopt["sc_od_hit"]==1){
                         if($od==" order by "){
@@ -124,27 +124,75 @@ if($schopt){
         $actives = implode(",", $align_active);
     }
 }else{
-    if($_SESSION["type1"]==1){
+    if($_SESSION["type1"]==1 || $_SESSION["type1"] == ""){
+        $type1 = 1;
         $search .= " and p.pd_type = 1";
     }else if($_SESSION["type1"]==2){
         $search .= " and p.pd_type = 2";
     }
-    if($cate1){
-        $search .= " and p.pd_cate = '{$cate1}' ";
-    }
-    if($cate2){
-        $search .= " and p.pd_cate2 = '{$cate2}' ";
+
+    if($set_search!="") {
+
+        if ($type1) {
+            $search .= " and p.pd_type = {$type1}";
+        }
+
+        if ($type2) {
+            $search .= " and p.pd_type2 = {$type2}";
+        }
+
+        if ($cate1) {
+            $search .= " and p.pd_cate = '{$cate1}' ";
+        }
+        if ($cate2) {
+            $search .= " and p.pd_cate2 = '{$cate2}' ";
+        }
+
+        if ($mb_level != "") {
+            $search .= " and m.mb_level = 4 ";
+        }
+
+        if ($priceFrom != 0 && $priceTo != 0) {
+            $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
+        }
+
+        if ($align) {
+            $od = " order by ";
+            $alings = explode(",", $align);
+            $actives = explode(",", $orderactive);
+            for ($i = 0; $i < count($actives); $i++) {
+                if ($actives[$i] == 1) {
+                    if ($alings[$i] == "pd_price") {
+                        if ($i == 0) {
+                            $od .= "p." . $alings[$i] . " asc";
+                        } else {
+                            $od .= ", p." . $alings[$i] . " asc";
+                        }
+                    } else if ($alings[$i] == "pd_loc") {
+                        if($_SESSION["lat"] && $_SESSION["lng"]) {
+                            if ($i == 0) {
+                                $od .= " distance desc";
+                            } else {
+                                $od .= ", distance desc";
+                            }
+                        }
+                    } else {
+                        if ($i == 0) {
+                            $od .= "p." . $alings[$i] . " desc";
+                        } else {
+                            $od .= ", p." . $alings[$i] . " desc";
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
-if($mb_level){
-    $where .= " and m.mb_level = 4";
-}
 
 if($_SESSION["lat"] && $_SESSION["lng"]){
     $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
 }
-
 
 $total=sql_fetch("select count(*) as cnt from `product` where {$search} ");
 if(!$page)
@@ -165,7 +213,6 @@ if($member["mb_id"]){
 }
 
 $sqls = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
-//echo $sqls;
 $res = sql_query($sqls);
 while($row = sql_fetch_array($res)){
     $list[] = $row;
@@ -211,6 +258,28 @@ for($i=0;$i<count($list);$i++){
 			$flag = false;
 		}
 	}
+
+    $wished_cnt = sql_fetch("select count(*)as cnt from `wish_product` where pd_id = {$list[$i]["pd_id"]}");
+
+    if($list[$i]["pd_date"]) {
+        $loc_data = $list[$i]["pd_date"];
+        if($list[$i]["pd_update"]){
+            $loc_data = $list[$i]["pd_update"];
+        }
+        $now = date("Y-m-d H:i:s");
+        $time_gep = round((strtotime($now) - strtotime($loc_data)) / 3600);
+        if($time_gep == 0){
+            $time_gep = "몇 분전";
+        }else if($time_gep < 24){
+            $time_gep = $time_gep."시간 전";
+        }else if($time_gep > 24){
+            $time_gep = round($time_gep / 24)."일 전";
+        }
+    }else{
+        $time_gep = "정보 없음";
+    }
+
+
     for($k=0;$k<count($listadd);$k++){
         if($listadd[$k]["ad_sort"]==$cnt[$i]["num"]){
             ?>
@@ -292,6 +361,9 @@ for($i=0;$i<count($list);$i++){
                 <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
 				<div>
 					<ul>
+                        <?php if($list_type=="list"||$_SESSION["list_type"]=="list"){?>
+                        <li style="margin-right:2vw;"><?php echo $time_gep;?></li>
+                        <?php }?>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
 						<?php if($app){?>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_loc<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><?php echo $dist;?></li>
@@ -321,6 +393,7 @@ for($i=0;$i<count($list);$i++){
                 <h2><?php echo $pt2." ".$list[$i]["pd_tag"];?></h2>
             <?php }?>
 			<div>
+
                 <?php if($list[$i]["pd_type2"]==4){?>
                     <?php if($list[$i]["pd_price"]==0){?>
                         <h1>가격 제시</h1>
@@ -329,6 +402,9 @@ for($i=0;$i<count($list);$i++){
                     <?php }?>
                 <?php }else{?>
                     <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                <?php }?>
+                <?php if($wished_cnt["cnt"]>0){?>
+                    <div class="list_wished_cnt"><?php echo $wished_cnt["cnt"];?></div>
                 <?php }?>
 				<?php 
 				if($flag){?>
@@ -344,7 +420,7 @@ for($i=0;$i<count($list);$i++){
 </div>
 
 <?php }
-if(count($list)==0){echo "no-list//".$odr;}
+if(count($list)==0){echo "no-list//".$sqls;}
 ?>
 <script>
 
@@ -361,29 +437,44 @@ if(count($list)==0){echo "no-list//".$odr;}
 
 
             swiper.on('swipeleft',function(e){
-                $("#"+id).remove();
-                $grid.masonry('remove', this).masonry("layout");
                 $.ajax({
                     url:g5_url+"/mobile/page/ajax/ajax.remove_item.php",
                     method:"POST",
                     data:{pd_id:pd_id}
                 }).done(function(data){
-                    $("#debug").addClass("active");
-                    $("#debug").html("휴지통으로 이동되었습니다.");
-                    setTimeout(removeDebug,1500);
+                    if(data=="1") {
+                        $("#"+id).remove();
+                        $grid.masonry('remove', this).masonry("layout");
+                        $("#mobile_header #mobile_menu_btn").addClass("active");
+                        $("#debug").addClass("active");
+                        $("#debug").html("휴지통으로 이동되었습니다.");
+                        setTimeout(removeDebug, 1500);
+                    }else if(data=="3"){
+                        $("#debug").addClass("active");
+                        $("#debug").html("자신의 글은 휴지통에 보낼 수 없습니다.");
+                        setTimeout(removeDebug, 1500);
+                    }
                 });
             });
             swiper.on("swiperight",function(e){
-                $("#"+id).remove();
-                $grid.masonry('remove', this).masonry("layout");
+
                 $.ajax({
                     url:g5_url+"/mobile/page/ajax/ajax.remove_item.php",
                     method:"POST",
                     data:{pd_id:pd_id}
                 }).done(function(data){
-                    $("#debug").addClass("active");
-                    $("#debug").html("휴지통으로 이동되었습니다.");
-                    setTimeout(removeDebug,1500);
+                    if(data=="1") {
+                        $("#"+id).remove();
+                        $grid.masonry('remove', this).masonry("layout");
+                        $("#mobile_header #mobile_menu_btn").addClass("active");
+                        $("#debug").addClass("active");
+                        $("#debug").html("휴지통으로 이동되었습니다.");
+                        setTimeout(removeDebug, 1500);
+                    }else if(data=="3"){
+                        $("#debug").addClass("active");
+                        $("#debug").html("자신의 글은 휴지통에 보낼 수 없습니다.");
+                        setTimeout(removeDebug, 1500);
+                    }
                 });
             });
 
@@ -403,6 +494,7 @@ if(count($list)==0){echo "no-list//".$odr;}
 
             swiperm.on("singletap ", function(ev) {
                 if(ev.type == "singletap"){
+                    console.log("A");
                     fn_viewer(pd_id);
                 }
             });

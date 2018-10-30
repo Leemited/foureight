@@ -35,7 +35,7 @@ while($row = sql_fetch_array($res)){
 	<h2>검색 저장 목록</h2>
 	<div class="all_clear" onclick="fnSearchClear();"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash_all.svg" alt=""></div>
 </div>
-<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 38vw);overflow-y:scroll">
+<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 30vw);overflow-y:scroll">
 	<section class="recent_list">
 		<article class="post">
 			<div class="my_search">

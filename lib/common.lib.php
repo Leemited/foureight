@@ -159,7 +159,7 @@ function alert($msg='', $url='', $error=true, $post=false)
     if (isset($g5['title'])) {
         $header = $g5['title'];
     }
-    include_once(G5_BBS_PATH.'/alarm.php');
+    include_once(G5_BBS_PATH.'/alert.php');
     exit;
 }
 
@@ -3464,4 +3464,22 @@ function distTran($dist){
     return $dist;
 }
 
+//날짜 차이 구하기
+function dateDiff($sStartDate, $sEndDate)
+{
+    $sStartTime = strtotime($sStartDate);
+    $sEndTime = strtotime($sEndDate);
+
+    if($sStartTime > $sEndTime)
+        return false;
+
+    $sDiffTime = $sEndTime - $sStartTime;
+
+    $aReturnValue['d'] = round($sDiffTime/60/60/24);
+    //$aReturnValue['d'] = $sDiffTime/60/60/24;
+    $aReturnValue['H'] = sprintf("%02d", ($sDiffTime/60/60)%24);
+    $aReturnValue['i'] = sprintf("%02d", ($sDiffTime/60)%60);
+
+    return $aReturnValue;
+}
 ?>

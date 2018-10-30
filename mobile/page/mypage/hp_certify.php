@@ -11,7 +11,6 @@ $settings = sql_fetch($sql);
 $mywords = explode(",",$settings["my_words"]);
 
 $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
-
 ?>
     <script src="<?php echo G5_JS_URL ?>/certify.js?v=<?php echo G5_JS_VER; ?>"></script>
     <style>
@@ -23,27 +22,25 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
         <!-- <div class="sub_add">추가</div> -->
     </div>
     <div id="settings">
-        <form action="<?php echo G5_MOBILE_URL?>/page/mypage/hp_certify_update.php" method="post" name="fregisterform">
+        <form action="<?php echo G5_MOBILE_URL?>/page/mypage/hp_certify_update.php" method="post" name="fregisterform" >
             <input type="hidden" name="cert_type" value="<?php echo $member['mb_certify']; ?>" id="cert_type">
             <input type="hidden" name="cert_no" id="cert_no" value="">
+            <input type="hidden" name="mb_name" id="mb_name" value="<?php echo $member["mb_name"];?>">
+            <input type="hidden" name="mb_hp" id="reg_mb_hp">
+            <input type="hidden" name="mb_id" id="reg_mb_id" value="<?php echo $member["mb_id"];?>">
+
             <div class="setting_wrap">
                 <h2>현재 번호</h2>
                 <ul>
-                    <li class="single">
+                    <li class="single" style="height:6vw;line-height:7vw;">
                         <?php echo ($member["mb_hp"])?$member["mb_hp"]:"등록된 핸드폰 번호가 없습니다.";?>
+                        <input type="button" value="변경하기" id="win_hp_cert" class="addr_btn">
                     </li>
                 </ul>
             </div>
             <div class="setting_wrap">
-                <h2>변경 번호</h2>
-                <ul>
-                    <li class="single">
-                        <input type="text" class="setting_input" name="mb_hp" id="mb_hp" placeholder="" value="" style="width:50%;">
-                        <input type="button" value="인증하기" id="win_hp_cert" class="addr_btn">
-                    </li>
-                </ul>
                 <div class="btn_group">
-                    <input type="submit" value="수정" class="setting_btn">
+                    <input type="submit" value="확인" class="setting_btn" onclick="return fnSubmit();">
                 </div>
             </div>
         </form>
@@ -103,21 +100,16 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
     }
 
     function fnSubmit(){
-        if($("#mb_hp").val()==""){
-            alert("변경할 번호를 입력해주세요.");
-            return false;
-        }else if($("#cert_no").val()==""){
+        if ($("#cert_no").val() == "") {
             alert("휴대폰 인증을 해주세요.");
             return false;
         }
         var msg = reg_mb_hp_check();
         if (msg) {
             alert(msg);
-            $("#mb_hp").focus();
+            $("#reg_mb_hp").focus();
             return false;
         }
-
-        document.fregisterform.submit();
     }
 </script>
 <?php

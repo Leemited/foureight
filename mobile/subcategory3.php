@@ -69,6 +69,7 @@ while($row=sql_fetch_array($res)){
 		<?php for($j=0;$j<count($scate[$i]);$j++){?>
 		<li id="<?php echo $scate[$i][$j]["cate_code"];?>"><a href="#"><?php echo $scate[$i][$j]["cate_name"];?></a></li>
 		<?php }?>
+        <li onclick="fnsuggestion2('<?php echo $scate[$i]['parent_ca_id'];?>');">제안하기</li>
 	</ul>
 	<?php }?>
 

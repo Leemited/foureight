@@ -33,7 +33,7 @@ if($pd_id){
     $write = sql_fetch($sql);
 
     if($pd_id){
-        $sql = "select * from `categorys` where cate_type= '{$write[pd_type]}' and cate_depth = 1";
+        $sql = "select * from `categorys` where cate_type= '{$write["pd_type"]}' and cate_depth = 1";
         $cate1 = sql_query($sql);
         while($row = sql_fetch_array($cate1)){
             $ca1[] = $row;
@@ -41,12 +41,13 @@ if($pd_id){
                 $ca_id = $row["ca_id"];
             }
         }
-        $cate2 = sql_query("select * from `categorys` where cate_type= '{$write["pd_type"]}' and cate_depth = 2 and parent_ca_id = '{$ca_id}'");
+        $cate2 = sql_query("select * from `categorys` where cate_type = '{$write["pd_type"]}' and cate_depth = 2 and parent_ca_id = '{$ca_id}'");
         while($row = sql_fetch_array($cate2)){
             $ca2[] = $row;
         }
     }
 }
+
 if(!$pd_id) {
     $type = $_REQUEST["type"];
     $c = $_REQUEST["cate1"];
@@ -142,10 +143,25 @@ if(!$pd_id) {
         <input type="hidden" value="<?php echo $write["pd_lng"];?>" name="pd_lng" id="pd_lng">
         <input type="hidden" class="write_input width_80" name="wr_subject" id="wr_subject" value="<?php if($pd_id){echo $write["pd_tag"];}else{echo $title;}?>" >
         <input type="hidden" name="mywords" value="">
+        <?php if($type == 2){?>
+            <section class="write_sec avil">
+                <article>
+                    <div>
+                        <div class="videoArea sc avility">
+                            <h2>거래 조건 및 유의 사항</h2><br><br>
+                            <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" required placeholder="거래시 유의사항을 적어주세요. 대화하기에서 구매 안내에 사용됩니다.">
+                            <?php echo $view["pd_infos"];?>
+                        </textarea>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        <?php }?>
 		<section class="write_sec">
 			<article>
 				<div>
-                    <?php if($pd_id){?>
+                    <?php if($pd_id){
+                        ?>
                     <div class="sch_top">
                         <select name="cate_up" id="cate_up" class="sel_cate input01s" required >
                             <option value="">1차 카테고리</option>
@@ -257,7 +273,7 @@ if(!$pd_id) {
 <!--            </article>-->
 <!--        </section>-->
         <?php } ?>
-		<?php if($filename=="" && $chkMobile == false && !$pd_id){?>
+		<?php /*if($filename=="" && $chkMobile == false && !$pd_id){*/?><!--
 		<section class="write_sec">
 			<article>
 				<div>
@@ -292,7 +308,7 @@ if(!$pd_id) {
 				</div>
 			</article>
 		</section>
-		<?php }?>
+		--><?php /*}*/?>
 		<section class="write_sec">
 			<article>
 				<div>
@@ -369,18 +385,7 @@ if(!$pd_id) {
 				</div>
 			</article>
 		</section>
-        <?php if($type == 2){?>
-        <section class="write_sec avil">
-            <article>
-                <div>
-                    <div class="videoArea sc avility">
-                        <h2>거래 조건 및 유의 사항</h2><br><br>
-                        <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" required placeholder="거래시 유의사항을 적어주세요. 대화하기에서 구매 안내에 사용됩니다."></textarea>
-                    </div>
-                </div>
-            </article>
-        </section>
-        <?php }?>
+
 		<div class="submit_btns">
 			<input type="submit" value="확인" class="submit_btn" onclick="fnSubmit();">
 		</div>
@@ -390,7 +395,6 @@ if(!$pd_id) {
         <div id="map" style="width:100%;height:40vh;"></div>
         <div class="loc_list">
             <ul class="loc_ul_list">
-
             </ul>
         </div>
         <div style="padding:2.8vw 0;text-align:center;">
@@ -474,6 +478,7 @@ function addLoc(){
     <?php }?>
     location.hash="#modal";
 }
+//안씀?
 $(".modal_sel li").click(function(){
 	var text = $(this).text();
 	//$(this).toggleClass("active");
@@ -489,7 +494,7 @@ $(".modal_sel li").click(function(){
 		$(this).addClass("active");
 		$(".modal_sel li").not($(this)).removeClass("active");
         $(".loclist").html('');
-		var item = '<div class="myloc">'+text+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+text+'" name="locs" id=""/></div>';
+		var item = '<div class="myloc">'+text+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+text+'" name="locs" id="locs"/></div>';
 	}
     $(".loclist").append(item);
 });
@@ -507,6 +512,11 @@ $(".addLink").click(function(){
 		alert("링크주소를 입력해주세요");
 		return false;
 	}
+
+    if(link.indexOf("embed")==-1 && link.indexOf("youtube")==-1){
+	    alert("Youtube 링크만 가능합니다. \rYoutube 링크는 반드시 Embed Video안에 있는 링크를 가져오시기 바랍니다.");
+    }
+
 	var item = '<div class="link_lists it_'+linkCnt+'">'+link+'<img src="<?php echo G5_IMG_URL?>/ic_write_close.svg" alt="" class="locsDel"></div>';
 	var value = '<input type="hidden" value="'+link+'" name="links[]" id=""/>';
 	$(".videolinks").append(item);
@@ -589,10 +599,14 @@ function mapSet(){
     $("#map_sel").css({"bottom": "-50vh","top":"unset","margin-top":"unset"});
     $(".loclist").html('');
     $(".loc_ul_list li").each(function(){
-        if($(this).hasClass("active")){
+        if($(this).hasClass("active")) {
             var text = $(this).text();
-            var textchk = text.split("]");
-            text = textchk[1];
+            console.log(text);
+            if (text.indexOf("]") != -1) {
+                var textchk = text.split("]");
+                text = textchk[1];
+            }
+            console.log(text);
             if(locitem.indexOf(text)!=-1){
                 $(".loclist").append(locitem);
             }else{
@@ -651,17 +665,22 @@ $(function(){
 
     $("#cate_up").change(function(){
         var ca_id = $(this).val();
+        var name = $("#cate_up option:selected").text();
         //var text = $("#cate option:checked").text();
         $.ajax({
             url:g5_url+"/mobile/page/ajax/ajax.category2.php",
             method:"POST",
             data:{ca_id:ca_id}
         }).done(function(data){
-            console.log(data);
+            $("#cate1").val(name);
             $("#cate2_up option").remove();
             $("#cate2_up").append(data);
             //$("#cate1").val(text);
         });
+    });
+    $("#cate2_up").change(function(){
+        var name = $("#cate2_up option:selected").text();
+        $("#cate2").val(name);
     });
 
     var id2_height = $("#id02 .w3-container").height();
@@ -672,7 +691,40 @@ $(function(){
             console.log(this);
             readUrl(this,e);
         })
-    })
+    });
+
+    //게시글 등록 엔터
+    $("#sub_title").keyup(function (e) {
+        var type2 = $("#wr_type2").val();
+        var text = $(this).val();
+        console.log(e.keyCode + "//" + text.length);
+
+        if(e.keyCode==8 && text == "#" || e.keyCode==46 && text == "#"){
+            $(this).val('');
+            return false;
+        }
+        if(text.length == 1 && e.keyCode != 32){
+            console.log("A");
+            $(this).val("#"+text);
+        }
+        if(text.length == 1 && e.keyCode == 32){
+            console.log("B");
+            $(this).val("#");
+        }
+        if (text.length >= 2 && e.keyCode == 32) {
+            console.log("C");
+            $(this).val(text + "#");
+        }
+        var chk = text.substr(0,1);
+        if(chk != "#"){
+            $(this).val("#"+text);
+        }
+        var cnt = text.split("#");
+        if (cnt.length > 10) {
+            alert("검색어는 최대 10개까지 등록가능합니다.");
+            return false;
+        }
+    });
 });
 
 // 숫자 타입에서 쓸 수 있도록 format() 함수 추가
@@ -726,8 +778,18 @@ daum.maps.event.addListener(map, 'click', function(mouseEvent) {
     searchDetailAddrFromCoords(mouseEvent.latLng, function(result, status) {
         if (status === daum.maps.services.Status.OK) {
             var data;
+            var item="";
             data = { x : mouseEvent.latLng.ib , y : mouseEvent.latLng.jb, place_name : result[0].address.address_name};
+            var i = $(".loc_ul_list li").length;
+            item += "<li class='active' onclick=\"setCenter(\'"+mouseEvent.latLng.jb+"\',\'"+mouseEvent.latLng.ib+"\',\'"+result[0].address.address_name+"\',\'"+result[0].address.address_name+"\',\'"+i+"\')\" >";
+            item += result[0].address.address_name;
+            item += "</li>";
+            $(".loc_ul_list li").removeClass("active");
+            $(".loc_ul_list").append(item);
+            locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' +
+                '<input type="hidden" value="'+mouseEvent.latLng.jb+'" name="pd_lat" id=""/><input type="hidden" value="'+mouseEvent.latLng.ib+'" name="pd_lng" id=""/></div>';
             displayMarker(data);
+
         }
     });
 });
@@ -759,7 +821,13 @@ function placesSearchCB (data, status, pagination) {
             }else{
                 bounds.extend(new daum.maps.LatLng(data[i].y,data[i].x));
             }
-            item += "<li onclick=\"setCenter(\'"+data[i].y+"\',\'"+data[i].x+"\',\'"+data[i].place_name+"\',\'"+data[i].road_address_name+"\',\'"+i+"\')\" >";
+            var address = "";
+            if(data[i].road_address_name){
+                address = data[i].road_address_name;
+            }else{
+                address = data[i].address_name;
+            }
+            item += "<li onclick=\"setCenter(\'"+data[i].y+"\',\'"+data[i].x+"\',\'"+data[i].place_name+"\',\'"+address+"\',\'"+i+"\')\" >";
             item += addr_simple+data[i].place_name;
             item += "</li>";
         }
@@ -789,7 +857,7 @@ function setCenter(lat,lng,place_name,place_address,num) {
     // 지도 중심을 이동 시킵니다
     map.setCenter(moveLatLon);
 
-    locitem = '<div class="myloc">'+place_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+place_address+'" name="locs" id=""/><input type="hidden" value="'+place_name+'" name="locs_name" id=""/>' +
+    locitem = '<div class="myloc">'+place_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+place_address+'" name="locs" id="locs"/><input type="hidden" value="'+place_name+'" name="locs_name" id=""/>' +
         '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
 }
 

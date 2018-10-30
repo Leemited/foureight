@@ -40,17 +40,39 @@ if($mode != "profile" && $member["mb_id"]==""){
 $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$mb_id}'");
 
 $mb=get_member($mb_id);
+
+//설정 가져오기
+if($mb["mb_id"]!=$member["mb_id"]){
+    $settings = sql_fetch("select * from `mysetting` where mb_id = '{$mb["mb_id"]}'");
+}
+
 $total=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}'");
+$res=sql_query("select * from `product` where mb_id = '{$mb_id}'");
+while($row = sql_fetch_array($res)){
+    $all_pd_ids[] = $row["pd_id"];
+}
+if(count($all_pd_ids)>0) {
+    $my_pd_ids = implode(",", $all_pd_ids);
+}else{
+    $my_pd_ids = '';
+}
+
 if($wish_id) {
     $wish = sql_fetch("select count(*) as cnt from `wish_product` where mb_id = '{$mb_id}' and pd_id != '' {$search}");
 }
 $total1=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 1");
 $total2=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 2");
+$total3=sql_fetch("select count(*) as cnt from `cart` where pd_id in ({$my_pd_ids}) and c_status = 0");
+$total4=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status = 0 and p.pd_type = 1");
+$total5=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status = 0 and p.pd_type = 2");
 
 $total = $total["cnt"];
 $wishtotal = $wish["cnt"];
 $total1 = $total1["cnt"];
 $total2 = $total2["cnt"];
+$total3 = $total3['cnt'];
+$total4 = $total4['cnt'];
+$total5 = $total5['cnt'];
 
 $sql = "select * from `product` where mb_id = '{$mb_id}' and pd_type = 1 order by pd_date desc";
 $res = sql_query($sql);
@@ -58,6 +80,8 @@ while($row = sql_fetch_array($res)){
     $list[] = $row;
 }
 
+$addr = explode(" ",$mb["mb_addr1"]);
+$mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
 ?>
     <div id="id03" class="w3-modal w3-animate-opacity no-view">
         <div class="w3-modal-content w3-card-4">
@@ -139,10 +163,11 @@ while($row = sql_fetch_array($res)){
 				<?php }?>
 				</div>
                 <?php } ?>
-				<?php echo $mb["mb_id"]; if($mb["mb_level"] == 4){ echo "<span>기업회원</span>";}?></h4>
-				<p><img src="" alt=""><?php echo ($mb["mb_hp"])?$mb["mb_hp"]:"전화번호 정보가 없습니다.";?></p>
-				<p><img src="" alt=""><?php echo ($mb["mb_email"])?$mb["mb_email"]:"이메일정보가 없습니다.";?></p>
-				<p><img src="" alt=""><?php echo ($mb["mb_addr1"])?$mb["mb_addr1"]:"등록된 주소가 없습니다.";?></p>
+				<?php echo $mb["mb_nick"]; if($mb["mb_level"] == 4){ echo "<span>기업회원</span>";}?></h4>
+                <p><img src="" alt=""><?php if($settings["hp_set"]==0 && count($settings) > 0){echo "비공개";}else{echo ($mb["mb_hp"])?$mb["mb_hp"]:"전화번호 정보가 없습니다.";}?></p>
+				<!--<p><img src="" alt=""><?php /*echo ($mb["mb_email"])?$mb["mb_email"]:"이메일정보가 없습니다.";*/?></p>-->
+				<p><img src="" alt="">가입일 : <?php echo $mb["mb_datetime"];?></p>
+				<p><img src="" alt=""><?php echo ($mb["mb_addr1"])?$mb_address:"등록된 주소가 없습니다.";?></p>
 			</div>
 		</div>
 		<div class="bg"></div>
@@ -156,7 +181,7 @@ while($row = sql_fetch_array($res)){
             </li>
             <li class="myprofile <?php if($type==2){echo 'active';}?>">
                 <div>거래진행중</div>
-                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_orders.svg" alt=""><?php echo number_format($totalorder);?></h2>
+                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_orders.svg" alt=""><?php echo number_format($total3);?></h2>
             </li>
             <li class="myprofile <?php if($type==3){echo 'active';}?>">
                 <div>관심상품</div>
@@ -288,9 +313,6 @@ while($row = sql_fetch_array($res)){
             </div>
         </article>
     </section>
-	<div>
-		
-	</div>
 </div>
 <script>
 var type1 = "";
@@ -337,13 +359,16 @@ $(document).ready(function(){
                 $(".sub_ul").css("display","inline-block");
                 $(".sub_ul li").removeClass("active");
                 $(".sub_ul #mul").addClass("active");
+                if(type1 == 2){
+                    $(".sub_ul #mul div label").html("<?php echo $total4;?>");
+                    $(".sub_ul #avil label").html("<?php echo $total5;?>");
+                }
             }
             fnlist2(1,type1,1,"<?php echo $mb_id;?>");
         }
     });
 
     $(".sub_ul li").click(function(){
-        console.log(type1);
         if(!$(this).hasClass("active")){
             $(this).addClass("active");
             $(".sub_ul li").not($(this)).removeClass("active");

@@ -21,6 +21,7 @@ for($i=0;$i<count($parent);$i++) {
     <?php
     }
     ?>
+        <li onclick="fnsuggestion2('<?php echo $parent[$i]['parent_ca_id'];?>');">제안하기</li>
     </ul>
     <?php
 }

@@ -15,7 +15,7 @@ while($row = sql_fetch_array($res)){
     <div class="sub_back" onclick="location.href=g5_url"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2>대화목록</h2>
 </div>
-<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 38vw);overflow-y:scroll">
+<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 30vw);overflow-y:scroll">
     <div class="talk_list">
     <?php for($i=0;$i<count($my_talk);$i++){
     $img = explode(",",$my_talk[$i]["pd_images"]);
