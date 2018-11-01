@@ -3,119 +3,75 @@ include_once("../../../common.php");
 //검색 기본값
 $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
 
-//검색 정렬 기본값
-if($_SESSION["list_basic_order"]=="location"){
-    $od = " order by ISNULL(p.pd_lat) asc,  distance asc, p.pd_update desc, p.pd_date desc";
-}else {
-    $od = " order by p.pd_update desc, p.pd_date desc";
+if($set_type){
+    $search .= " and p.pd_type = {$set_type}";
 }
-
-if($schopt){
-
-    $stx = $schopt["sc_tag"];
-
-    $search .= " and ( p.pd_name like '%{$stx}%' or p.pd_tag like '%{$stx}%' or p.pd_content like '%{$stx}%')";
-
-    $type1 = $schopt["sc_type"];
-    $type2 = $schopt["sc_type2"];
-    $cate1 = $schopt["sc_cate1"];
-    $cate2 = $schopt["sc_cate2"];
-
-    if($type1){
-        $search .= " and p.pd_type = '{$type1}' ";
-    }
-    if($type2){
-        $search .= " and p.pd_type2 = '{$type2}' ";
-    }
-    if($cate1){
-        $search .= " and p.pd_cate = '{$cate1}' ";
-    }
-    if($cate2){
-        $search .= " and p.pd_cate2 = '{$cate2}' ";
-    }
-
-    $priceFrom = $schopt["sc_priceFrom"];
-    $priceTo = $schopt["sc_priceTo"];
-
-    if($priceFrom!=0 && $priceTo!=0) {
-        $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
-    }
-
-    $align = $schopt["sc_align"];
-    $aligns = explode(",", $align);
-    //정렬 초기화
-
-    if($align !=""){
-        $od = " order by ";
-        for ($i = 0; $i < count($aligns); $i++) {
-            switch ($aligns[$i]) {
-                case "pd_date":
-                    $align_active[$i] = $schopt["sc_od_date"];
-                    if($schopt["sc_od_date"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_date desc";
-                        }else {
-                            $od .= " , p.pd_date desc";
-                        }
-                    }
-                    break;
-                case "pd_price":
-                    $align_active[$i] = $schopt["sc_od_price"];
-                    if($schopt["sc_od_price"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_price desc";
-                        }else {
-                            $od .= " , p.pd_price desc";
-                        }
-                    }
-                    break;
-                case "pd_recom":
-                    $align_active[$i] = $schopt["sc_od_recom"];
-                    if($schopt["sc_od_recom"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_recom desc";
-                        }else {
-                            $od .= " , p.pd_recom desc";
-                        }
-                    }
-                    break;
-                case "pd_hit":
-                    $align_active[$i] = $schopt["sc_od_hit"];
-                    if($schopt["sc_od_hit"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_hits desc";
-                        }else {
-                            $od .= " , p.pd_hits desc";
-                        }
-                    }
-                    break;
-                case "pd_loc":
-                    $align_active[$i] = $schopt["sc_od_loc"];
-                    if($_SESSION["lat"] && $_SESSION["lng"]){
-                        if($schopt["sc_od_loc"]==1){
-                            if($od==" order by "){
-                                $od .= " distance desc";
-                            }else {
-                                $od .= " , distance desc";
-                            }
-                        }
-                    }
-                    break;
+if($type2){
+    $search .= " and p.pd_type2 = {$type2}";
+}
+if($stx){
+    $search .= " and (p.pd_name like '%{$stx}%' or p.pd_tag like '%{$stx}%' or p.pd_cate like '%{$stx}%' or p.pd_cate2 like '%{$stx}%')";
+}
+if($cate){
+    $search .= " and p.pd_cate = '{$cate}'";
+}
+if($cate2){
+    $search .= " and p.pd_cate2 = '{$cate2}'";
+}
+if($priceFrom && $priceTo){
+    $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
+}
+if($order_sort){
+    $order_sorts = explode(",",$order_sort);
+    $actives = explode(",",$order_sort_active);
+    for($i=0;$i<count($order_sorts);$i++){
+        if($order_sorts[$i]=="pd_date"){
+            if($actives[$i] == 1){
+                $checked = "checked";
             }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked.'>'.
+                '<span class="round">최신순</span></label>';
         }
-        $actives = implode(",", $align_active);
-    }
-}else{
-    if($_SESSION["type1"]==1 || $_SESSION["type1"] == ""){
-        $type1 = 1;
-        $search .= " and p.pd_type = 1";
-    }else if($_SESSION["type1"]==2){
-        $search .= " and p.pd_type = 2";
+        if($order_sorts[$i]=="pd_price"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked.'>'.
+                '<span class="round">가격순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_recom"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked.'>'.
+                '<span class="round">추천순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_hits"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
+                        '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked.'>'.
+                        '<span class="round">인기순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_loc"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
+                        '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked.'>'.
+                        '<span class="round">거리순</span></label>';
+        }
     }
 }
 
 if($_SESSION["lat"] && $_SESSION["lng"]){
     $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
+}else if($member["mb_1"] && $member["mb_1"]){
+    $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$member["mb_1"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$member["mb_2"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$member["mb_1"]}))), SQRT(1 - POW(SIN(RADIANS({$member["mb_1"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$member["mb_2"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$member["mb_1"]})))) AS distance";
 }
 
 $total=sql_fetch("select count(*) as cnt from `product` where {$search} ");
@@ -134,7 +90,6 @@ if($member["mb_id"]){
     $search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$ss_id}') ";
 }
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
-$iada = $sql;
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $pro[] = $row;
@@ -142,110 +97,145 @@ while($row = sql_fetch_array($res)){
 include_once(G5_MOBILE_PATH."/head.map.php");
 
 ?>
-<div class="wrap">
-    <div class="current" onclick="fnReset();">
-        <img src="<?php echo G5_IMG_URL?>/ic_current_map.svg" alt="">
-    </div>
-	<div id="map" style=""></div>
-    <?php if($stx){?>
-    <div id="container" >
-        <section class="main_list">
-            <article class="post" id="post">
-                <div class="list_item grid are-images-unloaded" id="test">
-                    <div class="grid__item type_list <?php if($flag){echo "wishedon";}?>" id="list_<?php echo $list[$i]['pd_id'];?>">
-                        <?php echo $sqls;?>
-                        <div>
-                            <?php if($list[$i]["pd_images"]!=""){
-                                $img = explode(",",$list[$i]["pd_images"]);
-                                $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
-                                if(is_file(G5_DATA_PATH."/product/".$img1)){
-                                    ?>
-                                    <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
-                                        <?php if($img1!=""){?>
-                                            <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
-                                        <?php }else{ ?>
-                                            <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="" class="main" style="opacity:0">
-                                        <?php }?>
-                                    </div>
-                                <?php }else{
-                                    $tags = explode("/",$list[$i]["pd_tag"]);
-                                    $rand = rand(1,13);
-                                    ?>
-                                    <div class="bg rand_bg<?php echo $rand;?> item_images" >
-                                        <?php echo $search;?>
-                                        <div class="tags">
-                                            <?php echo "<br><br><br><br><br><br><br>".$align;?>
-
-                                            <?php for($k=0;$k<count($tags);$k++){
-                                                $rand_font = rand(3,6);
-                                                ?>
-                                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                                            <?php }?>
-                                        </div>
-                                        <div class="clear"></div>
-                                    </div>
-                                <?php }?>
+<style>
+    #map{margin-top: 20vw;height: calc(100vh - 35vw);}
+    #map .wrap{width:26vw;background: #fff;padding: 10px;border-radius: 10px;top:0px;left: -16vw;-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);}
+    #map .wrap .close{position:absolute;top:1vw;right:1vw;width:4vw;height:4vw;}
+    #map .wrap .info{width:100%;font-size: 3vw;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;padding: 3vw 0 0 0;}
+    #map .wrap .info p{padding-top:2vw;font-weight:bold;font-size:4vw;text-align:center;}
+    #map .wrap .button_area{width:100%;text-align:center;padding-top:3vw;}
+    #map .wrap .button_area input{padding:1vw;font-size:3vw;border:none;-webkit-border-radius:5vw;-moz-border-radius:5vw;border-radius:5vw;background-color:#ffe700;color:#000;width:calc(100% - 2vw)}
+    #map_list{position:absolute;bottom:0;display:none;width:100%;height:32vh;left:0;z-index:10;overflow:hidden;}
+    #map_list ul{overflow-y:scroll;height:100%;}
+    #map_list li.item{position:relative;clear:both;padding:1px;width:calc(100% - 2px);-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);margin-bottom: 1vw;display: inline-block;overflow: hidden}
+    #map_list li.item .item_images{width:35vw;height:26vw;float:left}
+    #map_list li.item .info{float: left;width: calc(65vw - 2px);position: relative;height:26vw;}
+    #map_list li.item .info .top{background: #eee;position: absolute;top: 0;width: 100%;height: 6vw;}
+    #map_list li.item .info .top h2{font-size: 4vw;position: absolute;left: 1vw;top: 1vw;color: #565656;}
+    #map_list li.item .info .top div{position: relative;text-align: right;height: 100%;}
+    #map_list li.item .info .top div ul{width: 50vw;text-align: right;right: 0;position: absolute;top: 1px;}
+    #map_list li.item .info .top div ul li{font-size: 2vw;float: right;font-size:3vw;margin:0 1vw;line-height:6vw;color:#565656}
+    #map_list li.item .info .top div ul li img{width:4.4vw;margin-top:-1vw}
+    #map_list li.item .info .bottom{position: absolute;bottom: 0;height: calc(26vw - 7vw);}
+    #map_list li.item .info .bottom h2{font-size: 4vw;padding: 1vw 2vw;word-break: keep-all}
+    #map_list li.item .info .bottom .price{font-size:4.3vw;width:100%;text-align:right;}
+</style>
+<div class="wrap" style="height:calc(100vh - 35vw);">
+    <?php if($stx || $searchActive == "search"){?>
+        <div id="map_list" style="display:block;">
+            <ul>
+                <?php for($i=0;$i<count($pro);$i++){
+                    if($pro[$i]["distance"] == 0 ){
+                        $dist = "정보없음";
+                    }else {
+                        $dist = round($pro[$i]["distance"],1) . "km";
+                    }
+                    if($pro[$i]["pd_date"]) {
+                        $loc_data = $pro[$i]["pd_date"];
+                        if($pro[$i]["pd_update"]){
+                            $loc_data = $pro[$i]["pd_update"];
+                        }
+                        $now = date("Y-m-d H:i:s");
+                        $time_gep = round((strtotime($now) - strtotime($loc_data)) / 3600);
+                        if($time_gep == 0){
+                            $time_gep = "몇 분전";
+                        }else if($time_gep < 24){
+                            $time_gep = $time_gep."시간 전";
+                        }else if($time_gep > 24){
+                            $time_gep = round($time_gep / 24)."일 전";
+                        }
+                    }else{
+                        $time_gep = "정보 없음";
+                    }?>
+                    <li onclick="mapCenter('<?php echo $i;?>')" class="item">
+                        <?php if($pro[$i]["pd_images"]!=""){
+                            $img = explode(",",$pro[$i]["pd_images"]);
+                            $img[0] = trim($img[0]);
+                            $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
+                            if(is_file(G5_DATA_PATH."/product/".$img1)){
+                                ?>
+                                <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;min-height: 26vw;">
+                                    <?php if($img1!=""){?>
+                                        <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
+                                    <?php }else{ ?>
+                                        <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="" class="main" style="opacity:0">
+                                    <?php }?>
+                                </div>
                             <?php }else{
-                                $tags = explode("/",$list[$i]["pd_tag"]);
+                                $tags = explode("#",$pro[$i]["pd_tag"]);
                                 $rand = rand(1,13);
                                 ?>
                                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
                                     <div class="tags">
                                         <?php for($k=0;$k<count($tags);$k++){
                                             $rand_font = rand(3,6);
-                                            ?>
-                                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                                        <?php }?>
+                                            if($tags[$k]!=""){
+                                                ?>
+                                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
+                                            <?php } }?>
                                     </div>
                                     <div class="clear"></div>
                                 </div>
                             <?php }?>
+                        <?php }else{
+                            $tags = explode("#",$pro[$i]["pd_tag"]);
+                            $rand = rand(1,13);
+                            ?>
+                            <div class="bg rand_bg<?php echo $rand;?> item_images" >
+                                <div class="tags">
+                                    <?php for($k=0;$k<count($tags);$k++){
+                                        $rand_font = rand(3,6);
+                                        if($tags[$k]!=""){
+                                            ?>
+                                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
+                                        <?php } }?>
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                        <?php }?>
+                        <div class="info">
+                            <?php if($pro[$i]["pd_name"]) {
+                                switch ($pro[$i]["pd_type2"]) {
+                                    case "4":
+                                        $pt2 = "[삽니다]";
+                                        break;
+                                    case "8":
+                                        $pt2 = "[팝니다]";
+                                        break;
+                                }
+                            }
+                            ?>
                             <div class="top">
+                                <h2><?php echo ($pro[$i]["mb_level"]==4)?"전":"　";?></h2>
                                 <div>
-                                    <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
-                                    <div>
-                                        <ul>
-                                            <li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($list_type == "true"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
-                                            <?php if($chkMobile){?>
-                                                <li><img src="<?php echo G5_IMG_URL?>/ic_loc<?php if($list_type == "true"){echo "_list";}?>.svg" alt=""><?php echo $dist;?></li>
-                                            <?php }?>
-                                        </ul>
-                                    </div>
+                                    <ul>
+                                        <?php if($app || $pro[$i]["distance"]){?>
+                                        <li><img src="<?php echo G5_IMG_URL?>/ic_loc_list.svg" alt=""><?php echo $dist;?></li>
+                                        <?php }?>
+                                        <li><img src="<?php echo G5_IMG_URL?>/ic_hit_list.svg" alt=""> <?php echo $pro[$i]["pd_hits"];?></li>
+                                        <li><?php echo $time_gep;?></li>
+                                    </ul>
+                                    <div class="clear"></div>
                                 </div>
                             </div>
                             <div class="bottom">
-                                <?php if($list[$i]["pd_name"]){
-                                    switch($list[$i]["pd_type2"]){
-                                        case "4":
-                                            $pt2 = "[삽니다]";
-                                            break;
-                                        case "8":
-                                            $pt2 = "[팝니다]";
-                                            break;
-                                    }
-                                    ?>
-                                    <h2><?php echo $pt2." ".$list[$i]["pd_name"];?></h2>
-                                <?php }?>
-                                <div>
-                                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
-                                    <?php
-                                    if($flag){?>
-
-                                        <img src="<?php echo G5_IMG_URL?>/ic_wish_on.svg" alt="" class="wished" >
-                                    <?php }else{ ?>
-                                        <img src="<?php echo G5_IMG_URL?>/ic_wish.svg" alt="" class="wished" >
-                                    <?php }?>
+                                <h2><?php echo $pt2. " " . $pro[$i]["pd_name"];?></h2>
+                                <div class="price">
+                                    <?php echo number_format($pro[$i]["pd_price"]);?> 원
                                 </div>
                             </div>
-
                         </div>
-                    </div>
-
-                </div>
-            </article>
-        </section>
-    </div>
+                    </li>
+                <?php }?>
+            </ul>
+        </div>
     <?php }?>
+	<div id="map" style="width:100%;<?php if($stx || $searchActive == "search"){?>height:calc(100vh - 35vw - 32vh);<?php }?>">
+        <div class="current" onclick="fnReset();" >
+            <img src="<?php echo G5_IMG_URL?>/ic_current_map.svg" alt="">
+        </div>
+    </div>
+
 </div>
 <script>
 var lat='33.450701',lng='126.570667';
@@ -284,8 +274,8 @@ map = new daum.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
 //        addrs[<?php //echo $i;?>//] = "<?php //echo $pro[$i]["pd_location"];?>//";
 //    <?php //}?>
 //    setLatLng(addrs);
-
 if(lat && lng) {
+    <?php if(count($pro) > 0) {?>
     // 마커를 표시할 위치와 title 객체 배열입니다
     var positions = [
         <?php for($i=0;$i<count($pro);$i++){
@@ -293,6 +283,7 @@ if(lat && lng) {
             ?>
         {
             title: "<?php echo $pro[$i]["pd_name"];?>",
+            price: "<?php echo $pro[$i]["pd_price"];?>",
             latlng: new daum.maps.LatLng(<?php echo $pro[$i]["pd_lat"];?>,<?php echo $pro[$i]["pd_lng"];?>),
             image: "<?php echo $imgs[0];?>",
             pd_id : "<?php echo $pro[$i]["pd_id"];?>"
@@ -303,6 +294,14 @@ if(lat && lng) {
             latlng: new daum.maps.LatLng(lat, lng)
         }
     ];
+    <?php }else {?>
+    var positions = [
+        {
+            title: '현재위치',
+            latlng: new daum.maps.LatLng(lat, lng)
+        }
+    ];
+    <?php }?>
 }else{
     var positions = [
         {
@@ -328,7 +327,9 @@ if(lat && lng) {
 var imageSrc = "<?php echo G5_IMG_URL?>/view_pin.svg";
 var imageSrc2 = "<?php echo G5_IMG_URL?>/ic_current_map.svg";
 var overlay = [];
+var markers = [];
 var i = 0;
+var bounds = new daum.maps.LatLngBounds();
 positions.forEach(function(pos){
     // 마커 이미지의 이미지 크기 입니다
     var imageSize = new daum.maps.Size(30, 42);
@@ -340,6 +341,7 @@ positions.forEach(function(pos){
         markerImage = new daum.maps.MarkerImage(imageSrc, imageSize);
     }
 
+
     var marker = new daum.maps.Marker({
         map: map, // 마커를 표시할 지도
         position: pos.latlng, // 마커를 표시할 위치
@@ -347,31 +349,56 @@ positions.forEach(function(pos){
         image: markerImage // 마커 이미지
     });
 
+
     if(pos.title!="현재위치") {
+        bounds.extend(pos.latlng);
+
         var back = "";
         if (pos.image != "") {
             var img = pos.image;
-            back = "background-image:url(" + g5_url + "/data/product/" + img + ");background-size:cover;background-position:center;background-repeat:no-repeat;";
+            back = "background-image:url(" + g5_url + "/data/product/" + img + ");background-size:contain;background-position:center;background-repeat:no-repeat;";
         } else {
             back = "background-color:#efeea1;";
         }
 
-        var content = '<div class="wrap" onclick="closeOverlay('+i+');">' +
-            '<div style="width:30vw;height:30vw;min-wdith:30vw;min-height:30vw;max-width:30vw;max-height:30vw;' + back + '"></div>' +
-            '<div class="info">' + pos.title + '</div>' +
+        var price = ""
+        if(pos.price != 0){
+            price = pos.price + " 원";
+        }else{
+            price = "가격 제시"
+        }
+        
+        var content = '<div class="wrap">' +
+            '<div class="close" onclick="closeOverlay('+i+');"><img src="'+g5_url+'/img/ic_close_b.png" alt=""></div>' +
+            '<div class="img" style="width:100%;height:20vw;min-height:20vw;max-width:100%;max-height:20vw;' + back + '"></div>' +
+            '<div class="info">' + pos.title + '<p class="price">'+price+'</p></div>' +
+            '<div class="button_area"><input type="button" value="바로가기" onclick="fn_viewer(\''+pos.pd_id+'\')"></div>' +
             '</div>';
-        overlay[i] = new daum.maps.CustomOverlay({
-            position:pos.latlng
+        var overlays = new daum.maps.CustomOverlay({
+            position:pos.latlng,
+            map:map,
+            content:content,
+            xAnchor:0,
+            yAnchor:1.2
         });
 
-        overlay[i].setContent(content);
-        overlay[i].setMap(map);
+        markers.push(pos.latlng);
+        overlay.push(overlays);
+
+        daum.maps.event.addListener(marker,'click',function(){
+            overlays.setMap(map);
+        });
     }
+
+    <?php if(count($pro) == 0){?>
+    bounds.extend(pos.latlng);
+    <?php }?>
+
+    map.setBounds(bounds);
     i++;
 });
 
 function closeOverlay(num){
-    console.log(num);
     if(num!=null || num!='') {
         overlay[num].setMap(null);
     }else{
@@ -381,94 +408,10 @@ function closeOverlay(num){
     }
 }
 
-$(function(){
-    closeOverlay('');
-})
-    // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
-    /*function makeOverListener(map, marker, infowindow) {
-        return function() {
-            infowindow.close();
-            infowindow.open(map, marker);
-        };
-    }*/
-
-
-
-/*
-function getCoordsForEachAddr (data, bunchSize, oncomplete) {
-
-    var geocoder = new daum.maps.services.Geocoder();
-    var tryCount = 0;
-    var doneCount = 0;
-    var totalSize = data.length;
-    var coordArray = [];
-
-    function indexedCallback (index) {
-
-        return function (status, result) {
-
-            doneCount++;
-
-            if (status === daum.maps.services.Status.OK) {
-
-                var addr = result.addr[0];
-
-                coordArray[index] = {
-                    'lat': addr.lat,
-                    'lng': addr.lng
-                };
-
-            } else {
-
-                coordArray[index] = null;
-            }
-
-            if (doneCount === totalSize) {
-
-                oncomplete(coordArray);
-
-            } else if (doneCount === tryCount * bunchSize) {
-
-                doRequest();
-            }
-        };
-    }
-
-    function doRequest () {
-
-        var i = doneCount,
-            len = Math.min(totalSize, i + bunchSize);
-
-        tryCount++;
-
-        for (; i < len; i++) {
-            geocoder.addr2coord(data[i], indexedCallback(i));
-        }
-    }
-
-    doRequest();
+function mapCenter(num){
+    map.setCenter(markers[num]);
 }
 
-function setLatLng (addrs) {
-
-    getCoordsForEachAddr(addrs, 500, function(data) {
-
-        data.forEach(function(coord, i) {
-
-            if (!coord) {
-
-                return;
-            }
-
-            new daum.maps.Marker({
-                map: map,
-                title: addrs[i],
-                position: new daum.maps.LatLng(coord.lat, coord.lng)
-            });
-        });
-    });
-}
-*/
 function fnReset(){
     var latlng = window.android.getLocation();
     var locs = latlng.split("/");
@@ -479,6 +422,16 @@ function fnReset(){
     // 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동합니다
     map.panTo(moveLatLon);
 }
+
+$(".category ul > li").click(function(){
+    $(this).addClass("active");
+    $(".category ul li").not($(this)).removeClass("active");
+    var id = $(this).attr("id");
+    $("."+id).addClass("active");
+    $(".category2 ul").not($("."+id)).removeClass("active");
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
+});
 
 </script>
 <?php 

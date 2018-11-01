@@ -25,7 +25,7 @@ if($member["mb_id"]){
     $mb_id = session_id();
 }
 
-if($stx && $set == "simple"){
+if($stx){
 
     $filter = explode(",",$config["cf_filter"]);
 
@@ -37,31 +37,11 @@ if($stx && $set == "simple"){
             return false;
         }
     }
+
     //검색어 업데이트
     $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), ".$_SERVER["REMOTE_ADDR"].")";
     sql_query($sql);
 
-    //검색목록 저장 or 업데이트
-    if(!$set_sc_id) {
-        $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='', sc_cate1 = '', sc_cate2 = '', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now()";
-        sql_query($sql);
-        $sc_id = sql_insert_id();
-        $sql = "select * from `my_search_list` where sc_id = '{$sc_id}'";
-        $schopt = sql_fetch($sql);
-    }else{
-        $sql = "select * from `my_search_list` where sc_id = '{$set_sc_id}'";
-        $schopt = sql_fetch($sql);
-        if($stx != $schopt["sc_tag"]){
-            $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='', sc_cate1 = '', sc_cate2 = '', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now()";
-            sql_query($sql);
-            $sc_id = sql_insert_id();
-            $sql = "select * from `my_search_list` where sc_id = '{$sc_id}'";
-            $schopt = sql_fetch($sql);
-        }else {
-            $sql = "update `my_search_list` set sc_datetime = now() where sc_id = '{$set_sc_id}'";
-            sql_query($sql);
-        }
-    }
 }
 
 if($lat && $lng && $is_member){
@@ -69,89 +49,13 @@ if($lat && $lng && $is_member){
     sql_query($sql);
 }
 
-if($schopt) {
-
-    if($schopt["sc_type"]!=""){
-        $_SESSION["type1"] = $schopt["sc_type"];
-    }
-
-    if($schopt["sc_align"]!="") {
-        $order = explode(",", $schopt["sc_align"]);
-        $order_disabled = explode(",", $schopt["sc_align_disabled"]);
-        for ($i = 0; $i < count($order); $i++) {
-            if ($order[$i] == "pd_date") {
-                if($schopt["sc_od_date"] == 1) {
-                    $sortActive[$i] = 1;
-                    $orderlabel[$i] = '<label class=align for=pd_date><input type=checkbox name=orders[] value=pd_date id=pd_date checked><span class=round>최신순</span></label>';
-                }else{
-                    $sortActive[$i] = 0;
-                    $orderlabel[$i] = '<label class=align for=pd_date><input type=checkbox name=orders[] value=pd_date id=pd_date ><span class=round>최신순</span></label>';
-                }
-            }
-            if ($order[$i] == "pd_price") {
-                if($schopt["sc_od_price"] == 1) {
-                    $sortActive[$i] = 1;
-                    $orderlabel[$i] = '<label class=align for=pd_price><input type=checkbox name=orders[] value=pd_price id=pd_price checked><span class=round>가격순</span></label>';
-                }else{
-                    $sortActive[$i] = 0;
-                    $orderlabel[$i] = '<label class=align for=pd_price><input type=checkbox name=orders[] value=pd_price id=pd_price><span class=round>가격순</span></label>';
-                }
-            }
-            if ($order[$i] == "pd_recom") {
-                if($schopt["sc_od_recom"] == 1) {
-                    $sortActive[$i] = 1;
-                    $orderlabel[$i] = '<label class=align for=pd_recom><input type=checkbox name=orders[] value=pd_recom id=pd_recom checked><span class=round>추천순</span></label>';
-                }else{
-                    $sortActive[$i] = 0;
-                    $orderlabel[$i] = '<label class=align for=pd_recom><input type=checkbox name=orders[] value=pd_recom id=pd_recom ><span class=round>추천순</span></label>';
-                }
-            }
-            if ($order[$i] == "pd_hit") {
-                if($schopt["sc_od_hit"] == 1) {
-                    $sortActive[$i] = 1;
-                    $orderlabel[$i] = '<label class=align for=pd_hit><input type=checkbox name=orders[] value=pd_hit id=pd_hit checked><span class=round>조회순</span></label>';
-                }else{
-                    $sortActive[$i] = 0;
-                    $orderlabel[$i] = '<label class=align for=pd_hit><input type=checkbox name=orders[] value=pd_hit id=pd_hit ><span class=round>조회순</span></label>';
-                }
-            }
-            if ($order[$i] == "pd_loc") {
-                if($schopt["sc_od_loc"] == 1) {
-                    $sortActive[$i] = 1;
-                    $orderlabel[$i] = '<label class=align for=pd_loc><input type=checkbox name=orders[] value=pd_loc id=pd_loc checked><span class=round>거리순</span></label>';
-                }else{
-                    $sortActive[$i] = 0;
-                    $orderlabel[$i] = '<label class=align for=pd_loc><input type=checkbox name=orders[] value=pd_loc id=pd_loc ><span class=round>거리순</span></label>';
-                }
-            }
-        }
-
-        $order_sort_active = implode(",", $sortActive);
-    }
-}
-
-//글등록시
-if($schopt["sc_type"]==2){
-    $sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1 order by cate_order";
-}else {
-    $sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1 order by cate_order";
-}
+$sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1 order by cate_order";
 
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $category1[] = $row;
 }
-if($schopt["sc_cate1"] && $schopt["sc_cate2"]){
-    $sql = "select ca_id from `categorys` where `cate_name` = '{$schopt[sc_cate1]}' and `cate_depth` = 1 ";
-    $ca_id = sql_fetch($sql);
-    $sql = "select * from `categorys` where `cate_type` = '{$schopt[sc_type]}' and `cate_depth` = 2 and parent_ca_id = '{$ca_id[ca_id]}'";
-    $res = sql_query($sql);
-    while($row = sql_fetch_array($res)){
-        $set_cate2[] = $row;
-    }
-}
 
-//글등록시
 $sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1 order by cate_order";
 
 $res = sql_query($sql);
@@ -164,13 +68,6 @@ $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $help[] = $row;
 }
-
-//새알림
-$start = date("Y-m-d");
-$end = date("Y-m-d", strtotime("-3 month"));
-$sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}'";
-$alarms = sql_fetch($sql);
-
 ?>
 <div id="id01s" class="w3-modal w3-animate-opacity">
     <div class="w3-modal-content w3-card-4">
@@ -318,23 +215,20 @@ $alarms = sql_fetch($sql);
             dot:false
         });
     </script>
+    <form action="./" method="get" name="simplesearch" id="simplesearch" >
     <header id="mobile_header">
         <!-- <h1><a href="<?php echo G5_URL; ?>" title="HOME" class="logos"><i></i></a></h1> -->
         <div class="search">
-            <form action="./" method="get" name="simplesearch" id="simplesearch" >
                 <input type="text" style="display:none;">
-                <input type="hidden" value="simple" name="set" id="set">
-                <input type="hidden" name="set_type" id="set_type" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>">
-                <input type="hidden" name="set_sc_id" id="set_sc_id" value="<?php echo $sc_id;?>" >
+                <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 1;}?>">
                 <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
-                <input type="text" name="stx" id="stx" value="<?php echo $schopt["sch_tag"];?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
+                <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
                 <label class="switch schtype" >
-                    <input type="checkbox" id="type1" name="type1" <?php if($schopt["sc_type"]=="2" || $_SESSION["type1"]=="2"){?>checked<?php }?> >
-                    <span class="slider round" <?php if($schopt["sc_type"]=="2"){?>style="text-align:left"<?php }else{ if($_SESSION["type1"]=="2"){ ?>style="text-align:left"<?php } }?>>
-                        <?php if($schopt["sc_type"]=="2" || $_SESSION["type1"]=="2"){?>능력<?php }else{ ?>물건<?php }?>
+                    <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"){?>checked<?php }?> >
+                    <span class="slider round" <?php if($set_type=="2"){?>style="text-align:left"<?php }?>>
+                        <?php if($set_type=="2"){?>능력<?php }else{ ?>물건<?php }?>
                     </span>
                 </label>
-            </form>
         </div>
         <a href="javascript:" id="mobile_menu_btn" class="mobile_menu_btn" title="MENU"><i></i></a>
         <a href="javascript:fnSetting();" id="mobile_setting_btn" title="SETTING"><i></i></a>
@@ -349,55 +243,33 @@ $alarms = sql_fetch($sql);
         </ul>
     </div>
     <div class="search_setting">
-        <form action="<?php echo G5_URL?>/mobile/page/savesearch/save_search.php" method="post" name="savesch" id="savesch" >
-            <input type="hidden" name="sc_id" id="sc_id" value="<?php echo $sc_id;?>" >
-            <input type="hidden" name="set_type" id="set_type2" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" >
-            <input type="hidden" value="<?php if($schopt["sc_priceFrom"]!=""){echo $schopt['sc_priceFrom'];}?>" id="sc_priceFrom" name="priceFrom">
-            <input type="hidden" value="<?php if($schopt["sc_priceTo"]!=""){echo $schopt['sc_priceTo'];}?>" id="sc_priceTo" name="priceTo">
-            <input type="hidden" value="<?php if($schopt["sc_tag"]!=""){echo $schopt['sc_tag'];}?>" name="sch_text" id="sch_text" >
-            <input type="hidden" value="save" name="formtype" id="formtype">
-            <input type="hidden" value="N" name="saveAgree" id="saveAgree">
-            <input type="hidden" value="<?php echo $schopt["sc_align"];?>" name="order_sort" id="order_sort">
-            <input type="hidden" value="<?php echo $schopt["sc_align_disabled"];?>" name="un_order_sort" id="un_order_sort">
+            <input type="hidden" value="search" name="searchActive" >
+            <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
+            <input type="hidden" value="<?php echo $priceTo; ?>" id="sc_priceTo" name="priceTo">
+            <input type="hidden" value="<?php echo $order_sort;?>" name="order_sort" id="order_sort">
             <input type="hidden" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
-            <input type="hidden" value="<?php echo $_SESSION["list_type"];?>" name="set_list_type" id="set_list_type">
-            <input type="hidden" value="<?php echo $schopt["sc_cate1"];?>" name="cate" id="cate">
-            <input type="hidden" value="<?php echo $schopt["sc_cate2"];?>" name="cate2" id="cate2">
+            <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
+            <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
             <div class="sch_top">
-                <input type="button" value="카테고리 선택" class="sch_btn" onclick="fnwrite2();">
-                <!--<select name="cate" id="cate" class="sel_cate input01s" required >
-					<option value="">전체</option>
-					<?php /*for($i=0;$i<count($category1);$i++){ */?>
-					<option value="<?php /*echo $category1[$i]["cate_name"];*/?>" id="<?php /*echo $category1[$i]["ca_id"];*/?>" <?php /*if($schopt["sc_cate1"]!=""){if($schopt["sc_cate1"] == $category1[$i]["cate_name"]){*/?>selected<?php /*} }*/?>><?php /*echo $category1[$i]["cate_name"];*/?></option>
-					<?php /*} */?>
-				</select>
-				<select name="cate2" id="cate2" class="sel_cate input01s" required >
-					<option value="">전체</option>
-                    <?php /*if($sc_id && $schopt["sc_cate2"]!=""){
-                        for($i=0;$i<count($set_cate2);$i++){
-                        */?>
-                            <option value="<?php /*echo $set_cate2[$i]["cate_name"];*/?>" id="<?php /*echo $set_cate2[$i]["ca_id"];*/?>" <?php /*if($schopt["sc_cate2"]!=""){if($schopt["sc_cate2"] == $set_cate2[$i]["cate_name"]){*/?>selected<?php /*} }*/?>><?php /*echo $set_cate2[$i]["cate_name"];*/?></option>
-                    <?php /*} }*/?>
-				</select>-->
+                <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
                 <a href="javascript:fnsuggestion();">제안하기</a>
             </div>
             <div class="types sch_mid">
-                <p id="cates"><?php if($schopt["sc_cate1"] && $schopt["sc_cate2"]){?><span><?php echo $schopt['sc_cate1'];?></span> > <span><?php echo $schopt['sc_cate2'];?></span><?php }?></p>
                 <label class="radio_tag" for="four">
-                    <input type="radio" name="type2" id="four" value="8" <?php if($schopt["sc_type2"]=="8" || $schopt["sc_type2"] == ""){?>checked<?php  }?>>
+                    <input type="radio" name="type2" id="four" value="8" <?php if($type2=="8" || $type2 == ""){?>checked<?php  }?>>
                     <span class="slider2 round">팝니다</span>
                 </label>
                 <label class="radio_tag" for="eight">
-                    <input type="radio" name="type2" id="eight" value="4" <?php if($schopt["sc_type2"]=="4"){?>checked<?php } ?>>
+                    <input type="radio" name="type2" id="eight" value="4" <?php if($type2=="4"){?>checked<?php } ?>>
                     <span class="slider2 round">삽니다</span>
                 </label>
                 <label class="radio_tag" for="mb_level">
-                    <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($schopt["sc_level"]==4){?>checked<?php } ?>>
+                    <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($mb_level=="4"){?>checked<?php } ?>>
                     <span class="slider2 round">전문가</span>
                 </label>
             </div>
             <div class="sch_ord">
-                <?php if(count($order)==0 || $schopt["sc_align"] == ""){?>
+                <?php if(count($order_item)==0){?>
                     <label class="align" id="sortable" for="pd_date">
                         <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" checked>
                         <span class="round">최신순</span>
@@ -410,7 +282,7 @@ $alarms = sql_fetch($sql);
                         <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" checked>
                         <span class="round">추천순</span>
                     </label>
-                    <label class="align" id="sortable" for="pd_hit">
+                    <label class="align" id="sortable" for="pd_hits">
                         <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" checked>
                         <span class="round">인기순</span>
                     </label>
@@ -419,8 +291,8 @@ $alarms = sql_fetch($sql);
                         <span class="round">거리순</span>
                     </label>
                 <?php }else{
-                    for($i=0;$i<count($orderlabel);$i++){
-                        echo $orderlabel[$i];
+                    for($i=0;$i<count($order_item);$i++){
+                        echo $order_item[$i];
                     } }?>
             </div>
             <div class="clear"></div>
@@ -431,24 +303,20 @@ $alarms = sql_fetch($sql);
                 </div>
                 <div id="slider-range"></div>
             </div>
-            <!--<div class="sch_tags">
-                <p>카테고리를 선택해주세요.</p>
-            </div>-->
             <div class="sch_btn_group">
-                <!--<input type="button" value="제안하기" class="sch_btn btn_light" onclick="fnsuggestion();">	-->
-                <input type="button" value="현검색저장" class="sch_btn" onclick="fnSaveSch()">
-                <input type="button" value="검색" class="sch_btn" onclick="list_search();">
-                <input type="button" value="삽니다 간편등록" class="sch_btn sch_save_write" onClick="fnWrite();">
+                <input type="submit" value="검색" class="sch_btn" style="width:100%" >
             </div>
-            <div class="search_close" onclick="fnSetting2()">
+            <div class="search_close" onclick="fnSettingMap2()">
                 <img src="<?php echo G5_IMG_URL?>/search_close.png" alt="">
             </div>
             <div class="header_bg"></div>
-        </form>
-        <div class="no-list" style="display:">
+        <?php if(count($pro)==0){?>
+        <div class="no-list" style="display:block">
             <p>목록이 없습니다.</p>
         </div>
+        <?php } ?>
     </div>
+    </form>
     <div class="mobile_menu">
         <span></span>
         <div class="menu">
@@ -483,10 +351,12 @@ $alarms = sql_fetch($sql);
             <ul>
                 <li class="menu1"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
                 <li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/talk/talk.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
+                <li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/wish/wish.list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_wish.svg" alt="">위시리스트</a></li>
                 <li class="menu3"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/cart.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
                 <li class="menu4"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/order_history.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
                 <li class="menu6"><a href="<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
                 <li class="menu6"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=notice"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
+                <li class="menu6"><a href="<?php echo G5_BBS_URL?>/page/company/company.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_company.svg" alt="">회사소개</a></li>
                 <li class="menu7"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">도움말</a></li>
                 <li class="menu8"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/settings.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_settings.svg" alt="">설정</a>
                     <div class="sugg"><a href="javascript:fnsuggestion();">제안하기</a></div>
@@ -497,35 +367,6 @@ $alarms = sql_fetch($sql);
 			</div> -->
         </div>
     </div>
-    <div class="category_menu">
-        <div class="cate_header">
-            <img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt="" onclick="cateClose();">
-            <h2>카테고리 설정</h2>
-        </div>
-        <div class="category catetype1">
-            <ul>
-                <?php for($i=0;$i<count($category1);$i++){ ?>
-                    <li class="cate<?php echo $category1[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
-                <?php } ?>
-                <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
-            </ul>
-        </div>
-        <?php include_once(G5_MOBILE_PATH."/subcategory1.php"); ?>
-    </div>
-    <div class="category_menu2">
-        <div class="cate_header">
-            <img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt="" onclick="cateClose();">
-            <h2>카테고리 설정</h2>
-        </div>
-        <div class="category catetype2">
-            <ul>
-                <?php for($i=0;$i<count($category2);$i++){ ?>
-                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
-                <?php } ?>
-            </ul>
-        </div>
-        <?php include_once(G5_MOBILE_PATH."/subcategory2.php"); ?>
-    </div>
     <div class="category_menu3">
         <div class="cate_header">
             <img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt="" onclick="cateClose();">
@@ -533,8 +374,9 @@ $alarms = sql_fetch($sql);
         </div>
         <div class="category catetype1">
             <ul>
+                <li class="cate000 <?php if($i==0){?>active<?php } ?>" id="scate000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
                 <?php for($i=0;$i<count($category1);$i++){ ?>
-                    <li class="cate<?php echo $category1[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
+                    <li class="cate<?php echo $category1[$i]["ca_id"]; ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
                 <?php } ?>
                 <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
             </ul>
@@ -548,27 +390,13 @@ $alarms = sql_fetch($sql);
         </div>
         <div class="category catetype2">
             <ul>
+                <li class="cate0000 <?php if($i==0){?>active<?php } ?>" id="scate0000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
                 <?php for($i=0;$i<count($category2);$i++){ ?>
-                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
+                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
                 <?php } ?>
             </ul>
         </div>
         <?php include_once(G5_MOBILE_PATH."/subcategory4.php"); ?>
-    </div>
-    <div class="search_etc">
-        <div class="sort">
-            <div class="left">
-                <img src="" alt="">
-            </div>
-            <!--<div class="left">
-                <label class="switch del" for="delete">
-                    <input type="checkbox" id="delete" >
-                    <span class="slider round"></span>
-                </label>
-            </div>-->
-        </div>
-        <div class="sort_bg"></div>
-        <div class="clear"></div>
     </div>
 </div>
 <script>
@@ -595,10 +423,6 @@ $alarms = sql_fetch($sql);
     }
 
     function fnSimpleSearch(){
-        /*if($("#stx").val() == ""){
-         alert("검색어를 입력해주세요.");
-         return false;
-         }*/
         if ($("#set").val() == "2") {
             // 설정에서 검색어 체크
             $("#sch_text").val($("#stx").val());
@@ -617,6 +441,15 @@ $alarms = sql_fetch($sql);
     }
 
     $(function(){
+        <?php if(count($pro)==0){?>
+        $("#set").val(2);
+        location.hash = "#search";
+        $(".search_setting").attr("id","menuon");
+        $(".search_setting").css("top","20vw");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+        <?php } ?>
+
         $(".mobile_menu .menu .close ").click(function(){
             $(".mobile_menu").fadeOut(300,function(){
                 $(".mobile_menu").removeClass("active");
@@ -762,23 +595,26 @@ $alarms = sql_fetch($sql);
             var sc = $(this).find("a").text();
             var type = $("#type").val();
             var msg = '';
-            $.ajax({
-                url:g5_url+"/mobile/page/ajax/ajax.category_info.php",
-                method:"post",
-                data:{cate:c,type:type}
-            }).done(function(data){
-                msg = data;
-                //if(confirm(msg+ "\r\n해당 ")){
-                $("#type").val(type);
-                $("#cate").val(c);
-                $("#cate2").val(sc);
-
-                //$("#id01").css("display","block");
-                //$("html, body").css("overflow","hidden");
-                //$("html, body").css("height","100vh");
-                $("#cates").html("<span>"+c+"</span> > <span>"+sc+"</span>");
+            if(c=="전체" && sc == "전체"){
+                $("#cate").val('');
+                $("#cate2").val('');
+                $(".sch_top .sch_btn").val("카테고리선택");
                 cateClose();
-            });
+            }else {
+                $.ajax({
+                    url: g5_url + "/mobile/page/ajax/ajax.category_info.php",
+                    method: "post",
+                    data: {cate: c, type: type}
+                }).done(function (data) {
+                    msg = data;
+                    $("#type").val(type);
+                    $("#cate").val(c);
+                    $("#cate2").val(sc);
+
+                    $(".sch_top .sch_btn").val(c + " > " + sc);
+                    cateClose();
+                });
+            }
         });
 
         $(".radio_tag").click(function(){
@@ -960,14 +796,7 @@ $alarms = sql_fetch($sql);
             alert("검색어를 입력해 주세요");
             return false;
         }
-        /*if($("#cate").val() == ""){
-         alert("1차 카테고리를 선택해 주세요.");
-         return false;
-         }
-         if($("#cate2").val() == ""){
-         alert("2차 카테고리를 선택해 주세요.");
-         return false;
-         }*/
+
         $(".search_setting").attr("id","");
         $(".search_setting").css("top","-100vh");
         $("#id05").css("display","block");
@@ -993,14 +822,7 @@ $alarms = sql_fetch($sql);
             alert("검색어를 입력해주세요.");
             return false;
         }
-        /*if($("#cate").val() == ""){
-         alert("1차 카테고리를 선택해 주세요.");
-         return false;
-         }
-         if($("#cate2").val() == ""){
-         alert("2차 카테고리를 선택해 주세요.");
-         return false;
-         }*/
+
         document.savesch.submit();
     }
 

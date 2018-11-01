@@ -40,7 +40,8 @@ if($stx && $set == "simple"){
     //검색어 업데이트
     $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), ".$_SERVER["REMOTE_ADDR"].")";
     sql_query($sql);
-    
+    /*
+     * 저장된 검색어를 불러올 경우 실행
     //검색목록 저장 or 업데이트
     if(!$set_sc_id) {
         $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='', sc_cate1 = '', sc_cate2 = '', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now()";
@@ -61,7 +62,7 @@ if($stx && $set == "simple"){
             $sql = "update `my_search_list` set sc_datetime = now() where sc_id = '{$set_sc_id}'";
             sql_query($sql);
         }
-    }
+    }*/
 }
 
 if($lat && $lng && $is_member){
@@ -128,19 +129,26 @@ if($schopt) {
 
         $order_sort_active = implode(",", $sortActive);
     }
+}else{
+
 }
 
-//글등록시
-if($schopt["sc_type"]==2){
-    $sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1 order by cate_order";
-}else {
-    $sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1 order by cate_order";
-}
+
+$sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1 order by cate_order";
 
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$category1[] = $row;
 }
+
+$sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1 order by cate_order";
+
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $category2[] = $row;
+}
+
+
 if($schopt["sc_cate1"] && $schopt["sc_cate2"]){
     $sql = "select ca_id from `categorys` where `cate_name` = '{$schopt[sc_cate1]}' and `cate_depth` = 1 ";
     $ca_id = sql_fetch($sql);
@@ -149,14 +157,6 @@ if($schopt["sc_cate1"] && $schopt["sc_cate2"]){
     while($row = sql_fetch_array($res)){
         $set_cate2[] = $row;
     }
-}
-
-//글등록시
-$sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1 order by cate_order";
-
-$res = sql_query($sql);
-while($row = sql_fetch_array($res)){
-    $category2[] = $row;
 }
 
 $sql = "select * from `g5_write_help` where wr_is_comment = 0;";
@@ -483,11 +483,12 @@ $alarms = sql_fetch($sql);
 			<ul>
 				<li class="menu1"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
 				<li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/talk/talk.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
+				<li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/wish/wish.list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_wish.svg" alt="">위시리스트</a></li>
 				<li class="menu3"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/cart.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
 				<li class="menu4"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/order_history.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
 				<li class="menu6"><a href="<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
                 <li class="menu6"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=notice"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
-                <li class="menu6"><a href="<?php echo G5_BBS_URL?>/page/company/company.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">회사소개</a></li>
+                <li class="menu6"><a href="<?php echo G5_BBS_URL?>/page/company/company.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_company.svg" alt="">회사소개</a></li>
 				<li class="menu7"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">도움말</a></li>
 				<li class="menu8"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/settings.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_settings.svg" alt="">설정</a>
                     <div class="sugg"><a href="javascript:fnsuggestion();">제안하기</a></div>
@@ -505,8 +506,9 @@ $alarms = sql_fetch($sql);
 		</div>
 		<div class="category catetype1">
 			<ul>
+                <li class="cate000 <?php if($i==0){?>active<?php } ?>" id="scate000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
 				<?php for($i=0;$i<count($category1);$i++){ ?>
-				<li class="cate<?php echo $category1[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
+				<li class="cate<?php echo $category1[$i]["ca_id"]; ?> " id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
 				<?php } ?>
                 <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
 			</ul>
@@ -520,8 +522,9 @@ $alarms = sql_fetch($sql);
 		</div>
 		<div class="category catetype2">
 			<ul>
+                <li class="cate0000 <?php if($i==0){?>active<?php } ?>" id="scate0000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
 				<?php for($i=0;$i<count($category2);$i++){ ?>
-				<li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
+				<li class="cate<?php echo $category2[$i]["ca_id"]; ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
 				<?php } ?>
 			</ul>
 		</div>
@@ -534,8 +537,9 @@ $alarms = sql_fetch($sql);
         </div>
         <div class="category catetype1">
             <ul>
+                <li class="cate000 <?php if($i==0){?>active<?php } ?>" id="scate000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
                 <?php for($i=0;$i<count($category1);$i++){ ?>
-                    <li class="cate<?php echo $category1[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
+                    <li class="cate<?php echo $category1[$i]["ca_id"]; ?> " id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
                 <?php } ?>
                 <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
             </ul>
@@ -549,8 +553,9 @@ $alarms = sql_fetch($sql);
         </div>
         <div class="category catetype2">
             <ul>
+                <li class="cate0000 <?php if($i==0){?>active<?php } ?>" id="scate0000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
                 <?php for($i=0;$i<count($category2);$i++){ ?>
-                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php } ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
+                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?> " id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
                 <?php } ?>
             </ul>
         </div>
@@ -781,16 +786,10 @@ $(function(){
             data:{cate:c,type:type}
         }).done(function(data){
             msg = data;
-            //if(confirm(msg+ "\r\n해당 ")){
             $("#type").val(type);
             $("#cate").val(c);
             $("#cate2").val(sc);
-
-            //$("#id01").css("display","block");
-            //$("html, body").css("overflow","hidden");
-            //$("html, body").css("height","100vh");
-            //$("#cates").html("<span>"+c+"</span> > <span>"+sc+"</span>");
-            $(".sch_btn").val(c+" > "+sc);
+            $(".sch_top .sch_btn").val(c+" > "+sc);
             cateClose();
         });
     });

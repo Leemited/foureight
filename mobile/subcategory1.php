@@ -1,6 +1,5 @@
 <?php 
 
-
 $sql = "select * from `categorys` where `cate_depth` = 2 and cate_type = 1 order by `cate_order`";
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
@@ -61,16 +60,19 @@ while($row=sql_fetch_array($res)){
 			break;
 	}
 
-    $parent[] = $row["parent_ca_id"];
+    $parent3[] = $row["parent_ca_id"];
 }
 ?>
 <div class="category2">
+    <ul class="scate000">
+        <li id="000"><a href="#">전체</a></li>
+    </ul>
 	<?php for($i=0;$i<count($scate);$i++){ ?>
 	<ul class="scate<?php echo ($i+1);?> <?php if($i==0){?>active<?php }?>">
 		<?php for($j=0;$j<count($scate[$i]);$j++){?>
 		<li id="<?php echo $scate[$i][$j]["cate_code"];?>"><a href="#"><?php echo $scate[$i][$j]["cate_name"];?></a></li>
 		<?php }?>
-        <li onclick="fnsuggestion2('<?php echo $parent[$i];?>');">제안하기</li>
+        <li onclick="fnsuggestion2('<?php echo $parent3[$i];?>');">제안하기</li>
     </ul>
 	<?php }?>
 

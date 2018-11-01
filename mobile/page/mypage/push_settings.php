@@ -12,7 +12,6 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 
 ?>
 <style>
-#settings{height:calc(100vh - 20vw);}
 #settings .setting_wrap ul li.select_time{display:inline-block;width:calc(100% - 8vw);}
 #settings .setting_wrap ul li.select_time select{font-size:4vw;position:absolute;right:2.8vw;top:2.4vw;width:initial;width:20%}
 #settings .setting_wrap ul li.select_time select:after{content:"";}

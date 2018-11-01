@@ -64,6 +64,9 @@ while($row=sql_fetch_array($res)){
 }
 ?>
 <div class="category2">
+    <ul class="scate000">
+        <li id="000"><a href="#">전체</a></li>
+    </ul>
 	<?php for($i=0;$i<count($scate);$i++){ ?>
 	<ul class="scate<?php echo ($i+1);?> <?php if($i==0){?>active<?php }?>">
 		<?php for($j=0;$j<count($scate[$i]);$j++){?>

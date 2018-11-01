@@ -9,7 +9,6 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 
 ?>
 <style>
-#settings{height:calc(100vh - 20vw);}
 #settings .setting_wrap ul li{padding:2vw;}
 </style>
 <div class="sub_head">
@@ -44,5 +43,4 @@ function fnsubmit(){
 }
 </script>
 <?php 
-include_once(G5_PATH."/tail.sub.php");
-?>
+include_once(G5_PATH."/tail.php");?>

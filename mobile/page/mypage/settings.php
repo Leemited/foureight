@@ -24,7 +24,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 	<div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
 	<h2>개인 정보 설정</h2>
 </div>
-<div id="settings">
+<div id="settings" class="main">
 	<div class="setting_wrap_top">
 		<div class="profile">
             <form action="<?php echo G5_MOBILE_URL;?>/page/ajax/ajax.profile_upload.php" enctype="multipart/form-data" method="post" id="profile_form">

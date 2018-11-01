@@ -278,6 +278,23 @@ function fnSetting2(){
     }
 }
 
+
+function fnSettingMap2(){
+    if($(".search_setting").attr("id") == "menuon"){
+        $(".search_setting").attr("id","");
+        $(".search_setting").css("top","-100vh");
+        $("html").css("overflow","auto");
+        $("body").css("overflow","unset");
+        location.hash='';
+    }else{
+        location.hash = "#search";
+        $(".search_setting").attr("id","menuon");
+        $(".search_setting").css("top","20vw");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+    }
+}
+
 function hidePreview(){
 	$("#DetailImage").hide();
 	location.hash= '';

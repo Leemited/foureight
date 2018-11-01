@@ -5,6 +5,14 @@ if(defined('G5_THEME_PATH')) {
     require_once(G5_THEME_PATH.'/tail.php');
     return;
 }
+
+//새알림
+$start = date("Y-m-d");
+$end = date("Y-m-d", strtotime("-3 month"));
+$sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}'";
+$alarms = sql_fetch($sql);
+
+
 ?>
 
 <div id="debug" style="">삭제상태</div>
@@ -17,7 +25,13 @@ if(defined('G5_THEME_PATH')) {
 			<li onclick="location.href=g5_url+'/mobile/page/mypage/mypage.php'">
 				<img src="<?php echo G5_IMG_URL?>/bottom_icon_01.svg" alt="마이페이지">
 			</li>
-			<li onclick="location.href=g5_url+'/mobile/page/wish/wish.list.php'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_02.svg" alt="위시리스트" class="wished_tail"></li>
+			<li onclick="location.href=g5_url+'/mobile/page/mypage/alarm.php'">
+                <?php if($alarms["cnt"] > 0){?>
+                    <div class="new"></div>
+                <?php }?>
+                <img src="<?php echo G5_IMG_URL?>/bottom_icon_02.svg" alt="알람리스트" class="wished_tail">
+
+            </li>
 			<?php if($p == "index"){?>
 			<li id="home" onclick="location.href='<?php echo G5_URL;?>'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="최상위로"></li>
 			<?php }else{?>

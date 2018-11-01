@@ -11,7 +11,7 @@ if(!$pd_type){
     $pd_type = 1;
 }
 
-$sql = "select *,p.mb_id as pd_mb_id from `order` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and c.od_status = 1 and c.od_pay_status = 1 order by od_date desc";
+$sql = "select *,p.mb_id as pd_mb_id from `order` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and c.od_status = 1 and c.od_pay_status = 1 and pd_type = {$pd_type} order by od_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $cart[] = $row;
@@ -37,8 +37,9 @@ $back_url = G5_URL;
 </div>
 <div class="mycart_tab">
     <ul>
-        <li class="active">거래내역관리</li>
-        <li onclick="location.href=g5_url+'/mobile/page/mypage/order_history_bank.php'">계좌등록/변경</li>
+        <li <?php if($pd_type==1){?>class="active"<?php }?> onclick="location.href=g5_url+'/mobile/page/mypage/order_history.php?pd_type=1'">물건</li>
+        <li <?php if($pd_type==2){?>class="active"<?php }?> onclick="location.href=g5_url+'/mobile/page/mypage/order_history.php?pd_type=2'">능력</li>
+        <!--<li onclick="location.href=g5_url+'/mobile/page/mypage/order_history_bank.php'">계좌등록/변경</li>-->
     </ul>
 </div>
 <div class="alert_list">
