@@ -1,9 +1,8 @@
 <?php
-include_once('./_common.php');
-
-$subject = strip_tags($_POST['subject']);
-$content = strip_tags($_POST['content']);
-$sub_title = strip_tags($_POST['content']);
+include_once('../../../common.php');
+$subject = strip_tags($_REQUEST['subject']);
+$content = strip_tags($_REQUEST['content']);
+$sub_title = strip_tags($_REQUEST['content']);
 //$filter = explode(",", strtolower(trim($config['cf_filter'])));
 // strtolower 에 의한 한글 변형으로 아래 코드로 대체 (곱슬최씨님이 알려 주셨습니다.)
 $filter = explode(",", trim($config['cf_filter']));
@@ -36,5 +35,9 @@ for ($i=0; $i<count($filter); $i++) {
     }
 }
 
-die("{\"subject\":\"$subj\",\"content\":\"$cont\",\"sut_title\":\"$subt\"}");
+$data["subject"] = $subj;
+$data["content"] = $cont;
+$data["subtitle"] = $subt;
+
+echo json_encode($data);
 ?>

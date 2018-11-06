@@ -121,7 +121,6 @@ function get_images($srcfile,$dWidth="",$dHeight=""){
         //세로
         if($ratio > 1){
             $dWidth = $size[1]/2;
-            $degree = 0;
         }
         //가로
         else if($ratio < 1){
@@ -134,6 +133,7 @@ function get_images($srcfile,$dWidth="",$dHeight=""){
 
     // 썸네일 높이
     $thumb_height = round(($dWidth * $size[1]) / $size[0]);
+    //return $dWidth."//".$thumb_height;
     $filename = basename($srcfile);
     $filepath = dirname($srcfile);
 
@@ -182,7 +182,7 @@ function get_images2($srcfile){
     $filepath = dirname($srcfile);
 
     // 썸네일 생성
-    $thumb_file = thumbnails($filename, $filepath, $filepath, 150, 150, false);
+    $thumb_file = thumbnails($filename, $filepath, $filepath, 150, '', false);
 
     if(!$thumb_file)
         return false;

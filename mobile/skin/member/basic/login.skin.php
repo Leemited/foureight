@@ -19,13 +19,19 @@ if(strpos($agent,"foureight")!==false){
 		<div class="left" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/login_intro.php'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt="" ></div>
 		<!--<div class="right"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_option.svg" alt=""></div>-->
 	</div>
+
 	<div id="mb_login" class="mbskin">
 		<h1><?php echo $g5['title'] ?></h1>
 
 		<form name="flogin" action="<?php echo $login_action_url ?>" onsubmit="return flogin_submit(this);" method="post">
 		<input type="hidden" name="url" value="<?php echo $login_url ?>">
             <input type="hidden" name="regid" id="regid" value="">
+
 		<div id="login_frm">
+            <?php
+            // 소셜로그인 버튼
+            include_once(G5_PLUGIN_PATH.'/oauth/login.skin.inc.php');
+            ?>
 			<input type="text" name="mb_id" id="login_id" placeholder="이메일" required class="frm_input" placeholder="" autocomplete="off" value="<?php echo $_REQUEST["mb_id"];?>">
 			<input type="password" name="mb_password" id="login_pw" placeholder="비밀번호" required class="frm_input" autocomplete="off">
 			<!-- <div>
@@ -35,15 +41,16 @@ if(strpos($agent,"foureight")!==false){
 		</div>
 
 		<section>
+            <?php
+            // 소셜로그인 버튼
+            include_once(G5_PLUGIN_PATH.'/oauth/login.skin.inc.php');
+            ?>
 			<div class="login_link">
 				<a href="<?php echo G5_BBS_URL ?>/password_lost.php" target="_self" id="login_password_lost" class="">비밀번호를 잊으셨나요?</a>
 			</div>
 			<div>
 				<input type="submit" value="로그인" class="btn_submit">
-                <?php
-                // 소셜로그인 버튼
-                include_once(G5_PLUGIN_PATH.'/oauth/login.skin.inc.php');
-                ?>
+
 			</div>
 			<div class="login_link">
 				계정이 없으신가요?<a href="./register_form.php" class="register_link"> 회원 가입 하기</a>

@@ -26,22 +26,9 @@ if($member["mb_id"]){
 }
 
 if($stx){
-
-    $filter = explode(",",$config["cf_filter"]);
-
-    for($i=0;$i<count($filter);$i++){
-        if(strpos($stx,$filter[$i])!==false){
-            $text = string_star($filter[$i],'harf','left');
-            alert("검색어에 부적절한 단어[{$text}]가 포함되어 있습니다.");
-            echo "<script>$(\"#stx\").val('');</script>";
-            return false;
-        }
-    }
-
     //검색어 업데이트
-    $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), ".$_SERVER["REMOTE_ADDR"].")";
+    $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), '".$_SERVER["REMOTE_ADDR"]."')";
     sql_query($sql);
-
 }
 
 if($lat && $lng && $is_member){
@@ -216,93 +203,93 @@ while($row = sql_fetch_array($res)){
         });
     </script>
     <form action="./" method="get" name="simplesearch" id="simplesearch" >
-    <header id="mobile_header">
-        <!-- <h1><a href="<?php echo G5_URL; ?>" title="HOME" class="logos"><i></i></a></h1> -->
-        <div class="search">
-                <input type="text" style="display:none;">
-                <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 1;}?>">
-                <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
-                <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
-                <label class="switch schtype" >
-                    <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"){?>checked<?php }?> >
-                    <span class="slider round" <?php if($set_type=="2"){?>style="text-align:left"<?php }?>>
-                        <?php if($set_type=="2"){?>능력<?php }else{ ?>물건<?php }?>
-                    </span>
-                </label>
-        </div>
-        <a href="javascript:" id="mobile_menu_btn" class="mobile_menu_btn" title="MENU"><i></i></a>
-        <a href="javascript:fnSetting();" id="mobile_setting_btn" title="SETTING"><i></i></a>
-    </header>
-    <div class="keyword">
-        <div>
-            연관검색어
-        </div>
-        <ul>
-            <li>인기 검색어</li>
-            <li>최신 검색어</li>
-        </ul>
-    </div>
-    <div class="search_setting">
-            <input type="hidden" value="search" name="searchActive" >
-            <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
-            <input type="hidden" value="<?php echo $priceTo; ?>" id="sc_priceTo" name="priceTo">
-            <input type="hidden" value="<?php echo $order_sort;?>" name="order_sort" id="order_sort">
-            <input type="hidden" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
-            <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
-            <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
-            <div class="sch_top">
-                <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
-                <a href="javascript:fnsuggestion();">제안하기</a>
-            </div>
-            <div class="types sch_mid">
-                <label class="radio_tag" for="four">
-                    <input type="radio" name="type2" id="four" value="8" <?php if($type2=="8" || $type2 == ""){?>checked<?php  }?>>
-                    <span class="slider2 round">팝니다</span>
-                </label>
-                <label class="radio_tag" for="eight">
-                    <input type="radio" name="type2" id="eight" value="4" <?php if($type2=="4"){?>checked<?php } ?>>
-                    <span class="slider2 round">삽니다</span>
-                </label>
-                <label class="radio_tag" for="mb_level">
-                    <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($mb_level=="4"){?>checked<?php } ?>>
-                    <span class="slider2 round">전문가</span>
-                </label>
-            </div>
-            <div class="sch_ord">
-                <?php if(count($order_item)==0){?>
-                    <label class="align" id="sortable" for="pd_date">
-                        <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" checked>
-                        <span class="round">최신순</span>
+            <header id="mobile_header">
+                <!-- <h1><a href="<?php echo G5_URL; ?>" title="HOME" class="logos"><i></i></a></h1> -->
+                <div class="search">
+                    <input type="text" style="display:none;">
+                    <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 1;}?>">
+                    <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
+                    <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
+                    <label class="switch schtype" >
+                        <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"){?>checked<?php }?> >
+                        <span class="slider round" <?php if($set_type=="2"){?>style="text-align:left"<?php }?>>
+                    <?php if($set_type=="2"){?>능력<?php }else{ ?>물건<?php }?>
+                </span>
                     </label>
-                    <label class="align" id="sortable" for="pd_price">
-                        <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked>
-                        <span class="round">가격순</span>
-                    </label>
-                    <label class="align" id="sortable" for="pd_recom">
-                        <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" checked>
-                        <span class="round">추천순</span>
-                    </label>
-                    <label class="align" id="sortable" for="pd_hits">
-                        <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" checked>
-                        <span class="round">인기순</span>
-                    </label>
-                    <label class="align" id="sortable" for="pd_loc">
-                        <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
-                        <span class="round">거리순</span>
-                    </label>
-                <?php }else{
-                    for($i=0;$i<count($order_item);$i++){
-                        echo $order_item[$i];
-                    } }?>
-            </div>
-            <div class="clear"></div>
-            <div class="sch_price">
-                <div class="pr">
-                    <h2>금액설정</h2>
-                    <p class="price" id="schp"></p>
                 </div>
-                <div id="slider-range"></div>
+                <a href="javascript:" id="mobile_menu_btn" class="mobile_menu_btn" title="MENU"><i></i></a>
+                <a href="javascript:fnSetting();" id="mobile_setting_btn" title="SETTING"><i></i></a>
+            </header>
+            <div class="keyword">
+                <div>
+                    연관검색어
+                </div>
+                <ul>
+                    <li>인기 검색어</li>
+                    <li>최신 검색어</li>
+                </ul>
             </div>
+            <div class="search_setting">
+                <input type="hidden" value="search" name="searchActive" >
+                <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
+                <input type="hidden" value="<?php echo $priceTo; ?>" id="sc_priceTo" name="priceTo">
+                <input type="hidden" value="<?php echo $order_sort;?>" name="order_sort" id="order_sort">
+                <input type="hidden" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
+                <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
+                <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
+                <div class="sch_top">
+                    <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
+                    <a href="javascript:fnsuggestion();">제안하기</a>
+                </div>
+                <div class="types sch_mid">
+                    <label class="radio_tag" for="four">
+                        <input type="radio" name="type2" id="four" value="8" <?php if($type2=="8" || $type2 == ""){?>checked<?php  }?>>
+                        <span class="slider2 round">팝니다</span>
+                    </label>
+                    <label class="radio_tag" for="eight">
+                        <input type="radio" name="type2" id="eight" value="4" <?php if($type2=="4"){?>checked<?php } ?>>
+                        <span class="slider2 round">삽니다</span>
+                    </label>
+                    <label class="radio_tag" for="mb_level">
+                        <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($mb_level=="4"){?>checked<?php } ?>>
+                        <span class="slider2 round">전문가</span>
+                    </label>
+                </div>
+                <div class="sch_ord">
+                    <?php if(count($order_item)==0){?>
+                        <label class="align" id="sortable" for="pd_date">
+                            <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" checked>
+                            <span class="round">최신순</span>
+                        </label>
+                        <label class="align" id="sortable" for="pd_price">
+                            <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked>
+                            <span class="round">가격순</span>
+                        </label>
+                        <label class="align" id="sortable" for="pd_recom">
+                            <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" checked>
+                            <span class="round">추천순</span>
+                        </label>
+                        <label class="align" id="sortable" for="pd_hits">
+                            <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" checked>
+                            <span class="round">인기순</span>
+                        </label>
+                        <label class="align" id="sortable" for="pd_loc">
+                            <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
+                            <span class="round">거리순</span>
+                        </label>
+                    <?php }else{
+                        for($i=0;$i<count($order_item);$i++){
+                            echo $order_item[$i];
+                        } }?>
+                </div>
+                <div class="clear"></div>
+                <div class="sch_price">
+                    <div class="pr">
+                        <h2>금액설정</h2>
+                        <p class="price" id="schp"></p>
+                    </div>
+                    <div id="slider-range"></div>
+                </div>
             <div class="sch_btn_group">
                 <input type="submit" value="검색" class="sch_btn" style="width:100%" >
             </div>
@@ -374,7 +361,7 @@ while($row = sql_fetch_array($res)){
         </div>
         <div class="category catetype1">
             <ul>
-                <li class="cate000 <?php if($i==0){?>active<?php } ?>" id="scate000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
+                <li class="cate000 active" id="scate000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
                 <?php for($i=0;$i<count($category1);$i++){ ?>
                     <li class="cate<?php echo $category1[$i]["ca_id"]; ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
                 <?php } ?>
@@ -390,7 +377,7 @@ while($row = sql_fetch_array($res)){
         </div>
         <div class="category catetype2">
             <ul>
-                <li class="cate0000 <?php if($i==0){?>active<?php } ?>" id="scate0000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
+                <li class="cate0000 active" id="scate0000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
                 <?php for($i=0;$i<count($category2);$i++){ ?>
                     <li class="cate<?php echo $category2[$i]["ca_id"]; ?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
                 <?php } ?>

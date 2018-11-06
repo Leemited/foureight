@@ -8,187 +8,122 @@ if($_REQUEST["latlng"]) {
 }
 
 //검색 기본값
-$search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
+$search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0 ";
 
 //검색 정렬 기본값
 if($_SESSION["list_basic_order"]=="location"){
-    $od = " order by distance asc, p.pd_update desc, p.pd_date desc";
+    $od = " order by ISNULL(p.pd_lat) asc,  distance asc, p.pd_update desc, p.pd_date desc";
 }else {
     $od = " order by p.pd_update desc, p.pd_date desc";
 }
+if($member["mb_id"]){
+    $mb_id = $member["mb_id"];
+}else{
+    $mb_id = session_id();
+}
 
-if($_REQUEST["sc_id"]){
-    $sc_id = $_REQUEST["sc_id"];
+/*if($stx && $searchActive =="search"){
+
+}*/
+
+if($sc_id){
     $sql = "select * from `my_search_list` where sc_id = '{$sc_id}'";
     $schopt = sql_fetch($sql);
-}
-
-if($schopt){
-    $stx = $schopt["sc_tag"];
-
-    $search .= " and (p.pd_name like '%{$stx}%' or p.pd_tag like '%{$stx}%' or p.pd_content like '%{$stx}%')";
-
-    $type1 = $schopt["sc_type"];
+    $set_type = $schopt["sc_type"];
     $type2 = $schopt["sc_type2"];
-    $cate1 = $schopt["sc_cate1"];
+    $cate = $schopt["sc_cate1"];
     $cate2 = $schopt["sc_cate2"];
-
-
-    if($type1!= $_SESSION["type1"]){
-        $type1 = $_REQUEST["type1"];
-    }
-
-    if($type1){
-        $search .= " and p.pd_type = '{$type1}' ";
-    }
-
-    if($type2){
-        $search .= " and p.pd_type2 = '{$type2}' ";
-    }
-    if($cate1){
-        $search .= " and p.pd_cate = '{$cate1}' ";
-    }
-    if($cate2){
-        $search .= " and p.pd_cate2 = '{$cate2}' ";
-    }
-
+    $stx = $schopt["sc_tag"];
+    $order_sort = $schopt["sc_align"];
+    $order_sort_active = $schopt["sc_align_active"];
     $priceFrom = $schopt["sc_priceFrom"];
     $priceTo = $schopt["sc_priceTo"];
-
-    if($priceFrom!=0 && $priceTo!=0) {
-        $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
-    }
-
-    $align = $schopt["sc_align"];
-    $aligns = explode(",", $align);
-    //정렬 초기화
-
-    if($align){
-        $od = " order by ";
-        for ($i = 0; $i < count($aligns); $i++) {
-            switch ($aligns[$i]) {
-                case "pd_date":
-                    $align_active[$i] = $schopt["sc_od_date"];
-                    if($schopt["sc_od_date"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_date desc";
-                        }else {
-                            $od .= " , p.pd_date desc";
-                        }
-                    }
-                    break;
-                case "pd_price":
-                    $align_active[$i] = $schopt["sc_od_price"];
-                    if($schopt["sc_od_price"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_price asc";
-                        }else {
-                            $od .= " , p.pd_price asc";
-                        }
-                    }
-                    break;
-                case "pd_recom":
-                    $align_active[$i] = $schopt["sc_od_recom"];
-                    if($schopt["sc_od_recom"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_recom desc";
-                        }else {
-                            $od .= " , p.pd_recom desc";
-                        }
-                    }
-                    break;
-                case "pd_hits":
-                    $align_active[$i] = $schopt["sc_od_hit"];
-                    if($schopt["sc_od_hit"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_hits desc";
-                        }else {
-                            $od .= " , p.pd_hits desc";
-                        }
-                    }
-                    break;
-                case "pd_loc":
-                    $align_active[$i] = $schopt["sc_od_loc"];
-                    if($_SESSION["lat"] && $_SESSION["lng"]){
-                        if($schopt["sc_od_loc"]==1){
-                            if($od==" order by "){
-                                $od .= " distance desc";
-                            }else {
-                                $od .= " , distance desc";
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-        $actives = implode(",", $align_active);
-    }
-}else{
-    if($_SESSION["type1"]==1 || $_SESSION["type1"] == ""){
-        $type1 = 1;
-        $search .= " and p.pd_type = 1";
-    }else if($_SESSION["type1"]==2){
-        $search .= " and p.pd_type = 2";
-    }
-
-    if($set_search!="") {
-
-        if ($type1) {
-            $search .= " and p.pd_type = {$type1}";
-        }
-
-        if ($type2) {
-            $search .= " and p.pd_type2 = {$type2}";
-        }
-
-        if ($cate1) {
-            $search .= " and p.pd_cate = '{$cate1}' ";
-        }
-        if ($cate2) {
-            $search .= " and p.pd_cate2 = '{$cate2}' ";
-        }
-
-        if ($mb_level != "") {
-            $search .= " and m.mb_level = 4 ";
-        }
-
-        if ($priceFrom != 0 && $priceTo != 0) {
-            $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
-        }
-
-        if ($align) {
-            $od = " order by ";
-            $alings = explode(",", $align);
-            $actives = explode(",", $orderactive);
-            for ($i = 0; $i < count($actives); $i++) {
-                if ($actives[$i] == 1) {
-                    if ($alings[$i] == "pd_price") {
-                        if ($i == 0) {
-                            $od .= "p." . $alings[$i] . " asc";
-                        } else {
-                            $od .= ", p." . $alings[$i] . " asc";
-                        }
-                    } else if ($alings[$i] == "pd_loc") {
-                        if($_SESSION["lat"] && $_SESSION["lng"]) {
-                            if ($i == 0) {
-                                $od .= " distance desc";
-                            } else {
-                                $od .= ", distance desc";
-                            }
-                        }
-                    } else {
-                        if ($i == 0) {
-                            $od .= "p." . $alings[$i] . " desc";
-                        } else {
-                            $od .= ", p." . $alings[$i] . " desc";
-                        }
-                    }
-                }
-            }
-        }
-    }
+    $pd_price_type = $schopt["sc_worktime"];
+    $pd_timeForm = $schopt["sc_meetFrom"];
+    $pd_timeTo = $schopt["sc_meetTo"];
 }
 
+if($set_type){
+    $search .= " and p.pd_type = {$set_type}";
+}
+if($type2){
+    $search .= " and p.pd_type2 = {$type2}";
+}
+if($stx){
+    $search .= " and (p.pd_name like '%{$stx}%' or p.pd_tag like '%{$stx}%' or p.pd_cate like '%{$stx}%' or p.pd_cate2 like '%{$stx}%')";
+}
+if($cate){
+    $search .= " and p.pd_cate = '{$cate}'";
+}
+if($cate2){
+    $search .= " and p.pd_cate2 = '{$cate2}'";
+}
+if($priceFrom && $priceTo){
+    $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
+}
+if($pd_price_type){
+    $search .= " and p.pd_price_type = {$pd_price_type}";
+}
+
+if($pd_timeForm && $pd_timeTo){
+    $search .= " and p.pd_timeForm = '{$pd_timeForm}' and p.pd_timeTo = '{$pd_timeTo}'";
+}
+
+if($order_sort){
+    $od = "";
+    $order_sorts = explode(",",$order_sort);
+    $actives = explode(",",$order_sort_active);
+    for($i=0;$i<count($order_sorts);$i++){
+        if($order_sorts[$i]=="pd_date"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_date desc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked.'>'.
+                '<span class="round">최신순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_price"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_price asc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked.'>'.
+                '<span class="round">가격순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_recom"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_recom desc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked.'>'.
+                '<span class="round">추천순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_hits"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_hits desc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
+                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked.'>'.
+                '<span class="round">인기순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_loc"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                if($lat && $lng) {
+                    $ods[] = " , distance asc";
+                }
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
+                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked.'>'.
+                '<span class="round">거리순</span></label>';
+        }
+    }
+    $od = " order by ". implode(",",$ods);
+}
 
 if($_SESSION["lat"] && $_SESSION["lng"]){
     $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
@@ -211,6 +146,20 @@ if($member["mb_id"]){
     $wished_id = $ss_id;
     $search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$ss_id}') ";
 }
+
+//유저 차단 목록
+$block_time = date("Y-m-d H:i:s");
+$sql = "select target_id from `member_block` where mb_id = '{$member["mb_id"]}' and '{$block_time}' BETWEEN block_dateFrom and block_dateTo";
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $my_block["target_id"][] = $row;
+}
+
+if(count($my_block)>0){
+    $block_id = implode(",",$my_block["target_id"]);
+    $search .= " and p.mb_id not in ({$block_id}) ";
+}
+
 
 $sqls = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
 $res = sql_query($sqls);

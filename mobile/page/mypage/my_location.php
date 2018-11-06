@@ -15,7 +15,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 ?>
 <style>
 body{overflow: hidden}
-#settings{height:calc(100vh - 42vw);overflow:hidden;position:relative}
+#settings{height:calc(100vh - 30vw);overflow:hidden;position:relative}
 #settings .setting_wrap ul li{padding:2.88vw;}
 </style>
 <div class="sub_head">
@@ -24,7 +24,7 @@ body{overflow: hidden}
 	<!-- <div class="sub_add">추가</div> -->
 </div>
 <div id="settings">
-	<form action="<?php echo G5_MOBILE_URL?>/page/mypage/my_location_update.php" method="post">
+	<form action="<?php echo G5_MOBILE_URL?>/page/mypage/my_location_update.php" method="post" onsubmit="return false;">
 		<div class="setting_wrap">
 			<h2>거래 위치 목록</h2>
 			<ul>
@@ -75,7 +75,7 @@ body{overflow: hidden}
                 </li>
 			</ul>
 			<div class="btn_group">
-				<input type="submit" value="등록" class="setting_btn">
+				<input type="submit" value="등록" class="setting_btn" >
 			</div>
 		</div>
 	</form>

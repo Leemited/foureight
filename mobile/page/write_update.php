@@ -45,12 +45,6 @@ if($type==""){
 	$type = "1";
 }
 
-if(!isset($sellcode) || $sellcode==""){
-	$pd_type2 = 8;
-}else if(isset($sellcode) && $sellcode==1){
-	$pd_type2 = 4;
-}
-
 if (count($words) > 1) {
     $words = implode(",", $words);
 }else if (count($words) == 1) {
@@ -59,10 +53,16 @@ if (count($words) > 1) {
     $words = '';
 }
 
+$wr_content = $words.' '.$wr_content;
+
 if(count($links) > 1) {
-    $links = implode(",", $links);
+    $links = array_filter($links);
+    for($i=0;$i<count($links);$i++){
+        $links2[] = array_pop(explode("/",$links[$i]));
+    }
+    $links = implode(",", $links2);
 }else if(count($links) == 1) {
-    $links = $links[0];
+    $links = array_pop(explode("/",$links[0]));
 }else if(count($links) == 0){
     $links = '';
 }
@@ -76,7 +76,7 @@ if(!$pd_id || $pd_id == ""){
 	$sql = "insert into `product` set
 			pd_name = '{$wr_subject}',
 			pd_type = '{$type}',
-			pd_type2 = '{$pd_type2}',
+			pd_type2 = '{$type2}',
 			pd_cate = '{$cate1}',
 			pd_cate2 = '{$cate2}',
 			pd_images = '{$filename}',
@@ -97,18 +97,20 @@ if(!$pd_id || $pd_id == ""){
 			pd_discount = '{$discount_use}',
 			pd_lat = '{$pd_lat}',
 			pd_lng = '{$pd_lng}',
-			pd_update_cnt = 0";
+			pd_update_cnt = 0,
+            pd_timeFrom = '{$pd_timeFrom}',
+            pd_timeTo = '{$pd_timeTo}',
+            pd_price_type = '{$pd_price_type}'";
 	if(!sql_query($sql)){
 	    alert("입력 오류 입니다.다시 요청해 주세요");
     }
-
 	$pd_id = sql_insert_id();
 }else{
 //수정
     $sql = "update `product` set
 			pd_name = '{$wr_subject}',
 			pd_type = '{$type}',
-			pd_type2 = '{$pd_type2}',
+			pd_type2 = '{$type2}',
 			pd_cate = '{$cate1}',
 			pd_cate2 = '{$cate2}',
 			pd_images = '{$filename}',
@@ -123,9 +125,13 @@ if(!$pd_id || $pd_id == ""){
 			mb_id = '{$mb_id}',
 			pd_words = '{$words}',
 			pd_video_link = '{$links}',
+			pd_discount = '{$discount_use}',
 			pd_lat = '{$pd_lat}',
-			pd_lng = '{$pd_lng}'
-			where pd_id = '{$pd_id}'";
+			pd_lng = '{$pd_lng}',
+            pd_timeFrom = '{$pd_timeFrom}',
+            pd_timeTo = '{$pd_timeTo}',
+            pd_price_type = '{$pd_price_type}'
+            where pd_id = {$pd_id}";
     sql_query($sql);
 }
 

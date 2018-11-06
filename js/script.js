@@ -259,6 +259,7 @@ function fnSetting(){
 var set_search = '';
 
 function fnSetting2(){
+    $("#searchActive").val("search");
     if($(".search_setting").attr("id") == "menuon"){
         $("#set").val(1);
         $(".search_setting").attr("id","");
@@ -319,5 +320,30 @@ function blindClose(){
 	location.hash = '';
 }
 
-
+function fnfilter(content,attr){
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.filter.php",
+        method:"POST",
+        data:{content:content},
+        dataType:"json"
+    }).done(function(data){
+        if(data.content!=""){
+            console.log(location.href);
+            if(location.href.indexOf("#")!=-1){
+                console.log("A");
+                $("#debug").css({"background-color":"#fff","color":"#000"});
+            }
+            $("#debug").addClass("active");
+            $("#debug").html("금칙어가 포함되어 있습니다.");
+            setTimeout(removeDebug, 1500);
+            if(location.href.indexOf("#")!=-1) {
+                setTimeout(function () {
+                    $("#debug").css({"background-color":"#000","color":"#fff"});
+                }, 1500);
+            }
+            var retext = content.replace(data.content, "");
+            $("#"+attr).val(retext);
+        }
+    });
+}
 

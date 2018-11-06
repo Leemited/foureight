@@ -8,9 +8,9 @@ while($row=sql_fetch_array($res)){
 }
 ?>
 <div class="category2">
-        <ul class="scate0000">
+      <!--  <ul class="scate0000">
             <li id="0000"><a href="#">전체</a></li>
-        </ul>
+        </ul>-->
     <?php for($i=0;$i<count($parent2);$i++){
             $sql = "select * from `categorys` where `cate_depth` = 2 and `cate_type` = 2 and parent_ca_id = {$parent2[$i]["ca_id"]} order by cate_order, ca_id asc";
             $res = sql_query($sql);

@@ -64,36 +64,59 @@ if ($config['cf_analytics']) {
 <script>
 function fnPricingUpdate(){
     var pd_id = $("#p_pd_id").val();
+    var pd_type = $("#p_type").val();
     var pricing_pd_id = $("#id07 select").val();
     var pricing_content = $("#pricing_content").val();
+    var pricing_price = $("#pricing_price").val();
     var mb_id = "<?php echo $member["mb_id"];?>";
     $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.pricing_update.php",
         method:"POST",
-        data:{pd_id:pd_id,pricing_pd_id:pricing_pd_id,pricing_content:pricing_content,mb_id:mb_id}
+        data:{pd_id:pd_id,pricing_pd_id:pricing_pd_id,pricing_content:pricing_content,mb_id:mb_id,pd_type:pd_type,pricing_price:pricing_price}
     }).done(function(data){
        console.log(data);
-       if(data=="0"){
-           alert("로그인이 필요합니다.");
-           location.href=g5_url+'/mobile/page/login_intro.php';
-           return false;
-       }if(data=="1"){
-           alert("게시글 정보가 없습니다.");
-           return false;
-        }if(data=="2"){
-           alert("제시힐 게시물을 선택해 주세요.");
-           return false;
-        }if(data=="3"){
-            alert("내용을 입력해주세요.");
-            return false;
-        }if(data=="5"){
-            alert("잘못된 요청입니다. 다시 시도해 주세요.");
-            return false;
-        }
-        if(data=="4"){
-            alert("제시가 등록되었습니다.");
-            modalClose();
-        }
+       if(pd_type==1){
+           if (data == "0") {
+               alert("로그인이 필요합니다.");
+               location.href = g5_url + '/mobile/page/login_intro.php';
+               return false;
+           }
+           if (data == "5") {
+               alert("잘못된 요청입니다. 다시 시도해 주세요.");
+               return false;
+           }
+           if (data == "4") {
+               alert("제시가 등록되었습니다.");
+               modalClose();
+           }
+       }
+       if(pd_type==2) {
+           if (data == "0") {
+               alert("로그인이 필요합니다.");
+               location.href = g5_url + '/mobile/page/login_intro.php';
+               return false;
+           }
+           if (data == "1") {
+               alert("게시글 정보가 없습니다.");
+               return false;
+           }
+           if (data == "2") {
+               alert("제시할 게시물을 선택해 주세요.");
+               return false;
+           }
+           if (data == "3") {
+               alert("내용을 입력해주세요.");
+               return false;
+           }
+           if (data == "5") {
+               alert("잘못된 요청입니다. 다시 시도해 주세요.");
+               return false;
+           }
+           if (data == "4") {
+               alert("제시가 등록되었습니다.");
+               modalClose();
+           }
+       }
     });
 }
 function fn_viewer(id){

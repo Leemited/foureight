@@ -25,6 +25,20 @@ if($wish_id){
 		$i++;
 	}
 }
+
+//유저 차단 목록
+$block_time = date("Y-m-d H:i:s");
+$sql = "select target_id from `member_block` where mb_id = '{$member["mb_id"]}' and '{$block_time}' BETWEEN block_dateFrom and block_dateTo";
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $my_block["target_id"][] = $row;
+}
+
+if(count($my_block)>0){
+    $block_id = implode(",",$my_block["target_id"]);
+    $search .= " and p.mb_id not in ({$block_id}) ";
+}
+
 $search .= " and pd_id in ({$pd_ids})";
 
 $total=sql_fetch("select count(*) as cnt from `product` where {$search} ");

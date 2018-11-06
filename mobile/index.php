@@ -7,9 +7,6 @@ if(defined('G5_THEME_PATH')) {
 }
 include_once(G5_EXTEND_PATH."/image.extend.php");
 
-include_once(G5_MOBILE_PATH.'/head.php');
-
-
 //검색 기본값
 $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0 ";
 
@@ -20,108 +17,139 @@ if($_SESSION["list_basic_order"]=="location"){
     $od = " order by p.pd_update desc, p.pd_date desc";
 }
 
-if($schopt){
+/*if($sc_id){
+    $sql = "select * from `my_search_list` where sc_id = '{$sc_id}'";
+    $schopt = sql_fetch($sql);
 
-    $stx = $schopt["sc_tag"];
+    //$stx = $schopt["sc_tag"];
+}*/
 
-    $search .= " and ( p.pd_name like '%{$stx}%' or p.pd_tag like '%{$stx}%' or p.pd_content like '%{$stx}%')";
+if($member["mb_id"]){
+    $mb_id = $member["mb_id"];
+}else{
+    $mb_id = session_id();
+}
 
-    $type1 = $schopt["sc_type"];
+if($searchActive =="search") {
+    //그냥 검색일경우
+
+    //전체 검색어 업데이트
+    $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), '" . $_SERVER["REMOTE_ADDR"] . "')";
+    sql_query($sql);
+
+    //저장된 검색어를 불러올 경우 실행
+    //검색목록 저장 or 업데이트
+    //if(!$set_sc_id) {
+    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='', sc_cate1 = '', sc_cate2 = '',sc_align='{$order_sort}',sc_align_active='{$order_sort_active}' sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_savetype = 1";
+    echo $sql;
+    sql_query($sql);
+}
+if($searchActive == "save"){
+    
+    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$pd_type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_price_type = '{$pd_price_type}', sc_timeFrom = '{$pd_timeFrom}' , sc_timeTo = '{$pd_timeTo}', sc_savetype = 2, sc_status = '{$set_status}'";
+    echo $sql;
+    sql_query($sql);
+    $sc_id = sql_insert_id();
+}
+
+if($sc_id){
+    $sql = "select * from `my_search_list` where sc_id = '{$sc_id}'";
+    $schopt = sql_fetch($sql);
+    $set_type = $schopt["sc_type"];
     $type2 = $schopt["sc_type2"];
-    $cate1 = $schopt["sc_cate1"];
+    $cate = $schopt["sc_cate1"];
     $cate2 = $schopt["sc_cate2"];
-
-    if($type1){
-        $search .= " and p.pd_type = '{$type1}' ";
-    }
-    if($type2){
-        $search .= " and p.pd_type2 = '{$type2}' ";
-    }
-    if($cate1){
-        $search .= " and p.pd_cate = '{$cate1}' ";
-    }
-    if($cate2){
-        $search .= " and p.pd_cate2 = '{$cate2}' ";
-    }
-
+    $stx = $schopt["sc_tag"];
+    $order_sort = $schopt["sc_align"];
+    $order_sort_active = $schopt["sc_align_active"];
     $priceFrom = $schopt["sc_priceFrom"];
     $priceTo = $schopt["sc_priceTo"];
-
-    if($priceFrom!=0 && $priceTo!=0) {
-        $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
-    }
-
-    $align = $schopt["sc_align"];
-    $aligns = explode(",", $align);
-    //정렬 초기화
-
-    if($align !=""){
-        $od = " order by ";
-        for ($i = 0; $i < count($aligns); $i++) {
-            switch ($aligns[$i]) {
-                case "pd_date":
-                    $align_active[$i] = $schopt["sc_od_date"];
-                    if($schopt["sc_od_date"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_date desc";
-                        }else {
-                            $od .= " , p.pd_date desc";
-                        }
-                    }
-                    break;
-                case "pd_price":
-                    $align_active[$i] = $schopt["sc_od_price"];
-                    if($schopt["sc_od_price"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_price desc";
-                        }else {
-                            $od .= " , p.pd_price desc";
-                        }
-                    }
-                    break;
-                case "pd_recom":
-                    $align_active[$i] = $schopt["sc_od_recom"];
-                    if($schopt["sc_od_recom"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_recom desc";
-                        }else {
-                            $od .= " , p.pd_recom desc";
-                        }
-                    }
-                    break;
-                case "pd_hit":
-                    $align_active[$i] = $schopt["sc_od_hit"];
-                    if($schopt["sc_od_hit"]==1){
-                        if($od==" order by "){
-                            $od .= " p.pd_hits desc";
-                        }else {
-                            $od .= " , p.pd_hits desc";
-                        }
-                    }
-                    break;
-                case "pd_loc":
-                    $align_active[$i] = $schopt["sc_od_loc"];
-                    if($_SESSION["lat"] && $_SESSION["lng"]){
-                        if($schopt["sc_od_loc"]==1){
-                            if($od==" order by "){
-                                $od .= " distance desc";
-                            }else {
-                                $od .= " , distance desc";
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-        $actives = implode(",", $align_active);
-    }
+    $pd_price_type = $schopt["sc_worktime"];
+    $pd_timeForm = $schopt["sc_meetFrom"];
+    $pd_timeTo = $schopt["sc_meetTo"];
 }else{
-    if($_SESSION["type1"]==1 || $_SESSION["type1"] == ""){
-        $type1 = 1;
-        $search .= " and p.pd_type = 1";
-    }else if($_SESSION["type1"]==2){
-        $search .= " and p.pd_type = 2";
+    echo "간편 검색";
+    print_r2($_REQUEST);
+}
+
+if($set_type){
+    $search .= " and p.pd_type = {$set_type}";
+}
+if($type2){
+    $search .= " and p.pd_type2 = {$type2}";
+}
+if($stx){
+    $search .= " and (p.pd_name like '%{$stx}%' or p.pd_tag like '%{$stx}%' or p.pd_cate like '%{$stx}%' or p.pd_cate2 like '%{$stx}%')";
+}
+if($cate){
+    $search .= " and p.pd_cate = '{$cate}'";
+}
+if($cate2){
+    $search .= " and p.pd_cate2 = '{$cate2}'";
+}
+if($priceFrom && $priceTo){
+    $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
+}
+if($pd_price_type){
+    $search .= " and p.pd_price_type = {$pd_price_type}";
+}
+
+if($pd_timeForm != "00" && $pd_timeTo != "00" && $pd_timeForm != $pd_timeTo){
+    $search .= " and p.pd_timeForm = '{$pd_timeForm}' and p.pd_timeTo = '{$pd_timeTo}'";
+}
+
+if($order_sort){
+    $od = "";
+    $order_sorts = explode(",",$order_sort);
+    $actives = explode(",",$order_sort_active);
+    for($i=0;$i<count($order_sorts);$i++){
+        if($order_sorts[$i]=="pd_date"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_date desc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked.'>'.
+                '<span class="round">최신순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_price"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_price asc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked.'>'.
+                '<span class="round">가격순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_recom"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_recom desc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked.'>'.
+                '<span class="round">추천순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_hits"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " p.pd_hits desc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
+                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked.'>'.
+                '<span class="round">인기순</span></label>';
+        }
+        if($order_sorts[$i]=="pd_loc"){
+            if($actives[$i] == 1){
+                $checked = "checked";
+                $ods[] = " , distance asc";
+            }
+            $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
+                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked.'>'.
+                '<span class="round">거리순</span></label>';
+        }
     }
+    $od = " order by ". implode(",",$ods);
 }
 
 if($_SESSION["lat"] && $_SESSION["lng"]){
@@ -144,6 +172,19 @@ if($member["mb_id"]){
 	$search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$ss_id}') ";
 }
 
+//유저 차단 목록
+$block_time = date("Y-m-d H:i:s");
+$sql = "select target_id from `member_block` where mb_id = '{$member["mb_id"]}' and '{$block_time}' BETWEEN block_dateFrom and block_dateTo";
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $my_block["target_id"][] = $row;
+}
+
+if(count($my_block)>0){
+    $block_id = implode(",",$my_block["target_id"]);
+    $search .= " and p.mb_id not in ({$block_id}) ";
+}
+
 //내 게시글 블라인드 처리 확인
 $sql = "select * from `product` where mb_id = '{$wished_id}' and pd_blind >= 10 and pd_blind_status = 1 order by pd_date asc limit 0 , 1";
 $myblind = sql_fetch($sql);
@@ -161,7 +202,7 @@ while($row = sql_fetch_array($res)){
 
 
 //검색 최근 목록 저장
-if($schopt) {
+/*if($schopt) {
     $sql = "select *,count(*)as cnt from `save_read` where sc_id = '{$sc_id}' and mb_id = '{$wished_id}' ";
     $saves = sql_fetch($sql);
     $save_pd_id_all = explode(",",$saves["pd_ids"]);
@@ -180,7 +221,9 @@ if($schopt) {
         //echo $sql;
         sql_query($sql);
     }
-}
+}*/
+
+
 //ad 가져오기
 $today = date("Y-m-d");
 $sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= ad_from and '{$today}' < ad_to ";
@@ -196,26 +239,23 @@ while($row = sql_fetch_array($res)){
     $wished[] = $row;
 }
 
-//해당 최대가격
-
-//해당 최소가격
+include_once(G5_MOBILE_PATH.'/head.php');
 
 ?>
 
 <div class="loader" >
     <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
-    <!--<div style="background-color:#000;opacity: 0.4;width:100%;height:100%;position:absolute;top:0;left:0;"></div>-->
 </div>
-<!-- <div class="delarea1" style="height:100vh;width:5vw;position:absolute;left:0;top:0;background-color:#FFF"></div>
-<div class="delarea2" style="height:100vh;width:5vw;position:absolute;right:0;top:0;background-color:#FFF"></div> -->
+</div>
 <input type="hidden" value="<?php echo $schopt['sorts'];?>" id="sorts">
 <div id="id01" class="w3-modal w3-animate-opacity no-view">
 	<div class="w3-modal-content w3-card-4">
 		<div class="w3-container">
 			<form name="write_form" id="write_form" method="post" action="" onsubmit="return false;">
-                <input type="hidden" value="<?php if($schopt["sc_type"]){echo $schopt["sc_type"];}else if($_SESSION["type1"]){echo $_SESSION["type1"];}else{echo "1";}?>" name="type" id="type">
-                <input type="hidden" name="cate1" id="c" value="<?php echo $schopt['pd_cate'];?>">
-				<input type="hidden" name="cate2" id="sc" value="<?php echo $schopt['pd_cate2'];?>">
+                <input type="hidden" value="<?php if($type1){echo $type1;}else{echo 1;}?>" name="wr_type1" id="wr_type1">
+                <input type="hidden" name="cate1" id="c" value="<?php echo $cate1;?>">
+				<input type="hidden" name="cate2" id="sc" value="<?php echo $cate2;?>">
+				<input type="hidden" name="pd_type2" id="pd_type2" value="<?php if($pd_type2){echo $pd_type2;}else{echo 8;}?>">
                 <div class="type2_box">
                     <label class="switch schtype2" >
                         <input type="checkbox" id="wr_type2" name="wr_type2" value="4">
@@ -224,7 +264,10 @@ while($row = sql_fetch_array($res)){
                 </div>
 				<h2>검색어</h2>
 				<div>
-					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 #으로 해주세요" required>
+					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 #으로 해주세요" required value="#" onkeyup="fnfilter(this.value,'wr_title')">
+					<input type="text" name="wr_price" id="wr_price" placeholder="<?php if($type1==1){?>판매금액<?php }else{?>계약금<?php }?>" required value="" onkeyup="number_only(this)" style="<?php if($type1==2){?>width:30%;<?php }else{?>width:70%<?php }?>margin-right:5%;margin-top:0">
+                    <input type="text" name="wr_price2" id="wr_price2" placeholder="거래완료금" required value="" onkeyup="number_only(this)" style="width:30%;margin-top:0;<?php if($type1==2){?>display:inline-block;<?php }else{?>display:none;<?php }?>">
+                    <p class="write_help">예시 : 등록된 예시가 없습니다.</p>
 				</div>
 				<div>
 					<input type="button" value="확인" style="background-color:yellow" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types1">
@@ -255,13 +298,14 @@ while($row = sql_fetch_array($res)){
 	<!--<input type="hidden" value="<?php /*if($schopt["sc_type"]){echo $schopt["sc_type"];}else{echo "1";}*/?>" name="write_type" id="write_type">-->
 	<div class="write" onclick="<?php if(!$is_member){?>alert('로그인이 필요합니다.');location.href=g5_url+'/mobile/page/login_intro.php'; <?php }else if($member["mb_certify"]==""){ ?>alert('본인인증이 필요합니다.');location.href=g5_url+'/mobile/page/mypage/hp_certify.php';<?php }else if($member["mb_id"]){ ?>fnwrite();<?php } ?> ">
 		<div class="write_btn">
-            <?php if($schopt["sc_type"]==1 || $_SESSION["type1"] == 1){?>
+            <?php if($set_type == 1 || $set_type == ""){?>
             <img src="<?php echo G5_IMG_URL?>/ic_write_btn.svg" alt="">
             <?php }else{ ?>
             <img src="<?php echo G5_IMG_URL?>/ic_write_btn_2.svg" alt="">
             <?php }?>
         </div>
-		<div class="text" <?php if($schopt["sc_type"]==2 || $_SESSION["type1"] == 2){?>style="background-color: rgb(255, 61, 0); color: rgb(255, 255, 255);"<?php }?>><?php if($schopt["sc_type"]==1 || $_SESSION["type1"] == 1 || $type1 == 1){?>안쓰는건 팔고 나눠보세요!<?php }else{ ?>작은 능력이라도 올려보세요<?php }?></div>
+		<div class="text" <?php if($set_type==2){?>style="background-color: rgb(255, 61, 0); color: rgb(255, 255, 255);"<?php }?>>
+            <img src="<?php if($set_type == 1 || $set_type==""){echo G5_IMG_URL."/write_text_1.svg"; }else{ echo G5_IMG_URL."/write_text_2.svg";}?>" alt=""></div>
 	</div>
 	<section class="main_list">
 		<article class="post" id="post">
@@ -544,11 +588,15 @@ $(document).ready(function(){
 			$(".top_header").css("background-color","#000");
 			$("#search").attr("placeholder","원하는 물건이 있으세요?");
 			$(".text").css({"background-color":"#ffe400","color":"#000"});
-			$(".text").html("안쓰는건 팔고 나눠보세요!");
+			$(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_1.svg");
 			$(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn.svg");
 			$("#set_type").val("1");
+			$("#wr_type1").val("1");
 			$("#type").val("1");
             $("#theme-color").attr("content","#000000");
+            $("#wr_price").attr("placeholder","판매금액");
+            $("#wr_price").css("width","70%");
+            $("#wr_price2").css("display","none");
 			finish = false;
 
 			fnlist(1,'');
@@ -565,31 +613,67 @@ $(document).ready(function(){
 			$(".top_header").css("background-color","#ff3d00");
 			$("#search").attr("placeholder","누군가의 능력이 필요하세요?");
 			$(".text").css({"background-color":"#ff3d00","color":"#fff"});
-			$(".text").html("작은 능력이라도 올려보세요");
+            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_2.svg");
 			$(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn_2.svg");
 			$("#set_type").val("2");
+			$("#wr_type1").val("2");
 			$("#type").val("2");
             $("#theme-color").attr("content","#ff3d00");
+            $("#wr_price").attr("placeholder","계약금");
+            $("#wr_price2").attr("placeholder","거래완료금");
+            $("#wr_price").css("width","30%");
+            $("#wr_price2").css({"display":"inline-block","width":"30%"});
 			finish = false;
 
 			fnlist(1,'');
 		}
 	});
 
+    /*$("#wr_type2").change(function(){
+        if($(this).prop("checked")==true){
+            $("#pd_type2").val("4");
+        }else{
+            $("#pd_type2").val("8");
+        }
+    });*/
 	//검색어 등록시 판매 구매 선택
     $(".schtype2 .slider").click(function(){
+        console.log($("#wr_type1").val());
         if($(this).prev().prop("checked")==true){
             $(this).html('판매');
             $(this).css("text-align","right");
             //등록 버튼 수정
             $(".types1").css("display","inline-block");
             $(".types2").css("display","none");
+            $("#pd_type2").val("8");
+            if($("#wr_type1").val()==1){ //물건 판매 / 판매금액필요
+                $("#wr_price").attr("placeholder","판매금액");
+                $("#wr_price").css("width","70%");
+                $("#wr_price2").css("display","none");
+            }
+            if($("#wr_type1").val()==2){ //능력 판매 / 계약금 / 계약완료금
+                $("#wr_price").attr("placeholder","계약금");
+                $("#wr_price2").attr("placeholder","거래완료금");
+                $("#wr_price").css("width","30%");
+                $("#wr_price2").css({"display":"inline-block","width":"30%"});
+            }
         }else{
             $(this).html('구매');
             $(this).css("text-align","left");
             //등록 버튼 수정
             $(".types1").css("display","none");
             $(".types2").css("display","inline-block");
+            $("#pd_type2").val("4");
+            if($("#wr_type1").val()==1){ //물건 구매 / 구매예상금
+                $("#wr_price").attr("placeholder","구매예상금");
+                $("#wr_price").css("width","70%");
+                $("#wr_price2").css("display","none");
+            }
+            if($("#wr_type1").val()==2){ //능력 구매 / 구매예상금
+                $("#wr_price").attr("placeholder","구매예상금");
+                $("#wr_price").css("width","70%");
+                $("#wr_price2").css("display","none");
+            }
         }
     })
 
@@ -639,7 +723,7 @@ $(document).ready(function(){
                 console.log(data);
             });
 		    $("#set_list_type").val("gird");
-			$(this).css({"text-align":"right","background-image":"url(./img/ic_grid.png)","background-position":"10.2vw center"});
+			$(this).css({"background-image":"url(./img/ic_switch_grid.svg)"});
 			$(".grid__item").removeClass("type_list");
             finish = false;
 			fnlist(1,'false');
@@ -653,7 +737,7 @@ $(document).ready(function(){
                 console.log(data);
             });
             $("#set_list_type").val("list");
-			$(this).css({"text-align":"left","background-image":"url(./img/ic_list.png)","background-position":"2.2vw center"});
+			$(this).css({"background-image":"url(./img/ic_switch_list.svg)"});
 			$(".grid__item").addClass("type_list");
             finish = false;
 			fnlist(1,'true');
@@ -661,50 +745,77 @@ $(document).ready(function(){
 	});
 
 	$(".category ul > li").click(function(){
-		$(this).addClass("active");
-		$(".category ul li").not($(this)).removeClass("active");
-		var id = $(this).attr("id");
-		$("."+id).addClass("active");
-		$(".category2 ul").not($("."+id)).removeClass("active");
-        $("html, body").css("overflow","hidden");
-        $("html, body").css("height","100vh");
+	    if(!$(this).hasClass("sugg")) {
+            $(this).addClass("active");
+            $(".category ul li").not($(this)).removeClass("active");
+            var id = $(this).attr("id");
+            $("." + id).addClass("active");
+            $(".category2 ul").not($("." + id)).removeClass("active");
+            $("html, body").css("overflow", "hidden");
+            $("html, body").css("height", "100vh");
+        }
 	});
 	$(".category_menu .category2 ul li, .category_menu2 .category2 ul li").click(function(){
         var c = $(this).parent().parent().prev().children().find("li.active a").text();
         var sc = $(this).find("a").text();
-        var type = $("#type").val();
-        var msg = '';
-	    $.ajax({
-            url:g5_url+"/mobile/page/ajax/ajax.category_info.php",
-            method:"post",
-            data:{cate:c,type:type}
-        }).done(function(data){
-            msg = data;
-            if(confirm(msg+ "\r\n해당 카테고리로 게시글을 등록할까요?")){
-                $("#type").val(type);
-                $("#c").val(c);
-                $("#sc").val(sc);
-                $.ajax({
-                    url:g5_url+"/mobile/page/ajax/ajax.category_tag.php",
-                    method:"post",
-                    data:{cate1:c,cate2:sc}
-                }).done(function(data){
-                    if(data!="") {
-                        $("#wr_title").attr("placeholder", data);
+        if(sc != "") {
+            var type = $("#wr_type1").val();
+            var msg = '';
+            $.ajax({
+                url: g5_url + "/mobile/page/ajax/ajax.category_info.php",
+                method: "post",
+                data: {cate: c, type: type}
+            }).done(function (data) {
+                msg = data;
+                if (confirm(msg + "\r\n해당 카테고리로 게시글을 등록할까요?")) {
+                    //$("#type").val(type);
+                    $("#c").val(c);
+                    $("#sc").val(sc);
+                    $.ajax({
+                        url: g5_url + "/mobile/page/ajax/ajax.category_tag.php",
+                        method: "post",
+                        data: {cate1: c, cate2: sc}
+                    }).done(function (data) {
+                        if (data != "") {
+                            $(".write_help").html("예시 : " + data);
+                        }
+                    });
+                    cateClose();
+                    if(type==1){
+                        $("#wr_price").attr("placeholder","판매금액");
+                        $("#wr_price2").css("display","none");
                     }
-                });
-                cateClose();
-                $("#id01").css("display","block");
-                $("html, body").css("overflow","hidden");
-                $("html, body").css("height","100vh");
-                location.hash="#modal";
-                $("#id01 #wr_title").focus();
-            }else{
-            }
-        });
+                    if(type==2){
+                        $("#wr_price").attr("placeholder","계약금");
+                        $("#wr_price2").attr("placeholder","거래완료금");
+                        $("#wr_price2").css("display","inline-block");
+                    }
+                    $("#id01").css("display", "block");
+                    $("html, body").css("overflow", "hidden");
+                    $("html, body").css("height", "100vh");
+                    location.hash = "#modal";
+                    $("#id01 #wr_title").selectRange(1,2);
+                }
+            });
+        }
 	});
 
-	var container = document.getElementById('test');
+    $.fn.selectRange = function(start, end) {
+        return this.each(function() {
+            if(this.setSelectionRange) {
+                this.focus();
+                this.setSelectionRange(start, end);
+            } else if(this.createTextRange) {
+                var range = this.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', end);
+                range.moveStart('character', start);
+                range.select();
+            }
+        });
+    };
+
+    var container = document.getElementById('test');
 	var swipe2 = new Hammer(container);
     swipe2.on('swipeleft',function(e){
         console.log(e);
@@ -769,7 +880,7 @@ $(document).ready(function(){
         // Tap recognizer with minimal 2 taps
         swiperm.add( new Hammer.Tap({ event: 'doubletap', taps: 2 }) );
         // Single tap recognizer
-        swiperm.add( new Hammer.Tap({ event: 'singletap' }) );
+        swiperm.add( new Hammer.Tap({ event: 'singletap', interval: 100}) );
 
         // we want to recognize this simulatenous, so a quadrupletap will be detected even while a tap has been recognized.
         swiperm.get('doubletap').recognizeWith('singletap');
@@ -831,28 +942,58 @@ $(document).ready(function(){
             }
         });
     });
+
+
     //게시글 등록 엔터
     $("#wr_title").keyup(function (e) {
         var type2 = $("#wr_type2").val();
         var text = $(this).val();
-        console.log(e.keyCode + "//" + text.length);
-
-        if(e.keyCode==8 && text == "#" || e.keyCode==46 && text == "#"){
-            $(this).val('');
-            return false;
-        }
-        if(text.length == 1 && e.keyCode != 32){
-            console.log("A");
-            $(this).val("#"+text);
-        }
-        if(text.length == 1 && e.keyCode == 32){
-            console.log("B");
+        /*if(text==""){
             $(this).val("#");
+        }*/
+        <?php if(!$app){?>
+        //키보드 32
+        if (e.keyCode == 32) {
+            text = text.replace(" ","#");
+            $(this).val(text);
         }
-        if (text.length >= 2 && e.keyCode == 32) {
-            console.log("C");
-            $(this).val(text + "#");
+        <?php }else{ ?>
+        text = text.replace(" ","#");
+        $(this).val(text);
+        <?php }?>
+        /*
+        var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+        if(check.test(text)){
+            console.log("A");
+            var chk = text.substr(0,1);
+            if(chk != "#"){
+                console.log("B");
+                $(this).val("#"+text);
+            }
+            if(text.length >= 2 && (e.keyCode == 32 || e.keyCode == 229)){
+                console.log("C");
+                $(this).val(text + "#")
+            }
+        }else{
+            if(e.keyCode==8 && text == "#" || e.keyCode==46 && text == "#"){
+                $(this).val('');
+                return false;
+            }
+            if(text.length == 1 && (e.keyCode != 32 || e.keyCode != 229)){
+                $(this).val("#"+text);
+            }
+            if(text.length == 1 && (e.keyCode == 32 || e.keyCode == 229)){
+                $(this).val("#");
+            }
+            if (text.length >= 2 && (e.keyCode == 32 || e.keyCode == 229)) {
+                $(this).val(text + "#");
+            }
+            var chk = text.substr(0,1);
+            if(chk != "#"){
+                $(this).val("#"+text);
+            }
         }
+        */
         var chk = text.substr(0,1);
         if(chk != "#"){
             $(this).val("#"+text);
@@ -888,7 +1029,7 @@ $(document).ready(function(){
 });
 function fnlist(num,list_type){
 	//사고팔고/ /카테코리1/카테고리2/가격시작/가격끝/정렬순서1/정렬순서2/정렬순서3/정렬순서4/정렬순서5
-	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align,orderactive,typecompany;
+	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align,orderactive,typecompany,price_type,meetFrom,meetTo;
 
 	if(num == 1){
 		page=0;
@@ -925,16 +1066,20 @@ function fnlist(num,list_type){
     mb_id = $("#mb_id").val();
     align = $("#order_sort").val();
     orderactive = $("#order_sort_active").val();
+    price_type = $("#pd_price_type").val();
+    meetFrom = $("#pd_timeForm").val();
+    meetTo = $("#pd_timeTo").val();
+
 
     var list_type = $("#set_list_type").val();
     var pd_ids = "<?php echo $saves["pd_ids"];?>";
 
-    console.log(type1+"//"+type2+"//"+cate1+"//"+cate2+"//"+priceFrom+"//"+priceTo+"//"+sorts+"//"+align+"//"+mb_id+"//"+list_type+"//"+stx+"//"+pd_ids+"//"+orderactive+"//"+typecompany +"//" +set_search);
+    console.log(type1+"//"+type2+"//"+cate1+"//"+cate2+"//"+priceFrom+"//"+priceTo+"//"+sorts+"//"+align+"//"+mb_id+"//"+list_type+"//"+stx+"//"+pd_ids+"//"+orderactive+"//"+typecompany +"//" +set_search + "//" + price_type + "//" + meetFrom + "//" + meetTo);
 
 	$.ajax({
 		url:g5_url+"/mobile/page/ajax/ajax.index.list.php",
 		method:"POST",
-		data:{page:page,list_type:list_type,stx:stx,app:app,type1:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,align:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,orderactive:orderactive,set_search:set_search},
+		data:{page:page,list_type:list_type,stx:stx,app:app,type1:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo},
 		beforeSend:function(){
             $('.loader').show();
 		},
@@ -1003,16 +1148,18 @@ function fnWriteStep2(url){
 }
 
 function fnOnCam(){
-
 	if($("#wr_title").val()==""){
 		alert("제목을 입력해주세요");
 		return false;
 	}else{
 		var title = $("#wr_title").val();
-		var type = $("#type").val();
+		var type1 = $("#wr_type1").val();
+		var type2 = $("#pd_type2").val();
 		var cate1 = $("#c").val();
 		var cate2 = $("#sc").val();
-		window.android.camereOn('<?php echo $member["mb_id"];?>',title,cate1,cate2,type);
+		var wr_price = $("#wr_price").val();
+		var wr_price2 = $("#wr_price2").val();
+		window.android.camereOn('<?php echo $member["mb_id"];?>',title,cate1,cate2,type1,type2,wr_price,wr_price2);
 	}
 }
 
@@ -1050,6 +1197,7 @@ function fnLikeUpdate(){
         dataType:"json",
         data:{pd_id:id,mb_id:mb_id,like_content:text}
     }).done(function(data){
+        console.log(data);
         if(data.result=="1"){
             alert('이미 평가한 글입니다.');
         }else if(data.result=="2"){
@@ -1057,7 +1205,7 @@ function fnLikeUpdate(){
         }else{
             alert("잘못된 요청입니다.");
         }
-        $(".txt span").html(data.count);
+        $(".pd_like span").html(data.count);
         modalClose();
     });
 }
