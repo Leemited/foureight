@@ -581,6 +581,7 @@ $(function(){
     try{
         var regid = window.android.getRegid();
         var sdkVersion = window.android.getSdkVersion();
+        console.log("sdkVersion : " +sdkVersion.toString());
         $.ajax({
             url:g5_url+"/mobile/page/ajax/ajax.regid.update.php",
             method:"post",

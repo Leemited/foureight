@@ -1,6 +1,12 @@
 <?php 
 include_once("../../../common.php");
 include_once(G5_MOBILE_PATH."/head.login.php");
+
+$app = false;
+if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
+    $app = true;
+}
+
 if($member["mb_id"]==""){
 	alert("로그인이 필요합니다.", G5_URL."/mobile/page/login_intro.php?url=".G5_MOBILE_URL."/page/mypage/settings.php");
 }
@@ -9,6 +15,8 @@ $sql = "select * from `mysetting` where id= {$id} and mb_id = '{$member["mb_id"]
 $settings = sql_fetch($sql);
 
 $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
+
+
 
 ?>
 <style>
@@ -21,6 +29,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 	<h2>푸시 알림 설정</h2>
 </div>
 <div id="settings">
+    <?php if($member["sdkVersion"] && $member["sdkVersion"] < 26 ){?>
     <div class="setting_wrap">
         <h2>소리/진동 설정</h2>
         <ul>
@@ -28,6 +37,14 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
             <li>진동 <label class="switch2"><input type="checkbox" id="vibrate_set" name="vibrate_set" <?php if($settings["vibrate_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
         </ul>
     </div>
+    <?php }else{?>
+    <div class="setting_wrap">
+        <h2>소리/진동 설정</h2>
+        <ul>
+            <li class="single" onclick="<?php if($app){?>fnAppSet();<?php }else{?>alert('앱에서 설정할 수 있습니다.');<?php }?>">앱 설정 바로 가기 <span>안드로이드 오레오 버전 이상</span></li>
+        </ul>
+    </div>
+    <?php }?>
 	<div class="setting_wrap">
 		<h2>기본 설정</h2>
 		<ul>
@@ -72,7 +89,7 @@ $(function(){
 		$(this).click(function(){
 			var type = $(this).attr("id");
 			if($(this).is(":checked")==true){
-				fnSetUpdate(type,1);	
+                fnSetUpdate(type, 1);
 			}else{
 				fnSetUpdate(type,0);
 			}
@@ -80,7 +97,6 @@ $(function(){
 	});
 
 	$("#etiquette_time_start").change(function(){
-	    $("#")
 	    var type = $(this).attr("id");
 	    var state = $(this).val();
         fnSetUpdate(type,state);
@@ -91,6 +107,9 @@ $(function(){
         fnSetUpdate(type,state);
     });
 });
+function fnAppSet(){
+    window.android.settingOn();
+}
 function fnSetUpdate(type,state){
 	$.ajax({
 		url:g5_url+"/mobile/page/mypage/ajax.settings_update.php",

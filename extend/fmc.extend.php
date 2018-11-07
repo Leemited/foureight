@@ -1,5 +1,9 @@
 <?php
-function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id=''){
+function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id='',$imgurls=''){
+    //알림 저장
+    $sql = "insert into `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0";
+    sql_query($sql);
+
     $sql = "select * from `mysetting` where mb_id = '{$mb_id}'";
     $set = sql_fetch($sql);
     if($set["push_set"] == 0) return false;
@@ -18,18 +22,15 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
     if($set[$chennal] == 0){
         return false;
     }
-    //알림 저장
-    //$sql = "insert into `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0";
-    //sql_query($sql);
 
     $apiKey = "AAAATdHUVhc:APA91bHBoGTQnwcHrTgeBbZJaF6dz9TQ2EsMSayHCbsJntos5kqxwF9RT5ujrwfSe8mXZcbIlhKAUEuuYGNV1TDqKtixh08m6HSwjVNIWEZGA9meaJ1kMjs3VuyIn5qp0-pri79r0ql9";
     $regId_array=array($reg_id);
     $url = 'https://fcm.googleapis.com/fcm/send';
     $fields = array(
         'registration_ids' => $regId_array,
-        'data' => array( "title"=>$title,"message" => $content , "content_available" => 'true',"urls" => $urls ,"chennal" => $chennal ,"channelname" => $chennalname)
-        /*'priority' => 'high',
-        'sound' => 'default'*/
+        'data' => array( "title"=>$title,"message" => $content , "content_available" => 'true',"urls" => $urls ,"chennal" => $chennal ,"channelname" => $chennalname, "imgurlstr"=>$imgurls),
+        'priority' => 'high',
+        'sound' => 'default'
     );
     $headers = array(
         'Authorization: key='.$apiKey,

@@ -197,11 +197,13 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
         <div>
             48에서는 직접적인 거래 사기와 피해를 보장해 주지 않습니다.<br>
             따라서 결제전 신중하게 판단 하시기 바랍니다.
-            <div style="background-color:#0c0c94;width:45%;padding:2vw 3vw;font-size:3vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://thecheat.co.kr/rb/?mod=_search'">
+            <div class="order_info_link" style="position: relative;width:100%;text-align: center;margin:4vw 0 6vw;display: inline-block">
+            <div style="background-color:#0c0c94;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-right:1vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://thecheat.co.kr/rb/?mod=_search'">
                 <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 사기조회 하기
             </div>
-            <div style="background-color:#0c0c94;width:45%;padding:2vw 3vw;font-size:3vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://www.unicro.co.kr/index.jsp'">
+            <div style="background-color:#fff;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-left:1vw;color:#000;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://www.unicro.co.kr/index.jsp'">
                 <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 안전거래 하기
+            </div>
             </div>
             <div class="clear"></div>
         </div>
