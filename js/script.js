@@ -259,7 +259,7 @@ function fnSetting(){
 var set_search = '';
 
 function fnSetting2(){
-    $("#searchActive").val("search");
+    $("#searchActive").val("simple");
     if($(".search_setting").attr("id") == "menuon"){
         $("#set").val(1);
         $(".search_setting").attr("id","");

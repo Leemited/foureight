@@ -491,10 +491,11 @@ while($row = sql_fetch_array($res)){
         //getRegid
         try{
             var regid = window.android.getRegid();
+            var sdkVersion = window.android.getSdkVersion();
             $.ajax({
                 url:g5_url+"/mobile/page/ajax/ajax.regid.update.php",
                 method:"post",
-                data:{regid:regid,mb_id:"<?php echo $member["mb_id"];?>"}
+                data:{regid:regid,mb_id:"<?php echo $member["mb_id"];?>",sdkVersion:sdkVersion}
             }).done(function(data){
                 console.log(data);
             })

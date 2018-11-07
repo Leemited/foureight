@@ -26,6 +26,7 @@ if(strpos($agent,"foureight")!==false){
 		<form name="flogin" action="<?php echo $login_action_url ?>" onsubmit="return flogin_submit(this);" method="post">
 		<input type="hidden" name="url" value="<?php echo $login_url ?>">
             <input type="hidden" name="regid" id="regid" value="">
+            <input type="hidden " name="sdkVersion" id="sdkVersion" value="">
 
 		<div id="login_frm">
             <?php
@@ -71,7 +72,9 @@ $(function(){
     //getRegid
     try{
         var regId = window.android.getRegid();
+        var sdkVesion = window.android.getSdkVersion();
         $("#regid").val(regId);
+        $("#sdkVertion").val(sdkVesion);
     }catch(err){
         var regId = undefined;
         console.log(err);

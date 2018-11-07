@@ -1,15 +1,16 @@
 <?php
 include_once ("./common.php");
+
 //include_once (G5_EXTEND_PATH."/fcm.extend.php");
 $title = "test";
-$content = "테스입니다.";
+$content = "테스트[채팅알림]입니다.";
 $urls = "http://mave01.cafe24.com";
 $apiKey = "AAAATdHUVhc:APA91bHBoGTQnwcHrTgeBbZJaF6dz9TQ2EsMSayHCbsJntos5kqxwF9RT5ujrwfSe8mXZcbIlhKAUEuuYGNV1TDqKtixh08m6HSwjVNIWEZGA9meaJ1kMjs3VuyIn5qp0-pri79r0ql9";
 $regId_array=array("cvKj5qAMPx8:APA91bELmU2b6h5JdiISGf1PfaSAQwv39COnx1lF4PukmXPvn5enREAe8mlPC3Qf1S_P7L81OcaZ9tj2JUbcHCtaqGbVHssXppo8rO0tDcaR9tFXNHLNbH1pAlAM10r6xzulsFCjdB1M");
 $url = 'https://fcm.googleapis.com/fcm/send';
 $fields = array(
     'registration_ids' => $regId_array,
-    'data' => array( "title"=>$title,"message" => $content , "content_available" => 'true',"urls" => $urls),
+    'data' => array( "title"=>$title,"message" => $content , "content_available" => 'true',"urls" => $urls, "channel" => 'fcm_chat_channel', '채팅알림'),
     'priority' => 'high',
     'sound' => 'default'
 );

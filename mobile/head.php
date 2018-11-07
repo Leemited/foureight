@@ -34,6 +34,7 @@ while($row = sql_fetch_array($res)){
 }
 
 //??
+/*
 if($schopt["sc_cate1"] && $schopt["sc_cate2"]){
     $sql = "select ca_id from `categorys` where `cate_name` = '{$schopt[sc_cate1]}' and `cate_depth` = 1 ";
     $ca_id = sql_fetch($sql);
@@ -42,7 +43,7 @@ if($schopt["sc_cate1"] && $schopt["sc_cate2"]){
     while($row = sql_fetch_array($res)){
         $set_cate2[] = $row;
     }
-}
+}*/
 
 $sql = "select * from `g5_write_help` where wr_is_comment = 0;";
 $res = sql_query($sql);
@@ -214,6 +215,7 @@ $alarms = sql_fetch($sql);
             <div class="search">
                 <input type="text" style="display:none;">
                 <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 1;}?>">
+                <input type="hidden" name="set_type2" id="set_type2" value="<?php if($type2){echo $type2;}?>">
                 <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
                 <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
                 <label class="switch schtype" >
@@ -236,15 +238,15 @@ $alarms = sql_fetch($sql);
             </ul>
         </div>
         <div class="search_setting">
-            <input type="hidden" value="search" name="searchActive" id="searchActive" >
+            <input type="hidden" value="<?php echo $searchActive;?>" name="searchActive" id="searchActive" >
             <input type="hidden" value="" name="set_status" id="set_status" >
             <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
             <input type="hidden" value="<?php echo $priceTo; ?>" id="sc_priceTo" name="priceTo">
-            <input type="text" value="<?php echo $order_sort;?>" name="order_sort" id="order_sort">
-            <input type="text" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
+            <input type="hidden" value="<?php echo $order_sort;?>" name="order_sort" id="order_sort">
+            <input type="hidden" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
             <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
             <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
-            <input type="text" value="<?php echo $pd_price_type;?>" name="pd_price_type" id="pd_price_type">
+            <input type="hidden" value="<?php echo $pd_price_type;?>" name="pd_price_type" id="pd_price_type">
             <div class="sch_top">
                 <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
                 <a href="javascript:fnsuggestion();">제안하기</a>
@@ -301,15 +303,15 @@ $alarms = sql_fetch($sql);
             </div>
             <div class="types sch_mid timesel" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
                 <label class="radio_tag" for="workcnt">
-                    <input type="radio" name="workcate" id="workcnt" value="0" <?php if($pd_price_type==0 || $pd_price_type==""){?>checked<?php }?>>
+                    <input type="radio" name="pd_price_type" id="workcnt" value="0" <?php if($pd_price_type ==0 || $pd_price_type==""){?>checked<?php }?>>
                     <span class="slider2 round">회당</span>
                 </label>
                 <label class="radio_tag" for="worktime">
-                    <input type="radio" name="workcate" id="worktime" value="1" <?php if($pd_price_type==1){?>checked<?php }?>>
+                    <input type="radio" name="pd_price_type" id="worktime" value="1" <?php if($pd_price_type ==1){?>checked<?php }?>>
                     <span class="slider2 round">시간당</span>
                 </label>
                 <label class="radio_tag" for="workday">
-                    <input type="radio" name="workcate" id="workday" value="2" <?php if($pd_price_type==2){?>checked<?php }?>>
+                    <input type="radio" name="pd_price_type" id="workday" value="2" <?php if($pd_price_type ==2){?>checked<?php }?>>
                     <span class="slider2 round">하루당</span>
                 </label>
             </div>
@@ -318,12 +320,12 @@ $alarms = sql_fetch($sql);
                     <h2>거래가능시간</h2>
                 </div>
                 <div>
-                    <select name="pd_timeFrom" id="pd_timeForm" class="write_input3" style="width:15vw">
+                    <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:15vw">
                         <option value="">시간선택</option>
                         <?php for($i = 0; $i< 24; $i++){
                             $time = str_pad($i,"2","0",STR_PAD_LEFT);
                             ?>
-                            <option value="<?php echo $time;?>" <?php if($pd_timeFrom==$time){?>selected<?php }?>><?php echo $time;?></option>
+                            <option value="<?php echo $time;?>" <?php if($pd_timeFrom == $time){?>selected<?php }?>><?php echo $time;?></option>
                         <?php }?>
                     </select> 시부터
                     ~
@@ -332,7 +334,7 @@ $alarms = sql_fetch($sql);
                         <?php for($i = 0; $i< 24; $i++){
                             $time = str_pad($i,"2","0",STR_PAD_LEFT);
                             ?>
-                            <option value="<?php echo $time;?>" <?php if($pd_timeTo==$time){?>selected<?php }?>><?php echo $time;?></option>
+                            <option value="<?php echo $time;?>" <?php if($pd_timeTo == $time){?>selected<?php }?>><?php echo $time;?></option>
                         <?php }?>
                     </select> 시사이
                 </div>
@@ -404,7 +406,7 @@ $alarms = sql_fetch($sql);
 				<h2>디자인율 | 48</h2>
                 <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>대표전화 : 010-3034-1746</p>
                 <ul class="agreement">
-                    <li onclick="location.href=g5_url+'/mobile/page/company/agreement.php'">이용약관</li>
+                    <li onclick="location.href=g5_url+'/test3.php'">이용약관</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/privacy.php'">개인정보 취급방침</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/location.php'">위치정보 수집약관</li>
                 </ul>
@@ -506,6 +508,7 @@ var fnc = true;
 function fnKeyword(){
     var text = $("#stx").val();
     fnfilter(text,"stx");
+    $("#searchActive").val("search");
 
     //엔터가 아닐때
     if(window.event.keyCode != 13) {
@@ -513,6 +516,7 @@ function fnKeyword(){
             setTimeout(fnkeywordon, 1500);
         }
     }else {//엔터 일때
+
         if ($("#set").val() == "2") {
             // 설정에서 검색어 체크
             $("#sch_text").val($("#stx").val());
@@ -527,6 +531,7 @@ function fnKeyword(){
 }
 
 function fnSimpleSearch(){
+    $("#searchActive").val("search");
     if ($("#set").val() == "2") {
         // 설정에서 검색어 체크
         $("#sch_text").val($("#stx").val());
@@ -553,32 +558,6 @@ $(function(){
         $("body").css("overflow","unset");
     });
 
-    var active = '';
-
-    $("input[name^=orders]").each(function(e){
-        if(e==0) {
-            $("#order_sort").val($(this).val());
-        }else{
-            var align = $("#order_sort").val();
-            var data = align + ","+$(this).val();
-            $("#order_sort").val(data);
-        }
-        if($(this).is(":checked")==true){
-            if(active == ''){
-                    active = "1";
-            }else{
-                active = active + ",1";
-            }
-        }else{
-            if(active == ''){
-                active = "0";
-            }else{
-                active = active + ",0";
-            }
-        }
-        $("#order_sort_active").val(active);
-    })
-
     $("#stx").on("focus", function(){
         $(this).attr("placeholder","");
         $(".write").hide();
@@ -601,10 +580,11 @@ $(function(){
     //getRegid
     try{
         var regid = window.android.getRegid();
+        var sdkVersion = window.android.getSdkVersion();
         $.ajax({
             url:g5_url+"/mobile/page/ajax/ajax.regid.update.php",
             method:"post",
-            data:{regid:regid,mb_id:"<?php echo $member["mb_id"];?>"}
+            data:{regid:regid,mb_id:"<?php echo $member["mb_id"];?>",sdkVersion:sdkVersion}
         }).done(function(data){
             console.log(data);
         })
@@ -615,13 +595,32 @@ $(function(){
 
 
 	$(".schtype .slider").click(function(){
+        var menuon = $(".search_setting").attr("id");
+        if(menuon=="menuon"){
+            $("#searchActive").val("simple");
+        }else{
+            $("#searchActive").val("search");
+        }
 		if($(this).prev().prop("checked") == true){
 			$(this).html("물품");
 			$(this).css({"text-align":"right"});
+
             $("#set_type").val(1);
-            $("#set_type2").val(1);
+            //$("#set_type2").val(1);
+            $("#wr_type1").val(1);
+
             $(".timesel").css("display","none");
             $(".meettime").css("display","none");
+
+            $(".top_header").css("background-color","#000");
+            $("#search").attr("placeholder","원하는 물건이 있으세요?");
+            $(".text").css({"background-color":"#ffe400","color":"#000"});
+            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_1.svg");
+            $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn.svg");
+            $("#theme-color").attr("content","#000000");
+            $("#wr_price").attr("placeholder","판매금액");
+            $("#wr_price").css("width","70%");
+            $("#wr_price2").css("display","none");
 			//카테고리 설정
 			$.ajax({
 				url:g5_url+"/mobile/page/ajax/ajax.category.php",
@@ -633,13 +632,35 @@ $(function(){
 				$("#cate2 option").remove();
 				$("#cate2").append("<option value=''>전체</option>");
 			});
+
+            $.ajax({
+                url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
+                method:"post",
+                data:{key:"type1",value:"1"}
+            }).done(function(data){
+                console.log(data);
+            });
+            fnlist(1,'');
 		}else{
 			$(this).html("능력");
 			$(this).css({"text-align":"left"});
 			$("#set_type").val(2);
-			$("#set_type2").val(2);
-			$(".timesel").css("display","block");
-			$(".meettime").css("display","block");
+			//$("#set_type2").val(2);
+            $("#wr_type1").val(2);
+            console.log($("#set_type2").val());
+            if($("#set_type2").val() == 8) {
+                $(".timesel").css("display", "block");
+                $(".meettime").css("display", "block");
+            }
+            $(".top_header").css("background-color","#ff3d00");
+            $("#search").attr("placeholder","누군가의 능력이 필요하세요?");
+            $(".text").css({"background-color":"#ff3d00","color":"#fff"});
+            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_2.svg");
+            $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn_2.svg");
+            $("#theme-color").attr("content","#000000");
+            $("#wr_price").attr("placeholder","판매금액");
+            $("#wr_price").css("width","70%");
+            $("#wr_price2").css("display","none");
 			//카테고리 설정
 			$.ajax({
 				url:g5_url+"/mobile/page/ajax/ajax.category.php",
@@ -651,14 +672,65 @@ $(function(){
 				$("#cate2 option").remove();
 				$("#cate2").append("<option value=''>전체</option>");
 			});
+
+            $.ajax({
+                url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
+                method:"post",
+                data:{key:"type1",value:"2"}
+            }).done(function(data){
+                console.log(data);
+            });
+            fnlist(1,'');
 		}
 	});
+
+    /*$(".search .slider").click(function(){
+        if($(this).prev().prop("checked") == true){
+
+
+            $(this).html("물품");
+            $(this).css({"text-align":"right"});
+            $(".top_header").css("background-color","#000");
+            $("#search").attr("placeholder","원하는 물건이 있으세요?");
+            $(".text").css({"background-color":"#ffe400","color":"#000"});
+            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_1.svg");
+            $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn.svg");
+            $("#wr_type1").val("1");
+            $("#type").val("1");
+            $("#theme-color").attr("content","#000000");
+            $("#wr_price").attr("placeholder","판매금액");
+            $("#wr_price").css("width","70%");
+            $("#wr_price2").css("display","none");
+            finish = false;
+
+            fnlist(1,'');
+        }else{
+
+            $(this).html("능력");
+            $(this).css({"text-align":"left"});
+            $(".top_header").css("background-color","#ff3d00");
+            $("#search").attr("placeholder","누군가의 능력이 필요하세요?");
+            $(".text").css({"background-color":"#ff3d00","color":"#fff"});
+            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_2.svg");
+            $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn_2.svg");
+            $("#set_type").val("2");
+            $("#wr_type1").val("2");
+            $("#type").val("2");
+            $("#theme-color").attr("content","#ff3d00");
+            $("#wr_price").attr("placeholder","계약금");
+            $("#wr_price2").attr("placeholder","거래완료금");
+            $("#wr_price").css("width","30%");
+            $("#wr_price2").css({"display":"inline-block","width":"30%"});
+            finish = false;
+
+            fnlist(1,'');
+        }
+    });*/
 
 	$("#cate").change(function(){
 		var type1 = $(".schtype .slider").text();
 		var ca_id = $("#cate option:selected").attr("id");
 		var text = $("#cate option:checked").text();
-        console.log("A");
 		$.ajax({
 			url:g5_url+"/mobile/page/ajax/ajax.category2.php",
 			method:"POST",
@@ -712,13 +784,13 @@ $(function(){
 
 	$(".radio_tag").click(function(){
 		if($("#eight").prop("checked") == true){
-		    $("#type2").val(8);
+		    $("#set_type2").val(4);
 			$(".sch_save_write").css("display","none");
 			if($("#set_type").val()==2) {
                 $(".timesel, .meettime").css("display", "none");
             }
 		}else{
-            $("#type2").val(4);
+            $("#set_type2").val(8);
 			$(".sch_save_write").css("display","inline");
 			if($("#set_type").val()==2) {
                 $(".timesel, .meettime").css("display", "block");
@@ -887,14 +959,16 @@ $(document).on("change","#pd_timeForm",function(){
 });
 
 function fnSaveSch(){
+    $("#searchActive").val("save");
     if($("#set_type").val()==""){
         alert("물건/능력을 선택해주세요");
         return false;
     }
-    /*if($("#sch_text").val() == ""){
+    if($("#stx").val() == ""){
         alert("검색어를 입력해 주세요");
         return false;
-    }*/
+    }
+
     $(".search_setting").attr("id","");
     $(".search_setting").css("top","-100vh");
     $("#id05").css("display","block");
@@ -904,7 +978,7 @@ function fnSaveSch(){
 }
 
 function fnSearchAgree(status){
-    $("#searchActive").val('save');
+    //$("#searchActive").val('save');
     $("#set_status").val(status);
 	document.simplesearch.submit();
 }
@@ -928,7 +1002,7 @@ function fnWrite(){
         alert("2차 카테고리를 선택해 주세요.");
         return false;
     }
-    document.simplesearch.submit();
+
 }
 
 

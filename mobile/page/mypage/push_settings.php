@@ -37,12 +37,12 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 	<div class="setting_wrap">
 		<h2>알림 종류</h2>
 		<ul>
+			<li>기본 알림 <label class="switch2" for="notice_alarm_set"><input type="checkbox" id="notice_alarm_set" name="notice_alarm_set" <?php if($settings["notice_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li>구매예약 알림<label class="switch2" for="pay_reser_set"><input type="checkbox" id="pay_reser_set" name="pay_reser_set" <?php if($settings["pay_reser_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li>딜/제시하기 알림<label class="switch2" for="pricing_set"><input type="checkbox" id="pricing_set" name="pricing_set" <?php if($settings["pricing_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li>채팅 알림 <label class="switch2" for="chat_alarm_set"><input type="checkbox" id="chat_alarm_set" name="chat_alarm_set" <?php if($settings["chat_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li>댓글 알림 <label class="switch2" for="comment_alarm_set"><input type="checkbox" id="comment_alarm_set" name="comment_alarm_set" <?php if($settings["comment_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li>답변 알림 <label class="switch2" for="recomment_alarm_set"><input type="checkbox" id="recomment_alarm_set" name="recomment_alarm_set" <?php if($settings["recomment_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li>게시글 알림 <label class="switch2" for="notice_alarm_set"><input type="checkbox" id="notice_alarm_set" name="notice_alarm_set" <?php if($settings["notice_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 			<li>검색 알림 <label class="switch2" for="search_alarm_set"><input type="checkbox" id="search_alarm_set" name="search_alarm_set" <?php if($settings["search_alarm_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
 		</ul>
 	</div>

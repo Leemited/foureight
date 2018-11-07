@@ -27,42 +27,42 @@ if($order_sort){
     for($i=0;$i<count($order_sorts);$i++){
         if($order_sorts[$i]=="pd_date"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
-                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].'>'.
                 '<span class="round">최신순</span></label>';
         }
         if($order_sorts[$i]=="pd_price"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
-                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].'>'.
                 '<span class="round">가격순</span></label>';
         }
         if($order_sorts[$i]=="pd_recom"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
-                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].'>'.
                 '<span class="round">추천순</span></label>';
         }
         if($order_sorts[$i]=="pd_hits"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
-                        '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked.'>'.
+                        '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].'>'.
                         '<span class="round">인기순</span></label>';
         }
         if($order_sorts[$i]=="pd_loc"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
-                        '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked.'>'.
+                        '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].'>'.
                         '<span class="round">거리순</span></label>';
         }
     }
@@ -269,26 +269,23 @@ var mapContainer = document.getElementById('map'), // 지도를 표시할 div
     };
 
 map = new daum.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
-//    var addrs = new Array();
-//    <?php //for($i=0;$i<count($pro);$i++){?>
-//        addrs[<?php //echo $i;?>//] = "<?php //echo $pro[$i]["pd_location"];?>//";
-//    <?php //}?>
-//    setLatLng(addrs);
+
 if(lat && lng) {
     <?php if(count($pro) > 0) {?>
     // 마커를 표시할 위치와 title 객체 배열입니다
     var positions = [
         <?php for($i=0;$i<count($pro);$i++){
+            if($pro[$i]["pd_lat"] && $pro[$i]["pd_lng"]){
             $imgs = explode(",",$pro[$i]["pd_images"]);
             ?>
         {
             title: "<?php echo $pro[$i]["pd_name"];?>",
             price: "<?php echo $pro[$i]["pd_price"];?>",
-            latlng: new daum.maps.LatLng(<?php echo $pro[$i]["pd_lat"];?>,<?php echo $pro[$i]["pd_lng"];?>),
+            latlng: new daum.maps.LatLng('<?php echo $pro[$i]["pd_lat"];?>','<?php echo $pro[$i]["pd_lng"];?>'),
             image: "<?php echo $imgs[0];?>",
             pd_id : "<?php echo $pro[$i]["pd_id"];?>"
         },
-        <?php }?>
+        <?php } } ?>
         {
             title: '현재위치',
             latlng: new daum.maps.LatLng(lat, lng)
@@ -330,6 +327,7 @@ var overlay = [];
 var markers = [];
 var i = 0;
 var bounds = new daum.maps.LatLngBounds();
+console.log(positions);
 positions.forEach(function(pos){
     // 마커 이미지의 이미지 크기 입니다
     var imageSize = new daum.maps.Size(30, 42);
@@ -351,7 +349,7 @@ positions.forEach(function(pos){
 
 
     if(pos.title!="현재위치") {
-        bounds.extend(pos.latlng);
+        //bounds.extend(pos.latlng);
 
         var back = "";
         if (pos.image != "") {
@@ -390,11 +388,9 @@ positions.forEach(function(pos){
         });
     }
 
-    <?php if(count($pro) == 0){?>
     bounds.extend(pos.latlng);
-    <?php }?>
-
     map.setBounds(bounds);
+
     i++;
 });
 

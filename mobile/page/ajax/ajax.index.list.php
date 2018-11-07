@@ -22,10 +22,6 @@ if($member["mb_id"]){
     $mb_id = session_id();
 }
 
-/*if($stx && $searchActive =="search"){
-
-}*/
-
 if($sc_id){
     $sql = "select * from `my_search_list` where sc_id = '{$sc_id}'";
     $schopt = sql_fetch($sql);
@@ -39,13 +35,14 @@ if($sc_id){
     $priceFrom = $schopt["sc_priceFrom"];
     $priceTo = $schopt["sc_priceTo"];
     $pd_price_type = $schopt["sc_worktime"];
-    $pd_timeForm = $schopt["sc_meetFrom"];
+    $pd_timeFrom = $schopt["sc_meetFrom"];
     $pd_timeTo = $schopt["sc_meetTo"];
 }
 
 if($set_type){
     $search .= " and p.pd_type = {$set_type}";
 }
+
 if($type2){
     $search .= " and p.pd_type2 = {$type2}";
 }
@@ -65,10 +62,13 @@ if($pd_price_type){
     $search .= " and p.pd_price_type = {$pd_price_type}";
 }
 
-if($pd_timeForm && $pd_timeTo){
-    $search .= " and p.pd_timeForm = '{$pd_timeForm}' and p.pd_timeTo = '{$pd_timeTo}'";
+if($pd_timeFrom && $pd_timeTo){
+    $search .= " and p.pd_timeFrom = '{$pd_timeFrom}' and p.pd_timeTo = '{$pd_timeTo}'";
 }
 
+if($mb_level){
+    $search .= " and m.mb_level = 4 ";
+}
 if($order_sort){
     $od = "";
     $order_sorts = explode(",",$order_sort);
@@ -76,54 +76,56 @@ if($order_sort){
     for($i=0;$i<count($order_sorts);$i++){
         if($order_sorts[$i]=="pd_date"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_date desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
-                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].'>'.
                 '<span class="round">최신순</span></label>';
         }
         if($order_sorts[$i]=="pd_price"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_price asc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
-                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].'>'.
                 '<span class="round">가격순</span></label>';
         }
         if($order_sorts[$i]=="pd_recom"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_recom desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
-                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].'>'.
                 '<span class="round">추천순</span></label>';
         }
         if($order_sorts[$i]=="pd_hits"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_hits desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
-                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].'>'.
                 '<span class="round">인기순</span></label>';
         }
         if($order_sorts[$i]=="pd_loc"){
             if($actives[$i] == 1){
-                $checked = "checked";
-                if($lat && $lng) {
-                    $ods[] = " , distance asc";
+                $checked[$i] = "checked";
+                if($_SESSION["lat"] && $_SESSION["lng"]){
+                    $ods[] = " ISNULL(p.pd_lat) asc, distance asc";
                 }
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
-                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].'>'.
                 '<span class="round">거리순</span></label>';
         }
     }
+    //print_r2($ods);
     $od = " order by ". implode(",",$ods);
 }
+
 
 if($_SESSION["lat"] && $_SESSION["lng"]){
     $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";

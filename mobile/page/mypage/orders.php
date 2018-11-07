@@ -20,7 +20,7 @@ if(count($order_list)>1){
     $order_item_name .= " 외 ".(count($order_list)-1)."개";
 }
 
-$sql = "select * from `my_address` where mb_id = '{$member["mb_id"]}'";
+$sql = "select * from `my_address` where mb_id = '{$member["mb_id"]}' order by addr_default desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $my_addres[] = $row;
@@ -32,6 +32,22 @@ $mb_hp = explode("-",$member["mb_hp"]);
 
 $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=".$cart_idss;
 ?>
+<div id="id00" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
+                <input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id" id="mb_id">
+                <input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id" id="mb_id">
+                <input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id" id="mb_id">
+                <h2>배송지저장</h2>
+                <div>
+                    <input type="text" value="" name="addr_name" id="addr_name" placeholder="배송지 이름" required>
+                </div>
+                <div>
+                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="저장" onclick="fnAddrSave(1);" ><input type="button" value="기본배송지로저장" onclick="fnAddrSave(2);" style="width:auto;margin-left:1vw" >
+                </div>
+        </div>
+    </div>
+</div>
 <div class="sub_head">
     <div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2>주문/결제하기</h2>
@@ -56,12 +72,12 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                     $rand = rand(1,13);
                     ?>
                     <div class="bg rand_bg<?php echo $rand;?> item_images" >
-                        <div class="tags">
-                            <?php for($k=0;$k<count($tags);$k++){
+                        <div class="tags" style="display:table">
+                            <?php //for($k=0;$k<count($tags);$k++){
                                 $rand_font = rand(3,6);
                                 ?>
-                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                            <?php }?>
+                                <div class="rand_size<?php echo $rand_font;?>" style="display:table-cell;vertical-align: middle;text-align: center"><?php echo $order_list[0]["pd_tag"];?></div>
+                            <?php //}?>
                         </div>
                         <div class="clear"></div>
                     </div>
@@ -71,12 +87,12 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                 $rand = rand(1,13);
                 ?>
                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
-                    <div class="tags">
-                        <?php for($k=0;$k<count($tags);$k++){
+                    <div class="tags" style="display:table;width:100%;height:100%;">
+                        <?php //for($k=0;$k<count($tags);$k++){
                             $rand_font = rand(3,6);
                             ?>
-                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                        <?php }?>
+                            <div class="rand_size<?php echo $rand_font;?>" style="display:table-cell;vertical-align: middle;text-align: center"><?php echo $order_list[0]["pd_tag"];?></div>
+                        <?php //}?>
                     </div>
                     <div class="clear"></div>
                 </div>
@@ -95,8 +111,16 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
     </div>
     <div class="address_tab">
         <ul>
+            <?php if(count($my_addres) == 0){?>
             <li class="active" style="width:20%;">기본배송지</li>
+            <?php }else{
+                for($i=0;$i<count($my_addres);$i++){
+                ?>
+                    <li style="width:20%;float:left" id='<?php echo $my_addres[$i]["id"];?>' <?php if($my_addres[$i]["addr_default"] == 1){?>class="active"<?php }?> ><?php if($my_addres[$i]["addr_default"]==1){?>기본배송지<?php }else{ if($my_addres[$i]["addr_name"]){echo $my_addres[$i]["addr_name"];}else{echo "이름없음";}}?></li>
+            <?php }
+                }?>
         </ul>
+        <div class="clear"></div>
     </div>
     <form action="<?php echo G5_MOBILE_URL?>/page/mypage/order_update.php" name="order_form_update">
     <div class="order_write">
@@ -106,7 +130,7 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                 <div class="cell title">받는분</div>
                 <div class="cell inputs">
                     <input type="text" name="od_name" id="od_name" value="<?php echo $member["mb_name"];?>" class="order_input02" required>
-                    <input type="button" value="배송지저장" class="order_addr">
+                    <input type="button" value="배송지저장" class="order_addr" onclick="fnAddr();">
                 </div>
             </div>
             <div class="row">
@@ -115,7 +139,7 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                     <input type="text" name="od_zipcode" id="od_zipcode" value="<?php echo $member["mb_zip1"];?>" class="order_input02" required readonly>
                     <input type="button" value="우편번호 검색" class="order_addr" onclick="sample3_execDaumPostcode()">
                 </div>
-                <div id="wrap" style="display:none;border:1px solid;width:100%;height:300px;margin:5px 0;position:relative">
+                <div id="wraps" style="display:none;border:1px solid;width:100%;height:300px;margin:5px 0;position:relative">
                     <img src="//t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
                 </div>
             </div>
@@ -168,6 +192,20 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
             </div>
         </div>
     </div>
+    <div class="order_info">
+        <h2>사기조회 / 안전개래 안내</h2>
+        <div>
+            48에서는 직접적인 거래 사기와 피해를 보장해 주지 않습니다.<br>
+            따라서 결제전 신중하게 판단 하시기 바랍니다.
+            <div style="background-color:#0c0c94;width:45%;padding:2vw 3vw;font-size:3vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://thecheat.co.kr/rb/?mod=_search'">
+                <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 사기조회 하기
+            </div>
+            <div style="background-color:#0c0c94;width:45%;padding:2vw 3vw;font-size:3vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://www.unicro.co.kr/index.jsp'">
+                <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 안전거래 하기
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
     <div class="order_btns">
         <input type="button" value="직거래" class="order_btn" onclick="orderDirect()">
         <input type="button" value="즉시결재" class="order_btn2" onclick="orderUpdate()">
@@ -204,7 +242,7 @@ function orderUpdate(){
                 console.log(rsp.mt_id);
                 document.order_form_update.submit();
             } else {
-                alert('aa');
+                alert(rep);
             }
         });
         //document.order_form_update.submit();
@@ -215,17 +253,98 @@ function orderUpdate(){
 function orderDirect(){
     if(confirm("직거래 이용시 판매자의 동의가 필요합니다.")){
         //판매자에게 동의 확인 알림 확인 후 처리
-
+        $.ajax({
+            url:g5_url+"/mobile/page/mypage/ajax.pay_direct.php",
+            method:"post",
+            data:{pd_ids:pd_ids}
+        })
     }else{
         return false;
     }
 }
 
+function fnAddr(){
+    var zipcode = $("#od_zipcode").val();
+    var addr1 = $("#od_address1").val();
+    var addr2 = $("#od_address2").val();
+    var addr_mbname = $("#od_name").val();
+    if(zipcode=="" && addr1 == "" && addr2=="" && addr_mbname==""){
+        alert("주소정보를 입력해 주세요.");
+        return false;
+    }
+    $("#id00").css("display","block");
+    $("html,body").css("height","100vh");
+    $("html,body").css("overflow","hidden");
+    location.hash = "modal";
+}
+
+function fnAddrSave(type){
+    var zipcode = $("#od_zipcode").val();
+    var addr1 = $("#od_address1").val();
+    var addr2 = $("#od_address2").val();
+    var addr_name = $("#addr_name").val();
+    var addr_mbname = $("#od_name").val();
+    if(addr_name==""){
+        alert("배송지명을 입력해 주세요.");
+        return false;
+    }
+    $.ajax({
+        url:g5_url+"/mobile/page/mypage/ajax.add_address.php",
+        method:"post",
+        data:{zipcode:zipcode,addr1:addr1,addr2:addr2,type:type,addr_name:addr_name,addr_mbname:addr_mbname},
+        dataType:"json"
+    }).done(function(data){
+        console.log(data);
+        if(data.result == 0){
+            alert("배송지저장 갯수를 초과 했습니다.");
+        }
+        if(data.result==2){
+            alert("등록되었습니다.");
+            if(type==2){
+                var li = "<li id='"+data.id+"' class='active' style='width:20%;float:left'>"+addr_name+"</li>";
+                $(".address_tab li").removeClass("active");
+                $(".address_tab ul").prepend(li);
+            }else{
+                var li = "<li id='"+data.id+"' style='width:20%;float:left'>"+addr_name+"</li>";
+                $(".address_tab ul").append(li);
+            }
+
+        }if(data.result==1){
+            alert("중복된 정보 입니다.");
+        }if(data.result==3){
+            alert("입력 정보 오류로 인해 등록이 취소 되었습니다.");
+        }
+        modalClose();
+    });
+}
+$(function(){
+   $(document).on("click",".address_tab li",function(){
+       console.log("A");
+      if(!$(this).hasClass("active")){
+       console.log("B");
+          var id = $(this).attr("id");
+          $(this).addClass("active");
+          $(".address_tab li").not($(this)).removeClass("active");
+          $.ajax({
+              url:g5_url+"/mobile/page/mypage/ajax.select_address.php",
+              method:"post",
+              data:{id:id},
+              dataType:"json"
+          }).done(function(data){
+              console.log(data);
+              $("#od_name").val(data.addr_mbname);
+              $("#od_zipcode").val(data.addr_zipcode);
+              $("#od_address1").val(data.addr_address1);
+              $("#od_address2").val(data.addr_address2);
+          })
+      }
+   });
+});
 </script>
 <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
 <script>
     // 우편번호 찾기 찾기 화면을 넣을 element
-    var element_wrap = document.getElementById('wrap');
+    var element_wrap = document.getElementById('wraps');
 
     function foldDaumPostcode() {
         // iframe을 넣은 element를 안보이게 한다.
@@ -260,7 +379,7 @@ function orderDirect(){
 
                 // 우편번호와 주소 정보를 해당 필드에 넣는다.
                 document.getElementById('od_zipcode').value = data.zonecode; //5자리 새우편번호 사용
-                document.getElementById('od_adress1').value = fullAddr;
+                document.getElementById('od_address1').value = fullAddr;
 
                 // iframe을 넣은 element를 안보이게 한다.
                 // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)

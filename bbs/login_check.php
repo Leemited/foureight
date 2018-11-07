@@ -41,6 +41,10 @@ if($regid){
     $sql = "update {$g5['member_table']} set regid = '{$regid}' where mb_id = '{$mb[$mb_id]}'";
     sql_query($sql);
 }
+if($sdkVersion){
+    $sql = "update {$g5['member_table']} set sdkVersion = '{$sdkVersion}' where mb_id = '{$mb[$mb_id]}'";
+    sql_query($sql);
+}
 
 // 회원아이디 세션 생성
 set_session('ss_mb_id', $mb['mb_id']);

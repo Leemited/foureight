@@ -14,14 +14,14 @@ if($member["mb_id"]){
 $search = " mb_id = '{$mb_id}' ";
 
 //검색 저장 가져오기
-$sql = "select * from `my_search_list` where {$search} and sc_savetype = 1 order by sc_status desc , sc_id desc";
+$sql = "select * from `my_search_list` where {$search} and sc_savetype = 2 order by sc_status desc , sc_id desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $list2[] = $row;
 }
 
 //간편검색 5개 가져오기
-$sql = "select * from `my_search_list` where {$search} and sc_savetype = 2 order by sc_status desc , sc_id desc  limit 0, 5";
+$sql = "select * from `my_search_list` where {$search} and sc_savetype = 1 order by sc_status desc , sc_id desc  limit 0, 5";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;
@@ -38,8 +38,11 @@ while($row = sql_fetch_array($res)){
 		<article class="post">
 			<div class="my_search">
                 <ul class="lists">
+                    <?php if(count($list)==0 && count($list2)==0){?>
+                    <li class="no-list">검색된 리스트가 없습니다.</li>
+                    <?php }?>
                     <?php for($i=0;$i<count($list2);$i++){?>
-                        <li class="sc_item <?php if($list22[$i]["set_alarm"]== 1){?>save_item<?php }?>" >
+                        <li class="sc_item <?php if($list2[$i]["set_alarm"]== 1){?>save_item<?php }?>" >
                             <div class="types" onclick="fnSearch('<?php echo $list2[$i]["sc_id"];?>')">
                                 <?php if($list2[$i]["sc_priceFrom"] != 0){?>
                                     <h2><?php echo $list2[$i]["sc_type2"];?></h2>
@@ -50,10 +53,10 @@ while($row = sql_fetch_array($res)){
                             <div class="cont" onclick="fnSearch('<?php echo $list2[$i]["sc_id"];?>')">
                                 <p><?php echo $list2[$i]["sc_datetime"];?></p>
                                 <?php if($list2[$i]["sc_priceFrom"] != 0){?>
-                                    <h3><?php if($list2[$i]["sc_cate1"]){echo $list2[$i]["sc_cate1"];}else{echo "전체검색 ";}?>|<?php echo number_format($list2[$i]["sc_priceFrom"]);?> 원 ~ <?php echo number_format($list2[$i]["sc_priceTo"]);?> 원</h3>
-                                    <span><?php if($list2[$i]["sc_cate2"]){echo $list2[$i]["sc_cate2"];}else{echo "전체검색";}?></span>
+                                    <h3><?php if($list2[$i]["sc_tag"]){echo $list2[$i]["sc_tag"];}else{echo "검색어 없음";}?> | <?php echo number_format($list2[$i]["sc_priceFrom"]);?> 원 ~ <?php echo number_format($list2[$i]["sc_priceTo"]);?> 원</h3>
+                                    <span><?php if($list2[$i]["sc_cate1"]){echo $list2[$i]["sc_cate1"];}else{echo "전체검색 ";}?><?php if($list2[$i]["sc_cate2"]){echo " / ". $list2[$i]["sc_cate2"];}else{echo " / 전체검색";}?></span>
                                 <?php  }else{ ?>
-                                <h3>간편검색 : <?php if($list2[$i]["sc_type"]==1){echo "<span>[물건]</span>";}else{echo "<span>[능력]</span>";}?><?php echo $list2[$i]["sc_tag"];?>
+                                <h3>간편검색 : <?php if($list2[$i]["sc_type"]==1){echo "<span>[물건]</span>";}else{echo "<span>[능력]</span>";}?><?php if($list2[$i]["sc_tag"]){echo $list2[$i]["sc_tag"];}else{echo "검색어 없음";}?>
                                     <?php }?>
                             </div>
                             <div class="btn">
@@ -67,8 +70,9 @@ while($row = sql_fetch_array($res)){
                             </div>
                         </li>
                     <?php } ?>
+                    <li class="search_div"></li>
                     <?php for($i=0;$i<count($list);$i++){?>
-                        <li class="sc_item <?php if($list[$i]["set_alarm"]== 1){?>save_item<?php }?>" >
+                        <li class="sc_item " >
                             <div class="types" onclick="fnSearch('<?php echo $list[$i]["sc_id"];?>')">
                                 <?php if($list[$i]["sc_priceFrom"] != 0){?>
                                 <h2><?php echo $list[$i]["sc_type2"];?></h2>
@@ -95,10 +99,8 @@ while($row = sql_fetch_array($res)){
                                 <input type="button" value="삭제" class="schList_btn" onclick="search_del('<?php echo $list[$i]["sc_id"];?>')">
                             </div>
                         </li>
-                    <?php }
-                    if(count($list)==0 && count($list2)==0){?>
-                        <li class="no-list">검색된 리스트가 없습니다.</li>
-                    <?php }?>
+                    <?php } ?>
+
                 </ul>
             </div>
 		</article>

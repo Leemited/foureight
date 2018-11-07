@@ -1,13 +1,35 @@
 <?php
-function send_FCM($reg_id,$title,$content,$urls){
-    $apiKey = "AAAAivnhn8g:APA91bF80E_Eqt7LWly5fqYDME_UmsQQDx_nhoiyQtLUo0iwNqUX4cPoaHIStyeUXb3RLT-PckzQyCGS5VZqSw-r6l-NfARyFdH2gV82481_DDmGp9yZUk93JBilVyIoJdrFurdjnErxBCQI--LywGanG7dHur8jhg";
+function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id=''){
+    $sql = "select * from `mysetting` where mb_id = '{$mb_id}'";
+    $set = sql_fetch($sql);
+    if($set["push_set"] == 0) return false;
+
+    //현재 시간 체크 [에티켓설정시]
+    if($set["etiquette_set"]==1){
+        $now = date("H:i:s");
+        $start = date("H:i:s",strtotime($set["etiquette_time_start"].":00:00"));
+        $end = date("H:i:s",strtotime($set["etiquette_time_end"].":00:00"));
+
+        if(strtotime($now) < strtotime($start) && strtotime($now) > strtotime($end)){
+            return false;
+        }
+    }
+    //설정 대입
+    if($set[$chennal] == 0){
+        return false;
+    }
+    //알림 저장
+    //$sql = "insert into `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0";
+    //sql_query($sql);
+
+    $apiKey = "AAAATdHUVhc:APA91bHBoGTQnwcHrTgeBbZJaF6dz9TQ2EsMSayHCbsJntos5kqxwF9RT5ujrwfSe8mXZcbIlhKAUEuuYGNV1TDqKtixh08m6HSwjVNIWEZGA9meaJ1kMjs3VuyIn5qp0-pri79r0ql9";
     $regId_array=array($reg_id);
     $url = 'https://fcm.googleapis.com/fcm/send';
     $fields = array(
         'registration_ids' => $regId_array,
-        'data' => array( "title"=>$title,"message" => $content , "content_available" => 'true',"urls" => $urls),
-        'priority' => 'high',
-        'sound' => 'default'
+        'data' => array( "title"=>$title,"message" => $content , "content_available" => 'true',"urls" => $urls ,"chennal" => $chennal ,"channelname" => $chennalname)
+        /*'priority' => 'high',
+        'sound' => 'default'*/
     );
     $headers = array(
         'Authorization: key='.$apiKey,
@@ -29,9 +51,10 @@ function send_FCM($reg_id,$title,$content,$urls){
 
     return $result;
 }
+//전체 보내기
 function send_reserve_FCM($title,$content,$urls){
     $apiKey = "AAAAivnhn8g:APA91bF80E_Eqt7LWly5fqYDME_UmsQQDx_nhoiyQtLUo0iwNqUX4cPoaHIStyeUXb3RLT-PckzQyCGS5VZqSw-r6l-NfARyFdH2gV82481_DDmGp9yZUk93JBilVyIoJdrFurdjnErxBCQI--LywGanG7dHur8jhg";
-    $sql = "select regid from `g5_member` WHERE regid<>'' and mb_id = 'admin';";
+    $sql = "select regid from `g5_member` WHERE regid<>'' and mb_id = 'admin' ;";
     $rs = sql_query($sql);
     //$num = mysql_num_rows($rs);
     for($i=0;$row=sql_fetch_array($rs);$i++){

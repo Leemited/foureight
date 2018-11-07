@@ -29,24 +29,26 @@ if($member["mb_id"]){
 }else{
     $mb_id = session_id();
 }
+echo $searchActive;
 
-if($searchActive =="search") {
+if($searchActive !="save") {
     //그냥 검색일경우
-
+    if($stx) {
+        //전체 검색어 업데이트
+        $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), '" . $_SERVER["REMOTE_ADDR"] . "')";
+        sql_query($sql);
+        //저장된 검색어를 불러올 경우 실행
+        //검색목록 저장 or 업데이트
+        //if(!$set_sc_id) {
+        $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_priceFrom = '{$priceFrom}', sc_priceTo = '{$priceTo}', sc_align='{$order_sort}',sc_align_active='{$order_sort_active}', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_savetype = 1";
+        sql_query($sql);
+    }
+}else if($searchActive == "save"){
     //전체 검색어 업데이트
     $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), '" . $_SERVER["REMOTE_ADDR"] . "')";
     sql_query($sql);
 
-    //저장된 검색어를 불러올 경우 실행
-    //검색목록 저장 or 업데이트
-    //if(!$set_sc_id) {
-    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='', sc_cate1 = '', sc_cate2 = '',sc_align='{$order_sort}',sc_align_active='{$order_sort_active}' sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_savetype = 1";
-    echo $sql;
-    sql_query($sql);
-}
-if($searchActive == "save"){
-    
-    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$pd_type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_price_type = '{$pd_price_type}', sc_timeFrom = '{$pd_timeFrom}' , sc_timeTo = '{$pd_timeTo}', sc_savetype = 2, sc_status = '{$set_status}'";
+    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_priceFrom = '{$priceFrom}', sc_priceTo = '{$priceTo}',sc_align='{$order_sort}',sc_align_active='{$order_sort_active}', sc_price_type = '{$pd_price_type}', sc_timeFrom = '{$pd_timeFrom}' , sc_timeTo = '{$pd_timeTo}', sc_savetype = 2, set_alarm = '{$set_status}'";
     echo $sql;
     sql_query($sql);
     $sc_id = sql_insert_id();
@@ -64,20 +66,20 @@ if($sc_id){
     $order_sort_active = $schopt["sc_align_active"];
     $priceFrom = $schopt["sc_priceFrom"];
     $priceTo = $schopt["sc_priceTo"];
-    $pd_price_type = $schopt["sc_worktime"];
-    $pd_timeForm = $schopt["sc_meetFrom"];
-    $pd_timeTo = $schopt["sc_meetTo"];
-}else{
-    echo "간편 검색";
-    print_r2($_REQUEST);
+    $pd_price_type = $schopt["sc_price_type"];
+    $pd_timeFrom = $schopt["sc_timeFrom"];
+    $pd_timeTo = $schopt["sc_timeTo"];
 }
 
 if($set_type){
-    $search .= " and p.pd_type = {$set_type}";
+    $search .= " and p.pd_type = '{$set_type}'";
+}else{
+    $search .= " and p.pd_type = 1";
 }
 if($type2){
-    $search .= " and p.pd_type2 = {$type2}";
+    $search .= " and p.pd_type2 = '{$type2}'";
 }
+
 if($stx){
     $search .= " and (p.pd_name like '%{$stx}%' or p.pd_tag like '%{$stx}%' or p.pd_cate like '%{$stx}%' or p.pd_cate2 like '%{$stx}%')";
 }
@@ -94,8 +96,11 @@ if($pd_price_type){
     $search .= " and p.pd_price_type = {$pd_price_type}";
 }
 
-if($pd_timeForm != "00" && $pd_timeTo != "00" && $pd_timeForm != $pd_timeTo){
-    $search .= " and p.pd_timeForm = '{$pd_timeForm}' and p.pd_timeTo = '{$pd_timeTo}'";
+if($pd_timeFrom && $pd_timeTo){
+    $search .= " and p.pd_timeFrom = '{$pd_timeFrom}' and p.pd_timeTo = '{$pd_timeTo}'";
+}
+if($mb_level){
+    $search .= " and m.mb_level = 4 ";
 }
 
 if($order_sort){
@@ -105,47 +110,49 @@ if($order_sort){
     for($i=0;$i<count($order_sorts);$i++){
         if($order_sorts[$i]=="pd_date"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_date desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
-                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].'>'.
                 '<span class="round">최신순</span></label>';
         }
         if($order_sorts[$i]=="pd_price"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_price asc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
-                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].'>'.
                 '<span class="round">가격순</span></label>';
         }
         if($order_sorts[$i]=="pd_recom"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_recom desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
-                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].'>'.
                 '<span class="round">추천순</span></label>';
         }
         if($order_sorts[$i]=="pd_hits"){
             if($actives[$i] == 1){
-                $checked = "checked";
+                $checked[$i] = "checked";
                 $ods[] = " p.pd_hits desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
-                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].'>'.
                 '<span class="round">인기순</span></label>';
         }
         if($order_sorts[$i]=="pd_loc"){
             if($actives[$i] == 1){
-                $checked = "checked";
-                $ods[] = " , distance asc";
+                $checked[$i] = "checked";
+                if($_SESSION["lat"] && $_SESSION["lng"]) {
+                    $ods[] = " ISNULL(p.pd_lat) asc, distance asc";
+                }
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
-                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked.'>'.
+                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].'>'.
                 '<span class="round">거리순</span></label>';
         }
     }
@@ -195,14 +202,14 @@ while($row = sql_fetch_array($res)){
 	$list[] = $row;
 }
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od}";
+
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $pd_ids[] = $row["pd_id"];
 }
 
-
 //검색 최근 목록 저장
-/*if($schopt) {
+if($sc_id) {
     $sql = "select *,count(*)as cnt from `save_read` where sc_id = '{$sc_id}' and mb_id = '{$wished_id}' ";
     $saves = sql_fetch($sql);
     $save_pd_id_all = explode(",",$saves["pd_ids"]);
@@ -221,7 +228,7 @@ while($row = sql_fetch_array($res)){
         //echo $sql;
         sql_query($sql);
     }
-}*/
+}
 
 
 //ad 가져오기
@@ -572,62 +579,6 @@ $(document).ready(function(){
 
 	//masonry 초기화
 	initpkgd();
-
-	$(".search .slider").click(function(){
-		if($(this).prev().prop("checked") == true){
-
-		    $.ajax({
-                url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
-                method:"post",
-                data:{key:"type1",value:"1"}
-            }).done(function(data){
-               console.log(data);
-            });
-			$(this).html("물품");
-			$(this).css({"text-align":"right"});
-			$(".top_header").css("background-color","#000");
-			$("#search").attr("placeholder","원하는 물건이 있으세요?");
-			$(".text").css({"background-color":"#ffe400","color":"#000"});
-			$(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_1.svg");
-			$(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn.svg");
-			$("#set_type").val("1");
-			$("#wr_type1").val("1");
-			$("#type").val("1");
-            $("#theme-color").attr("content","#000000");
-            $("#wr_price").attr("placeholder","판매금액");
-            $("#wr_price").css("width","70%");
-            $("#wr_price2").css("display","none");
-			finish = false;
-
-			fnlist(1,'');
-		}else{
-            $.ajax({
-                url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
-                method:"post",
-                data:{key:"type1",value:"2"}
-            }).done(function(data){
-                console.log(data);
-            });
-			$(this).html("능력");
-			$(this).css({"text-align":"left"});
-			$(".top_header").css("background-color","#ff3d00");
-			$("#search").attr("placeholder","누군가의 능력이 필요하세요?");
-			$(".text").css({"background-color":"#ff3d00","color":"#fff"});
-            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_2.svg");
-			$(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn_2.svg");
-			$("#set_type").val("2");
-			$("#wr_type1").val("2");
-			$("#type").val("2");
-            $("#theme-color").attr("content","#ff3d00");
-            $("#wr_price").attr("placeholder","계약금");
-            $("#wr_price2").attr("placeholder","거래완료금");
-            $("#wr_price").css("width","30%");
-            $("#wr_price2").css({"display":"inline-block","width":"30%"});
-			finish = false;
-
-			fnlist(1,'');
-		}
-	});
 
     /*$("#wr_type2").change(function(){
         if($(this).prop("checked")==true){
@@ -1048,11 +999,7 @@ function fnlist(num,list_type){
     stx = $("#stx").val();
     app = "<?php echo $app;?>";
     type1 = $("#set_type").val();
-    if($("#four").prop("checked") == true){
-        type2 = 8;
-    }else {
-        type2 = 4;
-    }
+    type2 = $("#set_type2").val();
     if($("#mb_level").prop("checked")==true) {
         typecompany = 4;
     }else{
@@ -1064,6 +1011,8 @@ function fnlist(num,list_type){
     priceTo = $("#sc_priceTo").val();
     sorts = $("#order_sort").val();
     mb_id = $("#mb_id").val();
+    var searchActive = $("#searchActive").val();
+    //if(searchActive != "search") {
     align = $("#order_sort").val();
     orderactive = $("#order_sort_active").val();
     price_type = $("#pd_price_type").val();
@@ -1079,7 +1028,7 @@ function fnlist(num,list_type){
 	$.ajax({
 		url:g5_url+"/mobile/page/ajax/ajax.index.list.php",
 		method:"POST",
-		data:{page:page,list_type:list_type,stx:stx,app:app,type1:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo},
+		data:{page:page,list_type:list_type,stx:stx,app:app,set_type:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo},
 		beforeSend:function(){
             $('.loader').show();
 		},
@@ -1087,7 +1036,7 @@ function fnlist(num,list_type){
 			$(".loader").css("display","none");
 		}
 	}).done(function(data){
-	    console.log(data);
+	    //console.log(data);
 		if(data.indexOf("no-list")==-1){
 			if(num == 1){
                 //새리스트
@@ -1218,7 +1167,15 @@ function fnSimpleWrite(){
         return false;
     }
 }
-
+function doNotReload(){
+    if((event.ctrlKey == true && (event.keyCode == 78 || event.keyCode == 82)) || (event.keyCode == 116))
+    {
+        event.keyCode = 0;
+        event.cancelBubble = true;
+        event.returnValue = false;
+    }
+}
+document.onkeydown = doNotReload;
 </script>
 <script src="https://hammerjs.github.io/dist/hammer.js"></script>
 
