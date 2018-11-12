@@ -349,9 +349,15 @@ while($row = sql_fetch_array($res)){
                     <div class="sugg"><a href="javascript:fnsuggestion();">제안하기</a></div>
                 </li>
             </ul>
-            <!-- <div class="copyright" style="">
-				<img src="<?php echo G5_IMG_URL?>/mobile_menu_logo.png" alt="" />
-			</div> -->
+            <div class="copyright" style="">
+                <h2>디자인율 | 48</h2>
+                <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>대표전화 : 070 4090 4811</p>
+                <ul class="agreement">
+                    <li onclick="location.href=g5_url+'/mobile/page/company/agreement.php'">이용약관</li>
+                    <li onclick="location.href=g5_url+'/mobile/page/company/privacy.php'">개인정보 취급방침</li>
+                    <li onclick="location.href=g5_url+'/mobile/page/company/location.php'">위치정보 수집약관</li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class="category_menu3">
@@ -471,10 +477,12 @@ while($row = sql_fetch_array($res)){
 
         $("#stx").on("focus", function(){
             $(this).attr("placeholder","");
+            $(".current").css("bottom","3vw");
             $(".write").hide();
             $("#ft").hide();
         });
         $("#stx").on("blur", function(){
+            $(".current").css("bottom","19vw");
             $(".write").show();
             $("#ft").show();
         });

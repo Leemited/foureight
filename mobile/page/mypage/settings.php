@@ -69,11 +69,11 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 	<div class="setting_wrap">
 		<h2>연락기능 설정</h2>
 		<ul>
-            <li>연락처 비공개 설정 <label class="switch2"><input type="checkbox" id="show_hp" name="show_hp" <?php if($settings["show_hp"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-            <li>전화가능 <label class="switch2"><input type="checkbox" id="hp_set" name="hp_set" <?php if($settings["hp_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li>문자가능 <label class="switch2"><input type="checkbox" id="sms_set" name="sms_set" <?php if($settings["sms_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li>대화가능 <label class="switch2"><input type="checkbox" id="chat_set" name="chat_set" <?php if($settings["chat_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
-			<li>댓글가능 <label class="switch2"><input type="checkbox" id="comment_set" name="comment_set" <?php if($settings["comment_set"]==1){echo "checked";}?>><span class="set_slider round"></span></label></li>
+            <li>연락처 비공개 설정 <label class="switch2"><input type="checkbox" id="show_hp" name="show_hp" <?php if($settings["show_hp"]==1){echo "checked";}?> value="1"><span class="set_slider round"></span></label></li>
+            <li>전화가능 <label class="switch2"><input type="checkbox" id="hp_set" name="hp_set" <?php if($settings["hp_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
+			<li>문자가능 <label class="switch2"><input type="checkbox" id="sms_set" name="sms_set" <?php if($settings["sms_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
+			<li>대화가능 <label class="switch2"><input type="checkbox" id="chat_set" name="chat_set" <?php if($settings["chat_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
+			<!--<li>댓글가능 <label class="switch2"><input type="checkbox" id="comment_set" name="comment_set" <?php /*if($settings["comment_set"]==1){echo "checked";}*/?> class="set_contact"><span class="set_slider round"></span></label></li>-->
 		</ul>
 	</div>
 	<div class="setting_wrap">
@@ -125,41 +125,121 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js" integrity="sha384-FzT3vTVGXqf7wRfy8k4BiyzvbNfeYjK+frTVqZeNDFl8woCbF0CYG6g2fMEFFo/i" crossorigin="anonymous"></script>
 <script>
 var id = "<?php echo $settings['id'];?>";
+var show = $("#show_hp").val();
 $(function(){
 	$("input[type=checkbox]").each(function(){
 		$(this).click(function(){
 			var type = $(this).attr("id");
-			if(type == "hp_set" || type == "sms_set"){
+			if(type=="show_hp"){
+			    var contactCnt = 0;
+
+                if($(this).prop("checked")==true){
+                    if($("#chat_set").prop("checked")==false){
+                        alert("연락기능은 최소 1개는 선택되어야 합니다.");
+                        //$(this).attr("checked",true);
+                        return false;
+                    }else{
+                        $("#hp_set").attr("checked",false);
+                        $("#sms_set").attr("checked",false);
+                        fnSetUpdate("hp_set",0);
+                        fnSetUpdate("sms_set",0);
+                        fnSetUpdate("show_hp",1);
+                    }
+                }else{
+
+                    $("#hp_set").attr("checked",true);
+                    $("#sms_set").attr("checked",true);
+                    fnSetUpdate("hp_set",1);
+                    fnSetUpdate("sms_set",1);
+                    fnSetUpdate("show_hp",0);
+
+                }
+            }
+			else if(type == "hp_set" || type == "sms_set"){
+                var contactCnt = 0;
+
 			    //두개 체크 여부 확인
                 var hp_chk = $("#hp_set").prop("checked");
                 var sms_chk = $("#sms_set").prop("checked");
                 if(hp_chk == sms_chk){
-                    console.log("A");
+                    $(".set_contact").each(function(){
+                        if($(this).prop("checked")==true){
+                            contactCnt++;
+                        }
+                    });
+
+                    if(contactCnt < 1){
+                        alert("연락기능은 최소 1개는 선택되어야 합니다.");
+                        $(this).attr("checked",true);
+                        return false;
+                    }
+
                     if(hp_chk == false){
                         $("#show_hp").attr("checked",true);
-                        fnSetUpdate("hp_set",0,id);
-                        fnSetUpdate("sms_set",0,id);
-                        //fnSetUpdate("show_hp",1,id);
+                        fnSetUpdate("hp_set",0);
+                        fnSetUpdate("sms_set",0);
+                        fnSetUpdate("show_hp",1);
                     }else{
                         $("#show_hp").attr("checked",false);
-                        fnSetUpdate("hp_set",1,id);
-                        fnSetUpdate("sms_set",1,id);
-                        //fnSetUpdate("show_hp",0,id);
+                        fnSetUpdate("hp_set",1);
+                        fnSetUpdate("sms_set",1);
+                        fnSetUpdate("show_hp",0);
                     }
                 }else{
+                    $(".set_contact").each(function(){
+                        if($(this).prop("checked")==true){
+                            contactCnt++;
+                        }
+                    });
+
+                    if(contactCnt < 1){
+                        alert("연락기능은 최소 1개는 선택되어야 합니다.");
+                        $(this).attr("checked",true);
+                        return false;
+                    }
                     if ($(this).is(":checked") == true) {
-                        fnSetUpdate(type, 1, id);
+                        fnSetUpdate(type, 1);
                     } else {
-                        fnSetUpdate(type, 0, id);
+                        fnSetUpdate(type, 0);
                     }
                 }
             }else {
-                console.log("B");
-                if ($(this).is(":checked") == true) {
-                    fnSetUpdate(type, 1, id);
-                } else {
-                    fnSetUpdate(type, 0, id);
+			    if($("#show_hp").prop("checked")==true){
+			        show = 1;
+                }else{
+			        show = 0
                 }
+			    console.log(type+"= show");
+                if(type=="show_hp" && show == 1){
+                    $("#hp_set").attr("checked",false);
+                    $("#sms_set").attr("checked",false);
+                    fnSetUpdate("hp_set",0);
+                    fnSetUpdate("sms_set",0);
+                }else if(type=="show_hp" && show == 0){
+                    $("#hp_set").attr("checked",true);
+                    $("#sms_set").attr("checked",true);
+                    fnSetUpdate("hp_set",1);
+                    fnSetUpdate("sms_set",1);
+                }
+                var contactCnt = 0;
+                $(".set_contact").each(function(e){
+                    console.log("B"+e);
+                    if($(this).prop("checked")==true){
+                        contactCnt++;
+                        console.log("b"+contactCnt);
+                    }
+                });
+                if(contactCnt < 1){
+                    alert("연락기능은 최소 1개는 선택되어야 합니다.");
+                    $(this).attr("checked",true);
+                    return false;
+                }
+                if ($(this).is(":checked") == true) {
+                    fnSetUpdate(type, 1);
+                } else {
+                    fnSetUpdate(type, 0);
+                }
+
             }
 		});
 	});
@@ -172,7 +252,7 @@ $(function(){
 });
 
 function fnSetUpdate(type,state){
-    if(type=="show_hp" && state == 1){
+    /*if(type=="show_hp" && state == 1){
         $("#hp_set").attr("checked",false);
         $("#sms_set").attr("checked",false);
         fnSetUpdate2("hp_set",0);
@@ -182,7 +262,8 @@ function fnSetUpdate(type,state){
         $("#sms_set").attr("checked",true);
         fnSetUpdate2("hp_set",1);
         fnSetUpdate2("sms_set",1);
-    }
+    }*/
+
 	$.ajax({
 		url:g5_url+"/mobile/page/mypage/ajax.settings_update.php",
 		data:{type:type,state:state,id:id},

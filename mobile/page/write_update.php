@@ -105,6 +105,23 @@ if(!$pd_id || $pd_id == ""){
 	    alert("입력 오류 입니다.다시 요청해 주세요");
     }
 	$pd_id = sql_insert_id();
+
+	if($type == 2 && $type2 == 8){
+        $search = " and sc_price_type = '{$pd_price_type}' and sc_timeFrom >= '{$pd_timeFrom}' and sc_timeTo <= '{$pd_timeTo}'";
+    }
+    if($filename) {
+	    $files = explode(",",$filename);
+        $img = G5_DATA_URL . "/product/".$files[0];
+    }
+
+    //글등록시 검색 등록된 것과 비교해서 조건에 맞는 회원 불러오기
+	$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where ('{$sub_title}' like CONCAT('%', sc_tag ,'%') or '{$sub_title}' like CONCAT('%', sc_cate1 ,'%') or '{$sub_title}' like CONCAT('%', sc_cate2 ,'%') or '{$wr_content}' like CONCAT('%', sc_tag ,'%') or '{$wr_content}' like CONCAT('%', sc_cate1 ,'%') or '{$wr_content}' like CONCAT('%', sc_cate2 ,'%') or '{$wr_content}') and ({$price} between sc_priceFrom and sc_priceTo) and set_alarm = 1 and sc_type = {$type} and sc_type2 = {$type2} {$search} ";
+    $res = sql_query($sql);
+    while($row = sql_fetch_array($res)){
+        if($row["regid"]!="" && $row["mb_id"] != $member["mb_id"]) {
+            echo send_FCM($row["regid"],"검색알림",$row["sc_tag"]."의 게시물이 등록되었습니다.", G5_URL."/index.php?sc_id=".$row["sc_id"],"search_alarm_set","검색알림",$row["mb_id"],$pd_id,$img);
+        }
+    }
 }else{
 //수정
     $sql = "update `product` set

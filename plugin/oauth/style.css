@@ -82,7 +82,7 @@
 /*.sns-wrap-over .sns-fb .ico {background-position:0 0 }*/
 .sns-wrap-over .sns-fb {background:#2e5393}
 /*.sns-wrap-over .sns-kk .ico {background-position:-87px 0}*/
-.sns-wrap-over .sns-kk {background:#f2df00;color:#2f2f2f !important;}
+.sns-wrap-over .sns-kk {background:#f2df00;color:#2f2f2f !important;-webkit-box-shadow: 0px 2px 3px rgba(0,0,0,0.6);-moz-box-shadow: 0px 2px 3px rgba(0,0,0,0.6);box-shadow: 0px 2px 3px rgba(0,0,0,0.6);}
 .reg-form .sns-icon-not {border-color:#8b8b8b}
 
 /* SNS by SIZE */

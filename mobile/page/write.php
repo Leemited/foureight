@@ -49,7 +49,6 @@ if($pd_id){
     }
 }
 
-
 if(!$pd_id) {
     $type1 = $_REQUEST["wr_type1"];
     $pd_type2 = $_REQUEST["pd_type2"];
@@ -58,8 +57,18 @@ if(!$pd_id) {
     $title = $_REQUEST["title"];
     $filename = $_REQUEST["filename"];
     $videoname = $_REQUEST["videoname"];
-    $wr_price = $_REQUEST["wr_price"];
-    $wr_price2 = $_REQUEST["wr_price2"];
+    $pd_price = str_replace(",","",$_REQUEST["wr_price"]);
+    $pd_price2 = str_replace(",","",$_REQUEST["wr_price2"]);
+    $pd_timeFrom = $_REQUEST["pd_timeFrom"];
+    $pd_timeTo = $_REQUEST["pd_timeTo"];
+    $pd_video_link = $_REQUEST["pd_video_link"];
+    $pd_discount = $_REQUEST["pd_discount"];
+    $pd_content = $_REQUEST["pd_content"];
+    $pd_price_type = $_REQUEST["pd_price_type"];
+    $pd_location = $_REQUEST["pd_location"];
+    $pd_location_name = $_REQUEST["pd_location_name"];
+    $pd_infos = $_REQUEST["pd_infos"];
+
 }else{
     $type1 = $write["pd_type"];
     $pd_type2 = $write["pd_type2"];
@@ -68,6 +77,17 @@ if(!$pd_id) {
     $title = $write["pd_name"];
     $filename = $write["pd_images"];
     $videoname = $write["pd_videos"];
+    $pd_price = $write["pd_price"];
+    $pd_price2 = $write["pd_price2"];
+    $pd_timeFrom = $write["pd_timeFrom"];
+    $pd_timeTo = $write["pd_timeTo"];
+    $pd_video_link = $write["pd_video_link"];
+    $pd_discount = $write["pd_discount"];
+    $pd_content = $write["pd_content"];
+    $pd_price_type = $write["pd_price_type"];
+    $pd_location = $write["pd_location"];
+    $pd_location_name = $write["pd_location_name"];
+    $pd_infos = $write["pd_infos"];
 }
 
 ?>
@@ -111,7 +131,7 @@ if(!$pd_id) {
             </div>-->
             <div>
                 <div class="map_set">
-                    <input type="text" value="" name="locs1" id="locs1" value="<?php if($write["pd_location"]!=""){echo $write["pd_location"];}?>" placeholder="예)신림역 2번 출구" required onkeyup="fnfilter(this.value,'locs1')">
+                    <input type="text" value="" name="locs1" id="locs1" value="" placeholder="예)신림역 2번 출구" required onkeyup="fnfilter(this.value,'locs1')">
                     <?php if($app){?>
                         <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc();" class="nowLoc">
                     <?php }?>
@@ -178,7 +198,7 @@ if(!$pd_id) {
 		<input type="hidden" value="<?php echo $pd_type2;?>" name="type2" id="type2">
 		<input type="hidden" value="<?php echo $c;?>" name="cate1" id="cate1">
 		<input type="hidden" value="<?php echo $sc;?>" name="cate2" id="cate2">
-		<input type="hidden" value="<?php echo $filename;?>" name="filename" id="filename">
+		<input type="text" value="<?php echo $filename;?>" name="filename" id="filename">
         <input type="hidden" value="<?php echo $videoname;?>" name="videoname" id="videoname">
         <!--<input type="text" value="" name="addr" id="addr">-->
         <input type="hidden" value="<?php echo $write["pd_lat"];?>" name="pd_lat" id="pd_lat">
@@ -192,7 +212,7 @@ if(!$pd_id) {
                         <div class="videoArea sc avility">
                             <h2>거래 조건 및 유의 사항</h2><br><br>
                             <p>거래시 유의사항을 적어주세요. 대화하기에서 구매 안내에 사용됩니다.</p>
-                            <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" style="margin-top:5vw" required onkeyup="fnfilter(this.value,'pd_infos')"><?php echo $view["pd_infos"];?></textarea>
+                            <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" style="margin-top:5vw" required onkeyup="fnfilter(this.value,'pd_infos')"><?php echo str_replace("<br/>","\n", $pd_infos);?></textarea>
                         </div>
                     </div>
                 </article>
@@ -247,7 +267,7 @@ if(!$pd_id) {
                             <div class="in_content" style="padding:0;">
 
                             </div>
-							<textarea name="wr_content" id="wr_content" class="autosize" placeholder="상세 설명" onkeyup="fnfilter(this.value,'wr_content')"><?php echo str_replace("<br/>","\n", $write["pd_content"]);?></textarea>
+							<textarea name="wr_content" id="wr_content" class="autosize" placeholder="상세 설명" onkeyup="fnfilter(this.value,'wr_content')"><?php echo str_replace("<br/>","\n", $pd_content);?></textarea>
 						</div>
 					</div>
 				</div>
@@ -259,11 +279,11 @@ if(!$pd_id) {
                     <div class="videoArea sc">
                         <h2>거래가능 시간</h2>
                         <div>
-                            <select name="pd_timeFrom" id="pd_timeForm" class="write_input3" style="width:15vw">
+                            <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:15vw">
                                 <?php for($i = 0; $i< 24; $i++){
                                     $time = str_pad($i,"2","0",STR_PAD_LEFT);
                                     ?>
-                                    <option value="<?php echo $time;?>" <?php if($write["pd_timeForm"]==$time){?>selected<?php }?>><?php echo $time;?></option>
+                                    <option value="<?php echo $time;?>" <?php if($pd_timeFrom==$time){?>selected<?php }?>><?php echo $time;?></option>
                                 <?php }?>
                             </select> 시부터
                              ~
@@ -271,7 +291,7 @@ if(!$pd_id) {
                                 <?php for($i = 0; $i< 24; $i++){
                                     $time = str_pad($i,"2","0",STR_PAD_LEFT);
                                     ?>
-                                    <option value="<?php echo $time;?>" <?php if($write["pd_timeTo"]==$time){?>selected<?php }?>><?php echo $time;?></option>
+                                    <option value="<?php echo $time;?>" <?php if($pd_timeTo==$time){?>selected<?php }?>><?php echo $time;?></option>
                                 <?php }?>
                             </select> 시사이
                         </div>
@@ -284,11 +304,13 @@ if(!$pd_id) {
                 <div>
                     <div class="videoArea filelist">
                         <h2>사진수정</h2>
-                        <?php if($filename!=""){
-                            ?>
+                        <?php if($filename!=""){ ?>
                         <?php $images = explode(",",$filename); $image_cnt = count($images);?>
                         <?php for($i=0;$i<count($images);$i++){
                                 $img = get_images2(G5_DATA_PATH."/product/".$images[$i]);
+                                if(is_file($img)){
+                                    echo "파일 없음";
+                                }
                             ?>
                                 <div class="image_box" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"<?php }?> style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;">
                                     <label for="images<?php echo $i;?>">
@@ -298,7 +320,6 @@ if(!$pd_id) {
                                         <?php } ?>
                                     </label>
                                 </div>
-                        <?php }?>
                         <?php }?>
                         <?php
                         if($image_cnt > 0){
@@ -312,6 +333,7 @@ if(!$pd_id) {
                                     <?php } ?>
                                 </label>
                             </div>
+                        <?php }?>
                         <?php }?>
                         <?php }else{
                             for($i=0;$i<5;$i++){
@@ -377,8 +399,8 @@ if(!$pd_id) {
 						</div>
 					</div>
 					<div class="videolinks">
-                        <?php if($write["pd_video_link"]!=""){ ?>
-                        <?php $linkVideos = explode(",",$write["pd_video_link"]); $linkCount = count($linkVideos); ?>
+                        <?php if($pd_video_link!=""){ ?>
+                        <?php $linkVideos = explode(",",$pd_video_link); $linkCount = count($linkVideos); ?>
                         <?php for($i=0;$i<count($linkVideos);$i++){ ?>
                             <div class="link_lists it_<?php echo $i;?>"><?php echo $linkVideos[$i];?><img src="<?php echo G5_IMG_URL?>/ic_write_close.svg" alt="" class="linkDels">
                                 <input type="hidden" value="<?php echo $linkVideos[$i];?>" name="links[]" id="" >
@@ -396,7 +418,7 @@ if(!$pd_id) {
 					<div class="videoArea sc">
 						<h2>검색어</h2>
 						<div>
-							<input type="text" value="<?php if($pd_id){echo $write["pd_tag"];}else{echo $title;}?>" name="sub_title" id="sub_title" class="write_input3" onkeyup="fnfilter(this.value,'sub_title')" />
+							<input type="text" value="<?php if($title){echo $title;}?>" name="sub_title" id="sub_title" class="write_input3" onkeyup="fnfilter(this.value,'sub_title')" />
 						</div>
 					</div>
 					<div class="infor">
@@ -413,21 +435,21 @@ if(!$pd_id) {
                             <h2>거래가격 단위</h2>
                             <div>
                                 <select name="pd_price_type" id="pd_price_type" class="write_input3" style="width:25vw">
-                                    <option value="0">회당</option>
-                                    <option value="1">시간당</option>
-                                    <option value="2">하루당</option>
+                                    <option value="0" <?php if($pd_price_type == 0){?>selected<?php }?>>회당</option>
+                                    <option value="1" <?php if($pd_price_type == 1){?>selected<?php }?>>시간당</option>
+                                    <option value="2" <?php if($pd_price_type == 2){?>selected<?php }?>>하루당</option>
                                 </select>
                             </div>
                         </div>
                     <?php }?>
 					<div class="prices">
-						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php if($write["pd_price"]){echo number_format($write["pd_price"]);}else{ if($wr_price){echo number_format($wr_price);}}?>" placeholder="<?php if($pd_type2== 4){?>구매예상금액<?php }else{?>판매가격<?php }?>" name="price" id="price" required class="write_input2" onkeyup="number_only(this);"/>
-                        <?php if($type1==1 && $pd_type2 == 8){?><input type="checkbox" name="discount_use" style="display:none;" id="discount_use" value="1" <?php if($write["pd_discount"]==1){?>checked<?php }?>><label for="discount_use">흥정가능<img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""></label><?php }?>
+						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php if($pd_price){echo number_format($pd_price);}?>" placeholder="<?php if($pd_type2== 4){?>구매예상금액<?php }else{?>판매가격<?php }?>" name="price" id="price" required class="write_input2" onkeyup="number_only(this);"/>
+                        <?php if($type1==1 && $pd_type2 == 8){?><input type="checkbox" name="discount_use" style="display:none;" id="discount_use" value="1" <?php if($pd_discount==1){?>checked<?php }?>><label for="discount_use">흥정가능<img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""></label><?php }?>
                         <?php if($type1==2){?>계약금<?php }?>
                     </div>
                     <?php if($type1==2){?>
                     <div class="prices step2">
-                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php if($write["pd_price2"]){echo number_format($write["pd_price2"]);}else{ if($wr_price2){echo number_format($wr_price2);} }?>" placeholder="10,000" name="price2" id="price2" required class="write_input2 width_80" onkeyup="number_only(this);"/> 거래완료금
+                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php if($pd_price2){echo number_format($pd_price2);}?>" placeholder="10,000" name="price2" id="price2" required class="write_input2 width_80" onkeyup="number_only(this);"/> 거래완료금
 					</div>
                     <?php }?>
 				</div>
@@ -443,12 +465,12 @@ if(!$pd_id) {
 						</div>
 					</div>
 					<div class="loclist <?php if(!$pd_id){ echo  "no-loc";}?>">
-                        <?php if($pd_id && ($write["pd_location"]|| $write["pd_location_name"])){?>
+                        <?php if($pd_location || $pd_location_name){?>
                             <div class="myloc">
-                                <?php if($write["pd_location"]){echo $write["pd_location"];}else{echo $write["pd_location_name"];}?>
+                                <?php if($pd_location){echo $pd_location;}else{echo $pd_location_name;}?>
                                 <img src="<?php echo G5_IMG_URL?>/ic_write_close.svg" alt="" class="locsDel">
-                                <input type="hidden" value="<?php echo $write["pd_location"];?>" name="locs_name" id="">
-                                <input type="hidden" value="<?php echo $write["pd_location_name"];?>" name="locs" id="">
+                                <input type="hidden" value="<?php echo $pd_location;?>" name="locs_name" id="">
+                                <input type="hidden" value="<?php echo $pd_location_name;?>" name="locs" id="">
                             </div>
                         <?php } ?>
 					</div>
@@ -511,8 +533,9 @@ function setImages(img,index){
     });
 }
 
-$(document).on("change","#pd_timeForm",function(){
+$(document).on("change","#pd_timeFrom",function(){
     var time = $(this).val();
+    setCookie("pd_timeFrom",$(this).val(),'1');
     $("#pd_timeTo option").each(function(e){
         if(Number($(this).val()) < Number(time)){
             $(this).attr("disabled",true);
@@ -633,9 +656,20 @@ $(".addLink").click(function(){
 		return false;
 	}
 
-    if(link.indexOf("embed")==-1 && link.indexOf("youtube")==-1){
-	    alert("Youtube 링크만 가능합니다. \rYoutube 링크는 반드시 Embed Video안에 있는 링크를 가져오시기 바랍니다.");
+    if(link.indexOf("youtu.be")==-1){
+	    alert("Youtube 링크만 가능합니다.");
+	    return false;
     }
+
+    var pd_link="";
+    if(pd_link==""){
+        pd_link = link;
+    }else{
+        pd_link = pd_link+","+link;
+    }
+
+    console.log(pd_link);
+    setCookie("pd_video_link",pd_link,'1');
 
 	var item = '<div class="link_lists it_'+linkCnt+'">'+link+'<img src="<?php echo G5_IMG_URL?>/ic_write_close.svg" alt="" class="locsDel"></div>';
 	var value = '<input type="hidden" value="'+link+'" name="links[]" id=""/>';
@@ -686,6 +720,8 @@ function addWords(){
 }
 
 function fnSubmit(){
+    setCookie("<?php echo $member["mb_id"];?>","done","1");
+    //window.android.write_complete();
     //$('.loader').show();
 }
 
@@ -721,12 +757,10 @@ function mapSet(){
     $(".loc_ul_list li").each(function(){
         if($(this).hasClass("active")) {
             var text = $(this).text();
-            console.log(text);
             if (text.indexOf("]") != -1) {
                 var textchk = text.split("]");
                 text = textchk[1];
             }
-            console.log(text);
             if(locitem.indexOf(text)!=-1){
                 $(".loclist").append(locitem);
             }else{
@@ -743,18 +777,41 @@ function mapSet(){
 
 function nowLoc(num){
     if(lat && lng){
-        console.log(lat + "//" + lng);
-    }else {
-        var latlng = window.android.getLocation();
+        var latlng = new daum.maps.LatLng(lat, lng);
+    }else{
+        var loc = window.android.getLocation();
+        var myloc = loc.split("/");
+        var latlng = new daum.maps.LatLng(myloc[0], myloc[1]);
+        lat = myloc[0];
+        lng = myloc[1];
     }
+
+
+    searchDetailAddrFromCoords(latlng, function(result, status) {
+        if (status === daum.maps.services.Status.OK) {
+
+            var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
+            detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
+
+            var item = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' +
+                '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
+
+            setCookie("pd_location",result[0].address.address_name)
+            setCookie("pd_location_name",result[0].address.address_name)
+
+            $(".loclist").html('');
+            $(".loclist").append(item);
+            modalClose();
+        }
+    });
 }
 
-    $(document).on("click",".loc_ul_list li",function(){
-       if(!$(this).hasClass("active")){
-           $(this).addClass("active");
-           $(".loc_ul_list li").not($(this)).removeClass("active");
-       }
-    });
+$(document).on("click",".loc_ul_list li",function(){
+   if(!$(this).hasClass("active")){
+       $(this).addClass("active");
+       $(".loc_ul_list li").not($(this)).removeClass("active");
+   }
+});
 $(function(){
     $("#locs1").keyup(function(key){
         if(key.keyCode == 13){
@@ -762,18 +819,19 @@ $(function(){
         }
     });
     var flag = false;
-    if("<?php echo $type1;?>" == "1" && "<?php echo $pd_type2;?>" == 8){
+    <?php if($type1 == 1 && $pd_type2 == 8){?>
+    console.log("A");
         if(flag == false) {
             setTimeout(function () {
-                $("#id04").css("display", "block");
+                $("#id04").css({"display":"block","z-index":"90000"});
                 $("html, body").css("overflow","hidden");
                 $("html, body").css("height","100vh");
+                flag = true;
             }, 1000);
-            flag = true;
         }
-    }
+    <?php  }?>
 
-    $("#price , #price2").keyup(function(){
+    $("#price , #price2").change(function(){
         var price = Number($(this).val());
         price = price.numberFormat();
         $(this).val(price);
@@ -783,13 +841,13 @@ $(function(){
     $(".myword").click(function(){
         $(this).toggleClass("active");
         var chk = $(".in_content").html();
-        console.log(chk);
         var item = "<div class='"+$(this).text()+"'>"+$(this).text()+"<input type='hidden' name='words[]' value='"+$(this).text()+"'><br></div>";
         if($(".in_content div").hasClass($(this).text())){
             console.log("cccc"+$(this).text());
             $(".in_content div."+$(this).text()).remove();
         }else{
             $(".in_content").append(item);
+
         }
 
     });
@@ -928,7 +986,8 @@ daum.maps.event.addListener(map, 'click', function(mouseEvent) {
             locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' +
                 '<input type="hidden" value="'+mouseEvent.latLng.jb+'" name="pd_lat" id=""/><input type="hidden" value="'+mouseEvent.latLng.ib+'" name="pd_lng" id=""/></div>';
             displayMarker(data);
-
+            setCookie("pd_location",result[0].address.address_name,'1');
+            setCookie("pd_location_name",result[0].address.address_name,'1');
         }
     });
 });
@@ -937,7 +996,6 @@ function searchDetailAddrFromCoords(coords, callback) {
     // 좌표로 법정동 상세 주소 정보를 요청합니다
     geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
 }
-
 
 // 장소 검색 객체를 생성합니다
 var ps = new daum.maps.services.Places();
@@ -998,6 +1056,8 @@ function setCenter(lat,lng,place_name,place_address,num) {
 
     locitem = '<div class="myloc">'+place_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+place_address+'" name="locs" id="locs"/><input type="hidden" value="'+place_name+'" name="locs_name" id=""/>' +
         '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
+    setCookie("pd_location",place_address,'1');
+    setCookie("pd_location_name",place_name,'1');
 }
 
 // 지도에 마커를 표시하는 함수입니다
@@ -1079,29 +1139,55 @@ function getLatlng(loc){
         }
     });
 }
-function setCookie(name, value, expiredays){
-    var todayDate = new Date();
-    todayDate.setDate( todayDate.getDate() + expiredays );
-    document.cookie = name + "=" + escape( value ) + "; path=/; expires=" + todayDate.toGMTString() + ";"
-}
-
-function getCookie(cName) {
-    cName = cName + '=';
-    var cookieData = document.cookie;
-    var start = cookieData.indexOf(cName);
-    var cValue = '';
-    if(start != -1){
-        start += cName.length;
-        var end = cookieData.indexOf(';', start);
-        if(end == -1)end = cookieData.length;
-        cValue = cookieData.substring(start, end);
-    }
-    return unescape(cValue);
-}
 
 $(function(){
     var cookie_id = getCookie("<?php echo $member["mb_id"];?>");
-    setCookie("<?php echo $member["mb_id"];?>","done","1");
+    setCookie("<?php echo $member["mb_id"];?>","write","1");
+    setCookie("wr_type1","<?php echo $type1;?>","1");
+    setCookie("pd_type2","<?php echo $pd_type2;?>","1");
+    setCookie("cate1","<?php echo $c;?>","1");
+    setCookie("cate2","<?php echo $sc;?>","1");
+    setCookie("title","<?php echo $title;?>","1");
+    setCookie("filename","<?php echo $filename;?>","1");
+    setCookie("videoname","<?php echo $videoname;?>","1");
+    setCookie("pd_price","<?php echo $pd_price;?>","1");
+    setCookie("pd_price2","<?php echo $pd_price2;?>","1");
+    setCookie("pd_video_link","<?php echo $pd_video_link;?>","1");
+    setCookie("pd_timeFrom","<?php echo $pd_timeFrom;?>","1");
+    setCookie("pd_timeTo","<?php echo $pd_timeTo;?>","1");
+    setCookie("pd_discount","<?php echo $pd_discount;?>","1");
+    setCookie("pd_price_type","<?php echo $pd_price_type;?>","1");
+    setCookie("pd_location","<?php echo $pd_location;?>","1");
+    setCookie("pd_location_name","<?php echo $pd_location_name;?>","1");
+    setCookie("pd_infos",$("#pd_infos").val(),"1");
+    setCookie("pd_content",$("#wr_content").val(),"1");
+    if(cookie_id != "") {
+        $("#wr_content").change(function () {
+            setCookie("pd_content", $(this).val(), '1');
+        });
+        $("#pd_timeTo").change(function () {
+            setCookie("pd_timeTo", $(this).val(), '1');
+        });
+        $("#pd_infos").change(function () {
+            setCookie("pd_infos", $(this).val(), '1');
+        });
+        $("#pd_infos").change(function () {
+            setCookie("pd_infos", $(this).val(), '1');
+        });
+        $("#price").change(function () {
+
+            setCookie("pd_price", $(this).val(), '1');
+        });
+        $("#price2").change(function () {
+            setCookie("pd_price2", $(this).val(), '1');
+        });
+        $("#sub_title").change(function () {
+            setCookie("title", $(this).val(), '1');
+        });
+        $("#discount_use").change(function () {
+            setCookie("pd_discount", $(this).val(), '1');
+        });
+    }
 })
 </script>
 <?php

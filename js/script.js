@@ -240,14 +240,20 @@ function modalClose(){
 
 function fnSetting(){
     if($(".search_setting").attr("id") == "menuon"){
-        $("#set").val(1);
+        //$("#set").val(1);
         $(".search_setting").attr("id","");
         $(".search_setting").css("top","-100vh");
         $("html").css("overflow","auto");
         $("body").css("overflow","unset");
         location.hash='';
     }else{
-        $("#set").val(2);
+        var type = $("#set_type").val();
+        var type2 = $("#set_type2").val();
+        if(type == 2 && (type2=="" || type== 8)){
+            $(".timesel").css("display", "block");
+            $(".meettime").css("display", "block");
+        }
+        //$("#set").val(2);
         location.hash = "#search";
         $(".search_setting").attr("id","menuon");
         $(".search_setting").css("top","20vw");

@@ -27,8 +27,21 @@ if($comment_re != "1") {
     $_SESSION["cm_time"] = date("i");*/
     $sql = "insert into `product_comment` set pd_id='{$pd_id}',parent_cm_id = '', comment_re = '', comment_content = '{$comment}',comment_status = '{$secret}', comment_datetime = now(), comment_price = '', mb_id = '{$mb_id}', re_pd_id = ''";
     if (sql_query($sql)) {
-        $sql = "select * from `product_comment` as p left join `g5_member` as m on m.mb_id = p.mb_id where p.pd_id ='{$pd_id}' order by p.comment_datetime desc limit 0 , 1";
+
+        $sql = "select *,m.mb_id as mb_id from `product_comment` as p left join `g5_member` as m on m.mb_id = p.mb_id where p.pd_id ='{$pd_id}' order by p.comment_datetime desc limit 0 , 1";
         $cm = sql_fetch($sql);
+
+        $sql = "select * from `product` where pd_id = '{$pd_id}'";
+        $pd = sql_fetch($sql);
+        if($pd["pd_images"]) {
+            $imgs = explode(",",$pd["pd_images"]);
+            $img = G5_DATA_URL."/product/".$imgs[0];
+        }
+        //알림 보내기
+        if($pd["mb_id"]!=$mb_id) {
+            //send_FCM('fcmid','타이틀','내용','유알엘','체널','체널명','받는아이디','게시글번호','이미지');
+            send_FCM($cm["regid"], $pd["pd_tag"], "등록하신 상품에 새 댓글이 등록되었습니다.", G5_URL . "/index.php?pd_id=" . $pd_id, "comment_alarm_set", "댓글알림", $pd["mb_id"], $pd_id, $img);
+        }
         ?>
         <li class="<?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} } ?>" id="cmt<?php echo $cm[cm_id];?>">
             <!--<div class="profile" <?php /*if($cm["member_id"] != $mb_id){ echo "onclick=fnRecom('".$cm["cm_id"]."','".$mb_id."','".$member["mb_name"]."','".$cm["comment_status"]."')";} */?> >

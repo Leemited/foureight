@@ -98,7 +98,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
 
 ?>
 <style>
-    #map{margin-top: 20vw;height: calc(100vh - 35vw);}
+    #map{margin-top: 20vw;height: calc(100vh - 20vw);}
     #map .wrap{width:26vw;background: #fff;padding: 10px;border-radius: 10px;top:0px;left: -16vw;-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);}
     #map .wrap .close{position:absolute;top:1vw;right:1vw;width:4vw;height:4vw;}
     #map .wrap .info{width:100%;font-size: 3vw;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;padding: 3vw 0 0 0;}
@@ -230,7 +230,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
             </ul>
         </div>
     <?php }?>
-	<div id="map" style="width:100%;<?php if($stx || $searchActive == "search"){?>height:calc(100vh - 35vw - 32vh);<?php }?>">
+	<div id="map" style="width:100%;<?php if($stx || $searchActive == "search"){?>height:calc(100vh - 20vw - 32vh);<?php }?>">
         <div class="current" onclick="fnReset();" >
             <img src="<?php echo G5_IMG_URL?>/ic_current_map.svg" alt="">
         </div>

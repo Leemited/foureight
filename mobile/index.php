@@ -73,6 +73,7 @@ if($sc_id){
 
 if($set_type){
     $search .= " and p.pd_type = '{$set_type}'";
+    $type1 = $set_type;
 }else{
     $search .= " and p.pd_type = 1";
 }
@@ -271,10 +272,11 @@ include_once(G5_MOBILE_PATH.'/head.php');
                 </div>
 				<h2>검색어</h2>
 				<div>
+                    <p class="write_help"></p>
 					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 #으로 해주세요" required value="#" onkeyup="fnfilter(this.value,'wr_title')">
-					<input type="text" name="wr_price" id="wr_price" placeholder="<?php if($type1==1){?>판매금액<?php }else{?>계약금<?php }?>" required value="" onkeyup="number_only(this)" style="<?php if($type1==2){?>width:30%;<?php }else{?>width:70%<?php }?>margin-right:5%;margin-top:0">
-                    <input type="text" name="wr_price2" id="wr_price2" placeholder="거래완료금" required value="" onkeyup="number_only(this)" style="width:30%;margin-top:0;<?php if($type1==2){?>display:inline-block;<?php }else{?>display:none;<?php }?>">
-                    <p class="write_help">예시 : 등록된 예시가 없습니다.</p>
+					<input type="text" name="wr_price" id="wr_price" placeholder="<?php if($type1=="1"){?>판매금액<?php }else{?>계약금<?php }?>" required value="<?php echo $type1;?>" onkeyup="number_only(this)" style="<?php if($type1=="2"){?>width:30%;<?php }else{?>width:70%<?php }?>margin-right:5%;margin-top:0">
+                    <input type="text" name="wr_price2" id="wr_price2" placeholder="거래완료금" required value="" onkeyup="number_only(this)" style="width:30%;margin-top:0;<?php if($type1=="2"){?>display:inline-block;<?php }else{?>display:none;<?php }?>">
+                    <!--<p class="write_help"></p>-->
 				</div>
 				<div>
 					<input type="button" value="확인" style="background-color:yellow" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types1">
@@ -312,7 +314,8 @@ include_once(G5_MOBILE_PATH.'/head.php');
             <?php }?>
         </div>
 		<div class="text" <?php if($set_type==2){?>style="background-color: rgb(255, 61, 0); color: rgb(255, 255, 255);"<?php }?>>
-            <img src="<?php if($set_type == 1 || $set_type==""){echo G5_IMG_URL."/write_text_1.svg"; }else{ echo G5_IMG_URL."/write_text_2.svg";}?>" alt=""></div>
+            <img src="<?php if($set_type == 1 || $set_type==""){echo G5_IMG_URL."/write_text_1.svg"; }else{ echo G5_IMG_URL."/write_text_2.svg";}?>" alt="">
+        </div>
 	</div>
 	<section class="main_list">
 		<article class="post" id="post">
@@ -728,7 +731,9 @@ $(document).ready(function(){
                         data: {cate1: c, cate2: sc}
                     }).done(function (data) {
                         if (data != "") {
-                            $(".write_help").html("예시 : " + data);
+                            $("#id01 .write_help").html("예 : " + data);
+                        }else{
+                            $("#id01 .write_help").html("검색어 구분은 #으로 해주세요.");
                         }
                     });
                     cateClose();
@@ -745,7 +750,7 @@ $(document).ready(function(){
                     $("html, body").css("overflow", "hidden");
                     $("html, body").css("height", "100vh");
                     location.hash = "#modal";
-                    $("#id01 #wr_title").selectRange(1,2);
+                    //$("#id01 #wr_title").selectRange(1,2);
                 }
             });
         }
@@ -912,39 +917,7 @@ $(document).ready(function(){
         text = text.replace(" ","#");
         $(this).val(text);
         <?php }?>
-        /*
-        var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
-        if(check.test(text)){
-            console.log("A");
-            var chk = text.substr(0,1);
-            if(chk != "#"){
-                console.log("B");
-                $(this).val("#"+text);
-            }
-            if(text.length >= 2 && (e.keyCode == 32 || e.keyCode == 229)){
-                console.log("C");
-                $(this).val(text + "#")
-            }
-        }else{
-            if(e.keyCode==8 && text == "#" || e.keyCode==46 && text == "#"){
-                $(this).val('');
-                return false;
-            }
-            if(text.length == 1 && (e.keyCode != 32 || e.keyCode != 229)){
-                $(this).val("#"+text);
-            }
-            if(text.length == 1 && (e.keyCode == 32 || e.keyCode == 229)){
-                $(this).val("#");
-            }
-            if (text.length >= 2 && (e.keyCode == 32 || e.keyCode == 229)) {
-                $(this).val(text + "#");
-            }
-            var chk = text.substr(0,1);
-            if(chk != "#"){
-                $(this).val("#"+text);
-            }
-        }
-        */
+
         var chk = text.substr(0,1);
         if(chk != "#"){
             $(this).val("#"+text);
@@ -966,6 +939,10 @@ $(document).ready(function(){
             }
         }
         if (e.keyCode == 13) {
+            if($("#wr_title").val()=="" || $("#wr_title").val()=="#"){
+                alert("검색어를 입력해주세요.");
+                return false;
+            }
             if (type2 == 8) {
                 //판매시
                 <?php if($app){ ?>fnOnCam();
@@ -1070,6 +1047,60 @@ function fnlist(num,list_type){
 }
 
 function fnwrite(){
+    var chk = getCookie('<?php echo $member["mb_id"];?>');
+    if(chk!="" && chk == "write"){
+        if(confirm('작성중인 글이 있습니다. 해당 글을 계속 작성하시겠습니까?')){
+            var wr_type1 = getCookie('wr_type1');
+            var pd_type2 = getCookie('pd_type2');
+            var cate1 = getCookie('cate1');
+            var cate2 = getCookie('cate2');
+            var title = getCookie('title');
+            var filename = getCookie('filename');
+            var videoname = getCookie('videoname');
+            var wr_price = getCookie('pd_price');
+            var wr_price2 = getCookie('pd_price2');
+            var pd_video_link = getCookie('pd_video_link');
+            var pd_timeFrom = getCookie('pd_timeFrom');
+            var pd_timeTo = getCookie('pd_timeTo');
+            var pd_discount = getCookie('pd_discount');
+            var pd_content = getCookie('pd_content');
+            var pd_price_type = getCookie('pd_price_type');
+            var pd_location = getCookie('pd_location');
+            var pd_location_name = getCookie('pd_location_name');
+            var pd_infos = getCookie('pd_infos');
+
+            cate1 = encodeURIComponent(cate1,"UTF-8");
+            cate2 = encodeURIComponent(cate2,"UTF-8");
+            pd_content = encodeURIComponent(pd_content,"UTF-8");
+            title = encodeURIComponent(title,"UTF-8");
+            pd_location = encodeURIComponent(pd_location,"UTF-8");
+            pd_location_name = encodeURIComponent(pd_location_name,"UTF-8");
+            pd_infos = encodeURIComponent(pd_infos,"UTF-8");
+
+            location.href=g5_url+"/mobile/page/write.php?wr_type1="+wr_type1+"&pd_type2="+pd_type2+"&cate1="+cate1+"&cate2="+cate2+"&title="+title+"&filename="+filename+"&videoname="+videoname+"&wr_price="+wr_price+"&wr_price2="+wr_price2+"&pd_video_link="+pd_video_link+"&pd_timeFrom="+pd_timeFrom+"&pd_timeTo="+pd_timeTo+"&pd_discount="+pd_discount+"&pd_content="+pd_content+"&pd_price_type="+pd_price_type+"&pd_location="+pd_location+"&pd_location_name="+pd_location_name+"&pd_infos="+pd_infos;
+            return false;
+        }else{
+            setCookie('<?php echo $member["mb_id"];?>',"","1");
+            setCookie("wr_type1","","1");
+            setCookie("pd_type2","","1");
+            setCookie("cate1","","1");
+            setCookie("cate2","","1");
+            setCookie("title","","1");
+            setCookie("filename","","1");
+            setCookie("videoname","","1");
+            setCookie("pd_price","","1");
+            setCookie("pd_price2","","1");
+            setCookie("pd_video_link","","1");
+            setCookie("pd_timeFrom","","1");
+            setCookie("pd_timeTo","","1");
+            setCookie("pd_discount","","1");
+            setCookie("pd_content","","1");
+            setCookie("pd_price_type","","1");
+            setCookie("pd_location","","1");
+            setCookie("pd_location_name","","1");
+            setCookie("pd_infos","","1");
+        }
+    }
 	var type = $("#set_type").val();
 	if(type == 1){
 		//물건
@@ -1091,13 +1122,17 @@ function fnwrite(){
 
 
 function fnWriteStep2(url){
+    if($("#wr_title").val()=="" || $("#wr_title").val()=="#"){
+        alert("검색어를 입력해주세요.");
+        return false;
+    }
 	document.write_form.action = url;
     //console.log(url + document.getElementById("write_from").action);
 	document.write_form.submit();
 }
 
 function fnOnCam(){
-	if($("#wr_title").val()==""){
+	if($("#wr_title").val()=="" || $("#wr_title").val()=="#"){
 		alert("제목을 입력해주세요");
 		return false;
 	}else{
@@ -1176,6 +1211,11 @@ function doNotReload(){
     }
 }
 document.onkeydown = doNotReload;
+
+<?php if($pd_id){ ?>
+fn_viewer("<?php echo $pd_id;?>");
+<?php } ?>
+
 </script>
 <script src="https://hammerjs.github.io/dist/hammer.js"></script>
 

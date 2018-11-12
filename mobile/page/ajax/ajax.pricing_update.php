@@ -24,6 +24,18 @@ if($pd_type==1){
 
     if (sql_query($sql)) {
 
+        $sql = "select * from `product` where pd_id = '{$pd_id}'";
+        $pd = sql_fetch($sql);
+        if($pd["pd_images"]) {
+            $imgs = explode(",",$pd["pd_images"]);
+            $img = G5_DATA_URL."/product/".$imgs[0];
+        }
+
+        $mb = get_member($pd["mb_id"]);
+
+        send_FCM($mb["regid"],$pd["pd_tag"],"게시물에 제시/딜 요청등록",G5_URL."/index.php?pd_id=".$pd_id,'pricing_set','제시/딜 알림',$mb["mb_id"],$pd["pd_id"],$img);
+
+        echo "4";
     } else {
         echo "5";
     }
@@ -49,6 +61,16 @@ if($pd_type==2) {
     $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_pd_id = {$pricing_pd_id}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}'";
 
     if (sql_query($sql)) {
+        $sql = "select * from `product` where pd_id = '{$pd_id}'";
+        $pd = sql_fetch($sql);
+        if($pd["pd_images"]) {
+            $imgs = explode(",",$pd["pd_images"]);
+            $img = G5_DATA_URL."/product/".$imgs[0];
+        }
+
+        $mb = get_member($pd["mb_id"]);
+
+        send_FCM($mb["regid"],$pd["pd_tag"],"게시물에 제시/딜 요청등록",G5_URL."/index.php?pd_id=".$pd_id,'pricing_set','제시/딜 알림',$mb["mb_id"],$pd["pd_id"],$img);
         echo "4";
     } else {
         echo "5";

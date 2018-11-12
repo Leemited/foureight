@@ -16,7 +16,7 @@ include_once (G5_MOBILE_PATH."/head.login.php");
 </div>
 <div class="help" style="">
 
-    <h1>표준 이용약관안(안)</h1>
+    <h1>위치정보 수집약관</h1>
 
     <h2>제 1장. 총 칙</h2>
 

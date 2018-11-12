@@ -4,14 +4,12 @@ include_once(G5_MOBILE_PATH."/head.login.php");
 if($member["mb_id"]==""){
 	alert("로그인이 필요합니다.", G5_MOBILE_URL."/page/login_intro.php?url=".G5_MOBILE_URL."/page/mypage/settings.php");
 }
-$chkMobile = true;
 $sql = "select * from `mysetting` where id= {$id} and mb_id = '{$member["mb_id"]}'";
 $settings = sql_fetch($sql);
 
 $mylocations = explode(",",$settings["my_locations"]);
 
 $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
-
 ?>
 <style>
 body{overflow: hidden}
@@ -95,10 +93,10 @@ body{overflow: hidden}
     </div>
 </div>
 <script>
-    var locitem = "";
     var itemadd = '',addrs = '';
-    var lat = '33.450701';
-    var lng = '126.570667';
+    var lat = '';
+    var lng = '';
+    var marker;
     <?php if($_SESSION["lat"] && $_SESSION["lng"]){?>
     lat = "<?php echo $_SESSION["lat"];?>";
     lng = "<?php echo $_SESSION["lng"];?>";
@@ -113,20 +111,38 @@ body{overflow: hidden}
 
     var map = new daum.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
 
-    // 마커가 표시될 위치입니다
-    var markerPosition  = new daum.maps.LatLng(map.getCenter());
-
-    // 마커를 생성합니다
-    var marker = new daum.maps.Marker({
-        position: markerPosition
-    });
 
     var infowindow = new daum.maps.InfoWindow({zIndex:9002});
 
-    // 마커가 지도 위에 표시되도록 설정합니다
-    marker.setMap(map);
+    // 지도를 클릭했을때 클릭한 위치에 마커를 추가하도록 지도에 클릭이벤트를 등록합니다
+    daum.maps.event.addListener(map, 'click', function(mouseEvent) {
+        // 클릭한 위치에 마커를 표시합니다
 
-    marker.setDraggable(true);
+        searchDetailAddrFromCoords(mouseEvent.latLng, function(result, status) {
+            if (status === daum.maps.services.Status.OK) {
+                var data;
+                var item="";
+                data = { x : mouseEvent.latLng.ib , y : mouseEvent.latLng.jb, place_name : result[0].address.address_name};
+                var i = $(".loc_ul_list li").length;
+                item += "<li class='active' onclick=\"setCenter(\'"+mouseEvent.latLng.jb+"\',\'"+mouseEvent.latLng.ib+"\',\'"+result[0].address.address_name+"\',\'"+result[0].address.address_name+"\',\'"+i+"\')\" >";
+                item += result[0].address.address_name;
+                item += "</li>";
+                $(".loc_ul_list li").removeClass("active");
+                $(".loc_ul_list").append(item);
+                locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' +
+                    '<input type="hidden" value="'+mouseEvent.latLng.jb+'" name="pd_lat" id=""/><input type="hidden" value="'+mouseEvent.latLng.ib+'" name="pd_lng" id=""/></div>';
+                displayMarker(data);
+                setCookie("pd_location",result[0].address.address_name,'1');
+                setCookie("pd_location_name",result[0].address.address_name,'1');
+            }
+        });
+    });
+
+    function searchDetailAddrFromCoords(coords, callback) {
+        // 좌표로 법정동 상세 주소 정보를 요청합니다
+        geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+    }
+
 
     // 장소 검색 객체를 생성합니다
     var ps = new daum.maps.services.Places();
@@ -173,10 +189,10 @@ body{overflow: hidden}
 
     var markers = [];
 
-    var imageSrc = 'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', // 마커이미지의 주소입니다
-        imageSize = new daum.maps.Size(64, 69), // 마커이미지의 크기입니다
-        imageOption = {offset: new daum.maps.Point(27, 69)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
-    var locitem;
+    var imageSrc = '<?php echo G5_IMG_URL?>/view_pin.svg', // 마커이미지의 주소입니다
+        imageSize = new daum.maps.Size(36, 40), // 마커이미지의 크기입니다
+        imageOption = {offset: new daum.maps.Point(18, 40)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
+
     function setCenter(lat,lng,place_name,place_address,num) {
         // 이동할 위도 경도 위치를 생성합니다
         var moveLatLon = new daum.maps.LatLng(lat,lng);
@@ -185,16 +201,24 @@ body{overflow: hidden}
         // 지도 중심을 이동 시킵니다
         map.setCenter(moveLatLon);
 
-        locitem = "["+place_name+"]"+place_address;
+        if(place_name) {
+            locitem = "[" + place_name + " ]" + place_address;
+        }else{
+            locitem = place_address;
+        }
+        setCookie("pd_location",place_address,'1');
+        setCookie("pd_location_name",place_name,'1');
     }
 
     // 지도에 마커를 표시하는 함수입니다
     function displayMarker(place) {
+        var markerImage = new daum.maps.MarkerImage(imageSrc, imageSize, imageOption);
 
         // 마커를 생성하고 지도에 표시합니다
         var marker = new daum.maps.Marker({
             map: map,
-            position: new daum.maps.LatLng(place.y, place.x)
+            position: new daum.maps.LatLng(place.y, place.x),
+            image:markerImage
         });
 
         // 마커에 클릭이벤트를 등록합니다
@@ -210,12 +234,13 @@ body{overflow: hidden}
             });
         });
 
+        marker.setMap(map);
+
         markers.push(marker);
     }
 
     var mapon = false;
     function mapSelect(num){
-        console.log($("#locs"+num).val());
         if($("#locs"+num).val()==""){
             alert("거래위치를 입력해주세요");
             return false;
@@ -231,25 +256,63 @@ body{overflow: hidden}
             $("html, body").css("height","100vh");
             mapon = true;
         }else if(mapon==true || num == ''){
+            locitem = '';
             $("#setnum").val('');
             $("#addr").val('');
             $("#map_sel").css({"bottom": "-100vw","top":"unset","height":"100vw"});
+            $("html, body").css("overflow","hidden");
+            $("html, body").css("height","100vh");
+            $(".loc_ul_list li").remove();
+            setMarkers(null);
+            markers = [];
             mapon = false;
         }
     }
 
     function mapSet(){
-        var num = $("#setnum").val();
+        /*var num = $("#setnum").val();
         $(".loclist").html('');
         $("#locs"+num).val(locitem);
         $("#setnum").val('');
         //$("#addr").val('');
         $("#map_sel").css({"bottom": "-100vw","top":"unset","height":"100vw"});
+        mapon = false;*/
+
+        var num = $("#setnum").val();
+        $("#locs"+num).val(locitem);
+        $("#map_sel").css({"bottom": "-100vh","top":"unset","height":"100vw"});
+        $(".loclist").html('');
+        $("#setnum").val('');
+        $("#addr").val('');
         mapon = false;
+        locitem="";
+        setMarkers(null);
+        markers = [];
     }
 
     function nowLoc(num){
+        if(lat && lng){
+            var latlng = new daum.maps.LatLng(lat, lng);
+        }else{
+            var loc = window.android.getLocation();
+            var myloc = loc.split("/");
+            var latlng = new daum.maps.LatLng(myloc[0], myloc[1]);
+            lat = myloc[0];
+            lng = myloc[1];
+        }
 
+        searchDetailAddrFromCoords(latlng, function(result, status) {
+            if (status === daum.maps.services.Status.OK) {
+
+                var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
+                detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
+
+                var item = result[0].address.address_name;
+
+                $("#locs"+num).val(item);
+
+            }
+        });
     }
 
     $(function(){
@@ -260,6 +323,29 @@ body{overflow: hidden}
             }
         });
     })
+
+    $("input[id^=locs]").each(function(){
+        <?php if(!$app){?>
+        $(this).keyup(function(e){
+            var id = $(this).attr("id");
+            id = id.replace("locs","");
+            if(e.keyCode == 13){
+                mapSelect(id);
+            }
+        });
+        <?php }?>
+    });
+
+    function mapKeySet(num,keyCode){
+        window.android.keyPress();
+    }
+
+    // 배열에 추가된 마커들을 지도에 표시하거나 삭제하는 함수입니다
+    function setMarkers(maps) {
+        for (var i = 0; i < markers.length; i++) {
+            markers[i].setMap(maps);
+        }
+    }
 </script>
 <?php 
 include_once(G5_PATH."/tail.php");

@@ -36,8 +36,9 @@ while($row=sql_fetch_array($res)){
 
 $sql = "select * from `product` where pd_id = {$pd_id}";
 $view = sql_fetch($sql);
-$photo = explode(",",$view["pd_images"]);
-
+if($view["pd_images"]) {
+    $photo = explode(",", $view["pd_images"]);
+}
 if($_SESSION["lat"] && $_SESSION["lng"]) {
     $sql = "select *,c.mb_id as mb_id, 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' order by c.sign_date asc";
 }else{
@@ -151,11 +152,13 @@ $viewlikecnt = sql_fetch($sql);
 <div class="DetailImage" id="DetailImage">
     <div id="imgs">
         <ul class="list2">
+            <?php if(count($photo)>0 || $view["pd_images"]!=""){?>
             <?php for($i=0;$i<count($photo);$i++){
                 $imgs = get_images(G5_DATA_PATH."/product/".$photo[$i],'','');
                 ?>
                 <li class="item2" id="item2" style="background-image:url('<?php echo G5_DATA_URL;?>/product/<?php echo $imgs?>');background-size:contain;background-repeat:no-repeat;background-position:center">
                 </li>
+            <?php }?>
             <?php }?>
         </ul>
     </div>
@@ -165,16 +168,19 @@ $viewlikecnt = sql_fetch($sql);
     <div class="close" onclick="modalCloseTalk();">
         <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
     </div>
-    <div>
+    <?php if($view["pd_type"]==2 && $view["pd_type2"]==8){?>
+    <div class="talk_info">
         <input type="button" value="거래유의사항 전달" class="">
     </div>
+    <?php }?>
     <div class="msg_container" id="msg_container" <?php if(count($mywordss)<0){?>style="height: calc(100% - 55.3vw);"<?php }?> >
         <div class="msg_bg"></div>
         <?php if(count($talk_list)==0){?>
             <div class="no-list">
                 <p>대화방에 참여 하였습니다.</p>
                 <?php if($view["pd_type"]==2 && $view["pd_infos"] != ""){?>
-                <p><?php echo $view["pd_infos"];?></p>
+                <p style="border-radius: 10px;font-size: 4vw;background-color: #ffe22e;color: #000;text-align: left;padding: 2vw;width: calc(100% - 8vw);"><?php echo nl2br($view["pd_infos"]);?></p>
+
                 <?php }?>
             </div>
         <?php }else {
@@ -234,6 +240,8 @@ $viewlikecnt = sql_fetch($sql);
     <?php }?>
     <div class="msg_controls">
         <input type="hidden" value="<?php echo $talk_read_ids;?>" id="talk_ids">
+        <input type="hidden" value="" id="talk_read_id">
+        <input type="hidden" value="normal" id="talk_type">
         <input type="text" name="talk_content" id="message" value="" placeholder="메세지를 입력하세요.">
         <input type="button" value="보내기" class="send_msg" onclick="fnSendMsg();">
     </div>
@@ -241,17 +249,22 @@ $viewlikecnt = sql_fetch($sql);
     <div class="price">
         <p><?php if($view['pd_type']==1){ if($view['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($view['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></p>
         <h2><?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]);}else{ if($view["pd_type2"]==8){echo "0원";}else{echo "제시요망";}}?></h2>
+        <?php if($view["pd_type"]==1 && $view["pd_type2"]==8){?>
+            <div class="sell_btn">
+                <input type="button" value="이 회원에게 판매하기" class="btn" onclick="fnSell();">
+            </div>
+        <?php }?>
         <div class="price_bg"></div>
     </div>
     
 </div>
 <div id="sell" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
     <div class="sell_con">
-        <input type="hidden" value="<?php echo $mb_id;?>" name="sell_mb_id" id="sell_mb_id">
-        <input type="hidden" value="<?php echo $pd_id;?>" name="pd_id" id="pd_id">
-        <h2>구매예약</h2>
+        <input type="text" value="" name="sell_mb_id" id="sell_mb_id">
+        <input type="text" value="<?php echo $pd_id;?>" name="pd_id" id="pd_id">
+        <h2>판매하기</h2>
         <div>
-            <input type="text" value="<?php if($view["pd_price"]>0){echo $view["pd_price"];}?>" name="price" id="price" placeholder="구매가격" required>
+            <input type="text" value="<?php if($view["pd_price"]>0){echo $view["pd_price"];}?>" name="price" id="price" placeholder="판매가격" required>
         </div>
         <div>
             <input type="button" value="취소" onclick="modalClose()"><input type="button" value="구매하기" onclick="addSell();" style="width:auto;background-color:" >
@@ -284,18 +297,35 @@ $viewlikecnt = sql_fetch($sql);
             <?php if($profile["mb_id"]!=$member["mb_id"]){?>
             <div class="profile_menu active">
                 <div class="menu1" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/mypage/mypage.php?mode=profile&pro_id=<?php echo $view["mb_id"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_profile.svg" alt=""></div><div class="text_box">프로필</div></div>
+                <?php if($profile["chat_set"]==1){?>
                 <div class="menu2" onclick="fnTalk();"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_talk.svg" alt=""></div><div class="text_box">간편대화</div></div>
-                <?php if($profile["mb_hp"]){?>
-                <?php if($profile["sms_set"]==1){?>
-                <div class="menu3" onclick="location.href='sms:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_msg.svg" alt=""></div><div class="text_box">메시지</div></div>
+                    <?php if($profile["show_hp"]==0){?>
+                        <?php if($profile["sms_set"]==1){?>
+                            <div class="menu3" onclick="location.href='sms:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_msg.svg" alt=""></div><div class="text_box">메시지</div></div>
+                            <?php if($profile["hp_set"]==1){?>
+                                <div class="menu4" onclick="location.href='tel:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_call.svg" alt=""></div><div class="text_box">전화</div></div>
+                            <?php }?>
+                        <?php }else{?>
+                            <?php if($profile["hp_set"]==1){?>
+                                <div class="menu3" onclick="location.href='tel:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_call.svg" alt=""></div><div class="text_box">전화</div></div>
+                            <?php }?>
+                        <?php }?>
+                    <?php }?>
+                <?php }else{ ?>
+                    <?php if($profile["show_hp"]==0){?>
+                    <?php if($profile["sms_set"]==1){?>
+                        <div class="menu2" onclick="location.href='sms:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_msg.svg" alt=""></div><div class="text_box">메시지</div></div>
+                        <?php if($profile["hp_set"]==1){?>
+                            <div class="menu3" onclick="location.href='tel:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_call.svg" alt=""></div><div class="text_box">전화</div></div>
+                        <?php }?>
+                    <?php }else{?>
+                            <?php if($profile["hp_set"]==1){?>
+                        <div class="menu2" onclick="location.href='tel:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_call.svg" alt=""></div><div class="text_box">전화</div></div>
+                            <?php }?>
+                    <?php }?>
+                    <?php }?>
                 <?php }?>
-                <?php if($profile["hp_set"]==1){?>
-                <div class="menu4" onclick="location.href='tel:<?php echo $profile["mb_hp"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_call.svg" alt=""></div><div class="text_box">전화</div></div>
-                <?php }?>
-                <?php }?>
-                <?php if($view["mb_id"]==$member["mb_id"] && $view["pd_update_cnt"] < 5){?>
-                <div class="menu5"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_up.svg" alt=""></div><div class="text_box">업하기</div></div>
-                <?php }?>
+
             </div>
             <?php }?>
             <div class="img" onclick="fnProfileMenu();">
@@ -378,7 +408,7 @@ $viewlikecnt = sql_fetch($sql);
                          <img src="<?php echo G5_IMG_URL?>/ic_hit_list.svg" alt="">
                          <span class="count"><?php echo "";?></span>/<?php echo $view["pd_hits"];?>
                      </div>
-                    <div class="view_blind_cnt" <?php if($view["mb_id"]!= $member["mb_id"] && $blind_cnt['cnt'] < 0 ){?>onclick="fnBlind('<?php echo $pd_id;?>','')"<?php }?>>
+                    <div class="view_blind_cnt" <?php if($view["mb_id"]!= $member["mb_id"] && $blind_cnt['cnt'] <= 0 ){?>onclick="fnBlind('<?php echo $pd_id;?>','')"<?php }?>>
                         <?php
                         switch ($view["pd_blind"]){
                             case 0:
@@ -539,6 +569,9 @@ $viewlikecnt = sql_fetch($sql);
                                         ?>
                                     <li style="display:table">
                                         <div style="display:table-row">
+                                            <div style="position:absolute;right:0;top:9vw;z-index:10">
+                                                <input type="button" value="판매하기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="addSell2('<?php echo $view["pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing["mb_id"];?>')">
+                                            </div>
                                             <div class="profile" style="width:15vw;height:15vw;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;float:none;display:table-cell;vertical-align:middle;"  <?php if($member["mb_id"] == $view["mb_id"]){?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')"<?php }?>>
                                                 <?php if($mb["mb_profile"]){?>
                                                     <img src="<?php echo $mb["mb_profile"];?>" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
@@ -546,9 +579,9 @@ $viewlikecnt = sql_fetch($sql);
                                                     <img src="<?php echo G5_IMG_URL;?>/no-profile.svg" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
                                                 <?php } ?>
                                             </div>
-                                            <div class="coms" style="display:table-cell;padding:3vw;position:relative;left:0;margin:0">
+                                            <div class="coms" style="display:table-cell;padding:3vw 20vw 3vw 3vw;position:relative;left:0;margin:0;">
                                                 <p style="margin:0;font-weight:bold"><?php echo $mb["mb_nick"];?></p>
-                                                <p style="margin:0"><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?> / <?php echo distTran($pricing[$i]["distance"]);?></p>
+                                                <p style="margin:0"><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?> <br> 거리 : <?php echo distTran($pricing[$i]["distance"]);?></p>
                                                 <h2 style="margin-top:2vw"><?php echo $pricing[$i]["pricing_content"];?></h2>
                                             </div>
                                         </div>
@@ -559,8 +592,8 @@ $viewlikecnt = sql_fetch($sql);
                                                     <li onclick="location.href='tel:<?php echo $mb["mb_hp"];?>'">전화하기</li>
                                                     <?php }if($set["sms_set"]!=0){?>
                                                     <li onclick="location.href='sms:<?php echo $mb["mb_hp"];?>'">문자하기</li>
-                                                    <?php }if($set["talk_set"]!=0){?>
-                                                    <li onclick="">대화하기</li>
+                                                    <?php }if($set["chat_set"]!=0){?>
+                                                    <li onclick="fnTalk2('<?php echo $mb["mb_id"];?>')">대화하기</li>
                                                     <?php }?>
                                                 </ul>
                                             </div>
@@ -572,6 +605,7 @@ $viewlikecnt = sql_fetch($sql);
                     </div>
                 </div>
                 <?php }?>
+                <?php if($profile["comment_set"]==1){?>
                 <div class="comment">
                     <input type="hidden" name="comment_re" id="comment_re" value="">
                     <input type="hidden" name="comment_re_mb_id" id="comment_re_mb_id" value="">
@@ -716,7 +750,7 @@ $viewlikecnt = sql_fetch($sql);
                         </div>
                     </div>
                 </div>
-
+                <?php }?>
                 <div class="detail_arrow_close">
                     <img src="<?php echo G5_IMG_URL?>/ic_view_arrow_close.png" alt="">
                 </div>
@@ -782,8 +816,10 @@ $viewlikecnt = sql_fetch($sql);
             <?php if($view["pd_video"] != ""){
 
             ?>
-            <li class="item video" >
-                <video autoplay controls src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>" width="360px" height="640px" class="view_video"></video>
+            <li class=" video" >
+                <video autoplay controls width="360px" height="640px" class="view_video" preload="metadata">
+                    <source src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>#t=2" type="video/mp4">
+                </video>
             </li>
             <?php } ?>
         </ul>
@@ -966,10 +1002,17 @@ $(function(){
     }
 
     function previewImg(){
-        $(".item").not(".video").each(function(e){
+        var count = 0;
+        $(".list .item").each(function(e) {
+            count = e;
+            console.log(e);
+        });
+        //$(".item").each(function(e){
+        if(count > 0) {
             $(".DetailImage").show();
-            location.href='#preview';
-        })
+            location.href = '#preview';
+        }
+        //})
     }
 
     function zoomIn(scale){
@@ -1427,6 +1470,7 @@ function fnTalk(){
     $(".view_top").css("display","block");
     $(".view_detail").css("top","100vh");
     $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
+    $("#talk_type").val("normal");
     $(".talk").show();
     var element = document.getElementById("msg_container");
     element.scrollTop = element.scrollHeight;
@@ -1464,13 +1508,63 @@ function fnTalk(){
     },1000);
 }
 
+function fnTalk2(mb_id){
+    $(".view_detail").hide();
+    $(".view_bottom").hide();
+    $(".DetailImage").hide();
+    $(".profile_menu").removeClass("active");
+    $(".view_top").css("display","block");
+    $(".view_detail").css("top","100vh");
+    $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
+    $("#talk_read_id").val(mb_id);
+    $("#talk_type").val("deal");
+    $(".talk").show();
+    var element = document.getElementById("msg_container");
+    element.scrollTop = element.scrollHeight;
+    //대화 갱신
+    talkID = setInterval(function(){
+        var pd_id = "<?php echo $view["pd_id"];?>";
+        var send_mb_id = "<?php echo $member["mb_id"];?>";
+        var read_mb_id = mb_id;
+        //누적 메시지 체크
+        var read_id = $("#talk_ids").val();
+        if(read_id == ""){
+            read_id = readid;
+        }
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.read_msg.php",
+            method:"post",
+            data:{pd_id:pd_id,mb_id:send_mb_id,read_mb_id:read_mb_id,read_id:read_id,roomid:roomid},
+            dataType:'json'
+        }).done(function(data){
+            if(data.cnt > 0) {
+                for (var i = 0; i < data.cnt; i++) {
+                    var text = JSON.stringify(data.msg[i]);
+                    text = text.replace(/\"/g,"");
+                    $(".msg_container").append(text);
+                }
+                element.scrollTop = element.scrollHeight;
+            }
+            if(data.ids) {
+                $("#talk_ids").val(data.ids);
+            }
+        });
+    },1000);
+}
+
+
 function fnSendMsg(){
+    var type = $("#talk_type").val();
     var pd_id = "<?php echo $view["pd_id"];?>";
     var mb_id = "<?php echo $member["mb_id"];?>";
     if(mb_id == ""){
         mb_id = "<?php echo session_id();?>";
     }
     var read_mb_id = "<?php echo $view["mb_id"];?>";
+    if(type=="deal"){
+        read_mb_id = $("#talk_read_id").val();
+    }
+    alert(read_mb_id);
     var message = $("#message").val();
     if(message == ""){
         alert('메세지를 입력해 주세요');
@@ -1560,7 +1654,6 @@ function addSell(){
     }).done(function (data) {
         console.log(data);
         if(data=="3"){
-            //alert("구매예약이 완료 되었습니다.");
             if(confirm("구매예약이 완료 되었습니다.\r장바구니로 이동 하시겠습니까?")){
                 location.href=g5_url+'/mobile/page/mypage/cart.php';
             }else{

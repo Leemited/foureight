@@ -5,8 +5,9 @@ if(!$pd_ids || !$cart_ids || !$prices){
     return false;
 }
 
-if($type=="insert") {
 
+
+if($type=="insert") {
     $pd_ids = explode(",", $_REQUEST["pd_ids"]);
     $cart_ids = explode(",", $_REQUEST["cart_ids"]);
     $prices = explode(",", $_REQUEST["prices"]);

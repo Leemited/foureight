@@ -47,7 +47,7 @@ if(strpos($agent,"foureight")!==false){
             include_once(G5_PLUGIN_PATH.'/oauth/login.skin.inc.php');
             ?>
 			<div class="login_link">
-				<a href="<?php echo G5_BBS_URL ?>/password_lost.php" target="_self" id="login_password_lost" class="">비밀번호를 잊으셨나요?</a>
+				<a href="<?php echo G5_MOBILE_URL;?>/page/find_password.php" target="_self" id="login_password_lost" class="">비밀번호를 잊으셨나요?</a>
 			</div>
 			<div>
 				<input type="submit" value="로그인" class="btn_submit">

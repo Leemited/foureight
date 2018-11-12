@@ -9,9 +9,8 @@ if(defined('G5_THEME_PATH')) {
 //새알림
 $start = date("Y-m-d");
 $end = date("Y-m-d", strtotime("-3 month"));
-$sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}'";
+$sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}' and alarm_status = 0";
 $alarms = sql_fetch($sql);
-
 
 ?>
 
@@ -86,7 +85,7 @@ function fnPricingUpdate(){
                return false;
            }
            if (data == "4") {
-               alert("제시가 등록되었습니다.");
+               alert("딜하기가 등록되었습니다.");
                modalClose();
            }
        }
@@ -290,6 +289,47 @@ function removeDebug(){
     $("#mobile_header #mobile_menu_btn").removeClass("active");
 }
 
+function addSell2(pd_id,price,sell_mb_id){
+
+    if(confirm("해당 판매글의 상태가 판매중으로 변경됩니다.\r판매 하시겠습니까?")) {
+        //바로 지목 판매이므로 상태는 판매중으로 변경
+        $.ajax({
+            url: g5_url + "/mobile/page/ajax/ajax.insert_cart.php",
+            method: "POST",
+            data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1}
+        }).done(function (data) {
+            console.log(data);
+        });
+    }else{
+        return false;
+    }
+}
+
+
+function setCookie(name, value, expiredays){
+    var todayDate = new Date();
+    todayDate.setDate( todayDate.getDate() + expiredays );
+    document.cookie = name + "=" + escape( value ) + "; path=/; expires=" + todayDate.toGMTString() + ";"
+}
+
+function getCookie(cName) {
+    cName = cName + '=';
+    var cookieData = document.cookie;
+    var start = cookieData.indexOf(cName);
+    var cValue = '';
+    if(start != -1){
+        start += cName.length;
+        var end = cookieData.indexOf(';', start);
+        if(end == -1)end = cookieData.length;
+        cValue = cookieData.substring(start, end);
+    }
+    return unescape(cValue);
+}
+function showMenu(){
+    $(".write").show();
+    $("#ft").show();
+    $(".current").css("bottom","19vw");
+}
 
 </script>
 

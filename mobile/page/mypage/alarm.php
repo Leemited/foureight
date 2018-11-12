@@ -10,13 +10,12 @@ if(!$is_member){
 $now = date("Y-m-d");
 $month = date("Y-m-d", strtotime("-3 month"));
 
-$sql = "select *,m.pd_id as pd_id from `my_alarms` as m left join `product` as p on m.pd_id = p.pd_id where m.mb_id = '{$member["mb_id"]}' and m.alarm_date between '{$month}' and '{$now}'";
+$sql = "select *,m.pd_id as pd_id from `my_alarms` as m left join `product` as p on m.pd_id = p.pd_id where m.mb_id = '{$member["mb_id"]}' and m.alarm_date between '{$month}' and '{$now}' order by m.alarm_date desc, m.alarm_time desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $alarm[] = $row;
 }
-$today = date("Y-m-d h:i:s");
-
+$today = date("Y-m-d H:i:s");
 ?>
 <div class="sub_head">
     <div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
@@ -42,8 +41,11 @@ $today = date("Y-m-d h:i:s");
                     $diff_date = ((int)$diff[$i]["i"]) . "분 전";
                 }
             }
+
             ?>
-            <div class="alarm_item <?php if($alarm[$i]["alarm_status"] != 0){?>alarm_read<?php }?>" onclick="alarmRead('<?php echo $alarm[$i]["pd_id"];?>','<?php echo $alarm[$i]["alarm_type"];?>','<?php echo $alarm[$i]["id"];?>')">
+            <!--<p><?php /*echo $alarm[$i]["alarm_type"];*/?></p>-->
+            <div class="alarm_item <?php if($alarm[$i]["alarm_status"] != 0){?>alarm_read<?php }?>" onclick="alarmRead('<?php echo $alarm[$i]["pd_id"];?>','<?php echo $alarm[$i]["alarm_type"];?>','<?php echo $alarm[$i]["id"];?>','<?php echo $alarm[$i]['alarm_link'];?>')">
+                <?php if($alarm[$i]["pd_id"]){?>
                 <?php if($alarm[$i]["pd_images"]!=""){
                     $img = explode(",",$alarm[$i]["pd_images"]);
                     $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
@@ -57,16 +59,16 @@ $today = date("Y-m-d h:i:s");
                             <?php }?>
                         </div>
                     <?php }else{
-                        $tags = explode("/",$alarm[$i]["pd_tag"]);
+                        //$tags = explode("/",$alarm[$i]["pd_tag"]);
                         $rand = rand(1,13);
                         ?>
                         <div class="bg rand_bg<?php echo $rand;?> item_images" style="display: table;">
                             <div class="tags">
-                                <?php for($k=0;$k<count($tags);$k++){
+                                <?php //for($k=0;$k<count($tags);$k++){
                                     $rand_font = rand(3,6);
                                     ?>
-                                    <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                                <?php }?>
+                                    <div class="rand_size<?php echo $rand_font;?>"><?php echo $alarm[$i]["pd_tag"];?></div>
+                                <?php //}?>
                             </div>
                             <div class="clear"></div>
                         </div>
@@ -77,54 +79,43 @@ $today = date("Y-m-d h:i:s");
                     ?>
                     <div class="bg rand_bg<?php echo $rand;?> item_images" style="display: table;">
                         <div class="tags">
-                            <?php for($k=0;$k<count($tags);$k++){
-                                $rand_font = rand(3,6);
-                                ?>
-                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                            <?php }?>
+                            <?php $rand_font = rand(3,6); ?>
+                                <div class="rand_size<?php echo $rand_font;?>"><?php echo $alarm[$i]["pd_tag"];?></div>
                         </div>
                         <div class="clear"></div>
                     </div>
                 <?php }?>
+                <?php }else{?>
+                    <div class="item_images" style="background-image:url('<?php echo G5_IMG_URL?>/logo.svg');background-repeat:no-repeat;background-size:70% 70%;background-position:center;background-color:#eee;">
+                    </div>
+                <?php }?>
                 <div class="item_text">
+                    <!--<div class="btns">
+                        <input type="button" value="삭제">
+                    </div>-->
                     <p><?php echo $alarm[$i]["alarm_date"];?> <?php echo $alarm[$i]["alarm_time"];?> <span><?php echo $diff_date;?></span></p>
-                    <h2><?php echo $alarm[$i]["pd_name"];?></h2>
+                    <h2>" <?php echo $alarm[$i]["alarm_title"];?> "</h2>
                     <div>
                         <?php
                         //alarm_type : 1 = 구매관련 , 2 = 좋아요 , 3 = 검색등록 , 4 = 댓글,대화, 5 = 기타
                         // 1,2 = 해당 요청 아이디 표시
                         // 3,4,5 = 기본 문구
                         ?>
-                        <?php echo $alarm[$i]["alarm_content"];?>
+                        <?php echo cut_str($alarm[$i]["alarm_content"],'30','...');?>
                     </div>
                 </div>
                 <div class="clear"></div>
             </div>
-        <?php }?>
+        <?php
+        //알림 업데이트
+            $sql = "update `my_alarms` set alarm_status = 1 where id = '{$alarm[$i]["id"]}'";
+            sql_query($sql);
+        }?>
     </div>
 </div>
 <script>
-function alarmRead(pd_id,type,id){
-    var link = "";
-    if(type==1){//구매
-        link = g5_url+"/mobile/page/mypage/cart.php";
-    }else if(type==2){//좋아요
-        link = g5_url+"/mobile/page/mypage/mypage.php";
-    }else if(type==3){//검색등록
-        link = g5_url;
-    }else if(type==4){//댓글,대화
-        link = g5_url+"/mobile/page/mypage/mypage.php";
-    }else{
-        link = "";
-    }
-    $.ajax({
-       url:g5_url+"/mobile/page/ajax/ajax.alarm_update.php",
-       method:"POST",
-       data:{pd_id:pd_id,mb_id:mb_id,id:id}
-    }).done(function(data){
-       console.log(data);
-
-    });
+function alarmRead(pd_id,type,id,link){
+    location.href=link;
 }
 </script>
 <?php

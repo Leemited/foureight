@@ -382,7 +382,7 @@ $alarms = sql_fetch($sql);
 				<h4><?php echo $member["mb_nick"];?></h4>
 				<div class="addr"><?php echo ($member["mb_addr1"])?$member["mb_addr1"]:"저장된 주소가 없습니다.";?></div>
                 <div class="alert" onclick="fnAlertView();">
-                    <?php if($alarms['cnt'] > 0){?><div><?php echo $alarms['cnt'];?></div><?php }?>
+                    <?php if($alarms['cnt'] > 0){?><div></div><?php }?>
                     <img src="<?php echo G5_IMG_URL?>/ic_alert.svg " alt="">
                 </div>
 				<?php }?>
@@ -406,7 +406,7 @@ $alarms = sql_fetch($sql);
 				<h2>디자인율 | 48</h2>
                 <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>대표전화 : 010-3034-1746</p>
                 <ul class="agreement">
-                    <li onclick="location.href=g5_url+'/test3.php'">이용약관</li>
+                    <li onclick="location.href=g5_url+'/mobile/page/company/agreement.php'">이용약관</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/privacy.php'">개인정보 취급방침</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/location.php'">위치정보 수집약관</li>
                 </ul>
@@ -649,7 +649,7 @@ $(function(){
 			//$("#set_type2").val(2);
             $("#wr_type1").val(2);
             console.log($("#set_type2").val());
-            if($("#set_type2").val() == 8) {
+            if($("#set_type2").val() == 8 || $("#set_type2").val() == "") {
                 $(".timesel").css("display", "block");
                 $(".meettime").css("display", "block");
             }
@@ -660,7 +660,7 @@ $(function(){
             $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn_2.svg");
             $("#theme-color").attr("content","#000000");
             $("#wr_price").attr("placeholder","판매금액");
-            $("#wr_price").css("width","70%");
+            $("#wr_price").css("width","30%");
             $("#wr_price2").css("display","none");
 			//카테고리 설정
 			$.ajax({

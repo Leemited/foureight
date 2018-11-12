@@ -1,6 +1,7 @@
 <?php
 include_once("../../../common.php");
-$sql = "select * from `cart` as c left join `product` as p on c.pd_id = p.pd_id where p.mb_id = '{$mb_id}' and c_status = 0 and p.pd_type = {$type1} order by c.c_date desc, c.pd_id";
+
+$sql = "select *,c.mb_id as mb_id from `cart` as c left join `product` as p on c.pd_id = p.pd_id where p.mb_id = '{$mb_id}' and c_status = 0 and p.pd_type = {$type1} order by c.c_date desc, c.pd_id";
 
 $res =sql_query($sql);
 while($row = sql_fetch_array($res)){
@@ -58,7 +59,7 @@ while($row = sql_fetch_array($res)){
                 <?php }?>
                 <div class="item_text cart">
                     <h2><?php echo $cart[$i]["pd_name"];?></h2>
-                    <p>구매자 : <?php echo $mb["mb_nick"];?></p>
+                    <p>구매요청자 : <?php echo $mb["mb_nick"];?></p>
                     <div>
                         구매요청금액 : <?php echo number_format($cart[$i]["c_price"])." 원";?>
                     </div>

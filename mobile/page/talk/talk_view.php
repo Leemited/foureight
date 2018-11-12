@@ -32,6 +32,9 @@ $myset = sql_fetch($sql);
 //대화시 간편대화 불러오기
 $mywords = explode(":@!",$myset["my_word"]);
 $mywordss = explode("!@~",$mywords[2]);
+
+$sql = "select * from `product` where pd_id = {$pd_id}";
+$pro = sql_fetch($sql);
 ?>
 <div id="id01" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
     <div class="w3-modal-content w3-card-4">
@@ -52,17 +55,21 @@ $mywordss = explode("!@~",$mywords[2]);
     <div class="close" onclick="location.href='<?php echo $back_url;?>'">
         <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
     </div>
+    <?php if($pro["pd_type"]==2 && $pro["pd_type2"]==8){?>
+        <div class="talk_info">
+            <input type="button" value="거래유의사항 전달" class="">
+        </div>
+    <?php }?>
     <div class="msg_container" id="msg_container">
         <div class="msg_bg"></div>
         <?php if(count($talk_list)==0){?>
             <div class="no-list">
                 <p>대화방에 참여 하였습니다.</p>
                 <?php
-                $sql = "select * from `product` where pd_id = {$pd_id}";
-                $pro = sql_fetch($sql);
-                if($pro["pd_desc"])
-                ?>
-                <!--<p><?php /*echo $pro[""];*/?></p>-->
+
+                 if($pro["pd_type"]==2 && $pro["pd_infos"] != ""){?>
+                    <p style="border-radius: 10px;font-size: 4vw;background-color: #ffe22e;color: #000;text-align: left;padding: 2vw;width: calc(100% - 8vw);"><?php echo nl2br($pro["pd_infos"]);?></p>
+                <?php }?>
             </div>
         <?php }else {
             $today = date("Y-m-d");

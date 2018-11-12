@@ -1,5 +1,6 @@
 <?php
 function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id='',$imgurls=''){
+    //대화저장일경우 중복알림 저장이 아니라 업데이트 되어야 함
     //알림 저장
     $sql = "insert into `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0";
     sql_query($sql);

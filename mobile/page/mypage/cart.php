@@ -132,14 +132,14 @@ $back_url = G5_URL;
             <input type="hidden" name="cart_ids" value="<?php echo $cart_ids;?>">
             <input type="hidden" name="prices"value="<?php echo $pd_prices;?>">
             <input type="hidden" name="total_price" value="<?php echo $total;?>">
-            <input type="hidden" name="type" id="type" value="insert">
+            <input type="hidden" name="type" id="type1" value="insert">
         </form>
         <form action="<?php echo G5_MOBILE_URL?>/page/mypage/cart_update.php" method="post" name="cartform" >
             <input type="hidden" name="pd_ids" id="pd_ids" value="<?php echo $pd_ids;?>">
             <input type="hidden" name="cart_ids" id="cart_ids" value="<?php echo $cart_ids;?>">
             <input type="hidden" name="prices" id="prices" value="<?php echo $pd_prices;?>">
             <input type="hidden" name="total_price" id="total_price" value="<?php echo $total;?>">
-            <input type="hidden" name="type" id="type" value="insert">
+            <input type="hidden" name="type" id="type2" value="insert">
         <div class="cart_info">
             <div class="cart_div">
                 <div class="left">총상품 금액</div>
@@ -198,7 +198,6 @@ function addOrder(pd_id,price,cid){
             $("#pd_ids").val(re_pd_ids);
             $("#cart_ids").val(re_cart_ids);
             $("#prices").val(re_prices);
-            re_pd_ids="",re_cart_ids="",re_prices="";
         }
     }else{
         $("#item_"+pd_id).addClass("active");
@@ -211,7 +210,6 @@ function addOrder(pd_id,price,cid){
         end_price = end_price.numberFormat();
         $(".cart_div .right").html(end_price + " 원");
         if(!pd_ids.indexOf(pd_id)!=-1){
-            console.log("A"+"//"+pd_ids);
             if(pd_ids==""){
                 pd_ids = pd_id;
                 cart_ids = cid;
@@ -236,7 +234,7 @@ function fnCartOrder(){
 }
 
 function fnCartDel(){
-    $("#type").val("del");
+    $("#type2").val("del");
     document.cartform.submit();
 }
 
