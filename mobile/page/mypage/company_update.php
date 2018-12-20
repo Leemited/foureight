@@ -1,6 +1,14 @@
 <?php
 include_once ("../../../common.php");
 
+$sql = "select COUNT(*) as cnt from `company_info` where mb_id = '{$member["mb_id"]}'";
+$chk = sql_fetch($sql);
+
+if($chk["cnt"]>0){
+    alert("이미 등록된 상태 입니다. 관리자에게 문의 바랍니다.");
+    return false;
+}
+
 if($_FILES["com_sign"]["tmp_name"]){
     // 디렉토리가 없다면 생성합니다. (퍼미션도 변경하구요.)
     @mkdir(G5_DATA_PATH.'/company/', G5_DIR_PERMISSION);
@@ -35,7 +43,7 @@ com_addr3 = '{$com_addr3}',
 com_addr_jibeon = '{$com_addr_jibeon}',
 com_tel = '{$com_tel}',
 status = 0,
-mb_id = '{$member["mb_id"]}'
+mb_id = '{$member["mb_id"]}',
 com_datetime = now() {$infile}";
 
 

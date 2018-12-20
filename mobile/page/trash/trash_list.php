@@ -46,31 +46,54 @@ while($row = sql_fetch_array($res)){
 			?>
 				<div class="grid__item trash" id="list_<?php echo $list[$i]['pd_id'];?>">
 					<div>
-						<?php if($list[$i]["pd_images"]!=""){
-							$img = explode(",",$list[$i]["pd_images"]);
-						?>
-						<div class="item_images">
-						<img src="<?php echo G5_DATA_URL?>/product/<?php echo $img[0];?>" alt="" class="main" >
-						</div>
-						<?php }else{ 
-						$tags = explode("/",$list[$i]["pd_tag"]);
-						$rand = rand(1,13);
-						?>
-						
-						<div class="bg rand_bg<?php echo $rand;?> item_images" >
-							<div class="tags">
-								<?php for($k=0;$k<count($tags);$k++){
-									$rand_font = rand(3,6);
-								?>
-								<div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-								<?php }?>
-							</div>
-							<div class="clear"></div>
-						</div>
-						<?php }?>
+                        <?php if($list[$i]["pd_images"]!=""){
+                            $img = explode(",",$list[$i]["pd_images"]);
+                            $img[0] = trim($img[0]);
+                            $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
+                            if(is_file(G5_DATA_PATH."/product/".$img1)){
+                                ?>
+                                <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;min-height: 28vw;">
+                                    <?php if($img1!=""){?>
+                                        <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
+                                    <?php }else{ ?>
+                                        <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="" class="main" style="opacity:0">
+                                    <?php }?>
+                                </div>
+                            <?php }else{
+                                $tags = explode("#",$list[$i]["pd_tag"]);
+                                $rand = rand(1,13);
+                                ?>
+                                <div class="bg rand_bg<?php echo $rand;?> item_images" >
+                                    <div class="tags">
+                                        <?php for($k=0;$k<count($tags);$k++){
+                                            $rand_font = rand(3,6);
+                                            if($tags[$k]!=""){
+                                                ?>
+                                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
+                                            <?php } }?>
+                                    </div>
+                                    <div class="clear"></div>
+                                </div>
+                            <?php }?>
+                        <?php }else{
+                            $tags = explode("#",$list[$i]["pd_tag"]);
+                            $rand = rand(1,13);
+                            ?>
+                            <div class="bg rand_bg<?php echo $rand;?> item_images" >
+                                <div class="tags">
+                                    <?php for($k=0;$k<count($tags);$k++){
+                                        $rand_font = rand(3,6);
+                                        if($tags[$k]!=""){
+                                            ?>
+                                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
+                                        <?php } }?>
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                        <?php }?>
 						<div class="top">
 							<div>
-								<h2><?php echo $type;?> </h2>
+                                <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
 								<div>
 									<ul>
 										<li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -85,7 +108,7 @@ while($row = sql_fetch_array($res)){
 							<h2><?php echo $list[$i]["pd_name"];?></h2>
 							<div>
 								<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
-								<!-- <img src="<?php echo G5_IMG_URL?>" alt="복원아이콘" class="" > -->
+								<img src="<?php echo G5_IMG_URL?>/ic_trash_del.svg" alt="복원아이콘" class="" onclick="fnTrashDelete('<?php echo $list[$i]["pd_id"];?>');">
 								<!-- <?php 		
 								
 								if($flag){
@@ -147,7 +170,6 @@ function fnTrashClear(){
             mtehod: "post",
             data:{mb_id:"<?php echo $member["mb_id"];?>"}
         }).done(function (data) {
-            console.log(data);
             alert(data);
             location.reload();
         });
@@ -156,6 +178,20 @@ function fnTrashClear(){
     }
 }
 
+function fnTrashDelete(pd_id){
+    $.ajax({
+        url: g5_url + "/mobile/page/ajax/ajax.trash_delete.php",
+        mtehod: "post",
+        data:{mb_id:"<?php echo $member["mb_id"];?>",pd_id:pd_id}
+    }).done(function (data) {
+        if(data==1) {
+            $("#list_" + pd_id).remove();
+            $grid.masonry('remove', this).masonry("layout");
+        }else{
+            alert("잘못된 요청입니다.");
+        }
+    });
+}
 </script>
 <?php 
 $p="wished";

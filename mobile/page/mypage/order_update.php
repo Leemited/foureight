@@ -37,6 +37,26 @@ while($row=sql_fetch_array($res)){
             $sql = "update `product` set pd_status = 4 where pd_id = '{$row["pd_id"]}'";
             sql_query($sql);
         }*/
+        $sql = "select m.mb_id as mbid,p.pd_type,p.pd_type2,p.pd_tag,p.pd_images from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where p.pd_id = '{$row[pd_id]}'";
+        $res = sql_fetch($sql);
+        $mb = get_member($res["mbid"]);
+        if($res["pd_type"]==1){
+            $content = $res["pd_tag"]."의 결제가 완료 되었습니다. ";
+        }else{
+            if($row["od_step"] == 1){
+                $content = $res["pd_tag"]."의 계약금이 결제되었습니다. ";
+            }else{
+                $content = $res["pd_tag"]."의 거래완료금이 결제되었습니다. ";
+            }
+        }
+
+        if($res["pd_images"]) {
+            $imgs = explode(",",$pd["pd_images"]);
+            $img = G5_DATA_URL."/product/".$imgs[0];
+        }
+
+        send_FCM($mb["regid"],'48결제알림',$content,G5_MOBILE_URL."/page/mypage/mypage.php",'fcm_buy_channel',"구매알림",$mb["mb_id"],$row["pd_id"],$img);
+
         alert("결제 완료 되었습니다.",G5_MOBILE_URL."/page/mypage/order_history.php");
     }else{
         alert("주문 등록 오류 입니다. \r관리자에게 문의해 주세요.");

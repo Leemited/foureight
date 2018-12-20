@@ -48,7 +48,7 @@ if($formtype == "write"){
         $set = ", pd_lat = '{$_SESSION['lat']}' , pd_lng = '{$_SESSION['lng']}'";
     }
     $con = number_format($priceFrom) . "원 에서 ".number_format($priceTo)."원 사이선에서 구매 원합니다.";
-    $sql = "insert into `product` set pd_type = {$set_type}, pd_type2 = 4, pd_cate='{$cate}', pd_cate2= '{$cate2}', pd_name = '{$sch_text}', pd_tag = '{$sch_text}', pd_content= '{$con}', mb_id = '{$member["mb_id"]}', pd_date = now(), pd_status = 0 {$set} ";
+    $sql = "insert into `product` set pd_type = {$wr_type}, pd_type2 = 4, pd_cate='{$cate}', pd_cate2= '{$cate2}', pd_name = '{$stx}', pd_tag = '{$stx}', pd_content= '{$con}', mb_id = '{$member["mb_id"]}', pd_date = now(), pd_status = 0, pd_price = '{$priceFrom}' {$set} ";
     if(sql_query($sql)){
         alert($sch_text."가 ".$cate."의 ".$cate2."카테고리에 [삽니다]글로 등록되었습니다.");
     }else{

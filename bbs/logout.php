@@ -15,6 +15,11 @@ if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
     $app = true;
 }
 
+$app2 = false;
+if($_SERVER["HTTP_USER_AGENT"] == "iosApp"){
+    $app2 = true;
+}
+
 
 if ($url) {
     if ( substr($url, 0, 2) == '//' )
@@ -42,12 +47,13 @@ if ($url) {
     <?php if($app){?>
     var chk = window.android.setLogout();
     <?php }?>
-    if(chk=="true") {
+    <?php if($app2){?>
+    webkit.messageHandlers.onLogout.postMessage("logout");
+    <?php }?>
+    if(chk) {
         location.href = '<?php echo $link;?>';
     }else{
         location.href = '<?php echo $link;?>';
     }
 </script>
-<?php
-//goto_url($link);
-?>
+

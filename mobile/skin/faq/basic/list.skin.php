@@ -100,12 +100,12 @@ echo '<div id="faq_hhtml">'.conv_content($fm['fm_mobile_head_html'], 1).'</div>'
 
     } else {
         if($stx){
-            echo '<p class="empty_list">검색된 게시물이 없습니다.</p>';
+            echo '<p class="empty_list"><div>검색된 게시물이 없습니다.</p>';
         } else {
-            echo '<div class="empty_table">등록된 FAQ가 없습니다.';
+            echo '<div class="empty_table"><div>등록된 FAQ가 없습니다.';
             if($is_admin)
                 echo '<br><a href="'.G5_ADMIN_URL.'/faqmasterlist.php">FAQ를 새로 등록하시려면 FAQ관리</a> 메뉴를 이용하십시오.';
-            echo '</div>';
+            echo '</div></div>';
         }
     }
     ?>

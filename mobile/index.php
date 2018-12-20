@@ -5,7 +5,12 @@ if(defined('G5_THEME_PATH')) {
     require_once(G5_THEME_PATH.'/index.php');
     return;
 }
-include_once(G5_EXTEND_PATH."/image.extend.php");
+//include_once(G5_EXTEND_PATH."/image.extend.php");
+
+if($is_member){
+    $sql = "select * from `mysetting` where mb_id = '{$member["mb_id"]}'";
+    $myset = sql_fetch($sql);
+}
 
 //검색 기본값
 $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0 ";
@@ -16,7 +21,6 @@ if($_SESSION["list_basic_order"]=="location"){
 }else {
     $od = " order by p.pd_update desc, p.pd_date desc";
 }
-
 /*if($sc_id){
     $sql = "select * from `my_search_list` where sc_id = '{$sc_id}'";
     $schopt = sql_fetch($sql);
@@ -24,12 +28,17 @@ if($_SESSION["list_basic_order"]=="location"){
     //$stx = $schopt["sc_tag"];
 }*/
 
+if($myset["feed_set"]==1){
+    $now = date("Y-m-d");
+    $month = date("Y-m-d", strtotime("- 6 month"));
+    $search .= " and p.pd_date between '{$month}' and now() ";
+}
+
 if($member["mb_id"]){
     $mb_id = $member["mb_id"];
 }else{
     $mb_id = session_id();
 }
-echo $searchActive;
 
 if($searchActive !="save") {
     //그냥 검색일경우
@@ -49,7 +58,6 @@ if($searchActive !="save") {
     sql_query($sql);
 
     $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_priceFrom = '{$priceFrom}', sc_priceTo = '{$priceTo}',sc_align='{$order_sort}',sc_align_active='{$order_sort_active}', sc_price_type = '{$pd_price_type}', sc_timeFrom = '{$pd_timeFrom}' , sc_timeTo = '{$pd_timeTo}', sc_savetype = 2, set_alarm = '{$set_status}'";
-    echo $sql;
     sql_query($sql);
     $sc_id = sql_insert_id();
 }
@@ -264,6 +272,7 @@ include_once(G5_MOBILE_PATH.'/head.php');
                 <input type="hidden" name="cate1" id="c" value="<?php echo $cate1;?>">
 				<input type="hidden" name="cate2" id="sc" value="<?php echo $cate2;?>">
 				<input type="hidden" name="pd_type2" id="pd_type2" value="<?php if($pd_type2){echo $pd_type2;}else{echo 8;}?>">
+                <input type="hidden" name="pd_price_type" id="pd_p_type" value="0">
                 <div class="type2_box">
                     <label class="switch schtype2" >
                         <input type="checkbox" id="wr_type2" name="wr_type2" value="4">
@@ -273,16 +282,23 @@ include_once(G5_MOBILE_PATH.'/head.php');
 				<h2>검색어</h2>
 				<div>
                     <p class="write_help"></p>
-					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 #으로 해주세요" required value="#" onkeyup="fnfilter(this.value,'wr_title')">
-					<input type="text" name="wr_price" id="wr_price" placeholder="<?php if($type1=="1"){?>판매금액<?php }else{?>계약금<?php }?>" required value="<?php echo $type1;?>" onkeyup="number_only(this)" style="<?php if($type1=="2"){?>width:30%;<?php }else{?>width:70%<?php }?>margin-right:5%;margin-top:0">
-                    <input type="text" name="wr_price2" id="wr_price2" placeholder="거래완료금" required value="" onkeyup="number_only(this)" style="width:30%;margin-top:0;<?php if($type1=="2"){?>display:inline-block;<?php }else{?>display:none;<?php }?>">
-                    <!--<p class="write_help"></p>-->
+					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 띄어쓰기로 가능합니다." required value="#" onkeyup="fnfilter(this.value,'wr_title')">
+                    <ul class="pd_price_type">
+                        <li class="active" id="pd_price_type0">회당</li>
+                        <li id="pd_price_type1">시간당</li>
+                        <li id="pd_price_type2">하루당</li>
+                    </ul>
+                    <input type="number" name="wr_price2" id="wr_price2" placeholder="계약금" required value="" onkeyup="number_only(this)" style="width:24%;margin-top:0;<?php if($type1=="2"){?>display:inline-block;<?php }else{?>display:none;<?php }?>;opacity: 0.6;">
+					<input type="number" name="wr_price" id="wr_price" placeholder="<?php if($type1=="1"){?>판매금액<?php }else{?>계약완료금<?php }?>" required value="<?php echo $type1;?>" onkeyup="number_only(this)" style="<?php if($type1=="2"){?>width:40%;<?php }else{?>width:70%<?php }?>margin-right:5%;margin-top:0">
 				</div>
-				<div>
-					<input type="button" value="확인" style="background-color:yellow" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types1">
+				<div class="price_box">
+					<input type="button" value="확인" style="background-color:yellow" onclick="<?php if($app){ ?>fnOnCam();<?php }else if($app2){?>fnOnCamIos()<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types1">
 					<input type="button" value="간편등록" onclick="fnSimpleWrite();" class="types2">
-					<input type="button" value="상세등록" onclick="<?php if($app){ ?>fnOnCam();<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types2">
+					<input type="button" value="상세등록" onclick="<?php if($app){ ?>fnOnCam();<?php }else if($app2){?>fnOnCamIos()<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types2">
 				</div>
+                <?php if($type1=="2"){?>
+                    <p class="write_help price_help">필요시 계약금을 설정할 수 있습니다.</p>
+                <?php }?>
                 <div class="modal_close" onclick="modalClose();">
                     <img src="<?php echo G5_IMG_URL?>/ic_modal_close.png" alt="">
                 </div>
@@ -324,7 +340,7 @@ include_once(G5_MOBILE_PATH.'/head.php');
 			<div class="list_item grid are-images-unloaded" id="test">
 				<?php
 				for($i=0;$i<count($list);$i++){
-				    if($list[$i]["distance"] == 0 ){
+				    if($list[$i]["pd_lat"]==0 && $list[$i]["pd_lng"]==0){
 				        $dist = "정보없음";
                     }else {
                         $dist = round($list[$i]["distance"],1) . "km";
@@ -391,6 +407,11 @@ include_once(G5_MOBILE_PATH.'/head.php');
                             <input type="button" value="사유보기" class="list_btn"  >
                         </div>
                     <?php }?>
+                    <div class="wished_active" style="" id="heart_<?php echo $list[$i]["pd_id"];?>">
+                        <div class="wished_ani">
+                            <i class="fa fa-heart fa-3x"></i>
+                        </div>
+                    </div>
 					<div class="in_grid">
                         <?php if($list[$i]["pd_images"]!=""){
                             $img = explode(",",$list[$i]["pd_images"]);
@@ -446,7 +467,7 @@ include_once(G5_MOBILE_PATH.'/head.php');
                                         <li><?php echo $time_gep;?></li>
                                         <?php }?>
 										<li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
-										<?php if($app || $list[$i]["distance"]){?><li><img src="<?php echo G5_IMG_URL?>/ic_loc.svg" alt="">
+										<?php if($app || $list[$i]["distance"] && $app2 || $list[$i]["distance"]){?><li><img src="<?php echo G5_IMG_URL?>/ic_loc.svg" alt="">
                                             <?php echo $dist;?>
                                             </li><?php }?>
 									</ul>
@@ -516,7 +537,11 @@ include_once(G5_MOBILE_PATH.'/head.php');
 			</div>
 		</article>
 	</section>
-
+</div>
+<div class="trash-ani">
+    <div class="trash-icon">
+    <img src="<?php echo G5_IMG_URL?>/ic_index_trash.svg" alt="">
+    </div>
 </div>
 <script>
 var page=1;
@@ -604,12 +629,16 @@ $(document).ready(function(){
                 $("#wr_price").attr("placeholder","판매금액");
                 $("#wr_price").css("width","70%");
                 $("#wr_price2").css("display","none");
+                $(".pd_price_type").css("display","none");
+                //$(".price_box .write_help.price_help").remove();
             }
             if($("#wr_type1").val()==2){ //능력 판매 / 계약금 / 계약완료금
-                $("#wr_price").attr("placeholder","계약금");
-                $("#wr_price2").attr("placeholder","거래완료금");
-                $("#wr_price").css("width","30%");
-                $("#wr_price2").css({"display":"inline-block","width":"30%"});
+                $("#wr_price").attr("placeholder","거래완료금");
+                $("#wr_price2").attr("placeholder","계약금");
+                $("#wr_price").css("width","40%");
+                $("#wr_price2").css({"display":"inline-block","width":"24%"});
+                $(".pd_price_type").css("display","block");
+                //$(".price_box").append('<p class="write_help price_help">필요시 계약금을 설정할 수 있습니다.</p>');
             }
         }else{
             $(this).html('구매');
@@ -622,14 +651,31 @@ $(document).ready(function(){
                 $("#wr_price").attr("placeholder","구매예상금");
                 $("#wr_price").css("width","70%");
                 $("#wr_price2").css("display","none");
+                $(".pd_price_type").css("display","none");
+                //$(".price_box .write_help.price_help").remove();
             }
             if($("#wr_type1").val()==2){ //능력 구매 / 구매예상금
                 $("#wr_price").attr("placeholder","구매예상금");
                 $("#wr_price").css("width","70%");
                 $("#wr_price2").css("display","none");
+                $(".pd_price_type").css("display","block");
+                //$(".price_box").append('<p class="write_help price_help">필요시 계약금을 설정할 수 있습니다.</p>');
             }
         }
-    })
+    });
+
+    //능력 판매시 가격 타입
+    $(".pd_price_type li").each(function(){
+        $(this).click(function(){
+            if(!$(this).hasClass("active")){
+                $(this).addClass("active");
+                $(".pd_price_type li").not($(this)).removeClass("active");
+                var id = $(this).attr("id");
+                var data = id.replace("pd_price_type","");
+                $("#pd_p_type").val(data);
+            }
+        });
+    });
 
 	//인기 거리
 	$(".align .slider").click(function(){
@@ -721,7 +767,11 @@ $(document).ready(function(){
                 data: {cate: c, type: type}
             }).done(function (data) {
                 msg = data;
-                if (confirm(msg + "\r\n해당 카테고리로 게시글을 등록할까요?")) {
+                var msg2 = "\r\n해당 카테고리로 게시글을 등록할까요?";
+                if(msg){
+                    msg2 = msg + msg2;
+                }
+                if (confirm(msg2)) {
                     //$("#type").val(type);
                     $("#c").val(c);
                     $("#sc").val(sc);
@@ -733,17 +783,26 @@ $(document).ready(function(){
                         if (data != "") {
                             $("#id01 .write_help").html("예 : " + data);
                         }else{
-                            $("#id01 .write_help").html("검색어 구분은 #으로 해주세요.");
+                            $("#id01 .write_help").html("검색어 구분은 띄어쓰기로 가능합니다.");
+                            $("#id01 .write_help.price_help").html("필요시 계약금을 설정할 수 있습니다.");
                         }
                     });
                     cateClose();
                     if(type==1){
                         $("#wr_price").attr("placeholder","판매금액");
                         $("#wr_price2").css("display","none");
+                        $("#wr_price").css("width","70%");
+                        $("#wr_price2").css({"display":"none"});
+                        $(".pd_price_type").css("display","none");
+                        $(".price_box .write_help.price_help").remove();
                     }
                     if(type==2){
-                        $("#wr_price").attr("placeholder","계약금");
-                        $("#wr_price2").attr("placeholder","거래완료금");
+                        $(".pd_price_type").css("display","block");
+                        $(".price_box").append('<p class="write_help price_help">필요시 계약금을 설정할 수 있습니다.</p>');
+                        $("#wr_price").attr("placeholder","거래완료금");
+                        $("#wr_price2").attr("placeholder","계약금");
+                        $("#wr_price").css("width","40%");
+                        $("#wr_price2").css({"display":"inline-block","width":"24%"});
                         $("#wr_price2").css("display","inline-block");
                     }
                     $("#id01").css("display", "block");
@@ -799,7 +858,9 @@ $(document).ready(function(){
                     $grid.masonry('remove', this).masonry("layout");
                     $("#mobile_header #mobile_menu_btn").addClass("active");
                     $("#debug").addClass("active");
+                    $(".trash-ani").addClass("active");
                     $("#debug").html("휴지통으로 이동되었습니다.");
+                    setTimeout(function(){$(".trash-icon").addClass("active");},1000);
                     setTimeout(removeDebug, 1500);
                 }else if(data=="3"){
                     $("#debug").addClass("active");
@@ -819,11 +880,13 @@ $(document).ready(function(){
                     $grid.masonry('remove', this).masonry("layout");
                     $("#mobile_header #mobile_menu_btn").addClass("active");
                     $("#debug").addClass("active");
+                    $(".trash-ani").addClass("active");
                     $("#debug").html("휴지통으로 이동되었습니다.");
+                    setTimeout(function(){$(".trash-icon").addClass("active");},1000);
                     setTimeout(removeDebug, 1500);
                 }else if(data=="3"){
                     $("#debug").addClass("active");
-                    $("#debug").html("자신의 글은 휴지통에 보낼 수 없습니다.");
+                    $("#debug").html("내 글은 휴지통에 보낼 수 없습니다.");
                     setTimeout(removeDebug, 1500);
                 }
             });
@@ -861,12 +924,14 @@ $(document).ready(function(){
                         if(data == "delete query") {
                             console.log("A");
                             $("#" + id).removeClass("wishedon");
+
                             var wished = $("#" + id).children().find($(".wished"));
                             var wished_cnt = $("#" + id).children().find($(".list_wished_cnt"));
                             var wished_total = Number(wished_cnt.text()) - 1;
                             if(wished_total < 0){
                                 wished_total = '';
                             }
+                            $("#heart_"+pd_id).removeClass("active");
                             wished.removeClass("element-animation");
                             wished.attr("src", g5_url + "/img/ic_wish.svg");
                             wished_cnt.html(wished_total);
@@ -888,6 +953,7 @@ $(document).ready(function(){
                             var wished = $("#"+id).children().find($(".wished"));
                             var wished_cnt = $("#" + id).children().find($(".list_wished_cnt"));
                             var wished_total = Number(wished_cnt.text()) + 1;
+                            $("#heart_"+pd_id).addClass("active");
                             wished.removeClass("element-animation");
                             wished.addClass("element-animation");
                             wished.attr("src",g5_url+"/img/ic_wish_on.svg");
@@ -1139,13 +1205,51 @@ function fnOnCam(){
 		var title = $("#wr_title").val();
 		var type1 = $("#wr_type1").val();
 		var type2 = $("#pd_type2").val();
+		var pd_price_type = $("#pd_p_type").val();
 		var cate1 = $("#c").val();
 		var cate2 = $("#sc").val();
 		var wr_price = $("#wr_price").val();
 		var wr_price2 = $("#wr_price2").val();
-		window.android.camereOn('<?php echo $member["mb_id"];?>',title,cate1,cate2,type1,type2,wr_price,wr_price2);
+		window.android.camereOn('<?php echo $member["mb_id"];?>',title,cate1,cate2,type1,type2,wr_price,wr_price2,pd_price_type);
 	}
 }
+
+function fnOnCamIos(){
+    if($("#wr_title").val()=="" || $("#wr_title").val()=="#"){
+        alert("제목을 입력해주세요");
+        return false;
+    }else{
+        var title = $("#wr_title").val();
+        var type1 = $("#wr_type1").val();
+        var type2 = $("#pd_type2").val();
+        var pd_price_type = $("#pd_p_type").val();
+        var cate1 = $("#c").val();
+        var cate2 = $("#sc").val();
+        var wr_price = $("#wr_price").val();
+        var wr_price2 = $("#wr_price2").val();
+        try{
+
+            var dataString = {
+                mb_id : "<?php echo $member["mb_id"];?>",
+                title : title,
+                cate1 : cate1,
+                cate2 : cate2,
+                type1 : type1,
+                type2 : type2,
+                wr_price : wr_price,
+                wr_price2 : wr_price2,
+                pd_price_type : pd_price_type
+            }
+
+            //var dataString = JSON.stringify(data);
+            //alert(dataString);
+            webkit.messageHandlers.onCam.postMessage(dataString);
+        }catch (err){
+            console.log(err);
+        }
+    }
+}
+
 
 $(window).scroll(function(){
 	if (Math.ceil($(window).scrollTop()) >= ($(document).height() - $(window).height())) {
@@ -1213,7 +1317,7 @@ function doNotReload(){
 document.onkeydown = doNotReload;
 
 <?php if($pd_id){ ?>
-fn_viewer("<?php echo $pd_id;?>");
+setTimeout(function(){fn_viewer("<?php echo $pd_id;?>")},150);
 <?php } ?>
 
 </script>

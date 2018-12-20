@@ -67,12 +67,12 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                             <option value="02/신한카드">신한카드</option>
                         </select>
                     </li>
-                    <li><input type="text" class="setting_input" name="card_year" placeholder="유효년" value="" style="width:10vw" required> 년 / <input type="text" class="setting_input" name="card_month" placeholder="유효월" value="" style="width:10vw" required> 월</li>
+                    <li><input type="number" class="setting_input" name="card_year" placeholder="유효년" value="" style="width:10vw" required> 년 / <input type="number" class="setting_input" name="card_month" placeholder="유효월" value="" style="width:10vw" required> 월</li>
                     <li>
-                        <input type="text" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
+                        <input type="number" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
                         <input type="password" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
                         <input type="password" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
-                        <input type="text" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required>
+                        <input type="number" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required>
                     </li>
                 </ul>
                 <div class="btn_group">

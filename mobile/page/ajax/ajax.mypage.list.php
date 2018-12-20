@@ -5,24 +5,24 @@ $page = $_REQUEST["page"];
 
 
 //검색 
-$search = " 1 ";
+$search = " p.pd_status < 10 ";
 
 //정렬
-$od = " order by pd_date desc";
+$od = " order by p.pd_date desc";
 
 //구분[구분 없음]
 $type1 = $_REQUEST["type1"];
 if($type1){
-	$search .= " and pd_type = ".$type1;
+	$search .= " and p.pd_type = ".$type1;
 }
 
 $mb_id = $_REQUEST["mb_id"];
 if($mb_id){
-    $search .= " and mb_id = '{$mb_id}'";
+    $search .= " and p.mb_id = '{$mb_id}'";
 }
 
 
-$sql = "select * from `product` where  {$search} order by pd_date desc";
+$sql = "select *, m.mb_id as mb_id from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where  {$search} order by p.pd_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;
@@ -74,11 +74,11 @@ for($i=0;$i<count($list);$i++){
                 ?>
                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
                     <div class="tags">
-                        <?php for($k=0;$k<count($tags);$k++){
+                        <?php //for($k=0;$k<count($tags);$k++){
                             $rand_font = rand(3,6);
                             ?>
-                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                        <?php }?>
+                            <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+                        <?php //}?>
                     </div>
                     <div class="clear"></div>
                 </div>
@@ -89,18 +89,18 @@ for($i=0;$i<count($list);$i++){
             ?>
             <div class="bg rand_bg<?php echo $rand;?> item_images" >
                 <div class="tags">
-                    <?php for($k=0;$k<count($tags);$k++){
+                    <?php //for($k=0;$k<count($tags);$k++){
                         $rand_font = rand(3,6);
                         ?>
-                        <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                    <?php }?>
+                        <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+                    <?php //}?>
                 </div>
                 <div class="clear"></div>
             </div>
         <?php }?>
 		<div class="top">
 			<div>
-				<h2><?php echo $type;?> </h2>
+                <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
 				<div>
 					<ul>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($list_type == "true"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>

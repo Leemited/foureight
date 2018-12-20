@@ -10,6 +10,9 @@ if($pro["cnt"]>0){
     $sql = "insert into `cart` set pd_id = {$pd_id} , mb_id = '{$sell_mb_id}', c_status = {$status}, c_price = {$price}, c_date = now()";
 }
 if(sql_query($sql)){
+    $sql = "update `product_pricing` set status = 1 where pd_id = '{$pd_id}'";
+    sql_query($sql);
+
     $cid = sql_insert_id();
     $sql = "update `product` set pd_status = {$status} where pd_id = {$pd_id}";
     if(sql_query($sql)){

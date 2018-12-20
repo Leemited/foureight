@@ -65,7 +65,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                             <option value="신한은행">신한은행</option>
                         </select>
                     </li>
-                    <li><input type="text" class="setting_input" name="bank_number" placeholder="계좌번호 '-' 포함" value="" required></li>
+                    <li><input type="number" class="setting_input" name="bank_number" placeholder="계좌번호 '-' 포함" value="" required></li>
                 </ul>
                 <div class="btn_group">
                     <input type="submit" value="등록" class="setting_btn">

@@ -115,6 +115,7 @@ while($row = sql_fetch_array($comment)){
                     <input type="hidden" name="page" value="<?php echo $page;?>">
                     <input type="hidden" name="sfl" value="<?php echo $sfl;?>">
                     <input type="hidden" name="stx" value="<?php echo $stx;?>">
+                    <input type="hidden" name="mb_id" value="<?php echo $view["mb_id"];?>">
                 <div class="model_list">
                     <table class="view_tbl">
                         <colgroup class="">

@@ -3,10 +3,6 @@ include_once('./_common.php');
 include_once(G5_PLUGIN_PATH.'/oauth/functions.php');
 include_once(G5_LIB_PATH.'/mailer.lib.php');
 
-$app = false;
-if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
-    $app = true;
-}
 //var_dump($_REQUEST); exit;
 
 $req_mb_id   = get_session('ss_oauth_request_mb_id');
@@ -55,7 +51,7 @@ if($is_member && $req_mode == 'connect' && $req_service == $service) {
 
     if($mb['mb_id'] && $mb['mb_id'] == get_session('ss_mb_id')) {
         // 기존연동체크
-        $sql = " select sm_id from {$g5['social_member_table']} where sm_id = '{$mb['mb_id']}' and mb_id = '{$mb['mb_id']}' and sm_service = '$service' ";
+        $sql = " select sm_id from {$g5['social_member_table']} where sm_id = '{$member['mb_id']}' and mb_id = '{$mb['mb_id']}' and sm_service = '$service' ";
         $row = sql_fetch($sql);
 
         if($row['sm_id']) {
@@ -127,6 +123,7 @@ if($g5['social_member_table']) {
     $row = sql_fetch($sql);
     if($row['mb_id']) {
         $mb = get_member($row['mb_id'], 'mb_id');
+
         if($mb['mb_id']) {
             unset($member);
 
@@ -136,28 +133,36 @@ if($g5['social_member_table']) {
 
             if($req_mode != 'connect') {
                 //alert_opener_url();
-                opener_url_reload();
+                if($_SERVER["HTTP_USER_AGENT"]=='iosApp') {
+                    echo "<script>" . PHP_EOL;
+                    echo "location.href='http://mave01.cafe24.com/'" . PHP_EOL;
+                    echo "</script>" . PHP_EOL;
+                }else {
+                    opener_url_reload();
+                }
             }
-
-            // 정보수정에서 연동일 때 처리
-            echo '<script>'.PHP_EOL;
-            /*if($app) {
-                echo 'window.android.setLogin("' . $mb['mb_id'] . '");' . PHP_EOL;
-            }*/
-            echo 'var $opener = window.opener;'.PHP_EOL;
-            echo '$opener.$("#sns-'.$service.'").removeClass("sns-icon-not");'.PHP_EOL;
-            echo 'window.close();'.PHP_EOL;
-            echo '</script>';
-            exit;
+            if($_SERVER["HTTP_USER_AGENT"]=="iosApp"){
+                echo "<script>".PHP_EOL;
+                echo "location.href='http://mave01.cafe24.com/'".PHP_EOL;
+                echo "</script>".PHP_EOL;
+            }else {
+                // 정보수정에서 연동일 때 처리
+                echo '<script>' . PHP_EOL;
+                echo 'var $opener = window.opener;' . PHP_EOL;
+                echo '$opener.$("#sns-' . $service . '").removeClass("sns-icon-not");' . PHP_EOL;
+                echo 'window.close();' . PHP_EOL;
+                echo '</script>';
+                exit;
+            }
         }
     }
 }
 
 // 회원가입처리
-if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $mb['mb_id']) {
+if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $member['mb_id']) {
     if(defined('G5_OAUTH_MEMBER_REGISTER_SELECT') && G5_OAUTH_MEMBER_REGISTER_SELECT) {
         $mb_reg = get_session('ss_oauth_member_register');
-        $mb = get_member($mb['mb_id'], 'mb_id');
+        $mb = get_member($member['mb_id'], 'mb_id');
 
         if($mb['mb_id']) {
             reset_social_info();
@@ -169,7 +174,7 @@ if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $mb['mb_id
             $url2 = G5_PLUGIN_URL.'/oauth/login.php?service='.$service.'&register=N';
             $url3 = G5_URL;
 
-            confirm($config['cf_title'].' 사이트에 회원가입 하시겠습니까?'.$mb_reg, $url1, $url2, $url3);
+            confirm($config['cf_title'].' 사이트에 회원가입 하시겠습니까?', $url1, $url2, $url3);
         }
 
         unset($_SESSION['ss_oauth_member_register']);
@@ -204,8 +209,7 @@ if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $mb['mb_id
 	$mb_profile = $member["mb_profile"];
     // 회원정보 입력
     $sql = " insert into {$g5['member_table']}
-                set mb_id = '{$mb_id}',
-                    /*mb_password = '{$member['mb_password']}',*/
+                set mb_id = '{$mb_email}',
                     mb_name = '{$mb_name}',
                     mb_nick = '{$mb_nick}',
                     mb_nick_date = '".G5_TIME_YMD."',
@@ -234,8 +238,7 @@ if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $mb['mb_id
                         sm_datetime = '".G5_TIME_YMDHIS."' ";
         sql_query($sql, false);
 
-		$sql = "insert into `mysetting`
-					set mb_id = '$mb_id'";
+		$sql = "insert into `mysetting` set mb_id = '$mb_id'";
 		sql_query($sql);
     } else {
         alert_opener_url('회원 정보 입력 중 오류가 발생했습니다. 다시 시도해 주십시오.', G5_URL);

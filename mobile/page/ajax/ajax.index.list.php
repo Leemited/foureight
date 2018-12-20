@@ -1,6 +1,11 @@
 <?php
 include_once("../../../common.php");
 
+if($is_member){
+    $sql = "select * from `mysetting` where mb_id = '{$member["mb_id"]}'";
+    $myset = sql_fetch($sql);
+}
+
 if($_REQUEST["latlng"]) {
     $locs = explode("/", $_REQUEST["latlng"]);
     $lat = $locs[0];
@@ -20,6 +25,12 @@ if($member["mb_id"]){
     $mb_id = $member["mb_id"];
 }else{
     $mb_id = session_id();
+}
+
+if($myset["feed_set"]==1){
+    $now = date("Y-m-d");
+    $month = date("Y-m-d", strtotime("- 6 month"));
+    $search .= " and p.pd_date between '{$month}' and now() ";
 }
 
 if($sc_id){
@@ -187,7 +198,7 @@ while($row = sql_fetch_array($res)){
 
 
 for($i=0;$i<count($list);$i++){
-    if($list[$i]["distance"] == 0 ){
+    if($list[$i]["pd_lat"]==0 && $list[$i]["pd_lng"]==0){
         $dist = "정보없음";
     }else {
         $dist = round($list[$i]["distance"],1) . "km";
@@ -316,7 +327,7 @@ for($i=0;$i<count($list);$i++){
                         <li style="margin-right:2vw;"><?php echo $time_gep;?></li>
                         <?php }?>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
-						<?php if($app){?>
+						<?php if($app || $app2){?>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_loc<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><?php echo $dist;?></li>
 						<?php }?>
 					</ul>

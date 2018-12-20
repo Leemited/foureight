@@ -125,7 +125,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
         <div id="map_list" style="display:block;">
             <ul>
                 <?php for($i=0;$i<count($pro);$i++){
-                    if($pro[$i]["distance"] == 0 ){
+                    if($pro["pd_lat"]==0 && $pro["pd_lng"]==0){
                         $dist = "정보없음";
                     }else {
                         $dist = round($pro[$i]["distance"],1) . "km";
@@ -230,7 +230,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
             </ul>
         </div>
     <?php }?>
-	<div id="map" style="width:100%;<?php if($stx || $searchActive == "search"){?>height:calc(100vh - 20vw - 32vh);<?php }?>">
+	<div id="map" style="width:100%;<?php if($stx || $searchActive == "search"){?>height:calc(100vh - 20vw - 41vh);<?php }?>">
         <div class="current" onclick="fnReset();" >
             <img src="<?php echo G5_IMG_URL?>/ic_current_map.svg" alt="">
         </div>
@@ -327,7 +327,6 @@ var overlay = [];
 var markers = [];
 var i = 0;
 var bounds = new daum.maps.LatLngBounds();
-console.log(positions);
 positions.forEach(function(pos){
     // 마커 이미지의 이미지 크기 입니다
     var imageSize = new daum.maps.Size(30, 42);

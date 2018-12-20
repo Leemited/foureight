@@ -209,7 +209,7 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
         </div>
     </div>
     <div class="order_btns">
-        <input type="button" value="직거래" class="order_btn" onclick="orderDirect()">
+        <!-- <input type="button" value="직거래" class="order_btn" onclick="orderDirect()"> -->
         <input type="button" value="즉시결재" class="order_btn2" onclick="orderUpdate()">
     </div>
     </form>
@@ -259,7 +259,9 @@ function orderDirect(){
             url:g5_url+"/mobile/page/mypage/ajax.pay_direct.php",
             method:"post",
             data:{pd_ids:pd_ids}
-        })
+        }).done(function(data){
+
+        });
     }else{
         return false;
     }

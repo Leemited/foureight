@@ -73,7 +73,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
             <li>전화가능 <label class="switch2"><input type="checkbox" id="hp_set" name="hp_set" <?php if($settings["hp_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
 			<li>문자가능 <label class="switch2"><input type="checkbox" id="sms_set" name="sms_set" <?php if($settings["sms_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
 			<li>대화가능 <label class="switch2"><input type="checkbox" id="chat_set" name="chat_set" <?php if($settings["chat_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
-			<!--<li>댓글가능 <label class="switch2"><input type="checkbox" id="comment_set" name="comment_set" <?php /*if($settings["comment_set"]==1){echo "checked";}*/?> class="set_contact"><span class="set_slider round"></span></label></li>-->
+			<li>댓글가능 <label class="switch2"><input type="checkbox" id="comment_set" name="comment_set" <?php /*if($settings["comment_set"]==1){echo "checked";}*/?> ><span class="set_slider round"></span></label></li>
 		</ul>
 	</div>
 	<div class="setting_wrap">
@@ -107,6 +107,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 		<ul>
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_word.php?id=<?php echo $settings['id'];?>'">개인 문구 등록</li>
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_location.php?id=<?php echo $settings['id'];?>'">거래 위치 설정</li>
+			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_times.php?id=<?php echo $settings['id'];?>'">거래 시간 설정</li>
 		</ul>
 	</div>
     <div class="setting_wrap ">

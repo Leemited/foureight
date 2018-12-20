@@ -13,6 +13,7 @@ if(strpos($agent,"foureight")!==false){
 }else{
     $check = false;
 }
+
 ?>
 <div class="wrap">
 	<div class="top_h">
@@ -25,8 +26,8 @@ if(strpos($agent,"foureight")!==false){
 
 		<form name="flogin" action="<?php echo $login_action_url ?>" onsubmit="return flogin_submit(this);" method="post">
 		<input type="hidden" name="url" value="<?php echo $login_url ?>">
-            <input type="hidden" name="regid" id="regid" value="">
-            <input type="hidden" name="sdkVersion" id="sdkVersion" value="">
+            <input type="hidden" name="regid" id="regid" value="<?php echo $_SESSION["regid"];?>">
+            <input type="hidden" name="sdkVersion" id="sdkVersion" value="<?php echo $_SESSION["sdkVersion"];?>">
 
 		<div id="login_frm">
             <?php
@@ -47,7 +48,7 @@ if(strpos($agent,"foureight")!==false){
             include_once(G5_PLUGIN_PATH.'/oauth/login.skin.inc.php');
             ?>
 			<div class="login_link">
-				<a href="<?php echo G5_MOBILE_URL;?>/page/find_password.php" target="_self" id="login_password_lost" class="">비밀번호를 잊으셨나요?</a>
+				<a href="<?php echo G5_BBS_URL;?>/password_lost.php" >비밀번호를 잊으셨나요?</a>
 			</div>
 			<div>
 				<input type="submit" value="로그인" class="btn_submit">
@@ -68,6 +69,7 @@ if(strpos($agent,"foureight")!==false){
 </div>
 
 <script>
+<?php if($app){?>
 $(function(){
     //getRegid
     try{
@@ -80,6 +82,7 @@ $(function(){
         console.log(err);
     }
 });
+<?php }?>
 $(function(){
     $("#login_auto_login").click(function(){
         if (this.checked) {

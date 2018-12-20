@@ -2,6 +2,11 @@
 include_once("../../common.php");
 include_once(G5_EXTEND_PATH."/image.extend.php");
 
+$app = false;
+if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
+    $app = true;
+}
+
 //접속 카운트
 
 if($member["mb_id"]){
@@ -40,9 +45,9 @@ if($view["pd_images"]) {
     $photo = explode(",", $view["pd_images"]);
 }
 if($_SESSION["lat"] && $_SESSION["lng"]) {
-    $sql = "select *,c.mb_id as mb_id, 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' order by c.sign_date asc";
+    $sql = "select *,c.mb_id as mb_id, 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' and c.status = 0 order by c.sign_date asc";
 }else{
-    $sql = "select *,c.mb_id as mb_id,'거리정보 없음' as distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' order by c.sign_date asc";
+    $sql = "select *,c.mb_id as mb_id,'거리정보 없음' as distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' and c.status = 0 order by c.sign_date asc";
 }
 //제시,딜
 $res = sql_query($sql);
@@ -193,6 +198,7 @@ $viewlikecnt = sql_fetch($sql);
                     $ampm = (date("a",strtotime($talk_list[$i]["msg_time"]))=="am")?"오전":"오후";
                     $date = $talk_list[$i]["msg_date"]."<br>".$ampm." ".substr($talk_list[$i]["msg_time"],0,5);
                 }
+
                 if ($mb_id == $talk_list[$i]["send_mb_id"]) {?>
                     <div class="msg_box my_msg">
                         <div class="in_box">
@@ -208,13 +214,18 @@ $viewlikecnt = sql_fetch($sql);
                     </div>
                 <?php } else {
                     $mb = get_member($talk_list[$i]["send_mb_id"]);
+                    if($mb["mb_nick"]){
+                        $nick = $mb["mb_nick"];
+                    }else{
+                        $nick = "닉네임정보 없음";
+                    }
                     ?>
                     <div class='msg_box read_msg'>
                         <div class="in_box">
                             <div class="read_profile" style="position:relative;<?php if($mb['mb_profile']){?>background-image:url('<?php echo $mb["mb_profile"];?>')<?php }else{?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg')<?php }?>;background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;
                                     border: 1px solid #fff;"></div>
                             <div class="box_con">
-                                <div class="read_name"><?php echo $mb["mb_nick"];?></div>
+                                <div class="read_name"><?php echo $nick;?></div>
                                 <div class='msg'><?php echo $talk_list[$i]["message"];?></div>
                                 <div class='date'><?php echo $date;?></div>
                                 <!--<div class="arrow"><img src="<?php /*echo G5_IMG_URL;*/?>/ic_chat_reply.png" alt=""></div>-->
@@ -249,7 +260,7 @@ $viewlikecnt = sql_fetch($sql);
     <div class="price">
         <p><?php if($view['pd_type']==1){ if($view['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($view['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></p>
         <h2><?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]);}else{ if($view["pd_type2"]==8){echo "0원";}else{echo "제시요망";}}?></h2>
-        <?php if($view["pd_type"]==1 && $view["pd_type2"]==8){?>
+        <?php if($view["pd_type"]==1 && $view["pd_type2"]==8 && $view["mb_id"] == $member["mb_id"]){?>
             <div class="sell_btn">
                 <input type="button" value="이 회원에게 판매하기" class="btn" onclick="fnSell();">
             </div>
@@ -260,8 +271,8 @@ $viewlikecnt = sql_fetch($sql);
 </div>
 <div id="sell" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
     <div class="sell_con">
-        <input type="text" value="" name="sell_mb_id" id="sell_mb_id">
-        <input type="text" value="<?php echo $pd_id;?>" name="pd_id" id="pd_id">
+        <input type="hidden" value="" name="sell_mb_id" id="sell_mb_id">
+        <input type="hidden" value="<?php echo $pd_id;?>" name="pd_id" id="pd_id">
         <h2>판매하기</h2>
         <div>
             <input type="text" value="<?php if($view["pd_price"]>0){echo $view["pd_price"];}?>" name="price" id="price" placeholder="판매가격" required>
@@ -460,7 +471,7 @@ $viewlikecnt = sql_fetch($sql);
             <div class="con">
                 <div class="pd_contents">
                     <h2>상세설명</h2>
-                    <p><?php echo ($view["pd_content"])?$view["pd_content"]:"등록된 상세 설명이 없습니다.";?></p>
+                    <p><?php echo ($view["pd_content"]!=" ")?$view["pd_content"]:"등록된 상세 설명이 없습니다.";?></p>
                 </div>
                 <?php if($view["pd_video_link"]){?>
                 <div class="link_video">
@@ -488,12 +499,17 @@ $viewlikecnt = sql_fetch($sql);
                 <?php if($view["pd_lat"]&&$view["pd_lng"]){?>
                 <div class="maps">
                     <div class="clear"></div>
-                    <!--<div class="fullbtn" onclick="location.href='<?php /*echo G5_MOBILE_URL*/?>/page/view_map.php?pd_id=<?php /*echo $pd_id;*/?>&location=<?php /*echo $view["pd_location"];*/?>'">
-                        <img src="<?php /*echo G5_IMG_URL;*/?>/ic_fullmap.svg" alt="확대">
-                    </div>-->
                     <div id="map" onclick="fnMapView('<?php echo $pd_id;?>','<?php echo $view["pd_location"];?>','<?php echo $view["pd_lat"];?>','<?php echo $view["pd_lng"];?>')"></div>
                 </div>
-                 <?php  }?>
+                 <?php  }else{?>
+                    <div class="maps">
+                        <div class="clear"></div>
+                        <div id="no-map">
+                            <p>지도 정보가 없습니다.</p>
+                            <img src="<?php echo G5_IMG_URL?>/no-map.svg" alt="">
+                        </div>
+                    </div>
+                <?php }?>
                 <?php if($view["pd_location"]){?>
                 <h4>거래선호 위치</h4>
                 <ul class="my_loc">
@@ -514,9 +530,15 @@ $viewlikecnt = sql_fetch($sql);
                         <!--<li onclick="fnMsg()">
                             <img src="<?php /*echo G5_IMG_URL;*/?>/view_share_msg.png" alt="">
                         </li>-->
+                        <?php if(!$app){?>
                         <li class="clipboard" data-clipboard-action="copy" data-clipboard-target="#copylink">
                             <img src="<?php echo G5_IMG_URL;?>/view_share_link.png" alt="">
                         </li>
+                        <?php }else{?>
+                        <li onclick="fnLink('<?php echo G5_URL;?>/index.php?pd_id=<?php echo $view["pd_id"]?>');">
+                            <img src="<?php echo G5_IMG_URL;?>/view_share_link.png" alt="">
+                        </li>
+                        <?php } ?>
                     </ul>
                     <div class="clear"></div>
                 </div>
@@ -532,7 +554,7 @@ $viewlikecnt = sql_fetch($sql);
 <!--                </div>-->
                 <?php if(count($pricing)>0){?>
                 <div class="comment">
-                    <h2><?php if($view["pd_type2"]=="4"){?>제시목록<?php }else if($view["pd_type2"]=="8"){?>흥정목록<?php }?></h2>
+                    <h2><?php if($view["pd_type2"]=="4"){?>제시목록<?php }else if($view["pd_type2"]=="8"){?>딜목록<?php }?></h2>
                     <div class="pricing cm_box">
                         <ul class="pri_container">
                             <?php for($i=0;$i<count($pricing);$i++){
@@ -570,7 +592,7 @@ $viewlikecnt = sql_fetch($sql);
                                     <li style="display:table">
                                         <div style="display:table-row">
                                             <div style="position:absolute;right:0;top:9vw;z-index:10">
-                                                <input type="button" value="판매하기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="addSell2('<?php echo $view["pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing["mb_id"];?>')">
+                                                <input type="button" value="판매하기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="addSell2('<?php echo $view["pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $mb["mb_id"];?>','<?php echo $pricing["id"];?>')">
                                             </div>
                                             <div class="profile" style="width:15vw;height:15vw;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;float:none;display:table-cell;vertical-align:middle;"  <?php if($member["mb_id"] == $view["mb_id"]){?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')"<?php }?>>
                                                 <?php if($mb["mb_profile"]){?>
@@ -764,12 +786,12 @@ $viewlikecnt = sql_fetch($sql);
             $rand = rand(1,13);
         ?>
         <div class="tags_box">
-        <?php  for($i=0;$i<count($tag);$i++){
+        <?php  //for($i=0;$i<count($view["pd_tag"]);$i++){
         ?>
             <div class="tags ">
-                <label for="" class=""><?php echo "#".$tag[$i];?></label>
+                <label for="" class=""><?php echo $view["pd_tag"];?></label>
             </div>
-        <?php } ?>
+        <?php //} ?>
         </div>
             <div class="tags_bg rand_bg<?php echo $rand;?>">
 
@@ -816,7 +838,7 @@ $viewlikecnt = sql_fetch($sql);
             <?php if($view["pd_video"] != ""){
 
             ?>
-            <li class=" video" >
+            <li class="item video" >
                 <video autoplay controls width="360px" height="640px" class="view_video" preload="metadata">
                     <source src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>#t=2" type="video/mp4">
                 </video>
@@ -829,7 +851,7 @@ $viewlikecnt = sql_fetch($sql);
         <?php }?>
 </div>
 
-<a style="display:none;" id="copylink" href="http://mave01.cafe24.com/mobile/page/view.php?pd_id=<?php echo $pd_id;?>">http://mave01.cafe24.com/mobile/page/view.php?pd_id=<?php echo $pd_id;?></a>
+<a style="display:none;" id="copylink" href="http://mave01.cafe24.com/index.php?pd_id=<?php echo $pd_id;?>">http://mave01.cafe24.com/index.php?pd_id=<?php echo $pd_id;?></a>
 
 <script>
 // Slide functions
@@ -1004,7 +1026,7 @@ $(function(){
     function previewImg(){
         var count = 0;
         $(".list .item").each(function(e) {
-            count = e;
+            count = e+1;
             console.log(e);
         });
         //$(".item").each(function(e){
@@ -1255,16 +1277,16 @@ $(function(){
             description: '<?php echo $tagall;?>',
             imageUrl: '<?php echo G5_DATA_URL."/product/".$tagimg; ?>',
             link: {
-                mobileWebUrl: g5_url+'/mobile/page/view.php?pd_id=<?php echo $pd_id; ?>',
-                webUrl: g5_url+'/mobile/page/view.php?pd_id=<?php echo $pd_id; ?>'
+                mobileWebUrl: g5_url+'/index.php?pd_id=<?php echo $pd_id; ?>',
+                webUrl: g5_url+'/index.php?pd_id=<?php echo $pd_id; ?>'
             }
         },
         buttons: [
             {
                 title: '웹으로 보기',
                 link: {
-                    mobileWebUrl: g5_url+'/mobile/page/view.php?pd_id=<?php echo $pd_id; ?>',
-                    webUrl: g5_url+'/mobile/page/view.php?pd_id=<?php echo $pd_id; ?>'
+                    mobileWebUrl: g5_url+'/index.php?pd_id=<?php echo $pd_id; ?>',
+                    webUrl: g5_url+'/index.php?pd_id=<?php echo $pd_id; ?>'
                 }
             }/*,
              {
@@ -1564,7 +1586,7 @@ function fnSendMsg(){
     if(type=="deal"){
         read_mb_id = $("#talk_read_id").val();
     }
-    alert(read_mb_id);
+    //alert(read_mb_id);
     var message = $("#message").val();
     if(message == ""){
         alert('메세지를 입력해 주세요');
@@ -1666,6 +1688,10 @@ function addSell(){
 
 function fnShow(id){
     $("#mb_"+id).toggleClass("active");
+}
+
+function fnLink(url){
+    window.android.copyLink(url);
 }
 </script>
 <?php

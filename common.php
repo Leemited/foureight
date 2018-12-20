@@ -392,6 +392,17 @@ if ($_SESSION['ss_mb_id']) { // 로그인중이라면
     // 자동로그인 end ---------------------------------------
 }
 
+if($app_mb_id){
+    //앱 로그인 처리(로그아웃 방지);
+    $member = get_member($app_mb_id);
+    // 회원아이디 세션 생성
+    set_session('ss_mb_id', $member['mb_id']);
+    // FLASH XSS 공격에 대응하기 위하여 회원의 고유키를 생성해 놓는다. 관리자에서 검사함 - 110106
+    set_session('ss_mb_key', md5($member['mb_datetime'] . $_SERVER['HTTP_USER_AGENT']));
+
+    $is_member = true;
+}
+
 
 $write = array();
 $write_table = "";

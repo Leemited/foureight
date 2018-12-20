@@ -34,7 +34,6 @@ if($oauth->check_valid_state_token($_GET['state'])) {
                             'mb_point'    => 0,
 							'mb_profile'  => $profile_img
                         );
-
                 set_session('ss_oauth_member_no','kko_'.$oauth->profile->id);
                 set_session('ss_oauth_member_kko_'.$oauth->profile->id.'_info', $member);
             }

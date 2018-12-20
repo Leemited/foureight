@@ -8,15 +8,6 @@ if(!defined('G5_IS_ADMIN') && defined('G5_THEME_PATH') && is_file(G5_THEME_PATH.
     return;
 }
 
-if($app_mb_id){
-    //앱 로그인 처리(로그아웃 방지);
-    $app_mb = get_member($app_mb_id);
-    // 회원아이디 세션 생성
-    set_session('ss_mb_id', $app_mb['mb_id']);
-    // FLASH XSS 공격에 대응하기 위하여 회원의 고유키를 생성해 놓는다. 관리자에서 검사함 - 110106
-    set_session('ss_mb_key', md5($app_mb['mb_datetime'] . $_SERVER['HTTP_USER_AGENT']));
-}
-
 $begin_time = get_microtime();
 
 if (!isset($g5['title'])) {
@@ -39,6 +30,11 @@ if (strstr($g5['lo_url'], '/'.G5_ADMIN_DIR.'/') || $is_admin == 'super') $g5['lo
 $app = false;
 if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
 	$app = true;
+}
+
+$app2 = false;
+if($_SERVER["HTTP_USER_AGENT"] == "iosApp"){
+    $app2 = true;
 }
 
 $mAgent = array("iphone","ipod","android","blackberry", "opera mini", "windows ce", "nokia", "sony" );
@@ -72,11 +68,11 @@ header("Pragma: no-cache"); // HTTP/1.0
 <meta name="theme-color" content="<?php if($_SESSION["type1"]==1 || $schopt["sc_type1"]==1){?>#000000<?php }else{?>#ff3d00<?php }?>" id="theme-color">
 <?php
 if (G5_IS_MOBILE) {
-    echo '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=0,maximum-scale=10,user-scalable=yes">'.PHP_EOL;
+    echo '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=0,maximum-scale=1,user-scalable=yes">'.PHP_EOL;
     echo '<meta name="HandheldFriendly" content="true">'.PHP_EOL;
     echo '<meta name="format-detection" content="telephone=no">'.PHP_EOL;
 } else {
-	echo '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=0,maximum-scale=10,user-scalable=yes">'.PHP_EOL;
+	echo '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=0,maximum-scale=1,user-scalable=yes">'.PHP_EOL;
     echo '<meta http-equiv="imagetoolbar" content="no">'.PHP_EOL;
     echo '<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">'.PHP_EOL;
     echo '<meta name="format-detection" content="telephone=no">'.PHP_EOL;
@@ -101,7 +97,9 @@ if (defined('G5_IS_ADMIN')) {
 <meta property="og:image"         content="<?php echo G5_DATA_URL?>/product/<?php echo $tagimg;?>" />
 <link rel="stylesheet" href="<?php echo G5_CSS_URL?>/jquery-ui.css">
 <link rel="stylesheet" href="<?php echo G5_CSS_URL?>/owl.carousel.css">
-<!-- <link rel="stylesheet" href="<?php echo G5_CSS_URL?>/pace-theme-center-simple.css"> -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+    <!-- <link rel="stylesheet" href="<?php echo G5_CSS_URL?>/pace-theme-center-simple.css"> -->
 <!--[if lte IE 8]>
 <script src="<?php echo G5_JS_URL ?>/html5.js"></script>
 <![endif]-->
@@ -162,6 +160,12 @@ if(!defined('G5_IS_ADMIN'))
     if($is_member){
     ?>
     window.android.setLogin('<?php echo $member["mb_id"];?>');
+    <?php }
+    } ?>
+    <?php if($app2){
+    if($is_member){
+    ?>
+    webkit.messageHandlers.onLogin.postMessage('<?php echo $member["mb_id"];?>');
     <?php }
     } ?>
 </script>

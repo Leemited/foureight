@@ -108,7 +108,7 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
                         </div>
                     </div>
                     <?php }?>
-                    <?php if (count($list) == 0) { echo '<div class="no-list">게시물이 없습니다.</div>'; } ?>
+                    <?php if (count($list) == 0) { echo '<div class="no-list"><div>게시물이 없습니다.</div></div>'; } ?>
                 </div>
 
             </div>
@@ -132,6 +132,8 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
             </div>
             <?php } ?>
             </form>
+            <!-- 페이지 -->
+            <?php echo $write_pages; ?>
         </div>
     </div>
     <?php if($is_checkbox) { ?>
@@ -140,8 +142,7 @@ add_stylesheet('<link rel="stylesheet" href="'.$board_skin_url.'/style.css">', 0
     </noscript>
     <?php } ?>
 
-    <!-- 페이지 -->
-    <?php echo $write_pages; ?>
+
 
 
 

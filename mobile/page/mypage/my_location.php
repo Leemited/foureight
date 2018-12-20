@@ -8,75 +8,95 @@ $sql = "select * from `mysetting` where id= {$id} and mb_id = '{$member["mb_id"]
 $settings = sql_fetch($sql);
 
 $mylocations = explode(",",$settings["my_locations"]);
+$mylat = explode(",",$settings["location_lat"]);
+$mylng = explode(",",$settings["location_lng"]);
+
 
 $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 ?>
 <style>
 body{overflow: hidden}
-#settings{height:calc(100vh - 30vw);overflow:hidden;position:relative}
+#settings{height:calc(100vh - 30vw);overflow-y:scroll;position:relative}
 #settings .setting_wrap ul li{padding:2.88vw;}
 </style>
 <div class="sub_head">
 	<div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
 	<h2>거래 위치 설정</h2>
-	<!-- <div class="sub_add">추가</div> -->
+    <div class="all_clear" onclick="fnLocationReset();"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash_all.svg" alt=""></div>
 </div>
 <div id="settings">
-	<form action="<?php echo G5_MOBILE_URL?>/page/mypage/my_location_update.php" method="post" onsubmit="return false;">
+	<!--<form action="<?php /*echo G5_MOBILE_URL*/?>/page/mypage/my_location_update.php" method="post" onsubmit="return false;">-->
 		<div class="setting_wrap">
 			<h2>거래 위치 목록</h2>
 			<ul>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]" id="locs1"  placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[0])?$mylocations[0]:"";?>">
+                    <input type="text" class="setting_input" id="locs1" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[0])?$mylocations[0]:"";?>">
                     <div class="map_set">
-                        <?php if($app){?>
-                        <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(1);">
-                        <?php }?>
+                        <?php /*if($app){*/?><!--
+                        <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(1);">
+                        --><?php /*}*/?>
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(1)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  id="locs2"  placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[1])?$mylocations[1]:"";?>">
+                    <input type="text" class="setting_input" id="locs2" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[1])?$mylocations[1]:"";?>">
                     <div class="map_set">
-                        <?php if($app){?>
-                            <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(2);">
-                        <?php }?>
+                        <?php /*if($app){*/?><!--
+                            <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(2);">
+                        --><?php /*}*/?>
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(2)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  id="locs3" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[2])?$mylocations[2]:"";?>">
+                    <input type="text" class="setting_input" id="locs3" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[2])?$mylocations[2]:"";?>">
                     <div class="map_set">
-                        <?php if($app){?>
-                            <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(3);">
-                        <?php }?>
+                        <?php /*if($app){*/?><!--
+                            <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(3);">
+                        --><?php /*}*/?>
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(3)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  id="locs4" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[3])?$mylocations[3]:"";?>">
+                    <input type="text" class="setting_input" id="locs4" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[3])?$mylocations[3]:"";?>">
                     <div class="map_set">
-                        <?php if($app){?>
-                            <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(4);">
-                        <?php }?>
+                        <?php /*if($app){*/?><!--
+                            <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(4);">
+                        --><?php /*}*/?>
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(4)">
                     </div>
                 </li>
 				<li>
-                    <input type="text" class="setting_input" name="mylocation[]"  id="locs5" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[4])?$mylocations[4]:"";?>">
+                    <input type="text" class="setting_input" id="locs5" placeholder="예) 강남역 1번 출구" style="width:80%" value="<?php echo ($mylocations[4])?$mylocations[4]:"";?>">
                     <div class="map_set">
-                        <?php if($app){?>
-                            <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc(5);">
-                        <?php }?>
+                        <?php /*if($app){*/?><!--
+                            <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(5);">
+                        --><?php /*}*/?>
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(5)">
                     </div>
                 </li>
 			</ul>
 			<div class="btn_group">
-				<input type="submit" value="등록" class="setting_btn" >
+				<input type="button" value="등록" class="setting_btn" onclick="fnSubmit()" >
 			</div>
 		</div>
-	</form>
+    <form action="<?php echo G5_MOBILE_URL?>/page/mypage/my_location_update.php" method="post" name="mylocation_form" >
+        <input type="hidden" name="mylocation[]" id="location1" value="<?php echo ($mylocations[0])?$mylocations[0]:"";?>">
+        <input type="hidden" name="mylat[]" id="mylat1" value="<?php echo ($mylat[0])?$mylat[0]:"";?>">
+        <input type="hidden" name="mylng[]" id="mylng1" value="<?php echo ($mylng[0])?$mylng[0]:"";?>">
+        <input type="hidden" name="mylocation[]" id="location2" value="<?php echo ($mylocations[1])?$mylocations[1]:"";?>">
+        <input type="hidden" name="mylat[]" id="mylat2" value="<?php echo ($mylat[1])?$mylat[1]:"";?>">
+        <input type="hidden" name="mylng[]" id="mylng2" value="<?php echo ($mylng[1])?$mylng[1]:"";?>">
+        <input type="hidden" name="mylocation[]" id="location3" value="<?php echo ($mylocations[2])?$mylocations[2]:"";?>">
+        <input type="hidden" name="mylat[]" id="mylat3" value="<?php echo ($mylat[2])?$mylat[2]:"";?>">
+        <input type="hidden" name="mylng[]" id="mylng3" value="<?php echo ($mylng[2])?$mylng[2]:"";?>">
+        <input type="hidden" name="mylocation[]" id="location4" value="<?php echo ($mylocations[3])?$mylocations[3]:"";?>">
+        <input type="hidden" name="mylat[]" id="mylat4" value="<?php echo ($mylat[3])?$mylat[3]:"";?>">
+        <input type="hidden" name="mylng[]" id="mylng4" value="<?php echo ($mylng[3])?$mylng[3]:"";?>">
+        <input type="hidden" name="mylocation[]" id="location5" value="<?php echo ($mylocations[4])?$mylocations[4]:"";?>">
+        <input type="hidden" name="mylat[]" id="mylat5" value="<?php echo ($mylat[4])?$mylat[4]:"";?>">
+        <input type="hidden" name="mylng[]" id="mylng5" value="<?php echo ($mylng[4])?$mylng[4]:"";?>">
+    </form>
+	<!--</form>-->
 </div>
 <div id="map_sel" style="z-index:900;background-color: #fff;">
     <input type="hidden" id="setnum" value="">
@@ -120,6 +140,7 @@ body{overflow: hidden}
 
         searchDetailAddrFromCoords(mouseEvent.latLng, function(result, status) {
             if (status === daum.maps.services.Status.OK) {
+                console.log(result);
                 var data;
                 var item="";
                 data = { x : mouseEvent.latLng.ib , y : mouseEvent.latLng.jb, place_name : result[0].address.address_name};
@@ -129,11 +150,13 @@ body{overflow: hidden}
                 item += "</li>";
                 $(".loc_ul_list li").removeClass("active");
                 $(".loc_ul_list").append(item);
-                locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' +
-                    '<input type="hidden" value="'+mouseEvent.latLng.jb+'" name="pd_lat" id=""/><input type="hidden" value="'+mouseEvent.latLng.ib+'" name="pd_lng" id=""/></div>';
+                //locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' + '<input type="hidden" value="'+mouseEvent.latLng.jb+'" name="pd_lat" id=""/><input type="hidden" value="'+mouseEvent.latLng.ib+'" name="pd_lng" id=""/></div>';
+                locitem = result[0].address.address_name;
+                lat = mouseEvent.latLng.jb;
+                lng = mouseEvent.latLng.ib;
                 displayMarker(data);
-                setCookie("pd_location",result[0].address.address_name,'1');
-                setCookie("pd_location_name",result[0].address.address_name,'1');
+                //setCookie("pd_location",result[0].address.address_name,'1');
+                //setCookie("pd_location_name",result[0].address.address_name,'1');
             }
         });
     });
@@ -157,6 +180,7 @@ body{overflow: hidden}
             var bounds = new daum.maps.LatLngBounds();
             var item="";
             for (var i=0; i<data.length; i++) {
+                console.log(data[i]);
                 displayMarker(data[i]);
                 var addr = data[i].address_name.split(" ");
                 var addr_simple = "["+addr[0]+" "+addr[1]+"]";
@@ -202,12 +226,14 @@ body{overflow: hidden}
         map.setCenter(moveLatLon);
 
         if(place_name) {
-            locitem = "[" + place_name + " ]" + place_address;
+            locitem = place_name;
         }else{
             locitem = place_address;
         }
-        setCookie("pd_location",place_address,'1');
-        setCookie("pd_location_name",place_name,'1');
+        lat = lat;
+        lng = lng;
+        //setCookie("pd_location",place_address,'1');
+        //setCookie("pd_location_name",place_name,'1');
     }
 
     // 지도에 마커를 표시하는 함수입니다
@@ -246,8 +272,7 @@ body{overflow: hidden}
             return false;
         }
         var loc = $("#locs"+num).val();
-
-
+        
         if(mapon==false) {
             ps.keywordSearch(loc, placesSearchCB);
             $("#setnum").val(num);
@@ -280,6 +305,9 @@ body{overflow: hidden}
 
         var num = $("#setnum").val();
         $("#locs"+num).val(locitem);
+        $("#location"+num).val(locitem);
+        $("#mylat"+num).val(lat);
+        $("#mylng"+num).val(lng);
         $("#map_sel").css({"bottom": "-100vh","top":"unset","height":"100vw"});
         $(".loclist").html('');
         $("#setnum").val('');
@@ -336,8 +364,11 @@ body{overflow: hidden}
         <?php }?>
     });
 
-    function mapKeySet(num,keyCode){
-        window.android.keyPress();
+    function mapKeySet(){
+        var id = $(document.activeElement).attr("id");
+        id = id.replace("locs","");
+        window.android.HideKeyboard();
+        mapSelect(id);
     }
 
     // 배열에 추가된 마커들을 지도에 표시하거나 삭제하는 함수입니다
@@ -345,6 +376,13 @@ body{overflow: hidden}
         for (var i = 0; i < markers.length; i++) {
             markers[i].setMap(maps);
         }
+    }
+
+    function fnSubmit(){
+        document.mylocation_form.submit();
+    }
+    function fnLocationReset(){
+        location.href=g5_url+'/mobile/page/mypage/my_location_delete.php';
     }
 </script>
 <?php 

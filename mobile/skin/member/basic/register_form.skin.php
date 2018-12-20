@@ -17,7 +17,7 @@ if(strpos($agent,"foureight")!==false){
 <style>
     .tbl_wrap{padding:2vw}
     .tbl_wraps{padding:2vw}
-    #reg_mb_id, #reg_mb_hp,#reg_mb_password, #reg_mb_password_re,#reg_mb_sex,#reg_mb_name, #reg_mb_hp_confirm,#reg_mb_name, #reg_mb_hp_confirm{background-color:#fff;font-family: "nsr", "Nanum Square";}
+    #reg_mb_id, #reg_mb_hp,#reg_mb_password, #reg_mb_password_re,#reg_mb_sex,#reg_mb_name, #reg_mb_hp_confirm,#reg_mb_name, #reg_mb_hp_confirm{font-family: "nsr", "Nanum Square";}
     .tbl_frm01 textarea, .frm_input{background-color:#fff}
 </style>
 <div class="wrap">
@@ -50,7 +50,7 @@ if(strpos($agent,"foureight")!==false){
 		<input type="hidden" name="mb_nick" value="<?php echo "FE".strtotime(date('Y-m-d'));?>" id="reg_mb_nick" required class="frm_input required nospace" maxlength="20">
 		<div class="tbl_frm01 tbl_wrap">
 			<input type="text" name="mb_id" value="<?php echo $member['mb_id'] ?>" id="reg_mb_id" class="frm_input <?php echo $readonly ?>" minlength="3" maxlength="20" <?php echo $required ?> <?php echo $readonly ?> placeholder="이메일[ID]" />
-			<input type="password" name="mb_password" id="reg_mb_password" class="frm_input" minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호" style="font-family:Sans-serif"/>
+			<input type="password" name="mb_password" id="reg_mb_password" class="frm_input" minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호" style="font-family:sans-serif,'nsr'"/>
 			<input type="password" name="mb_password_re" id="reg_mb_password_re" class="frm_input " minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호 확인" style="font-family:Sans-serif">
 			<select name="mb_sex" id="reg_mb_sex"  <?php echo $required ?> ><option value="">성별</option><option value="남" <?php if($member['mb_sex']=="남"){?>selected<?php } ?>>남</option><option value="여" <?php if($member['mb_sex']=="여"){?>selected<?php } ?>>여</option>
 			</select>	

@@ -8,8 +8,13 @@ if (isset($_SESSION['ss_mb_reg']))
 if (!$mb['mb_id'])
     goto_url(G5_URL);
 
+if ($mb["mb_password"] == "")
+    goto_url(G5_MOBILE_URL."/page/mypage/password_settings.php?type=register");
+
+goto_url(G5_URL);
+/*
 $g5['title'] = '회원가입이 완료되었습니다.';
 include_once(G5_PATH.'/mobile/head.login.php');
 include_once($member_skin_path.'/register_result.skin.php');
-include_once('./_tail.php');
+include_once('./_tail.php');*/
 ?>

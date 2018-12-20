@@ -5,13 +5,15 @@ if(defined('G5_THEME_PATH')) {
     require_once(G5_THEME_PATH.'/tail.php');
     return;
 }
-
 //새알림
 $start = date("Y-m-d");
 $end = date("Y-m-d", strtotime("-3 month"));
-$sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}' and alarm_status = 0";
-$alarms = sql_fetch($sql);
-
+if($member["mb_id"]) {
+    $sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$member["mb_id"]}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}' ";
+    $alarms = sql_fetch($sql);
+}else{
+    $alarms["cnt"]=0;
+}
 ?>
 
 <div id="debug" style="">삭제상태</div>
@@ -286,17 +288,20 @@ $(function() {
 });
 function removeDebug(){
     $("#debug").removeClass("active");
+    $(".trash-ani").removeClass("active");
+    $(".trash-ani2").removeClass("active");
+    $(".trash-icon").removeClass("active");
     $("#mobile_header #mobile_menu_btn").removeClass("active");
 }
 
-function addSell2(pd_id,price,sell_mb_id){
+function addSell2(pd_id,price,sell_mb_id,id){
 
-    if(confirm("해당 판매글의 상태가 판매중으로 변경됩니다.\r판매 하시겠습니까?")) {
+    if(confirm("해당 판매글의 상태가 거래중으로 변경됩니다.\r판매 하시겠습니까?")) {
         //바로 지목 판매이므로 상태는 판매중으로 변경
         $.ajax({
             url: g5_url + "/mobile/page/ajax/ajax.insert_cart.php",
             method: "POST",
-            data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1}
+            data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1,id:id}
         }).done(function (data) {
             console.log(data);
         });

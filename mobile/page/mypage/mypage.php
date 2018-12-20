@@ -60,7 +60,7 @@ if($mb["mb_id"]!=$member["mb_id"]){
     $settings = sql_fetch("select * from `mysetting` where mb_id = '{$mb["mb_id"]}'");
 }
 
-$total=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}'");
+$total=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_status < 10 ");
 $res=sql_query("select * from `product` where mb_id = '{$mb_id}'");
 while($row = sql_fetch_array($res)){
     $all_pd_ids[] = $row["pd_id"];
@@ -72,13 +72,13 @@ if(count($all_pd_ids)>0) {
 }
 
 if($wish_id) {
-    $wish = sql_fetch("select count(*) as cnt from `wish_product` where mb_id = '{$mb_id}' and pd_id != '' {$search}");
+    $wish = sql_fetch("select count(*) as cnt from `wish_product` where mb_id = '{$mb_id}' and pd_id != '' and pd_status < 10  {$search}");
 }
-$total1=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 1");
-$total2=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 2");
-$total3=sql_fetch("select count(*) as cnt from `cart` where pd_id in ({$my_pd_ids}) and c_status = 0");
-$total4=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status = 0 and p.pd_type = 1");
-$total5=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status = 0 and p.pd_type = 2");
+$total1=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 1 and pd_status < 10 ");
+$total2=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 2 and pd_status < 10 ");
+$total3=sql_fetch("select count(*) as cnt from `cart` where pd_id in ({$my_pd_ids}) and c_status != 2");
+$total4=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status != 2 and p.pd_type = 1");
+$total5=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status != 2 and p.pd_type = 2");
 
 $total = $total["cnt"];
 $wishtotal = $wish["cnt"];
@@ -88,7 +88,7 @@ $total3 = $total3['cnt'];
 $total4 = $total4['cnt'];
 $total5 = $total5['cnt'];
 
-$sql = "select * from `product` where mb_id = '{$mb_id}' and pd_type = 1 order by pd_date desc";
+$sql = "select *,m.mb_id as mb_id from `product` as p left join `g5_member` as m  on p.mb_id = m.mb_id where p.mb_id = '{$mb_id}' and p.pd_type = 1 and p.pd_status < 10 order by p.pd_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $list[] = $row;
@@ -118,6 +118,15 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
             </div>
         </div>
     </div>
+    <div id="id01s" class="w3-modal w3-animate-opacity">
+        <div class="w3-modal-content w3-card-4">
+            <div class="w3-container">
+                <div class="con">
+
+                </div>
+            </div>
+        </div>
+    </div>
 <div id="id0s" class="w3-modal w3-animate-opacity">
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
@@ -127,6 +136,24 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
         </div>
     </div>
 </div>
+    <div id="id02" class="w3-modal w3-animate-opacity no-view">
+        <div class="w3-modal-content w3-card-4">
+            <div class="w3-container">
+                <input type="hidden" name="like_id" id="like_id" value="">
+                <input type="hidden" name="view_pd_type" id="view_pd_type" value="">
+                <h2>평가하기</h2>
+                <div class="likes">
+                    좋아요 <img src="<?php echo G5_IMG_URL?>/view_like.svg" alt="" class="likeimg" >
+                </div>
+                <div>
+                    <input type="text" name="like_content" id="like_content" placeholder="평가 내용을 입력해주세요." required>
+                </div>
+                <div>
+                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="fnLikeUpdate();" >
+                </div>
+            </div>
+        </div>
+    </div>
 <div id="id06" class="w3-modal w3-animate-opacity no-view">
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
@@ -140,7 +167,49 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
         </div>
     </div>
 </div>
-<div id="id02" class="w3-modal w3-animate-opacity no-view">
+<div id="id04" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
+            <form name="write_from" id="write_from" method="post" action="">
+                <h2>블라인드 사유</h2>
+                <div>
+                    <input type="text" name="like_content" id="like_content" placeholder="평가 내용을 입력해주세요." required>
+                </div>
+                <div>
+                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="제시하기" onclick="fnPricingUpdate();" >
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="id07" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
+            <form name="write_from" id="write_from" method="post" action="">
+                <input type="hidden" name="p_pd_id" id="p_pd_id" value="">
+                <input type="hidden" name="p_type" id="p_type" value="">
+                <h2>제시하기</h2>
+                <div>
+                    <select name="prcing_pd_id" id="prcing_pd_id" required>
+                        <option value="">게시물 선택</option>
+                    </select>
+                    <ul class="blind_ul">
+                        <li>
+                            <input type="text" placeholder="제시내용을 입력하세요." name="pricing_content" id="pricing_content" required>
+                        </li>
+                        <li>
+                            <input type="text" placeholder="가격을 입력해주세요." name="pricing_price" id="pricing_price" style="margin-top:0;" onkeyup="number_only(this)">
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="제시등록" style="width:auto;padding:2vw 3vw" id="up_btn" onclick="fnPricingUpdate();" >
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="id09" class="w3-modal w3-animate-opacity no-view">
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
             <form action="<?php echo G5_MOBILE_URL?>/page/mypage/member_block_update.php" method="post" name="blockform">
@@ -320,7 +389,7 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                             <?php }?>
                             <div class="top">
                                 <div>
-                                    <h2><?php echo $list[$i]["pd_type2"];?> </h2>
+                                    <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
                                     <div>
                                         <ul>
                                             <li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -590,6 +659,9 @@ function fnlist2(num,type1,type,mb_id){
                 $(".grid").append(data);
 
                 initpkgd();
+                if(type1==2){
+                    $(".list_item").css("height","auto");
+                }
                 page=1;
             }else{
                 //스크롤
@@ -612,7 +684,7 @@ function fnlist2(num,type1,type,mb_id){
 }
 
 function fnUserHidden(mb_id){
-    $("#id02").css("display","block");
+    $("#id09").css("display","block");
     $("html, body").css("overflow","hidden");
     $("html, body").css("height","100vh");
 }

@@ -100,10 +100,18 @@ $app = false;
 if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
     $app = true;
 }
+
+$app2 = false;
+if(stripos($_SERVER["HTTP_USER_AGENT"],"iosApp")){
+    $app2 = true;
+}
 ?>
 <script>
     <?php if($app){?>
     window.android.setLogin('<?php echo $mb['mb_id'];?>');
+    <?php }?>
+    <?php if($app2){?>
+    webkit.messageHandlers.onLogin.postMessage('<?php echo $mb['mb_id'];?>');
     <?php }?>
 </script>
 <?php

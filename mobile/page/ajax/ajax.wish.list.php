@@ -92,11 +92,11 @@ for($i=0;$i<count($list);$i++){
                 ?>
                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
                     <div class="tags">
-                        <?php for($k=0;$k<count($tags);$k++){
+                        <?php //for($k=0;$k<count($tags);$k++){
                             $rand_font = rand(3,6);
                             ?>
-                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                        <?php }?>
+                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $list[$i]["pd_tag"];?></div>
+                        <?php //}?>
                     </div>
                     <div class="clear"></div>
                 </div>
@@ -107,18 +107,18 @@ for($i=0;$i<count($list);$i++){
             ?>
             <div class="bg rand_bg<?php echo $rand;?> item_images" >
                 <div class="tags">
-                    <?php for($k=0;$k<count($tags);$k++){
+                    <?php //for($k=0;$k<count($tags);$k++){
                         $rand_font = rand(3,6);
                         ?>
-                        <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                    <?php }?>
+                        <div class="rand_size<?php echo $rand_font;?>">#<?php echo $list[$i]["pd_tag"];?></div>
+                    <?php //}?>
                 </div>
                 <div class="clear"></div>
             </div>
         <?php }?>
 		<div class="top">
 			<div>
-				<h2><?php echo $type;?> </h2>
+                <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
 				<div>
 					<ul>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>

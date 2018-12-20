@@ -6,11 +6,11 @@ include_once(G5_LIB_PATH.'/mailer.lib.php');
 if ($is_member) {
     alert_close('이미 로그인중입니다.', G5_URL);
 }
-
+/*
 if (!chk_captcha()) {
     alert('자동등록방지 숫자가 틀렸습니다.');
 }
-
+*/
 $email = trim($_POST['mb_email']);
 
 if (!$email)
@@ -71,5 +71,5 @@ $content .= '</div>';
 
 mailer($config['cf_admin_email_name'], $config['cf_admin_email'], $mb['mb_email'], $subject, $content, 1);
 
-alert_close($email.' 메일로 회원아이디와 비밀번호를 인증할 수 있는 메일이 발송 되었습니다.\\n\\n메일을 확인하여 주십시오.');
+alert($email.' 메일로 회원아이디와 비밀번호를 인증할 수 있는 메일이 발송 되었습니다.\\n\\n메일을 확인하여 주십시오.');
 ?>

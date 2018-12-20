@@ -31,7 +31,7 @@ if($comment_re != "1") {
         $sql = "select *,m.mb_id as mb_id from `product_comment` as p left join `g5_member` as m on m.mb_id = p.mb_id where p.pd_id ='{$pd_id}' order by p.comment_datetime desc limit 0 , 1";
         $cm = sql_fetch($sql);
 
-        $sql = "select * from `product` where pd_id = '{$pd_id}'";
+        $sql = "select *,p.mb_id as mb_id from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where p.pd_id = '{$pd_id}'";
         $pd = sql_fetch($sql);
         if($pd["pd_images"]) {
             $imgs = explode(",",$pd["pd_images"]);
@@ -40,7 +40,7 @@ if($comment_re != "1") {
         //알림 보내기
         if($pd["mb_id"]!=$mb_id) {
             //send_FCM('fcmid','타이틀','내용','유알엘','체널','체널명','받는아이디','게시글번호','이미지');
-            send_FCM($cm["regid"], $pd["pd_tag"], "등록하신 상품에 새 댓글이 등록되었습니다.", G5_URL . "/index.php?pd_id=" . $pd_id, "comment_alarm_set", "댓글알림", $pd["mb_id"], $pd_id, $img);
+            send_FCM($pd["regid"], $pd["pd_tag"], "등록하신 상품에 새 댓글이 등록되었습니다.", G5_URL . "/index.php?pd_id=" . $pd_id, "comment_alarm_set", "댓글알림", $pd["mb_id"], $pd_id, $img);
         }
         ?>
         <li class="<?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} } ?>" id="cmt<?php echo $cm[cm_id];?>">

@@ -131,6 +131,10 @@ if($w == '' || $w == 'a' || $w == 'r') {
     sql_query($sql);
 }
 
+$mb = get_member($mb_id);
+
+send_FCM($mb["regid"],'48고객센터','고객님의 1:1문의사항에 대한 답변입니다.',G5_BBS_URL."/qaview.php?qa_id=".$qa_id,'notice_alarm_set',"기본알림",$mb["mb_id"],'','');
+
 alert("답변등록이 완료 되었습니다.");
 
 

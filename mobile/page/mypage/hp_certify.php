@@ -26,14 +26,14 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
             <input type="hidden" name="cert_type" value="<?php echo $member['mb_certify']; ?>" id="cert_type">
             <input type="hidden" name="cert_no" id="cert_no" value="">
             <input type="hidden" name="mb_name" id="mb_name" value="<?php echo $member["mb_name"];?>">
-            <input type="hidden" name="mb_hp" id="reg_mb_hp">
+            <input type="hidden" name="mb_hp" id="reg_mb_hp" value="123123131231" readonly>
             <input type="hidden" name="mb_id" id="reg_mb_id" value="<?php echo $member["mb_id"];?>">
 
             <div class="setting_wrap">
                 <h2>현재 번호</h2>
                 <ul>
                     <li class="single" style="height:6vw;line-height:7vw;">
-                        <?php echo ($member["mb_hp"])?$member["mb_hp"]:"등록된 핸드폰 번호가 없습니다.";?>
+                        <input type="text" id="showhp" placeholder="<?php echo ($member["mb_hp"])?$member["mb_hp"]:"등록된 핸드폰 번호가 없습니다.";?>" class="setting_input" value="<?php echo $member["mb_hp"];?>" readonly>
                         <input type="button" value="변경하기" id="win_hp_cert" class="addr_btn">
                     </li>
                 </ul>
@@ -46,6 +46,15 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
         </form>
     </div>
 <script>
+    $(function(){
+       var flag = setInterval(function(){
+           var cert = $("#cert_no").val();
+           if(cert!=""){
+               $("#showhp").val("인증 되었습니다. 확인을 눌러 등록해주세요.");
+               clearInterval(flag);
+           }
+       },1000);
+    });
     // 휴대폰인증
     $("#win_hp_cert").click(function() {
         if(!cert_confirm())

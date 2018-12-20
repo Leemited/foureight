@@ -24,15 +24,25 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
         return false;
     }
 
+    $mbs = get_member($mb_id);
+
     $apiKey = "AAAATdHUVhc:APA91bHBoGTQnwcHrTgeBbZJaF6dz9TQ2EsMSayHCbsJntos5kqxwF9RT5ujrwfSe8mXZcbIlhKAUEuuYGNV1TDqKtixh08m6HSwjVNIWEZGA9meaJ1kMjs3VuyIn5qp0-pri79r0ql9";
     $regId_array=array($reg_id);
     $url = 'https://fcm.googleapis.com/fcm/send';
-    $fields = array(
-        'registration_ids' => $regId_array,
-        'data' => array( "title"=>$title,"message" => $content , "content_available" => 'true',"urls" => $urls ,"chennal" => $chennal ,"channelname" => $chennalname, "imgurlstr"=>$imgurls),
-        'priority' => 'high',
-        'sound' => 'default'
-    );
+    if($mbs["sdkVersion"] == "ios"){
+        $fields = array(
+            'registration_ids' => $regId_array,
+            'priority' => 'high',
+            'notification' => array("title" => $title, "body" => $content, "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls)
+        );
+    }else {
+        $fields = array(
+            'registration_ids' => $regId_array,
+            'data' => array("title" => $title, "message" => $content, "content_available" => 'true', "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls),
+            'priority' => 'high',
+            'sound' => 'default'
+        );
+    }
     $headers = array(
         'Authorization: key='.$apiKey,
         'Content-Type: application/json'

@@ -63,39 +63,38 @@ $back_url = G5_URL;
                 $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
                 if(is_file(G5_DATA_PATH."/product/".$img1)){
                     ?>
-                    <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
                         <?php if($img1!=""){?>
-                            <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
+                    <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
                         <?php }else{ ?>
-                            <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="" class="main" style="opacity:0">
+                    <div class="item_images" style="background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg');background-repeat:no-repeat;background-size:cover;background-position:center;">
                         <?php }?>
                     </div>
                 <?php }else{
-                    $tags = explode("/",$cart[$i]["pd_tag"]);
+                    //$tags = explode("/",$cart[$i]["pd_tag"]);
                     $rand = rand(1,13);
                     ?>
                     <div class="bg rand_bg<?php echo $rand;?> item_images" >
                         <div class="tags">
-                            <?php for($k=0;$k<count($tags);$k++){
+                            <?php //for($k=0;$k<count($tags);$k++){
                                 $rand_font = rand(3,6);
                                 ?>
-                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                            <?php }?>
+                                <div class="rand_size<?php echo $rand_font;?>"><?php echo $cart[$i]["pd_tag"];?></div>
+                            <?php //}?>
                         </div>
                         <div class="clear"></div>
                     </div>
                 <?php }?>
             <?php }else{
-                $tags = explode("#",$cart[$i]["pd_tag"]);
+                //$tags = explode("#",$cart[$i]["pd_tag"]);
                 $rand = rand(1,13);
                 ?>
                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
                     <div class="tags">
-                        <?php for($k=0;$k<count($tags);$k++){
+                        <?php //for($k=0;$k<count($tags);$k++){
                             $rand_font = rand(3,6);
                             ?>
-                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                        <?php }?>
+                            <div class="rand_size<?php echo $rand_font;?>"><?php echo $cart[$i]["pd_tag"];?></div>
+                        <?php //}?>
                     </div>
                     <div class="clear"></div>
                 </div>
@@ -230,6 +229,10 @@ function fnOrderAll(){
 }
 
 function fnCartOrder(){
+    if($("#cart_ids").val()==""){
+        alert("선택된 물건/능력이 없습니다.");
+        return false;
+    }
     document.cartform.submit();
 }
 

@@ -24,8 +24,12 @@ if ($pass){
 $sql = "update `g5_member` set {$sql_password} where `mb_id` = '{$mb_id}' ";
 
 if(sql_query($sql)){
-	$msg = "변경이 완료 되었습니다.\\r\\n개인정보 변경으로 인해 재로그인 후 이용 가능합니다.";
-	alert($msg, G5_BBS_URL."/logout.php");
+    if($type!="register") {
+        $msg = "변경이 완료 되었습니다.\\r\\n개인정보 변경으로 인해 재로그인 후 이용 가능합니다.";
+        alert($msg, G5_BBS_URL . "/logout.php");
+    }else{
+        alert("회원가입이 완료 되었습니다.",G5_URL);
+    }
 }else{
 	alert("잘못된 접근입니다. 관리자에게 문의 바랍니다.");
 }

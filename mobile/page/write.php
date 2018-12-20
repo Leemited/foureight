@@ -1,16 +1,13 @@
 <?php
 include_once("../../common.php");
-include_once(G5_EXTEND_PATH."/image.extend.php");
-
-
 if(!$is_member){
     alert("로그인이 필요합니다.",G5_MOBILE_URL."/page/login_intro.php?url=".G5_MOBILE_URL."/page/write.php");
 }
 ?>
-    <div class="loader">
-        <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
-        <div style="background-color:#000;opacity: 0.4;width:100%;height:100%;position:absolute;top:0;left:0;"></div>
-    </div>
+<!--<div class="loader">
+    <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
+    <div style="background-color:#000;opacity: 0.4;width:100%;height:100%;position:absolute;top:0;left:0;"></div>
+</div> -->
 <?php
 include_once(G5_MOBILE_PATH."/head.login.php");
 
@@ -20,14 +17,12 @@ $mywords = explode(":@!",$mySetting["my_word"]);
 for($i=0;$i<count($mywords);$i++){
     $mywordss[] = explode("!@~",$mywords[$i]);
 }
-
-$cnt = 0;
-for($i=0;$i<count($mylocations);$i++){
-    if($mylocations[$i]!=""){
-        $locChk = true;
-        $cnts++;
-    }
+if($mySetting["my_locations"]) {
+    $mylocations = explode(",", $mySetting["my_locations"]);
+    $mylat = explode(",", $mySetting["location_lat"]);
+    $mylng = explode(",", $mySetting["location_lng"]);
 }
+
 $cateholder = sql_fetch("select info_text from `categorys` where cate_depth = 2 and cate_name = '{$sc}'");
 if($pd_id){
     $sql = "select * from `product` where pd_id = '{$pd_id}'";
@@ -59,16 +54,19 @@ if(!$pd_id) {
     $videoname = $_REQUEST["videoname"];
     $pd_price = str_replace(",","",$_REQUEST["wr_price"]);
     $pd_price2 = str_replace(",","",$_REQUEST["wr_price2"]);
-    $pd_timeFrom = $_REQUEST["pd_timeFrom"];
-    $pd_timeTo = $_REQUEST["pd_timeTo"];
+    $pd_timeFrom = $mySetting["pd_timeFrom"];
+    $pd_timeTo = $mySetting["pd_timeTo"];
     $pd_video_link = $_REQUEST["pd_video_link"];
     $pd_discount = $_REQUEST["pd_discount"];
     $pd_content = $_REQUEST["pd_content"];
     $pd_price_type = $_REQUEST["pd_price_type"];
     $pd_location = $_REQUEST["pd_location"];
     $pd_location_name = $_REQUEST["pd_location_name"];
+    if($mylocations[0] != ""){
+        $pd_location = $mylocations[0];
+        $pd_location_name = $mylocations[0];
+    }
     $pd_infos = $_REQUEST["pd_infos"];
-
 }else{
     $type1 = $write["pd_type"];
     $pd_type2 = $write["pd_type2"];
@@ -108,16 +106,16 @@ if(!$pd_id) {
 <div id="id02" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
-            <h2>거래 선호 위치</h2>
+            <h2>간편 거래 위치</h2>
             <div>
                 <ul class="modal_sel">
                     <?php for($i=0;$i<count($mylocations);$i++){?>
-                        <li class="locSel<?php echo $i;?>" ><?php echo $mylocations[$i];?></li>
+                        <li class="locSel<?php echo $i;?>" onclick="setLocation('','','');" ><?php echo $mylocations[$i];?></li>
                     <?php }?>
                 </ul>
             </div>
             <div>
-                <input type="button" value="취소" onclick="modalClose()"><input type="submit" value="확인" onclick="modalClose()" >
+                <input type="button" value="취소" onclick="modalClose()">
             </div>
         </div>
     </div>
@@ -126,20 +124,33 @@ if(!$pd_id) {
     <div class="w3-modal-content w3-card-4" >
         <div class="w3-container">
             <h2>거래위치 입력</h2>
-            <!--<div style="background-color:#fff;-webkit-border-radius: 3vw ;-moz-border-radius: 3vw ;border-radius: 3vw;padding:2vw;font-size:4vw;margin:3vw 0;">
-                <p>아직 등록된 거래 위치가 없으시내요. <br>거래위치는 마이페이지 설정에서 가능합니다.<br>등록하러 가시겠어요?<br><br>게시글을 올리시고 수정하셔도 괜찮아요!</p>
-            </div>-->
+
             <div>
                 <div class="map_set">
                     <input type="text" value="" name="locs1" id="locs1" value="" placeholder="예)신림역 2번 출구" required onkeyup="fnfilter(this.value,'locs1')">
-                    <?php if($app){?>
-                        <img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt="" onclick="nowLoc();" class="nowLoc">
-                    <?php }?>
                     <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect()">
                 </div>
+
             </div>
             <div>
                 <input type="button" value="취소" onclick="modalClose()"><!--<input type="button" value="확인" onclick="fnLocs();">-->
+            </div>
+            <br>
+            <h2>간편 거래위치 선택</h2>
+            <div>
+                <?php if(count($mylocations)>0 || $mylocations){?>
+                    <ul class="modal_sel">
+                        <?php for($i=0;$i<count($mylocations);$i++){
+                            if($mylocations[$i]!=""){?>
+                                <li class="locSel<?php echo $i;?>"  onclick="fnLocation('<?php echo $mylocations[$i];?>','<?php echo $mylat[$i];?>','<?php echo $mylng[$i];?>');">
+                                    <?php echo $mylocations[$i]?>
+                                </li>
+                            <?php }?>
+                        <?php }?>
+                    </ul>
+                <?php }else{?>
+                    <p>MYPAGE -> 설정 -> 거래위치설정에서 등록가능합니다.</p>
+                <?php }?>
             </div>
         </div>
     </div>
@@ -198,7 +209,7 @@ if(!$pd_id) {
 		<input type="hidden" value="<?php echo $pd_type2;?>" name="type2" id="type2">
 		<input type="hidden" value="<?php echo $c;?>" name="cate1" id="cate1">
 		<input type="hidden" value="<?php echo $sc;?>" name="cate2" id="cate2">
-		<input type="text" value="<?php echo $filename;?>" name="filename" id="filename">
+		<input type="hidden" value="<?php echo $filename;?>" name="filename" id="filename">
         <input type="hidden" value="<?php echo $videoname;?>" name="videoname" id="videoname">
         <!--<input type="text" value="" name="addr" id="addr">-->
         <input type="hidden" value="<?php echo $write["pd_lat"];?>" name="pd_lat" id="pd_lat">
@@ -305,18 +316,18 @@ if(!$pd_id) {
                     <div class="videoArea filelist">
                         <h2>사진수정</h2>
                         <?php if($filename!=""){ ?>
-                        <?php $images = explode(",",$filename); $image_cnt = count($images);?>
+                        <?php
+                            $images = explode(",",$filename);
+                            $image_cnt = count($images);
+                        ?>
                         <?php for($i=0;$i<count($images);$i++){
-                                $img = get_images2(G5_DATA_PATH."/product/".$images[$i]);
-                                if(is_file($img)){
-                                    echo "파일 없음";
-                                }
+                                $img = get_images(G5_DATA_PATH."/product/".$images[$i],500,500);
                             ?>
-                                <div class="image_box" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"<?php }?> style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;">
+                                <div class="image_box app" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }?>  style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;">
                                     <label for="images<?php echo $i;?>">
                                         <img src="<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
-                                        <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" >
+                                        <!--<input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" >-->
                                         <?php } ?>
                                     </label>
                                 </div>
@@ -325,11 +336,11 @@ if(!$pd_id) {
                         if($image_cnt > 0){
                         for($i=$image_cnt;$i<5;$i++){
                             ?>
-                            <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;"  <?php if($app){?> onclick="window.android.cameraOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }?> >
+                            <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;"  <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"<?php }?> >
                                 <label for="images<?php echo $i;?>">
                                     <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
-                                     <?php if(!$app){?>
-                                    <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;">
+                                    <?php if(!$app){?>
+                                    <!--<input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;">-->
                                     <?php } ?>
                                 </label>
                             </div>
@@ -338,7 +349,7 @@ if(!$pd_id) {
                         <?php }else{
                             for($i=0;$i<5;$i++){
                                 ?>
-                                <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;" <?php if($app){?> onclick="window.android.cameraOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }?> >
+                                <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }?> >
                                     <label for="images<?php echo $i;?>">
                                         <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
@@ -350,6 +361,9 @@ if(!$pd_id) {
                         }?>
                     </div>
                 </div>
+                <?php if($app || $app2){?>
+                <div class="photo_msg">사진을 로드중입니다.</div>
+                <?php }?>
             </article>
         </section>
 		<?php /*if($filename=="" && $chkMobile == false && !$pd_id){*/?><!--
@@ -442,16 +456,16 @@ if(!$pd_id) {
                             </div>
                         </div>
                     <?php }?>
-					<div class="prices">
-						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php if($pd_price){echo number_format($pd_price);}?>" placeholder="<?php if($pd_type2== 4){?>구매예상금액<?php }else{?>판매가격<?php }?>" name="price" id="price" required class="write_input2" onkeyup="number_only(this);"/>
-                        <?php if($type1==1 && $pd_type2 == 8){?><input type="checkbox" name="discount_use" style="display:none;" id="discount_use" value="1" <?php if($pd_discount==1){?>checked<?php }?>><label for="discount_use">흥정가능<img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""></label><?php }?>
-                        <?php if($type1==2){?>계약금<?php }?>
-                    </div>
                     <?php if($type1==2){?>
-                    <div class="prices step2">
-                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="text" value="<?php if($pd_price2){echo number_format($pd_price2);}?>" placeholder="10,000" name="price2" id="price2" required class="write_input2 width_80" onkeyup="number_only(this);"/> 거래완료금
+                    <div class="prices ">
+                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price2){echo number_format($pd_price2);}?>" placeholder="10,000" name="price2" id="price2" required class="write_input2 width_80" onkeyup="number_only(this)"/> 계약금
 					</div>
                     <?php }?>
+					<div class="prices <?php if($type1==2){?>step2<?php }?>">
+						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price){echo number_format($pd_price);}?>" placeholder="<?php if($pd_type2== 4){?>구매예상금액<?php }else{?>판매가격<?php }?>" name="price" id="price" required class="write_input2" onkeyup="number_only(this)"/>
+                        <?php if($type1==1 && $pd_type2 == 8){?><input type="checkbox" name="discount_use" style="display:none;" id="discount_use" value="1" <?php if($pd_discount==1){?>checked<?php }?>><label for="discount_use">흥정가능<img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""></label><?php }?>
+                        <?php if($type1==2){?>거래완료금<?php }?>
+                    </div>
 				</div>
 			</article>
 		</section>
@@ -471,6 +485,8 @@ if(!$pd_id) {
                                 <img src="<?php echo G5_IMG_URL?>/ic_write_close.svg" alt="" class="locsDel">
                                 <input type="hidden" value="<?php echo $pd_location;?>" name="locs_name" id="">
                                 <input type="hidden" value="<?php echo $pd_location_name;?>" name="locs" id="">
+                                <input type="hidden" value="<?php echo $mylat[0];?>" name="pd_lat" id=""/>
+                                <input type="hidden" value="<?php echo $mylng[0];?>" name="pd_lng" id=""/>
                             </div>
                         <?php } ?>
 					</div>
@@ -520,6 +536,8 @@ function setImages(img,index){
         }
     }
 
+    console.log("filename = "+newfile);
+
     $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.edit_image.php",
         method:"post",
@@ -528,8 +546,11 @@ function setImages(img,index){
     }).done(function(data){
         var imgs = "url('"+g5_url+"/data/product/"+data+"')";
         $("#box"+index).css("background-image",imgs);
-        $("#filename").val(newfile);
-        //console.log($("#box"+index).attr("style"));
+        if($("#filename").val()=="") {
+            $("#filename").val(newfile);
+        }else{
+            $("#filename").val(newfile);
+        }
     });
 }
 
@@ -922,6 +943,21 @@ $(function(){
             return false;
         }
     });
+
+    //사진 검증
+    <?php if($filename!=""){?>
+    setTimeout(function(){
+        $.ajax({
+            url:g5_url+"/mobile/page/write_photoload.php",
+            method:"post",
+            data:{filename:'<?php echo $filename;?>',app:'<?php echo $app;?>',app2:"<?php echo $app2;?>"}
+        }).done(function(data){
+             $(".filelist").html('<h2>사진수정</h2>');
+             $(".filelist").append(data);
+             $(".photo_msg").html('');
+        });
+    },2000);
+    <?php }?>
 });
 
 // 숫자 타입에서 쓸 수 있도록 format() 함수 추가
@@ -1142,7 +1178,9 @@ function getLatlng(loc){
 
 $(function(){
     var cookie_id = getCookie("<?php echo $member["mb_id"];?>");
+    <?php if(!$pd_id){?>
     setCookie("<?php echo $member["mb_id"];?>","write","1");
+    <?php }?>
     setCookie("wr_type1","<?php echo $type1;?>","1");
     setCookie("pd_type2","<?php echo $pd_type2;?>","1");
     setCookie("cate1","<?php echo $c;?>","1");
@@ -1188,7 +1226,23 @@ $(function(){
             setCookie("pd_discount", $(this).val(), '1');
         });
     }
+
+    setTimeout(function(){
+
+    },1000);
 })
+
+function fnLocation(locatioin,lat,lng){
+    if(confirm("해당 위치로 등록 하시겠습니까?")){
+        var locitem = '<div class="myloc">'+locatioin+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+locatioin+'" name="locs" id="locs"/><input type="hidden" value="'+locatioin+'" name="locs_name" id=""/>' +
+            '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
+         $(".loclist ").html('');
+         $(".loclist ").append(locitem);
+         modalClose();
+    }else{
+        return false;
+    }
+}
 </script>
 <?php
 include_once(G5_MOBILE_PATH."/tail.php");

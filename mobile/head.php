@@ -14,6 +14,17 @@ include_once(G5_LIB_PATH.'/visit.lib.php');
 include_once(G5_LIB_PATH.'/connect.lib.php');
 include_once(G5_LIB_PATH.'/popular.lib.php');
 
+if($is_member) {
+    if ($regid) {
+        $_SESSION["regid"] = $regid;
+    }
+    if ($sdkVersion) {
+        $_SESSION["sdkVersion"] = $sdkVersion;
+    }
+    $sql = "update `g5_member` set regid = '{$regid}', sdkVersion = '{$sdkVersion}' where mb_id ='{$member[mb_id]}'";
+    sql_query($sql);
+}
+
 if($lat && $lng && $is_member){
     $sql = "update `g5_member` set mb_1 = '{$lat}', mb_2 = '{$lng}', mb_3 = now() where mb_id ='{$member[mb_id]}'";
     sql_query($sql);
@@ -191,7 +202,6 @@ $alarms = sql_fetch($sql);
 		<div class="owl-carousel" id="helps">
 			<?php for($i=0;$i<count($help);$i++){?>
 			<div class="item"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help&wr_id=<?php echo $help[$i]["wr_id"];?>"><?php echo $help[$i]["wr_subject"];?></a></div>
-			<div class="item"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help&wr_id=<?php echo $help[$i]["wr_id"];?>"><?php echo $help[$i]["wr_subject"];?></a></div>
 			<?php }?>
 		</div>
 	</div>
@@ -210,13 +220,18 @@ $alarms = sql_fetch($sql);
         });
     </script>
     <form action="./" method="get" name="simplesearch" id="simplesearch" >
+        <div class="trash-ani2">
+            <img src="<?php echo G5_IMG_URL?>/ic_index_trash2.svg" alt="">
+        </div>
         <header id="mobile_header">
             <!-- <h1><a href="<?php echo G5_URL; ?>" title="HOME" class="logos"><i></i></a></h1> -->
             <div class="search">
                 <input type="text" style="display:none;">
+                <input type="hidden" name="formtype" id="formtype" value="">
                 <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 1;}?>">
                 <input type="hidden" name="set_type2" id="set_type2" value="<?php if($type2){echo $type2;}?>">
                 <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
+                <?php //print_r2($member);?>
                 <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
                 <label class="switch schtype" >
                     <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"){?>checked<?php }?> >
@@ -404,7 +419,7 @@ $alarms = sql_fetch($sql);
 			</ul>
 			<div class="copyright" style="">
 				<h2>디자인율 | 48</h2>
-                <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>대표전화 : 010-3034-1746</p>
+                <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>대표전화 : 070-4090-4811</p>
                 <ul class="agreement">
                     <li onclick="location.href=g5_url+'/mobile/page/company/agreement.php'">이용약관</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/privacy.php'">개인정보 취급방침</li>
@@ -685,49 +700,6 @@ $(function(){
 		}
 	});
 
-    /*$(".search .slider").click(function(){
-        if($(this).prev().prop("checked") == true){
-
-
-            $(this).html("물품");
-            $(this).css({"text-align":"right"});
-            $(".top_header").css("background-color","#000");
-            $("#search").attr("placeholder","원하는 물건이 있으세요?");
-            $(".text").css({"background-color":"#ffe400","color":"#000"});
-            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_1.svg");
-            $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn.svg");
-            $("#wr_type1").val("1");
-            $("#type").val("1");
-            $("#theme-color").attr("content","#000000");
-            $("#wr_price").attr("placeholder","판매금액");
-            $("#wr_price").css("width","70%");
-            $("#wr_price2").css("display","none");
-            finish = false;
-
-            fnlist(1,'');
-        }else{
-
-            $(this).html("능력");
-            $(this).css({"text-align":"left"});
-            $(".top_header").css("background-color","#ff3d00");
-            $("#search").attr("placeholder","누군가의 능력이 필요하세요?");
-            $(".text").css({"background-color":"#ff3d00","color":"#fff"});
-            $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_2.svg");
-            $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn_2.svg");
-            $("#set_type").val("2");
-            $("#wr_type1").val("2");
-            $("#type").val("2");
-            $("#theme-color").attr("content","#ff3d00");
-            $("#wr_price").attr("placeholder","계약금");
-            $("#wr_price2").attr("placeholder","거래완료금");
-            $("#wr_price").css("width","30%");
-            $("#wr_price2").css({"display":"inline-block","width":"30%"});
-            finish = false;
-
-            fnlist(1,'');
-        }
-    });*/
-
 	$("#cate").change(function(){
 		var type1 = $(".schtype .slider").text();
 		var ca_id = $("#cate option:selected").attr("id");
@@ -776,9 +748,11 @@ $(function(){
         }).done(function(data){
             msg = data;
             $("#type").val(type);
-            $("#cate").val(c);
-            $("#cate2").val(sc);
-            $(".sch_top .sch_btn").val(c+" > "+sc);
+            if(c != "전체" && sc != "전체") {
+                $("#cate").val(c);
+                $("#cate2").val(sc);
+                $(".sch_top .sch_btn").val(c + " > " + sc);
+            }
             cateClose();
         });
     });
@@ -986,12 +960,11 @@ function fnSearchAgree(status){
 
 function fnWrite(){
     $("#formtype").val("write");
-    $("#sch_text").val($("#stx").val());
-    if($("#set_type").val()==""){
+    if($("#wr_type").val()==""){
         alert("물건/능력을 선택해주세요");
         return false;
     }
-    if($("#sch_text").val() == ""){
+    if($("#stx").val() == ""){
         alert("검색어를 입력해 주세요");
         return false;
     }
@@ -1003,6 +976,9 @@ function fnWrite(){
         alert("2차 카테고리를 선택해 주세요.");
         return false;
     }
+
+    document.simplesearch.action = g5_url+"/mobile/page/savesearch/search_simple_update.php";
+    document.simplesearch.submit();
 
 }
 

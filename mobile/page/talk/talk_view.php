@@ -54,6 +54,17 @@ $pro = sql_fetch($sql);
 <div class="talk talk_view_container" style="<?php if($img1!=""){?>background-image:url('<?php echo G5_DATA_URL."/product/".$img1;?>');<?php }?>background-size:cover;background-repeat:no-repeat;background-position:center;">
     <div class="close" onclick="location.href='<?php echo $back_url;?>'">
         <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
+
+    </div>
+    <div class="price">
+        <h2> <span><?php if($talk_list[0]['pd_type']==1){ if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></span>
+            <?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]);}else{echo "0원";}?></h2>
+        <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8 ){?>
+            <div class="sell_btn">
+                <input type="button" value="이 회원에게 판매하기" class="btn" onclick="fnSell();">
+            </div>
+        <?php }?>
+        <div class="price_bg"></div>
     </div>
     <?php if($pro["pd_type"]==2 && $pro["pd_type2"]==8){?>
         <div class="talk_info">
@@ -115,21 +126,32 @@ $pro = sql_fetch($sql);
             }
         }?>
     </div>
-    <?php if(count($mywordss)>0){?>
-        <div class="my_word">
-            <ul>
-                <?php for($i=0;$i<count($mywordss);$i++){
-                    if($mywordss[$i]!=""){
-                    ?>
-                    <li><?php echo $mywordss[$i];?></li>
-                <?php }
-                }?>
-            </ul>
-        </div>
-    <?php }?>
+
     <div class="msg_controls">
         <input type="hidden" value="<?php echo $talk_read_ids;?>" id="talk_ids">
         <input type="text" name="talk_content" id="message" value="" placeholder="메세지를 입력하세요.">
+        <?php if(count($mywordss)>0){?>
+        <div class='panel noselect'>
+            <div class='admin-panel'>
+                <!-- <label class='text' for='toggle'>Admin Settings</label>-->
+                <label class='fas fa-bars' for='toggle'></label>
+            </div>
+            <input type='checkbox' id='toggle' checked="false">
+            <div class='menu-panel'>
+
+                <div class='arrow'></div>
+                <?php for($i=0;$i<count($mywordss);$i++){
+                    if($mywordss[$i]!=""){
+                        ?>
+                        <a href='#' class='row'>
+                            <div class='column-left'><?php echo $mywordss[$i];?></div>
+                            <div class='column-right'></div>
+                        </a>
+                    <?php }
+                }?>
+            </div>
+        </div>
+        <?php }?>
         <input type="button" value="보내기" class="send_msg" onclick="fnSendMsg();">
         <!--<div class="option">
             <div class="menu1">개인문구</div>
@@ -139,16 +161,7 @@ $pro = sql_fetch($sql);
         </div>-->
     </div>
 
-    <div class="price">
-        <p><?php if($talk_list[0]['pd_type']==1){ if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></p>
-        <h2><?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]);}else{echo "0원";}?></h2>
-        <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8){?>
-        <div class="sell_btn">
-            <input type="button" value="이 회원에게 판매하기" class="btn" onclick="fnSell();">
-        </div>
-        <?php }?>
-        <div class="price_bg"></div>
-    </div>
+
 
 </div>
 <script>
@@ -192,8 +205,8 @@ $pro = sql_fetch($sql);
         });
 
         //채팅 간편글
-        $(".my_word li").click(function(){
-            fnSendMsSimple($(this).text());
+        $(".menu-panel a").click(function(){
+            fnSendMsSimple($(this).find(".column-left").text());
         });
     });
 

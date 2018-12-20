@@ -95,7 +95,7 @@ add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
                 }
                 ?>
 
-                <?php if ($i == 0) { echo '<li class="empty_list">게시물이 없습니다.</li>'; } ?>
+                <?php if ($i == 0) { echo '<li class="empty_list"><div>게시물이 없습니다.</div></li>'; } ?>
             </ul>
         </div>
 

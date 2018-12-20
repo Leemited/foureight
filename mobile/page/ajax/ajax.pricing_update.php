@@ -20,7 +20,15 @@ if($pd_type==1){
         return false;
     }
 
-    $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}'";
+    $sql = "select count(*) as cnt, id from `product_pricing` where pd_id = {$pd_id} and mb_id = '{$mb_id}'";
+    $myPricing = sql_fetch($sql);
+
+    if($myPricing["cnt"]>0){
+        $sql = "update `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}' where id = '{$myPricing["id"]}'";;
+    }else{
+        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}'";
+    }
+
 
     if (sql_query($sql)) {
 
@@ -58,7 +66,14 @@ if($pd_type==2) {
         return false;
     }
 
-    $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_pd_id = {$pricing_pd_id}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}'";
+    $sql = "select count(*) as cnt, id from `product_pricing` where pd_id = {$pd_id} and mb_id = '{$mb_id}'";
+    $myPricing = sql_fetch($sql);
+
+    if($myPricing["cnt"]>0){
+        $sql = "update `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}' where id = '{$myPricing["id"]}'";;
+    }else{
+        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}'";
+    }
 
     if (sql_query($sql)) {
         $sql = "select * from `product` where pd_id = '{$pd_id}'";

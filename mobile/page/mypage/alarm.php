@@ -4,13 +4,13 @@ include_once (G5_MOBILE_PATH."/head.login.php");
 $back_url = G5_URL;
 
 if(!$is_member){
-    alert("로그인이 필요합니다.", G5_MOBILE_URL."/login_intro.php");
+    alert("로그인이 필요합니다.", G5_MOBILE_URL."/page/login_intro.php");
 }
 
 $now = date("Y-m-d");
 $month = date("Y-m-d", strtotime("-3 month"));
 
-$sql = "select *,m.pd_id as pd_id from `my_alarms` as m left join `product` as p on m.pd_id = p.pd_id where m.mb_id = '{$member["mb_id"]}' and m.alarm_date between '{$month}' and '{$now}' order by m.alarm_date desc, m.alarm_time desc";
+$sql = "select *,m.pd_id as pd_id from `my_alarms` as m left join `product` as p on m.pd_id = p.pd_id where m.mb_id = '{$member["mb_id"]}' and m.alarm_date between '{$month}' and '{$now}' and m.alarm_status != 3 order by m.alarm_date desc, m.alarm_time desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $alarm[] = $row;
@@ -44,19 +44,18 @@ $today = date("Y-m-d H:i:s");
 
             ?>
             <!--<p><?php /*echo $alarm[$i]["alarm_type"];*/?></p>-->
-            <div class="alarm_item <?php if($alarm[$i]["alarm_status"] != 0){?>alarm_read<?php }?>" onclick="alarmRead('<?php echo $alarm[$i]["pd_id"];?>','<?php echo $alarm[$i]["alarm_type"];?>','<?php echo $alarm[$i]["id"];?>','<?php echo $alarm[$i]['alarm_link'];?>')">
+            <div class="alarm_item <?php if($alarm[$i]["alarm_status"] != 0){?>alarm_read<?php }?>" id="list_<?php echo $alarm[$i]["id"];?>" onclick="alarmRead('<?php echo $alarm[$i]["pd_id"];?>','<?php echo $alarm[$i]["alarm_type"];?>','<?php echo $alarm[$i]["id"];?>','<?php echo $alarm[$i]['alarm_link'];?>')">
                 <?php if($alarm[$i]["pd_id"]){?>
                 <?php if($alarm[$i]["pd_images"]!=""){
                     $img = explode(",",$alarm[$i]["pd_images"]);
                     $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
                     if(is_file(G5_DATA_PATH."/product/".$img1)){
                         ?>
+                        <?php if($img1!=""){?>
                         <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
-                            <?php if($img1!=""){?>
-                                <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
-                            <?php }else{ ?>
-                                <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="" class="main" style="opacity:0">
-                            <?php }?>
+                        <?php }else{ ?>
+                        <div class="item_images" style="background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg');background-repeat:no-repeat;background-size:cover;background-position:center;">
+                        <?php }?>
                         </div>
                     <?php }else{
                         //$tags = explode("/",$alarm[$i]["pd_tag"]);
@@ -117,6 +116,53 @@ $today = date("Y-m-d H:i:s");
 function alarmRead(pd_id,type,id,link){
     location.href=link;
 }
+
+$(function() {
+    $("div[id^=list]").each(function(){
+        var id = $(this).attr("id");
+        var alarm_id = id.replace("list_","");
+        var item = document.getElementById(id);
+        var swiper = new Hammer(item);
+        swiper.on('swipeleft', function (e) {
+            $.ajax({
+                url:g5_url+"/mobile/page/ajax/ajax.alarm_delete.php",
+                method:"post",
+                data:{id:alarm_id}
+            }).done(function(data){
+                if(data==""){
+                    alert("잘못된 처리 입니다.");
+                }else if(data=="1"){
+                    alert("해당 알림정보가 잘못되었습니다.");
+                }else if(data=="2"){
+                    $("#"+id).addClass("remove");
+                    setTimeout(function(){$("#"+id).remove();},100);
+                    //alert("해당 알림은 삭제되었습니다.");
+                }else if(data=="3"){
+                    alert("해당 알림의 삭제처리오류로 인해 삭제가 되지 않았습니다.");
+                }
+            });
+        });
+        swiper.on("swiperight", function (e) {
+            $.ajax({
+                url:g5_url+"/mobile/page/ajax/ajax.alarm_delete.php",
+                method:"post",
+                data:{id:alarm_id}
+            }).done(function(data){
+                if(data==""){
+                    alert("잘못된 처리 입니다.");
+                }else if(data=="1"){
+                    alert("해당 알림정보가 잘못되었습니다.");
+                }else if(data=="2"){
+                    $("#"+id).addClass("remove");
+                    setTimeout(function(){$("#"+id).remove();},100);
+                    //alert("해당 알림은 삭제되었습니다.");
+                }else if(data=="3"){
+                    alert("해당 알림의 삭제처리오류로 인해 삭제가 되지 않았습니다.");
+                }
+            });
+        });
+    });
+});
 </script>
 <?php
 include_once (G5_MOBILE_PATH."/tail.php");

@@ -86,17 +86,18 @@ function image_resize_update($src, $dst, $output, $resize_width, $resize_height=
         return true;
     }
 }
-function get_images($srcfile,$dWidth="",$dHeight=""){
+function get_images($srcfile, $dWidth="", $dHeight=""){
     $size = @getimagesize($srcfile);
-    if(empty($size))
+    //echo $size[0]."//".$size[1];
+    if (empty($size))
         return false;
     // jpg 이면 exif 체크
-    if($size[2] == 2 && function_exists('exif_read_data')) {
+    if ($size[2] == 2 && function_exists('exif_read_data')) {
         $degree = 0;
         $exif = @exif_read_data($srcfile);
         //print_r2($exif);
-        if(!empty($exif['Orientation'])) {
-            switch($exif['Orientation']) {
+        if (!empty($exif['Orientation'])) {
+            switch ($exif['Orientation']) {
                 case 8:
                     $degree = 90;
                     break;
@@ -107,42 +108,50 @@ function get_images($srcfile,$dWidth="",$dHeight=""){
                     $degree = -90;
                     break;
             }
-
             // 세로사진의 경우 가로, 세로 값 바꿈
-            if($degree == 90 || $degree == -90) {
+            if ($degree == 90 || $degree == -90) {
                 $tmp = $size;
                 $size[0] = $tmp[1];
                 $size[1] = $tmp[0];
             }
+
+            $ratio = $size[0] / $size[1];
+
+            if($ratio >= 1){
+                $dWidth = $size[1];
+                $dHeight = $size[1] / $ratio;
+            }else{
+                if($size[0] > $size[1]){
+                    $dWidth = round($size[0] / $ratio);
+                    $dHeight = $size[1];
+                }else {
+                    $dWidth = $size[0];
+                    $dHeight = round($size[1] / $ratio);
+                }
+            }
+        }else{
+            $ratio = $size[0] / $size[1];
+
+            if($ratio >= 1){
+                $dWidth = $size[1];
+                $dHeight = $size[1] / $ratio;
+            }else{
+                $dWidth = $size[0]/ $ratio;;
+                $dHeight = $size[0];
+            }
         }
     }
-    if($dWidth==""){
-        $ratio = $size[0] / $size[1];
-        //세로
-        if($ratio > 1){
-            $dWidth = $size[1]/2;
-        }
-        //가로
-        else if($ratio < 1){
-            $dWidth = $size[0]/2;
-        }
-    }else{
-        $dWidth = $size[0];
-    }
 
-
-    // 썸네일 높이
-    $thumb_height = round(($dWidth * $size[1]) / $size[0]);
-    //return $dWidth."//".$thumb_height;
     $filename = basename($srcfile);
     $filepath = dirname($srcfile);
 
     // 썸네일 생성
-    $thumb_file = thumbnails($filename, $filepath, $filepath, $dWidth, $thumb_height, false);
+    $thumb_file = thumbnails($filename, $filepath, $filepath, $dWidth, $dHeight, false);
 
     if(!$thumb_file)
         return false;
 
+    //echo $thumb_file;
     return $thumb_file;
 }
 
@@ -178,11 +187,12 @@ function get_images2($srcfile){
 
     // 썸네일 높이
     //$thumb_height = 800;
+    $thumb_height = $size[1];
     $filename = basename($srcfile);
     $filepath = dirname($srcfile);
 
     // 썸네일 생성
-    $thumb_file = thumbnails($filename, $filepath, $filepath, 150, '', false);
+    $thumb_file = thumbnails($filename, $filepath, $filepath, 150, 150, false);
 
     if(!$thumb_file)
         return false;

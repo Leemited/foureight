@@ -141,7 +141,7 @@ while($row = sql_fetch_array($res)){
                         <?php }?>
 						<div class="top">
 							<div>
-								<h2><?php echo $type;?> </h2>
+                                <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
 								<div>
 									<ul>
 										<li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -244,7 +244,6 @@ $(document).ready(function(){
                 }).done(function(data){
                     $("#"+id).remove();
                     $grid.masonry('remove', this).masonry("layout");
-                    console.log(data);
                 });
             }
         });
