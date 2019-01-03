@@ -265,7 +265,7 @@ lng =   "127.48938549980389";
 var mapContainer = document.getElementById('map'), // 지도를 표시할 div
     mapOption = {
         center: new daum.maps.LatLng(lat, lng), // 지도의 중심좌표
-        level: 3 // 지도의 확대 레벨
+        level: 7 // 지도의 확대 레벨
     };
 
 map = new daum.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
@@ -387,8 +387,8 @@ positions.forEach(function(pos){
         });
     }
 
-    bounds.extend(pos.latlng);
-    map.setBounds(bounds);
+    //bounds.extend(pos.latlng);
+    //map.setBounds(bounds);
 
     i++;
 });

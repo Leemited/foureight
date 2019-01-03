@@ -26,7 +26,7 @@ if($pd_type==1){
     if($myPricing["cnt"]>0){
         $sql = "update `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}' where id = '{$myPricing["id"]}'";;
     }else{
-        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}'";
+        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(),status = 0, mb_id = '{$mb_id}'";
     }
 
 
@@ -72,7 +72,7 @@ if($pd_type==2) {
     if($myPricing["cnt"]>0){
         $sql = "update `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}' where id = '{$myPricing["id"]}'";;
     }else{
-        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}'";
+        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(),status = 0, mb_id = '{$mb_id}'";
     }
 
     if (sql_query($sql)) {

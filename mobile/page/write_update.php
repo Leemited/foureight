@@ -46,7 +46,7 @@ if($type==""){
 }
 
 if (count($words) > 1) {
-    $words = implode(",", $words);
+    $words = implode("\r\n", $words);
 }else if (count($words) == 1) {
     $words = $words[0];
 }else if(count($words) == 0){

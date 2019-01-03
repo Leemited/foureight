@@ -2,8 +2,20 @@
 function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id='',$imgurls=''){
     //대화저장일경우 중복알림 저장이 아니라 업데이트 되어야 함
     //알림 저장
-    $sql = "insert into `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0";
-    sql_query($sql);
+    if($chennal == "chat_alarm_set"){
+        $sql = "select * from `my_alarms` where pd_id = '{$pd_id}' and mb_id = '{$mb_id}'";
+        $id = sql_fetch($sql);
+        if($id["id"]==''){
+            $sql = "insert into `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0";
+            sql_query($sql);
+        }else{
+            $sql = "update `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0 where id = '{$id[id]}'";
+            sql_query($sql);
+        }
+    }else{
+        $sql = "insert into `my_alarms` set mb_id = '{$mb_id}', pd_id='{$pd_id}', alarm_type='{$chennalname}', alarm_title = '{$title}', alarm_content = '{$content}', alarm_link = '{$urls}',alarm_date = now(), alarm_time = now(), alarm_status = 0";
+        sql_query($sql);
+    }
 
     $sql = "select * from `mysetting` where mb_id = '{$mb_id}'";
     $set = sql_fetch($sql);

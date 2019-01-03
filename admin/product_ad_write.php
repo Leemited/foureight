@@ -31,9 +31,12 @@ if($ad_id) {
                     <tr>
                         <th>타입/카테고리</th>
                         <td class="con">
-                            <input type="radio" name="ad_type" id="type1" value="1" <?php if($write["ad_type"]==1 || $write["ad_type"] == "1"){echo "checked";}?>><label for="type1">물건</label> <input type="radio" name="ad_type" id="type2" value="2" <?php if($write["ad_type"]==2){echo "checked";}?>><label for="type2">능력</label>
+                            <input type="radio" name="ad_type" id="type1" value="1" required <?php if($write["ad_type"] ==1){echo "checked";}?>><label for="type1">물건</label> <input type="radio" name="ad_type" id="type2" required value="2" <?php if($write["ad_type"]==2){echo "checked";}?>><label for="type2">능력</label>
                             <select name="cate1" id="cate1" required>
                                 <option>타입을 선택해주세요.</option>
+                            </select>
+                            <select name="cate2" id="cate2" required>
+                                <option>1차 카테고리를 선택해 주세요.</option>
                             </select>
                         </td>
                     </tr>
@@ -68,7 +71,90 @@ if($ad_id) {
                         <th>시작/종료</th>
                         <td class="con">
                             시작 : <input type="text" value="<?php echo $write["ad_from"];?>" name="ad_from" id="ad_from" required class="write_input01 grid_30"/>
+                            시작 시간 :
+                            <select name="ad_from_hour" id="ad_from_hour" required class="write_input01">
+                                <option value="00" <?php if($write["ad_from_hour"]=="00"){?>selected<?php }?>>00</option>
+                                <option value="01" <?php if($write["ad_from_hour"]=="01"){?>selected<?php }?>>01</option>
+                                <option value="02" <?php if($write["ad_from_hour"]=="02"){?>selected<?php }?>>02</option>
+                                <option value="03" <?php if($write["ad_from_hour"]=="03"){?>selected<?php }?>>03</option>
+                                <option value="04" <?php if($write["ad_from_hour"]=="04"){?>selected<?php }?>>04</option>
+                                <option value="05" <?php if($write["ad_from_hour"]=="05"){?>selected<?php }?>>05</option>
+                                <option value="06" <?php if($write["ad_from_hour"]=="06"){?>selected<?php }?>>06</option>
+                                <option value="07" <?php if($write["ad_from_hour"]=="07"){?>selected<?php }?>>07</option>
+                                <option value="08" <?php if($write["ad_from_hour"]=="08"){?>selected<?php }?>>08</option>
+                                <option value="09" <?php if($write["ad_from_hour"]=="09"){?>selected<?php }?>>09</option>
+                                <option value="10" <?php if($write["ad_from_hour"]=="10"){?>selected<?php }?>>10</option>
+                                <option value="11" <?php if($write["ad_from_hour"]=="11"){?>selected<?php }?>>11</option>
+                                <option value="12" <?php if($write["ad_from_hour"]=="12"){?>selected<?php }?>>12</option>
+                                <option value="13" <?php if($write["ad_from_hour"]=="13"){?>selected<?php }?>>13</option>
+                                <option value="14" <?php if($write["ad_from_hour"]=="14"){?>selected<?php }?>>14</option>
+                                <option value="15" <?php if($write["ad_from_hour"]=="15"){?>selected<?php }?>>15</option>
+                                <option value="16" <?php if($write["ad_from_hour"]=="16"){?>selected<?php }?>>16</option>
+                                <option value="17" <?php if($write["ad_from_hour"]=="17"){?>selected<?php }?>>17</option>
+                                <option value="18" <?php if($write["ad_from_hour"]=="18"){?>selected<?php }?>>18</option>
+                                <option value="19" <?php if($write["ad_from_hour"]=="19"){?>selected<?php }?>>19</option>
+                                <option value="20" <?php if($write["ad_from_hour"]=="20"){?>selected<?php }?>>20</option>
+                                <option value="21" <?php if($write["ad_from_hour"]=="21"){?>selected<?php }?>>21</option>
+                                <option value="22" <?php if($write["ad_from_hour"]=="22"){?>selected<?php }?>>22</option>
+                                <option value="23" <?php if($write["ad_from_hour"]=="23"){?>selected<?php }?>>23</option>
+                            </select>시 ~
+                            <select name="ad_from_min" id="ad_from_min" required class="write_input01">
+                                <option value="00" <?php if($write["ad_from_min"]=="00"){?>selected<?php }?>>00</option>
+                                <option value="05" <?php if($write["ad_from_min"]=="05"){?>selected<?php }?>>05</option>
+                                <option value="10" <?php if($write["ad_from_min"]=="10"){?>selected<?php }?>>10</option>
+                                <option value="15" <?php if($write["ad_from_min"]=="15"){?>selected<?php }?>>15</option>
+                                <option value="20" <?php if($write["ad_from_min"]=="20"){?>selected<?php }?>>20</option>
+                                <option value="25" <?php if($write["ad_from_min"]=="25"){?>selected<?php }?>>25</option>
+                                <option value="30" <?php if($write["ad_from_min"]=="30"){?>selected<?php }?>>30</option>
+                                <option value="35" <?php if($write["ad_from_min"]=="35"){?>selected<?php }?>>35</option>
+                                <option value="40" <?php if($write["ad_from_min"]=="40"){?>selected<?php }?>>40</option>
+                                <option value="45" <?php if($write["ad_from_min"]=="45"){?>selected<?php }?>>45</option>
+                                <option value="50" <?php if($write["ad_from_min"]=="50"){?>selected<?php }?>>50</option>
+                                <option value="55" <?php if($write["ad_from_min"]=="55"){?>selected<?php }?>>55</option>
+                            </select>분
+                            <br>
                             종료 : <input type="text" value="<?php echo $write["ad_to"];?>" name="ad_to" id="ad_to" required class="write_input01 grid_30"/>
+                            종료 시간 :
+                            <select name="ad_to_hour" id="ad_to_hour" required class="write_input01">
+                                <option value="00" <?php if($write["ad_to_hour"]=="00"){?>selected<?php }?>>00</option>
+                                <option value="01" <?php if($write["ad_to_hour"]=="01"){?>selected<?php }?>>01</option>
+                                <option value="02" <?php if($write["ad_to_hour"]=="02"){?>selected<?php }?>>02</option>
+                                <option value="03" <?php if($write["ad_to_hour"]=="03"){?>selected<?php }?>>03</option>
+                                <option value="04" <?php if($write["ad_to_hour"]=="04"){?>selected<?php }?>>04</option>
+                                <option value="05" <?php if($write["ad_to_hour"]=="05"){?>selected<?php }?>>05</option>
+                                <option value="06" <?php if($write["ad_to_hour"]=="06"){?>selected<?php }?>>06</option>
+                                <option value="07" <?php if($write["ad_to_hour"]=="07"){?>selected<?php }?>>07</option>
+                                <option value="08" <?php if($write["ad_to_hour"]=="08"){?>selected<?php }?>>08</option>
+                                <option value="09" <?php if($write["ad_to_hour"]=="09"){?>selected<?php }?>>09</option>
+                                <option value="10" <?php if($write["ad_to_hour"]=="10"){?>selected<?php }?>>10</option>
+                                <option value="11" <?php if($write["ad_to_hour"]=="11"){?>selected<?php }?>>11</option>
+                                <option value="12" <?php if($write["ad_to_hour"]=="12"){?>selected<?php }?>>12</option>
+                                <option value="13" <?php if($write["ad_to_hour"]=="13"){?>selected<?php }?>>13</option>
+                                <option value="14" <?php if($write["ad_to_hour"]=="14"){?>selected<?php }?>>14</option>
+                                <option value="15" <?php if($write["ad_to_hour"]=="15"){?>selected<?php }?>>15</option>
+                                <option value="16" <?php if($write["ad_to_hour"]=="16"){?>selected<?php }?>>16</option>
+                                <option value="17" <?php if($write["ad_to_hour"]=="17"){?>selected<?php }?>>17</option>
+                                <option value="18" <?php if($write["ad_to_hour"]=="18"){?>selected<?php }?>>18</option>
+                                <option value="19" <?php if($write["ad_to_hour"]=="19"){?>selected<?php }?>>19</option>
+                                <option value="20" <?php if($write["ad_to_hour"]=="20"){?>selected<?php }?>>20</option>
+                                <option value="21" <?php if($write["ad_to_hour"]=="21"){?>selected<?php }?>>21</option>
+                                <option value="22" <?php if($write["ad_to_hour"]=="22"){?>selected<?php }?>>22</option>
+                                <option value="23" <?php if($write["ad_to_hour"]=="23"){?>selected<?php }?>>23</option>
+                            </select>시 ~
+                            <select name="ad_to_min" id="ad_to_min" required class="write_input01">
+                                <option value="00" <?php if($write["ad_to_min"]=="00"){?>selected<?php }?>>00</option>
+                                <option value="05" <?php if($write["ad_to_min"]=="05"){?>selected<?php }?>>05</option>
+                                <option value="10" <?php if($write["ad_to_min"]=="10"){?>selected<?php }?>>10</option>
+                                <option value="15" <?php if($write["ad_to_min"]=="15"){?>selected<?php }?>>15</option>
+                                <option value="20" <?php if($write["ad_to_min"]=="20"){?>selected<?php }?>>20</option>
+                                <option value="25" <?php if($write["ad_to_min"]=="25"){?>selected<?php }?>>25</option>
+                                <option value="30" <?php if($write["ad_to_min"]=="30"){?>selected<?php }?>>30</option>
+                                <option value="35" <?php if($write["ad_to_min"]=="35"){?>selected<?php }?>>35</option>
+                                <option value="40" <?php if($write["ad_to_min"]=="40"){?>selected<?php }?>>40</option>
+                                <option value="45" <?php if($write["ad_to_min"]=="45"){?>selected<?php }?>>45</option>
+                                <option value="50" <?php if($write["ad_to_min"]=="50"){?>selected<?php }?>>50</option>
+                                <option value="55" <?php if($write["ad_to_min"]=="55"){?>selected<?php }?>>55</option>
+                            </select>분
                         </td>
                     </tr>
                     <tr class="content">
@@ -125,13 +211,58 @@ if($ad_id) {
             data:{ad_type:ad_type}
         }).done(function(data){
             $("#cate1").html(data);
+        });
+    });
+
+    <?php if($write["ad_cate"]){?>
+        setTimeout(function(){
+            var ad_type = $("input[name=ad_type]:checked").val();
             $.ajax({
-                url:g5_url+"/admin/ajax.category_list_count.php",
-                method:"post",
-                data:{ad_type:ad_type}
+                url:g5_url+"/admin/ajax.category_list.php",
+                method:"POST",
+                data:{ad_type:ad_type,id:"<?php echo $write["ad_cate"];?>"}
             }).done(function(data){
-                $(".product_cnt").html("0부터 "+data+"사이값 입력");
-            })
+                $("#cate1").html(data);
+                <?php if($write["ad_cate2"]){?>
+                var type = $("input[name=ad_type]:checked").val();
+                $.ajax({
+                    url:g5_url+"/admin/ajax.category2_list.php",
+                    method:"post",
+                    data:{cate:$("#cate1").val(),type:type,id:"<?php echo $write["ad_cate2"];?>"}
+                }).done(function(data){
+                    $("#cate2").html(data);
+
+                });
+                <?php }?>
+            });
+        },1000);
+    <?php }?>
+
+    $("#cate1").change(function(){
+       var type = $("input[name=ad_type]:checked").val();
+       console.log(type);
+       $.ajax({
+           url:g5_url+"/admin/ajax.category2_list.php",
+           method:"post",
+           data:{cate:$(this).val(),type:type}
+       }).done(function(data){
+           $("#cate2").html(data);
+
+       });
+    });
+
+    $("#cate2").change(function(){
+        var type = $("input[name=ad_type]:checked").val();
+        $.ajax({
+            url:g5_url+"/admin/ajax.category_list_count.php",
+            method:"post",
+            data:{cate:$(this).val(),type:type}
+        }).done(function(data){
+            if(data==0) {
+                $(".product_cnt").html("해당 카테고리에 등록된 제품이 없음, (기본값 0 입력)");
+            }else{
+                $(".product_cnt").html("0부터 " + data + "사이값 입력");
+            }
         });
     });
 </script>

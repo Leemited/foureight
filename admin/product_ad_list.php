@@ -96,11 +96,18 @@ while($data=sql_fetch_array($query)){
                         }else{
                             $dates = $date[0];
                         }
+                        $sql = "select cate_name from `categorys` where ca_id = '{$list[$i]["ad_cate"]}'";
+                        $cate = sql_fetch($sql);
+                        $cate = ($cate["cate_name"])?$cate["cate_name"]:"선택된 카테고리 없음";
+                        $sql = "select cate_name from `categorys` where ca_id = '{$list[$i]["ad_cate2"]}'";
+                        $cate2 = sql_fetch($sql);
+                        $cate2 = ($cate2["cate_name"])?$cate2["cate_name"]:"선택된 카테고리 없음";
+
                         ?>
                         <tr <?php if($list[$i]["pd_blind"]>=10){ ?>class="blind"<?php } ?>>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo $list[$i]['num']; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo ($list[$i]["ad_type"]==1)?"물건":"능력";?></td>
-                            <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'" ><?php echo $list[$i]["ad_cate"]; ?></td>
+                            <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'" ><?php echo $cate." > ".$cate2; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'" ><?php echo $list[$i]["ad_subject"]; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo $list[$i]["ad_con"]; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo $dates; ?></td>

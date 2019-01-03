@@ -242,6 +242,8 @@ if($sc_id) {
 
 //ad 가져오기
 $today = date("Y-m-d");
+$hour = date("H");
+$min = date("m");
 $sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= ad_from and '{$today}' < ad_to ";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
@@ -771,7 +773,7 @@ $(document).ready(function(){
                 if(msg){
                     msg2 = msg + msg2;
                 }
-                if (confirm(msg2)) {
+                //if (confirm(msg2)) {
                     //$("#type").val(type);
                     $("#c").val(c);
                     $("#sc").val(sc);
@@ -786,6 +788,9 @@ $(document).ready(function(){
                             $("#id01 .write_help").html("검색어 구분은 띄어쓰기로 가능합니다.");
                             $("#id01 .write_help.price_help").html("필요시 계약금을 설정할 수 있습니다.");
                         }
+                        $("#id01 #wr_title").val("#");
+                        $("#id01 #wr_title").focus();
+                        $("#id01 #wr_title").selectRange(2);
                     });
                     cateClose();
                     if(type==1){
@@ -810,25 +815,13 @@ $(document).ready(function(){
                     $("html, body").css("height", "100vh");
                     location.hash = "#modal";
                     //$("#id01 #wr_title").selectRange(1,2);
-                }
+                    <?php if($app){?>
+                    window.android.Onkeyboard();
+                    <?php }?>
+                //}
             });
         }
 	});
-
-    $.fn.selectRange = function(start, end) {
-        return this.each(function() {
-            if(this.setSelectionRange) {
-                this.focus();
-                this.setSelectionRange(start, end);
-            } else if(this.createTextRange) {
-                var range = this.createTextRange();
-                range.collapse(true);
-                range.moveEnd('character', end);
-                range.moveStart('character', start);
-                range.select();
-            }
-        });
-    };
 
     var container = document.getElementById('test');
 	var swipe2 = new Hammer(container);
@@ -1319,6 +1312,22 @@ document.onkeydown = doNotReload;
 <?php if($pd_id){ ?>
 setTimeout(function(){fn_viewer("<?php echo $pd_id;?>")},150);
 <?php } ?>
+
+$.fn.selectRange = function(start, end) {
+    console.log(this.setSelectionRange);
+    return this.each(function() {
+        if(this.setSelectionRange) {
+            this.focus();
+            this.setSelectionRange(start, end);
+        } else if(this.createTextRange) {
+            var range = this.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', end);
+            range.moveStart('character', start);
+            range.select();
+        }
+    });
+};
 
 </script>
 <script src="https://hammerjs.github.io/dist/hammer.js"></script>

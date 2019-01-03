@@ -327,7 +327,7 @@ if(!$pd_id) {
                                     <label for="images<?php echo $i;?>">
                                         <img src="<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
-                                        <!--<input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" >-->
+                                        <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" >
                                         <?php } ?>
                                     </label>
                                 </div>
@@ -340,7 +340,7 @@ if(!$pd_id) {
                                 <label for="images<?php echo $i;?>">
                                     <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                     <?php if(!$app){?>
-                                    <!--<input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;">-->
+                                    <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;">
                                     <?php } ?>
                                 </label>
                             </div>
@@ -406,7 +406,7 @@ if(!$pd_id) {
 			<article>
 				<div>
 					<div class="videoArea">
-						<h2>동영상 링크 추가</h2>
+						<h2>동영상 링크</h2>
 						<div>
 							<input type="text" class="write_input2" name="video_link" id="linkText">
 							<input type="button" id="add" class="addLink" value="">
@@ -458,7 +458,7 @@ if(!$pd_id) {
                     <?php }?>
                     <?php if($type1==2){?>
                     <div class="prices ">
-                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price2){echo number_format($pd_price2);}?>" placeholder="10,000" name="price2" id="price2" required class="write_input2 width_80" onkeyup="number_only(this)"/> 계약금
+                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price2){echo number_format($pd_price2);}?>" placeholder="" name="price2" id="price2"  class="write_input2 width_80" onkeyup="number_only(this)"/> 계약금
 					</div>
                     <?php }?>
 					<div class="prices <?php if($type1==2){?>step2<?php }?>">
@@ -688,8 +688,6 @@ $(".addLink").click(function(){
     }else{
         pd_link = pd_link+","+link;
     }
-
-    console.log(pd_link);
     setCookie("pd_video_link",pd_link,'1');
 
 	var item = '<div class="link_lists it_'+linkCnt+'">'+link+'<img src="<?php echo G5_IMG_URL?>/ic_write_close.svg" alt="" class="locsDel"></div>';
@@ -841,7 +839,6 @@ $(function(){
     });
     var flag = false;
     <?php if($type1 == 1 && $pd_type2 == 8){?>
-    console.log("A");
         if(flag == false) {
             setTimeout(function () {
                 $("#id04").css({"display":"block","z-index":"90000"});
@@ -860,16 +857,20 @@ $(function(){
 
 
     $(".myword").click(function(){
-        $(this).toggleClass("active");
-        var chk = $(".in_content").html();
-        var item = "<div class='"+$(this).text()+"'>"+$(this).text()+"<input type='hidden' name='words[]' value='"+$(this).text()+"'><br></div>";
-        if($(".in_content div").hasClass($(this).text())){
-            console.log("cccc"+$(this).text());
-            $(".in_content div."+$(this).text()).remove();
-        }else{
-            $(".in_content").append(item);
-
-        }
+        var text = $(this).text();
+        var start = document.getElementById("wr_content").selectionStart;
+        var content = $("#wr_content").val();
+        var addcontent = content.slice(0,start)+text+content.slice(start);
+        $("#wr_content").val(addcontent);
+        //$(this).toggleClass("active");
+        //var chk = $(".in_content").html();
+        //var item = "<div class='"+$(this).text()+"'>"+$(this).text()+"<input type='hidden' name='words[]' value='"+$(this).text()+"'></div><br>";
+        //if($(".in_content div").hasClass($(this).text())){
+        //    console.log("cccc"+$(this).text());
+        //    $(".in_content div."+$(this).text()).remove();
+        //}else{
+        //   $(".in_content").append(item);
+        //}
 
     });
 
@@ -952,12 +953,16 @@ $(function(){
             method:"post",
             data:{filename:'<?php echo $filename;?>',app:'<?php echo $app;?>',app2:"<?php echo $app2;?>"}
         }).done(function(data){
+            console.log(data);
              $(".filelist").html('<h2>사진수정</h2>');
              $(".filelist").append(data);
              $(".photo_msg").html('');
         });
     },2000);
     <?php }?>
+
+    //textarea resizeHeight
+    $("textarea.autosize").height(1).height( $("textarea.autosize").prop('scrollHeight')+12 );
 });
 
 // 숫자 타입에서 쓸 수 있도록 format() 함수 추가

@@ -128,7 +128,7 @@ while($data=sql_fetch_array($query)){
 						if(count($list)==0){
 					?>
 						<tr>
-							<td colspan="6" class="text-center" style="padding:50px 0;">등록된 게시물이 없습니다.</td>
+							<td colspan="5" class="text-center" style="padding:50px 0;">등록된 게시물이 없습니다.</td>
 						</tr>
 					<?php
 						}

@@ -59,7 +59,7 @@ $pro = sql_fetch($sql);
     <div class="price">
         <h2> <span><?php if($talk_list[0]['pd_type']==1){ if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></span>
             <?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]);}else{echo "0원";}?></h2>
-        <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8 ){?>
+        <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8 && $talk_list[0]["mb_id"] == $member["mb_id"]){?>
             <div class="sell_btn">
                 <input type="button" value="이 회원에게 판매하기" class="btn" onclick="fnSell();">
             </div>
@@ -152,7 +152,7 @@ $pro = sql_fetch($sql);
             </div>
         </div>
         <?php }?>
-        <input type="button" value="보내기" class="send_msg" onclick="fnSendMsg();">
+        <input type="button" value="보내기" class="send_msg" >
         <!--<div class="option">
             <div class="menu1">개인문구</div>
             <?php /*if($talk_list[0]["pd_type"]==2){*/?>
@@ -208,42 +208,53 @@ $pro = sql_fetch($sql);
         $(".menu-panel a").click(function(){
             fnSendMsSimple($(this).find(".column-left").text());
         });
+
+        $("#message").focus(function(objEvent){
+            //스크롤 위치
+            setTimeout(function(){element.scrollTop = element.scrollHeight;},1000);
+        });
+
+        $(".send_msg").click(function(){
+            $("#message").focus();
+            var pd_id = "<?php echo $pd_id;?>";
+            var mb_id = "<?php echo $member["mb_id"];?>";
+            var read_mb_id = "<?php echo $send_mb_id;?>";
+            var message = $("#message").val();
+            if(message == ""){
+                alert('메세지를 입력해 주세요');
+                return false;
+            }
+            //누적 메시지 체크
+            var read_id = $("#talk_ids").val();
+
+            //스크롤 위치
+            var element = document.getElementById("msg_container");
+
+            $.ajax({
+                url:g5_url+"/mobile/page/ajax/ajax.send_msg.php",
+                method:"post",
+                data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id,roomid:roomid},
+                dataType:"json"
+            }).done(function(data){
+                console.log(data);
+                if(data.status=="success"){
+                    if(roomid=="") {
+                        $(".msg_container").append(data.msg);
+                        element.scrollTop = element.scrollHeight;
+                        $("#talk_ids").val(data.ids);
+                    }
+                    $("#message").val('');
+                    //$("#message").focus();
+                }else{
+                    alert("통신 오류 입니다.");
+                }
+            });
+        });
     });
 
     // 내게시글이므로 read_mb_id는 대화 상대에따라 변경
     function fnSendMsg(){
-        var pd_id = "<?php echo $pd_id;?>";
-        var mb_id = "<?php echo $member["mb_id"];?>";
-        var read_mb_id = "<?php echo $send_mb_id;?>";
-        var message = $("#message").val();
-        if(message == ""){
-            alert('메세지를 입력해 주세요');
-            return false;
-        }
-        //누적 메시지 체크
-        var read_id = $("#talk_ids").val();
 
-        //스크롤 위치
-        var element = document.getElementById("msg_container");
-
-        $.ajax({
-            url:g5_url+"/mobile/page/ajax/ajax.send_msg.php",
-            method:"post",
-            data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id,roomid:roomid},
-            dataType:"json"
-        }).done(function(data){
-            console.log(data);
-            if(data.status=="success"){
-                if(roomid=="") {
-                    $(".msg_container").append(data.msg);
-                    element.scrollTop = element.scrollHeight;
-                    $("#talk_ids").val(data.ids);
-                }
-                $("#message").val('');
-            }else{
-                alert("통신 오류 입니다.");
-            }
-        });
     }
 
 

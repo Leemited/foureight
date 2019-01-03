@@ -27,14 +27,16 @@ if(sql_query($sql)){
         
         //구매예약인지 딜 승인인지 파악
         
-        //구매자
+        //승인
         if($status==1) {
             send_FCM($mb["regid"], $pd["pd_tag"], $pd["pd_tag"] . "의 구매가 확정되었습니다.", G5_MOBILE_URL . "/page/mypage/cart.php", 'pricing_set', '제시/딜 알림', $mb["mb_id"], $pd_id, $img);
         }
-        //판매자
+        //예약
         if($status==0) {
             $mb = get_member($pd["mb_id"]);
-            send_FCM($mb["regid"], $pd["pd_tag"], $pd["pd_tag"] . "의 구매 요청입니다.", G5_MOBILE_URL . "/page/mypage/mypage.php?pd_id=" . $pd_id, 'pricing_set', '제시/딜 알림', $mb["mb_id"], $pd_id, $img);
+            //echo $mb["regid"]."//". $pd["pd_tag"]."//". $pd["pd_tag"] . "의 구매 요청입니다."."//". G5_MOBILE_URL . "/page/mypage/mypage.php?pd_id=" . $pd_id."//". 'pricing_set'."//". '제시/딜 알림'."//". $mb["mb_id"]."//". $pd_id."//". $img;
+            $result = send_FCM($mb["regid"], $pd["pd_tag"], $pd["pd_tag"] . "의 구매 요청입니다.", G5_MOBILE_URL . "/page/mypage/mypage.php?pd_id=" . $pd_id, 'pricing_set', '제시/딜 알림', $mb["mb_id"], $pd_id, $img);
+            print_r2($result);
         }
         echo "3";
     }else{

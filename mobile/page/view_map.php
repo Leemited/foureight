@@ -20,7 +20,6 @@ include_once ("../../common.php");
         var loc = "<?php echo $location;?>";
         var pd_lat = "<?php echo $lat;?>";
         var pd_lng = "<?php echo $lng;?>";
-        console.log(loc);
         // 주소로 좌표를 검색합니다
         geocoder.addressSearch(loc, function(result, status) {
             // 정상적으로 검색이 완료됐으면

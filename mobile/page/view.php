@@ -1660,8 +1660,9 @@ function fnSendMsSimple(msg){
     });
 }
 function fnSell(){
-    $("#sell").css({"display":"block","z-index":"91"});
-    location.hash = "modal";
+    //$("#sell").css({"display":"block","z-index":"91"});
+    //location.hash = "modal";
+    addSell();
 }
 
 function addSell(){

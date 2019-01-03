@@ -178,7 +178,7 @@ $alarms = sql_fetch($sql);
                 <h2>제시하기</h2>
                 <div>
                     <select name="prcing_pd_id" id="prcing_pd_id" required>
-                        <option value="">게시물 선택</option>
+                        <option value="">내 판매게시물 선택</option>
                     </select>
                     <ul class="blind_ul">
                         <li>
@@ -752,6 +752,10 @@ $(function(){
                 $("#cate").val(c);
                 $("#cate2").val(sc);
                 $(".sch_top .sch_btn").val(c + " > " + sc);
+            }else{
+                $("#cate").val('');
+                $("#cate2").val('');
+                $(".sch_top .sch_btn").val('카테고리선택');
             }
             cateClose();
         });

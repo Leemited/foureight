@@ -88,14 +88,12 @@ function image_resize_update($src, $dst, $output, $resize_width, $resize_height=
 }
 function get_images($srcfile, $dWidth="", $dHeight=""){
     $size = @getimagesize($srcfile);
-    //echo $size[0]."//".$size[1];
     if (empty($size))
         return false;
     // jpg 이면 exif 체크
     if ($size[2] == 2 && function_exists('exif_read_data')) {
         $degree = 0;
         $exif = @exif_read_data($srcfile);
-        //print_r2($exif);
         if (!empty($exif['Orientation'])) {
             switch ($exif['Orientation']) {
                 case 8:
@@ -117,27 +115,27 @@ function get_images($srcfile, $dWidth="", $dHeight=""){
 
             $ratio = $size[0] / $size[1];
 
-            if($ratio >= 1){
-                $dWidth = $size[1];
-                $dHeight = $size[1] / $ratio;
+            if($ratio >= 1){//가로
+                $dWidth = '';
+                $dHeight = $size[0];
             }else{
-                if($size[0] > $size[1]){
-                    $dWidth = round($size[0] / $ratio);
-                    $dHeight = $size[1];
-                }else {
+                if($size[0] > $size[1]){//가로
+                    $dWidth = '';
+                    $dHeight = $size[0];
+                }else {//새로
                     $dWidth = $size[0];
-                    $dHeight = round($size[1] / $ratio);
+                    $dHeight = '';
                 }
             }
         }else{
             $ratio = $size[0] / $size[1];
 
-            if($ratio >= 1){
-                $dWidth = $size[1];
-                $dHeight = $size[1] / $ratio;
-            }else{
-                $dWidth = $size[0]/ $ratio;;
+            if($ratio >= 1){ // 가로
+                $dWidth = '';
                 $dHeight = $size[0];
+            }else{ //새로
+                $dWidth = $size[0]/$ratio;
+                $dHeight = '';
             }
         }
     }
