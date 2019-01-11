@@ -7,7 +7,7 @@ if(!$member["mb_id"]){
 }
 
 if($type == 2) { // 제시
-    $sql = "select * from `product` where mb_id='{$member[mb_id]}' and pd_status = 0 and pd_type2 = 8";
+    $sql = "select * from `product` where mb_id='{$member[mb_id]}' and pd_status = 0 and pd_type2 = 8 and pd_type = 1";
     $res = sql_query($sql);
     while ($row = sql_fetch_array($res)) {
         $my_pro[] = $row;

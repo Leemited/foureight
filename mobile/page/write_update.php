@@ -100,6 +100,7 @@ if(!$pd_id || $pd_id == ""){
 			pd_update_cnt = 0,
             pd_timeFrom = '{$pd_timeFrom}',
             pd_timeTo = '{$pd_timeTo}',
+            pd_timetype = '{$pd_timeType}',
             pd_price_type = '{$pd_price_type}'";
 	if(!sql_query($sql)){
 	    alert("입력 오류 입니다.다시 요청해 주세요");
@@ -147,6 +148,7 @@ if(!$pd_id || $pd_id == ""){
 			pd_lng = '{$pd_lng}',
             pd_timeFrom = '{$pd_timeFrom}',
             pd_timeTo = '{$pd_timeTo}',
+            pd_timetype = '{$pd_timeType}',
             pd_price_type = '{$pd_price_type}'
             where pd_id = {$pd_id}";
     sql_query($sql);

@@ -68,6 +68,8 @@ $end = date("Y-m-d", strtotime("-3 month"));
 $sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}'";
 $alarms = sql_fetch($sql);
 
+//제시하기 내 판매글 선택 불러오기
+
 ?>
 <div id="id01s" class="w3-modal w3-animate-opacity">
     <div class="w3-modal-content w3-card-4">
@@ -95,6 +97,7 @@ $alarms = sql_fetch($sql);
 				<h2>제안하기</h2>
 				<div>
 					<input type="text" value="" name="cate_name" id="cate_name" placeholder="해당 '카테고리' 가 필요해요!" required>
+					<input type="text" value="" name="cate_name2" id="cate_name2" placeholder="해당 '상세카테고리' 가 필요해요!" >
 					<textarea value="" name="cate_content" id="cate_content"  placeholder="사유를 적어주세요" required></textarea>
 				</div>
 				<div>
@@ -169,6 +172,21 @@ $alarms = sql_fetch($sql);
         </div>
     </div>
 </div>
+<div id="id08" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
+            <form name="write_from" id="write_from" method="post" action="">
+                <h2>연락하기</h2>
+                <div>
+
+                </div>
+                <div>
+                    <input type="button" value="닫기" onclick="modalClose2()">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div id="id07" class="w3-modal w3-animate-opacity no-view">
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
@@ -179,6 +197,7 @@ $alarms = sql_fetch($sql);
                 <div>
                     <select name="prcing_pd_id" id="prcing_pd_id" required>
                         <option value="">내 판매게시물 선택</option>
+                        
                     </select>
                     <ul class="blind_ul">
                         <li>
@@ -196,6 +215,7 @@ $alarms = sql_fetch($sql);
         </div>
     </div>
 </div>
+
 <!-- 모바일 헤더 시작 -->
 <div id="head">
 	<div class="top_header" onclick="location.href='<?php echo G5_URL?>';" <?php if($set_type==2){?>style="background-color: rgb(255, 61, 0);"<?php }?>>
@@ -282,26 +302,27 @@ $alarms = sql_fetch($sql);
             </div>
             <div class="sch_ord">
                 <?php if(count($order_item)==0){?>
-                    <label class="align" id="sortable" for="pd_date">
-                        <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" checked>
-                        <span class="round">최신순</span>
+                    <label class="align" id="sortable" for="pd_loc">
+                        <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
+                        <span class="round">거리순</span>
                     </label>
                     <label class="align" id="sortable" for="pd_price">
                         <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked>
                         <span class="round">가격순</span>
                     </label>
+                    <label class="align" id="sortable" for="pd_date">
+                        <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" >
+                        <span class="round">최신순</span>
+                    </label>
                     <label class="align" id="sortable" for="pd_recom">
-                        <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" checked>
+                        <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" >
                         <span class="round">추천순</span>
                     </label>
                     <label class="align" id="sortable" for="pd_hits">
-                        <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" checked>
+                        <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" >
                         <span class="round">인기순</span>
                     </label>
-                    <label class="align" id="sortable" for="pd_loc">
-                        <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
-                        <span class="round">거리순</span>
-                    </label>
+
                 <?php }else{
                     for($i=0;$i<count($order_item);$i++){
                         echo $order_item[$i];
@@ -334,19 +355,20 @@ $alarms = sql_fetch($sql);
                 <div>
                     <h2>거래가능시간</h2>
                 </div>
-                <div>
-                    <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:15vw">
+                <div class="pd_times">
+                    <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:17vw">
                         <option value="">시간선택</option>
-                        <?php for($i = 0; $i< 24; $i++){
+                        <?php for($i = 1; $i< 25; $i++){
                             $time = str_pad($i,"2","0",STR_PAD_LEFT);
                             ?>
                             <option value="<?php echo $time;?>" <?php if($pd_timeFrom == $time){?>selected<?php }?>><?php echo $time;?></option>
                         <?php }?>
                     </select> 시부터
                     ~
-                    <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:15vw">
+                    <input type="checkbox" name="pd_timetype" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?>><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
+                    <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:17vw;margin-left:1vw;">
                         <option value="">시간선택</option>
-                        <?php for($i = 0; $i< 24; $i++){
+                        <?php for($i = 1; $i< 25; $i++){
                             $time = str_pad($i,"2","0",STR_PAD_LEFT);
                             ?>
                             <option value="<?php echo $time;?>" <?php if($pd_timeTo == $time){?>selected<?php }?>><?php echo $time;?></option>
@@ -437,7 +459,9 @@ $alarms = sql_fetch($sql);
 			<ul>
                 <!--<li class="cate000 active" id="scate000" ><a href="#"><img src="<?php /*echo G5_IMG_URL*/?>/ic_cate_all.svg" alt="">전체</a></li>-->
 				<?php for($i=0;$i<count($category1);$i++){ ?>
-				<li class="cate<?php echo $category1[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php }?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
+				<li class="cate<?php echo $category1[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php }?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>">
+                    <a href="#"><?php if($category1[$i]["icon"]){?><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php }?><?php echo $category1[$i]["cate_name"];?></a>
+                </li>
 				<?php } ?>
                 <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
 			</ul>
@@ -453,7 +477,7 @@ $alarms = sql_fetch($sql);
 			<ul>
                 <!--<li class="cate0000 active" id="scate0000" ><a href="#"><img src="<?php /*echo G5_IMG_URL*/?>/ic_cate_all.svg" alt="">전체</a></li>-->
 				<?php for($i=0;$i<count($category2);$i++){ ?>
-				<li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php }?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
+				<li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php }?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category2[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
 				<?php } ?>
                 <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
 			</ul>
@@ -485,7 +509,7 @@ $alarms = sql_fetch($sql);
             <ul>
                 <li class="cate000000 active" id="scate000000" ><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_cate_all.svg" alt="">전체</a></li>
                 <?php for($i=0;$i<count($category2);$i++){ ?>
-                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?> " id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
+                    <li class="cate<?php echo $category2[$i]["ca_id"]; ?> " id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category2[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
                 <?php } ?>
             </ul>
         </div>
@@ -518,8 +542,9 @@ $alarms = sql_fetch($sql);
 	</div>
 </div>
 <script>
-var slider;
+var slider = null;
 var fnc = true;
+var max = 0;
 function fnKeyword(){
     var text = $("#stx").val();
     fnfilter(text,"stx");
@@ -618,7 +643,7 @@ $(function(){
             $("#searchActive").val("search");
         }
 		if($(this).prev().prop("checked") == true){
-			$(this).html("물품");
+			$(this).html("물건");
 			$(this).css({"text-align":"right"});
 
             $("#set_type").val(1);
@@ -698,9 +723,11 @@ $(function(){
             });
             fnlist(1,'');
 		}
+        priceSet();
 	});
-
+/*
 	$("#cate").change(function(){
+	    console.log("ADA");
 		var type1 = $(".schtype .slider").text();
 		var ca_id = $("#cate option:selected").attr("id");
 		var text = $("#cate option:checked").text();
@@ -716,6 +743,7 @@ $(function(){
 	});
 
 	$("#cate2").change(function(){
+	    console.log("ADAVA");
 		var cate2 = $(this).val();
 		var cate1 = $("#cate").val();
 		$.ajax({
@@ -735,7 +763,7 @@ $(function(){
             }
 		});
 	});
-
+*/
     $(".category_menu3 .category2 ul li, .category_menu4 .category2 ul li").click(function(){
         var c = $(this).parent().parent().prev().children().find("li.active a").text();
         var sc = $(this).find("a").text();
@@ -758,6 +786,7 @@ $(function(){
                 $(".sch_top .sch_btn").val('카테고리선택');
             }
             cateClose();
+            priceSet();
         });
     });
 
@@ -786,13 +815,10 @@ $(function(){
             $("#pd_price_type").val($("#workday").val());
         }
 	});
-    <?php if(!$sc_id){?>
-    var max = 500000;
-    <?php }else{?>
-    var max = $("#sc_priceTo").val();
-    <?php }?>
 
-	slider = $( "#slider-range" ).slider({
+    max = priceSet();
+
+    slider = $( "#slider-range" ).slider({
 		range: true,
 		min: 1000,
 		max: 500000,
@@ -805,15 +831,15 @@ $(function(){
 		}
 	});
 	<?php if(!$sc_id){?>
-	$("#priceTo").val($( "#slider-range" ).slider( "values", 0 ));
-	$("#priceFrom").val($( "#slider-range" ).slider( "values", 1 ));
-	$( "#schp" ).text(number_format($( "#slider-range" ).slider( "values", 0 )) + " ~ " + number_format($( "#slider-range" ).slider( "values", 1 )));
+	//$("#priceTo").val($( "#slider-range" ).slider( "values", 0 ));
+	//$("#priceFrom").val($( "#slider-range" ).slider( "values", 1 ));
+	//$( "#schp" ).text(number_format($( "#slider-range" ).slider( "values", 0 )) + " ~ " + number_format($( "#slider-range" ).slider( "values", 1 )));
     <?php }else{?>
-    $( "#schp" ).text(number_format($("#sc_priceFrom").val()) + " ~ " +number_format($("#sc_priceTo").val()));
+    //$( "#schp" ).text(number_format($("#sc_priceFrom").val()) + " ~ " +number_format($("#sc_priceTo").val()));
     <?php }?>
 	var change = false;
 
-	$(".sch_ord").sortable({
+    $(".sch_ord").sortable({
         axis:"x",
         start:function(event,ui){
             var id = ui.item.context.firstElementChild;
@@ -920,7 +946,72 @@ $(function(){
         });
     });
     <?php }?>
+
 });
+
+function priceSet(){
+    var cate1 = $("#cate").val();
+    var cate2 = $("#cate2").val();
+    var pd_type = $("#wr_type1").val();
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.category_minmax.php",
+        method:"POST",
+        dataType:"json",
+        data:{cate2:cate2,cate1:cate1,pd_type:pd_type}
+    }).done(function(data){
+        console.log(data);
+        if(data.max != null) {
+            if(data.max==0){
+                $("#priceFrom").val(50000);
+                $("#schp").text('<?php echo number_format(1000);?>' + " ~ " + '<?php echo number_format(50000);?>');
+                slider = $( "#slider-range" ).slider({
+                    range: true,
+                    min: 1000,
+                    max: 50000,
+                    values: [1000 , 50000 ],
+                    step:1000,
+                    slide: function( event, ui ) {
+                        $("#sc_priceTo").val(ui.values[1]);
+                        $("#sc_priceFrom").val(ui.values[0]);
+                        $("#schp").text( number_format(ui.values[0])+" ~ "+number_format(ui.values[1]));
+                    }
+                });
+            }else {
+                $("#priceFrom").val(data.max);
+                <?php if($priceFrom && $priceTo) { ?>
+                $("#schp").text('<?php echo number_format($priceFrom);?>' + " ~ " + '<?php echo number_format($priceTo);?>');
+                slider = $( "#slider-range" ).slider({
+                    range: true,
+                    min: 1000,
+                    max: data.max,
+                    values: [<?php echo $priceFrom;?> , <?php echo $priceTo;?> ],
+                    step:1000,
+                    slide: function( event, ui ) {
+                        $("#sc_priceTo").val(ui.values[1]);
+                        $("#sc_priceFrom").val(ui.values[0]);
+                        $("#schp").text( number_format(ui.values[0])+" ~ "+number_format(ui.values[1]));
+                    }
+                });
+                <?php }else{ ?>
+                $("#schp").text(number_format(1000) + " ~ " + number_format(data.max));
+
+                slider = $( "#slider-range" ).slider({
+                    range: true,
+                    min: 1000,
+                    max: data.max,
+                    values: [1000 , data.max ],
+                    step:1000,
+                    slide: function( event, ui ) {
+                        $("#sc_priceTo").val(ui.values[1]);
+                        $("#sc_priceFrom").val(ui.values[0]);
+                        $("#schp").text( number_format(ui.values[0])+" ~ "+number_format(ui.values[1]));
+                    }
+                });
+                <?php }?>
+            }
+        }
+    });
+}
 
 $(document).on("change","#pd_timeForm",function(){
     var time = $(this).val();

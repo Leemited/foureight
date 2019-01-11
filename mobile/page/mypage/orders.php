@@ -185,8 +185,10 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                     <input type="text" name="tel2" id="tel2" maxlength="4" value="<?php echo $mb_hp[1];?>" class="hps" required> - <input type="text" name="tel3" id="tel3" maxlength="4" value="<?php echo $mb_hp[2];?>" class="hps" required>
                 </div>
             </div>
-            <div class="row">
-                <div class="cell full">
+        </div>
+        <div class="msgs">
+            <div class="cell full">
+                <div>
                     <input type="text" name="od_content" id="od_content" class="order_input" placeholder="판매자에게 남기는 말(50자 이내);">
                 </div>
             </div>

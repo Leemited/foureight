@@ -37,8 +37,9 @@ while($data=sql_fetch_array($query)){
 				<table>
 					<colgroup>
 						<col width="8%" class="md_none">
-						<col width="*">	
+						<col width="*">
 						<col width="10%">
+						<col width="15%">
 						<col width="10%">
 						<col width="10%">
 						<col width="10%">
@@ -47,7 +48,8 @@ while($data=sql_fetch_array($query)){
 					<thead>
 						<tr>
 							<th class="md_none">번호</th>							
-							<th class="">제안카테고리</th>							
+							<th class="">제안카테고리</th>
+							<th class="">제안상세카테고리</th>
 							<th class="">등록자</th>
 							<th class="">등록일</th>
 							<th class="">상태</th>
@@ -70,7 +72,8 @@ while($data=sql_fetch_array($query)){
 						<tr>
 							<td class="md_none" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]['num']; ?></td>						
 							<td class="" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]['cate_name']; ?></td>
-							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]["mb_id"]; ?></td> 
+							<td class="" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo ($list[$i]['cate_name2'])?$list[$i]["cate_name2"]:"-"; ?></td>
+							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]["mb_id"]; ?></td>
 							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]["insert_date"];?></td>
 							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $status;?></td>
 							<td>
@@ -81,9 +84,9 @@ while($data=sql_fetch_array($query)){
 							</td>
 							<td>
 								<?php if($list[$i]["status"]!=1){?>
-								<a href="javascript:fnCateAdd('<?php echo G5_URL."/admin/category_add.php?cate_name=".$list[$i]["cate_name"]."&ca_temp_id=".$list[$i]["ca_temp_id"]; ?>')" class="" ><img src="<?php echo G5_IMG_URL?>/ic_add.png" alt="바로등록"></a>
+								<a href="javascript:fnCateAdd('<?php echo G5_URL."/admin/category_temp_update.php?cate_name=".$list[$i]["cate_name"]."&cate_name2=".$list[$i]["cate_name2"]."&ca_temp_id=".$list[$i]["ca_temp_id"]; ?>')" class="" ><img src="<?php echo G5_IMG_URL?>/ic_add.png" alt="바로등록"></a>
 								<?php }?>
-								<a href="javascript:fnDel('<?php echo G5_URL."/admin/category_delete.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>');" class="" ><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt="삭제"></a>
+								<a href="javascript:fnDel('<?php echo G5_URL."/admin/category_temp_delete.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>');" class="" ><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt="삭제"></a>
 							</td> 
 						</tr>
 					<?php

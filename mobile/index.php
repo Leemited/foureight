@@ -240,16 +240,6 @@ if($sc_id) {
 }
 
 
-//ad 가져오기
-$today = date("Y-m-d");
-$hour = date("H");
-$min = date("m");
-$sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= ad_from and '{$today}' < ad_to ";
-$res = sql_query($sql);
-while($row = sql_fetch_array($res)){
-    $listadd[] = $row;
-}
-
 if($wished_id)
     $sql = "select * from `wish_product` where mb_id ='{$wished_id}'";
 $res = sql_query($sql);
@@ -259,6 +249,32 @@ while($row = sql_fetch_array($res)){
 
 include_once(G5_MOBILE_PATH.'/head.php');
 
+
+//ad 가져오기
+$where = " and ad_cate = '0' and ad_cate2 = '0'";
+if($cate){
+    $sql = "select * from `categorys` where cate_name = '{$cate}' and cate_type = '{$set_type}' limit 0, 1";
+    $res = sql_fetch($sql);
+    if($res["ca_id"]) {
+        $where = " and ad_cate = '{$res["ca_id"]}'";
+    }
+}
+if($cate2){
+    $sql = "select * from `categorys` where cate_name = '{$cate2}' and cate_type = '{$set_type}' limit 0, 1";
+    $res = sql_fetch($sql);
+    if($res["ca_id"]) {
+        $where .= " and ad_cate2 = '{$res["ca_id"]}'";
+    }
+}
+if($stx){
+    $where .= "and ad_keyword like '%{$stx}%'";
+}
+$today = date("Y-m-d H:i");
+$sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= DATE_FORMAT(CONCAT(ad_from,' ',ad_from_hour,':',ad_from_min), '%Y-%m-%d %H:%i') and '{$today}' < DATE_FORMAT(CONCAT(ad_to,' ',ad_to_hour,':',ad_to_min), '%Y-%m-%d %H:%i') {$where}";
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $listadd[] = $row;
+}
 ?>
 
 <div class="loader" >
@@ -316,7 +332,9 @@ include_once(G5_MOBILE_PATH.'/head.php');
                 <p>회원님의 게시물이 블라인드 처리되었습니다.</p>
             </div>
             <div>
-                <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="사유보기" style="width:auto" onclick="fnBlindView('<?php echo $myblind["pd_id"];?>');" >
+                <input type="button" value="취소" onclick="modalClose(this)">
+                <input type="button" value="사유보기" style="width:auto" onclick="location.href='<?php echo G5_MOBILE_URL."/page/mypage/blind_view.php?pd_id=".$myblind["pd_id"];?>'">
+                <input type="button" value="관리자문의" style="width:auto" onclick="fnAdminWrite('<?php echo $myblind["pd_id"];?>');" >
             </div>
         </div>
     </div>
@@ -377,10 +395,12 @@ include_once(G5_MOBILE_PATH.'/head.php');
                 }
 
 				for($k=0;$k<count($listadd);$k++){
+
 				    if($listadd[$k]["ad_sort"]==$i){
 				        ?>
                 <div class="grid__item ad_list <?php if($_SESSION["list_type"]=="list"){echo " type_list";}?>" onclick="location.href='<?php echo $listadd[$k]["ad_link"];?>'">
                     <div>
+                        <div class="ad_mark">AD</div>
                         <?php if($listadd[$k]["ad_photo"]!=""){
                             ?>
                             <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $listadd[$k]["ad_photo"];?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
@@ -501,10 +521,10 @@ include_once(G5_MOBILE_PATH.'/head.php');
                                     <?php if($list[$i]["pd_price"]==0){?>
 								        <h1>가격 제시</h1>
                                     <?php }else{ ?>
-								        <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+								        <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
                                     <?php }?>
                                 <?php }else{?>
-								<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+								<h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
                                 <?php }?>
                                 <div class="list_wished_cnt"><?php echo $wished_cnt["cnt"];?></div>
 								<?php
@@ -790,7 +810,7 @@ $(document).ready(function(){
                         }
                         $("#id01 #wr_title").val("#");
                         $("#id01 #wr_title").focus();
-                        $("#id01 #wr_title").selectRange(2);
+                        $("#id01 #wr_title").selectRange(2,2);
                     });
                     cateClose();
                     if(type==1){
@@ -799,11 +819,15 @@ $(document).ready(function(){
                         $("#wr_price").css("width","70%");
                         $("#wr_price2").css({"display":"none"});
                         $(".pd_price_type").css("display","none");
-                        $(".price_box .write_help.price_help").remove();
+                        $(".price_box .write_help.price_help").html('');
                     }
                     if(type==2){
                         $(".pd_price_type").css("display","block");
-                        $(".price_box").append('<p class="write_help price_help">필요시 계약금을 설정할 수 있습니다.</p>');
+                        if($("#id01 .write_help.price_help").length == 0){
+                            $(".price_box").append('<p class="write_help price_help">필요시 계약금을 설정할 수 있습니다.</p>');
+                        }else {
+                            $("#id01 .write_help.price_help").html("필요시 계약금을 설정할 수 있습니다.");
+                        }
                         $("#wr_price").attr("placeholder","거래완료금");
                         $("#wr_price2").attr("placeholder","계약금");
                         $("#wr_price").css("width","40%");
@@ -1016,7 +1040,7 @@ $(document).ready(function(){
 });
 function fnlist(num,list_type){
 	//사고팔고/ /카테코리1/카테고리2/가격시작/가격끝/정렬순서1/정렬순서2/정렬순서3/정렬순서4/정렬순서5
-	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align,orderactive,typecompany,price_type,meetFrom,meetTo;
+	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align,orderactive,typecompany,price_type,meetFrom,meetTo,meetType;
 
 	if(num == 1){
 		page=0;
@@ -1054,6 +1078,7 @@ function fnlist(num,list_type){
     price_type = $("#pd_price_type").val();
     meetFrom = $("#pd_timeForm").val();
     meetTo = $("#pd_timeTo").val();
+    meetType = $("#pd_timetype").val();
 
 
     var list_type = $("#set_list_type").val();
@@ -1064,7 +1089,7 @@ function fnlist(num,list_type){
 	$.ajax({
 		url:g5_url+"/mobile/page/ajax/ajax.index.list.php",
 		method:"POST",
-		data:{page:page,list_type:list_type,stx:stx,app:app,set_type:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo},
+		data:{page:page,list_type:list_type,stx:stx,app:app,set_type:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo,pd_timeType:meetType},
 		beforeSend:function(){
             $('.loader').show();
 		},
@@ -1232,7 +1257,7 @@ function fnOnCamIos(){
                 wr_price : wr_price,
                 wr_price2 : wr_price2,
                 pd_price_type : pd_price_type
-            }
+            };
 
             //var dataString = JSON.stringify(data);
             //alert(dataString);
@@ -1312,22 +1337,6 @@ document.onkeydown = doNotReload;
 <?php if($pd_id){ ?>
 setTimeout(function(){fn_viewer("<?php echo $pd_id;?>")},150);
 <?php } ?>
-
-$.fn.selectRange = function(start, end) {
-    console.log(this.setSelectionRange);
-    return this.each(function() {
-        if(this.setSelectionRange) {
-            this.focus();
-            this.setSelectionRange(start, end);
-        } else if(this.createTextRange) {
-            var range = this.createTextRange();
-            range.collapse(true);
-            range.moveEnd('character', end);
-            range.moveStart('character', start);
-            range.select();
-        }
-    });
-};
 
 </script>
 <script src="https://hammerjs.github.io/dist/hammer.js"></script>

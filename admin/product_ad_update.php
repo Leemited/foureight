@@ -36,9 +36,9 @@ if($_FILES["ad_photo"]["tmp_name"]){
 }
 
 if(!$ad_id){
-    $sql = "insert into `product_ad` set ad_link = '{$ad_link}', ad_subject = '{$ad_subject}', ad_con = '{$ad_con}', ad_from='{$ad_from}', ad_to = '{$ad_to}', ad_status = '{$ad_status}', ad_cate='{$cate1}',ad_cate2='{$cate2}',ad_type='{$ad_type}',ad_sort = '{$ad_sort}', ad_date = now(), ad_from_hour = '{$ad_from_hour}', ad_from_min = '{$ad_from_min}', ad_to_hour = '{$ad_to_hour}', ad_to_min = '{$ad_to_min}' {$where}";
+    $sql = "insert into `product_ad` set ad_link = '{$ad_link}', ad_subject = '{$ad_subject}', ad_con = '{$ad_con}', ad_from='{$ad_from}', ad_to = '{$ad_to}', ad_status = '{$ad_status}', ad_cate='{$cate1}',ad_cate2='{$cate2}',ad_type='{$ad_type}',ad_sort = '{$ad_sort}', ad_date = now(), ad_from_hour = '{$ad_from_hour}', ad_from_min = '{$ad_from_min}', ad_to_hour = '{$ad_to_hour}', ad_to_min = '{$ad_to_min}', ad_keyword = '{$ad_keyword}' {$where}";
 }else{
-    $sql = "update `product_ad` set ad_link = '{$ad_link}', ad_subject = '{$ad_subject}', ad_con = '{$ad_con}', ad_from='{$ad_from}', ad_to = '{$ad_to}', ad_status = '{$ad_status}', ad_cate='{$cate1}',ad_cate2='{$cate2}',ad_type='{$ad_type}',ad_sort = '{$ad_sort}' ,ad_from_hour = '{$ad_from_hour}', ad_from_min = '{$ad_from_min}', ad_to_hour = '{$ad_to_hour}', ad_to_min = '{$ad_to_min}' {$where} where ad_id = '{$ad_id}'";
+    $sql = "update `product_ad` set ad_link = '{$ad_link}', ad_subject = '{$ad_subject}', ad_con = '{$ad_con}', ad_from='{$ad_from}', ad_to = '{$ad_to}', ad_status = '{$ad_status}', ad_cate='{$cate1}',ad_cate2='{$cate2}',ad_type='{$ad_type}',ad_sort = '{$ad_sort}' ,ad_from_hour = '{$ad_from_hour}', ad_from_min = '{$ad_from_min}', ad_to_hour = '{$ad_to_hour}', ad_to_min = '{$ad_to_min}', ad_keyword = '{$ad_keyword}' {$where} where ad_id = '{$ad_id}'";
 }
 
 if(sql_query($sql)){

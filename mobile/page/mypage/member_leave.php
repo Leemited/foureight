@@ -13,10 +13,10 @@ $back_url = G5_MOBILE_URL."/page/mypage/settings.php";
     <div class="setting_wrap">
         <h2>회원탈퇴 안내</h2>
         <ul>
-            <li class="single">
-                <p>* 회원 탈퇴 시 고객님의 정보는 전자상거래상 소비자 보호에 관합 법률에 의거한 48 고객정보 정책에 따라 관리됩니다.</p>
-                <p>* 한 한번 탈퇴한 아이디는 다시 사용할 수 없으니 신중하게 선택 바랍니다.</p>
-                <p>* 재가입 요청은 문의 게시판을 이용해 주세요.</p>
+            <li class="single" style="text-align: left">
+                <p style="text-indent:0">* 회원 탈퇴 시 고객님의 정보는 전자상거래상 소비자 보호에 관합 법률에 의거한 48 고객정보 정책에 따라 관리됩니다.</p>
+                <p style="text-indent:0">* 한 한번 탈퇴한 아이디는 다시 사용할 수 없습니다.</p>
+                <p style="text-indent:0">* 재가입 요청은 문의 게시판을 이용해 주세요.</p>
             </li>
         </ul>
     </div>

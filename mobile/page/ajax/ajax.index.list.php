@@ -74,7 +74,11 @@ if($pd_price_type){
 }
 
 if($pd_timeFrom && $pd_timeTo){
-    $search .= " and p.pd_timeFrom = '{$pd_timeFrom}' and p.pd_timeTo = '{$pd_timeTo}'";
+    if($pd_timeType == 1){
+        $search .= " and p.pd_timeFrom = '{$pd_timeFrom}' and p.pd_timeTo = '{$pd_timeTo}'";
+    }else {
+        $search .= " and p.pd_timeFrom = '{$pd_timeFrom}' and p.pd_timeTo = '{$pd_timeTo}'";
+    }
 }
 
 if($mb_level){
@@ -181,8 +185,40 @@ while($row = sql_fetch_array($res)){
 }
 
 //ad 가져오기
-$today = date("Y-m-d");
+/*$today = date("Y-m-d");
 $sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= ad_from and '{$today}' < ad_to ";
+$res = sql_query($sql);
+while($row = sql_fetch_array($res)){
+    $listadd[] = $row;
+}*/
+
+//ad 가져오기
+$where = " and ad_cate = '0' and ad_cate2 = '0'";
+if($cate){
+    $sql = "select * from `categorys` where cate_name = '{$cate}' and cate_type = '{$set_type}' limit 0, 1";
+    $res = sql_fetch($sql);
+    if($res["ca_id"]) {
+        $where .= " and ad_cate = '{$res["ca_id"]}'";
+    }
+}
+if($cate2){
+    $sql = "select * from `categorys` where cate_name = '{$cate2}' and cate_type = '{$set_type}' limit 0, 1";
+    $res = sql_fetch($sql);
+    if($res["ca_id"]) {
+        $where .= " and ad_cate2 = '{$res["ca_id"]}'";
+    }
+}
+if($stx){
+    if($cate){
+        $where .= "and ad_keyword like '%{$stx}%'";
+    }else {
+        $where = " and ad_keyword like '%{$stx}%'";
+    }
+}
+$today = date("Y-m-d H:i");
+//$hour = date("H");
+//$min = date("m");
+$sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= DATE_FORMAT(CONCAT(ad_from,' ',ad_from_hour,':',ad_from_min), '%Y-%m-%d %H:%i') and '{$today}' < DATE_FORMAT(CONCAT(ad_to,' ',ad_to_hour,':',ad_to_min), '%Y-%m-%d %H:%i') {$where}";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $listadd[] = $row;
@@ -243,7 +279,7 @@ for($i=0;$i<count($list);$i++){
 
 
     for($k=0;$k<count($listadd);$k++){
-        if($listadd[$k]["ad_sort"]==$cnt[$i]["num"]){
+        if($listadd[$k]["ad_sort"]==$i){
             ?>
             <div class="grid__item ad_list <?php if($list_type=="list"){echo " type_list";}?>" onclick="location.href='<?php echo $listadd[$k]["ad_link"];?>'">
                 <div>
@@ -294,11 +330,11 @@ for($i=0;$i<count($list);$i++){
 		?>
 		<div class="bg rand_bg<?php echo $rand;?> item_images" >
 			<div class="tags">
-                <?php for($k=0;$k<count($tags);$k++){
+                <?php //for($k=0;$k<count($tags);$k++){
 					$rand_font = rand(3,6);
 				?>
-				<div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-				<?php }?>
+				<div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+				<?php //}?>
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -309,11 +345,11 @@ for($i=0;$i<count($list);$i++){
         ?>
         <div class="bg rand_bg<?php echo $rand;?> item_images" >
             <div class="tags">
-                <?php for($k=0;$k<count($tags);$k++){
+                <?php //for($k=0;$k<count($tags);$k++){
                     $rand_font = rand(3,6);
                     ?>
-                    <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                <?php }?>
+                    <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+                <?php //}?>
             </div>
             <div class="clear"></div>
         </div>
@@ -360,10 +396,10 @@ for($i=0;$i<count($list);$i++){
                     <?php if($list[$i]["pd_price"]==0){?>
                         <h1>가격 제시</h1>
                     <?php }else{ ?>
-                        <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                        <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
                     <?php }?>
                 <?php }else{?>
-                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
                 <?php }?>
                 <?php if($wished_cnt["cnt"]>0){?>
                     <div class="list_wished_cnt"><?php echo $wished_cnt["cnt"];?></div>

@@ -192,7 +192,7 @@ header .left .lnb{position:relative;top:0;z-index:2}
 .write_input03{padding:10px;font-size:16px;border:1px solid #ddd;color:#000;width:calc(100% - 22px);}
 
 
-.submit_gr{text-align:right;margin-top:20px;}
+.submit_gr{text-align:right;margin-top:20px;display: inline-block;width: 100%;height: 60px;}
 .adm-btn01{padding:10px;font-size:18px;background-color:#424242;color:#fff !important;width:200px}
 
 .write_form {width:100%;position:relative;padding:50px 0;}

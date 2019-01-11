@@ -14,7 +14,7 @@ while($row = sql_fetch_array($res)){
     $cate1[] = $row;
 }
 
-echo count($cate1);
+echo count($cate1)-1;
 
 
 

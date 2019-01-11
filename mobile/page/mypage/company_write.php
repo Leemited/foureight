@@ -41,7 +41,7 @@ if($view["cp_id"]){
         <div class="setting_wrap">
             <h2>사업자 번호</h2>
             <ul>
-                <li class="single"><input type="number" class="setting_input" name="com_num" placeholder="사업자 번호(- 포함)" value="<?php echo $view["com_num"];?>" <?php echo $readonly;?> required></li>
+                <li class="single"><input type="text" class="setting_input" name="com_num" placeholder="사업자 번호(- 포함)" value="<?php echo $view["com_num"];?>" <?php echo $readonly;?> required></li>
             </ul>
         </div>
         <div class="setting_wrap">
@@ -84,7 +84,7 @@ if($view["cp_id"]){
                 <li class="single">
                     <?php if($view["cp_id"] == ""){?>
                     <label for="com_sign" id="addr_btn" style="top:3vw;font-weight:normal;">등록</label>
-                    <input type="text" class="setting_input" name="file_name" id="file_name" readonly placeholder="사업자등록증 첨부" for="com_sign">
+                    <input type="text" class="setting_input" name="file_name" id="file_name" readonly placeholder="사업자등록증 첨부">
                     <input type="file" class="setting_input" name="com_sign" id="com_sign" style="display:none;" accept="image/*" required onchange="$('#file_name').val(this.value)">
                     <?php }else{?>
                         <img src="<?php echo G5_DATA_URL?>/company/<?php echo $view["com_sign"];?>" alt="">
@@ -95,13 +95,13 @@ if($view["cp_id"]){
         
         <?php if($view["cp_id"]==""){?>
         <div class="setting_wrap">
-            <div><input type="checkbox" value="" name="agree" id="agree" required><label for="agree" style="font-size:3vw;margin-left:1vw;"><a href="<?php echo G5_MOBILE_URL?>/page/guide/privacy.php" style="text-decoration: underline;">개인정보 취급방침</a>에 동의하십니까?</label></div>
+            <div><input type="checkbox" value="" name="agree" id="agree" required><label for="agree" style="font-size:3vw;margin-left:1vw;"><a href="<?php echo G5_MOBILE_URL?>/page/company/privacy.php" style="text-decoration: underline;">개인정보 취급방침</a>에 동의하십니까?</label></div>
         </div>
         <?php }?>
         <div class="setting_wrap">
             <div class="btn_group">
                 <?php if($view["cp_id"] == ""){?>
-                <input type="submit" value="등록" class="setting_btn">
+                <input type="submit" value="등록" class="setting_btn" onclick="fnSubmit();">
                 <?php }else{ ?>
                     심사중
                 <?php }?>
@@ -109,9 +109,11 @@ if($view["cp_id"]){
         </div>
     </form>
 </div>
-<script>
-
-</script>
+    <script>
+        function fnSubmit(){
+            document.com_form.submit();
+        }
+    </script>
 <?php
 include_once(G5_PATH."/tail.php");
 ?>

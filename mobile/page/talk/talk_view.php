@@ -18,8 +18,10 @@ while($row = sql_fetch_array($res)){
     //$roomid = $row["room_id"];
     if($member["mb_id"] != $row["send_mb_id"]){
         $sell_mb_id = $row["send_mb_id"];
+        $read_mb_id = $row["send_mb_id"];
     }else if($member["mb_id"] != $row["read_mb_id"]){
         $sell_mb_id = $row["read_mb_id"];
+        $read_mb_id = $row["read_mb_id"];
     }
 }
 if(count($talk_ids) > 0){
@@ -54,23 +56,23 @@ $pro = sql_fetch($sql);
 <div class="talk talk_view_container" style="<?php if($img1!=""){?>background-image:url('<?php echo G5_DATA_URL."/product/".$img1;?>');<?php }?>background-size:cover;background-repeat:no-repeat;background-position:center;">
     <div class="close" onclick="location.href='<?php echo $back_url;?>'">
         <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
-
     </div>
     <div class="price">
+        <h1><?php echo $talk_list[0]["pd_tag"];?></h1>
         <h2> <span><?php if($talk_list[0]['pd_type']==1){ if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($talk_list[0]['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></span>
-            <?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]);}else{echo "0원";}?></h2>
+            <?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]+$talk_list[0]["pd_price2"]);}else{echo "0원";}?></h2>
         <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8 && $talk_list[0]["mb_id"] == $member["mb_id"]){?>
             <div class="sell_btn">
-                <input type="button" value="이 회원에게 판매하기" class="btn" onclick="fnSell();">
+                <input type="button" value="결제요청하기" class="btn" onclick="fnSell();">
             </div>
         <?php }?>
         <div class="price_bg"></div>
     </div>
-    <?php if($pro["pd_type"]==2 && $pro["pd_type2"]==8){?>
+    <?php /*if($pro["pd_type"]==2 && $pro["pd_type2"]==8){*/?><!--
         <div class="talk_info">
             <input type="button" value="거래유의사항 전달" class="">
         </div>
-    <?php }?>
+    --><?php /*}*/?>
     <div class="msg_container" id="msg_container">
         <div class="msg_bg"></div>
         <?php if(count($talk_list)==0){?>
@@ -218,7 +220,7 @@ $pro = sql_fetch($sql);
             $("#message").focus();
             var pd_id = "<?php echo $pd_id;?>";
             var mb_id = "<?php echo $member["mb_id"];?>";
-            var read_mb_id = "<?php echo $send_mb_id;?>";
+            var read_mb_id = "<?php echo $read_mb_id;?>";
             var message = $("#message").val();
             if(message == ""){
                 alert('메세지를 입력해 주세요');
@@ -229,14 +231,13 @@ $pro = sql_fetch($sql);
 
             //스크롤 위치
             var element = document.getElementById("msg_container");
-
+            console.log(read_mb_id);
             $.ajax({
                 url:g5_url+"/mobile/page/ajax/ajax.send_msg.php",
                 method:"post",
                 data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id,roomid:roomid},
                 dataType:"json"
             }).done(function(data){
-                console.log(data);
                 if(data.status=="success"){
                     if(roomid=="") {
                         $(".msg_container").append(data.msg);

@@ -27,7 +27,7 @@ add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
             <header>
                 <h1 id="bo_v_title">
                     <?php
-                    echo $view['category'].' | '; // 분류 출력 끝
+                    echo $view['category'].'<br><br>'; // 분류 출력 끝
                     echo $view['subject']; // 글제목 출력
                     ?>
                 </h1>

@@ -102,7 +102,10 @@ while($row = sql_fetch_array($comment)){
                 </table>
             </div>
             <div class="submit_gr no_print">
-                <a href="<?php echo G5_URL."/admin/qa_list.php?page=".$page."&sfl=".$sfl."&stx=".$stx; ?>" class="adm-btn01">목록</a>
+                <?php if($view["qa_1"]){?>
+                    <input type="button" onclick="location.href='<?php echo G5_URL."/admin/product_blind_view.php?page=".$page."&sfl=".$sfl."&stx=".$stx."&pd_id=".$view["qa_1"]."&back=qa&qa_id=".$view["qa_id"]; ?>'" class="adm-btn01" value="사유보기" style="width:auto;border:none;">
+                <?php }?>
+                <input type="button" onclick="location.href='<?php echo G5_URL."/admin/qa_list.php?page=".$page."&sfl=".$sfl."&stx=".$stx; ?>'" class="adm-btn01" value="목록" style="width:auto;border:none;">
             </div>
 
             <header class="admin_title">

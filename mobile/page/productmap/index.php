@@ -403,6 +403,11 @@ function closeOverlay(num){
     }
 }
 
+setTimeout(function(){
+    for(var i = 0; i < overlay.length ; i++){
+        overlay[i].setMap(null);
+    }
+},1000);
 function mapCenter(num){
     map.setCenter(markers[num]);
 }

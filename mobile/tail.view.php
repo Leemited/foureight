@@ -49,6 +49,7 @@ if ($config['cf_analytics']) {
 
 <script>
 function modalClose(){
+    console.log("AAA");
 	$("[id^=id]").each(function(){
 		$(this).css("display","none");
 	});

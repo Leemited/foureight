@@ -45,15 +45,16 @@ if($view["pd_images"]) {
     $photo = explode(",", $view["pd_images"]);
 }
 if($_SESSION["lat"] && $_SESSION["lng"]) {
-    $sql = "select *,c.mb_id as mb_id, 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' and c.status = 0 order by c.sign_date asc";
+    $sql = "select *,c.mb_id as mb_id,p.pd_id as pricing_pd_id, 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' order by c.sign_date asc";
 }else{
-    $sql = "select *,c.mb_id as mb_id,'거리정보 없음' as distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' and c.status = 0 order by c.sign_date asc";
+    $sql = "select *,c.mb_id as mb_id,'거리정보 없음' as distance from `product_pricing` as c left join `product` as p on c.pricing_pd_id = p.pd_id where c.pd_id = '{$pd_id}' order by c.sign_date asc";
 }
-//제시,딜
+//제시,딜0
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
     $pricing[] = $row;
 }
+
 
 //게시글 설정
 $sql = "select * from `g5_member` as m left join `mysetting` as s on m.mb_id = s.mb_id where s.mb_id = '{$view[mb_id]}'";
@@ -131,16 +132,57 @@ if($myset["comment_secret_set"]=="1"){
 }
 //include_once(G5_MOBILE_PATH."/head.view.php");
 //게시물 신고 확인
-$sql = "select count(*) as cnt from `product_blind` where mb_id = '{$mb_id}' and pd_id = '{$view["pd_id"]}'";
+$sql = "select count(*) as cnt from `product_blind` where pd_id = '{$view["pd_id"]}'";
 $blind_cnt = sql_fetch($sql);
-
 //조회수 + 게시물 실시간 체크
 $pd_total = $view["pd_hits"];
 
 //좋아요 카운트
-$sql = "select count(*) as cnt from `product_like` where pd_id = '{$view["pd_id"]}' and pd_type = '{$view["pd_type"]}'";
-$viewlikecnt = sql_fetch($sql);
-
+//물건일 경우 물건 전체 가저오기
+//능력일 경우 해당 게시물 좋아요만 가져오기
+$likeper = false; // 구매자 파악
+$likewrite = true;
+if($view["pd_type"]==1) {
+    //좋아요 카운트
+    $sql = "select count(*) as cnt from `product_like` where pd_type = 1";
+    $viewlikecnt = sql_fetch($sql);
+    //좋아요 권한, 구매 확인
+    $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1";
+    $chkLike = sql_fetch($sql);
+    if($chkLike["cnt"] > 0){
+        $likeper = true;
+        //내가 올린 좋아요가 있는지 파악
+        $sql = "select count(*) as cnt from `product_like` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' ";
+        $chkcount = sql_fetch($sql);
+        if($chkcount["cnt"] > 0){
+            //이미 좋아요 처리
+            $likewrite = false;
+        }
+    }else {
+        // 구매하지 않음
+        $likeper = false;
+    }
+}else {
+    //좋아요 카운트
+    $sql = "select count(*) as cnt from `product_like` where pd_id = {$view["pd_id"]}";
+    $viewlikecnt = sql_fetch($sql);
+    //좋아요 권한, 구매 확인
+    $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1";
+    $chkLike = sql_fetch($sql);
+    if($chkLike["cnt"] > 0) {
+        $likeper = true;
+        //내가 올린 좋아요가 있는지 파악
+        $sql = "select count(*) as cnt from `product_like` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}'";
+        $chkcount = sql_fetch($sql);
+        if($chkcount["cnt"] > 0){
+            //이미 좋아요 처리
+            $likewrite = false;
+        }
+    }else{
+        // 구매하지 않음
+        $likeper = false;
+    }
+}
 ?>
 <?php include_once(G5_PATH .'/' . G5_PLUGIN_DIR . '/nodejs_connect/simple_view.php');?>
 
@@ -151,8 +193,6 @@ $viewlikecnt = sql_fetch($sql);
     .DetailImage .close {position:absolute;top:4vw;right:4vw;width:10vw;height:10vw;}
     .DetailImage .list2{white-space: nowrap;position: relative;font-size: 0;width: 100%;height: 100%;;-webkit-transition: all 500ms;-moz-transition: all 500ms;-ms-transition: all 500ms;-o-transition: all 500ms;transition: all 500ms;}
     .DetailImage .list2 .item2{width:100%;height:100%;display:inline-block;}
-
-
 </style>
 <div class="DetailImage" id="DetailImage">
     <div id="imgs">
@@ -164,6 +204,13 @@ $viewlikecnt = sql_fetch($sql);
                 <li class="item2" id="item2" style="background-image:url('<?php echo G5_DATA_URL;?>/product/<?php echo $imgs?>');background-size:contain;background-repeat:no-repeat;background-position:center">
                 </li>
             <?php }?>
+            <?php }
+            if ($view["pd_video"]!=""){?>
+                <li class="item2">
+                    <video controls width="360px" height="640px" class="view_video" preload="metadata" >
+                        <source src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>#t=1" type="video/mp4">
+                    </video>
+                </li>
             <?php }?>
         </ul>
     </div>
@@ -173,11 +220,22 @@ $viewlikecnt = sql_fetch($sql);
     <div class="close" onclick="modalCloseTalk();">
         <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
     </div>
-    <?php if($view["pd_type"]==2 && $view["pd_type2"]==8){?>
+    <div class="price">
+        <h1><?php echo $view["pd_tag"];?></h1>
+        <h2> <span><?php if($view['pd_type']==1){ if($view['pd_type2']==4){ ?>구매예상금액<?php }else{?>판매금액<?php } }else{ if($view['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></span>
+            <?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]+$view["pd_price2"]);}else{echo "0원";}?></h2>
+            <?php if($view["pd_type"]==1 && $view["pd_type2"]==8 && $view["mb_id"] == $member["mb_id"]){?>
+            <div class="sell_btn">
+                <input type="button" value="결제요청하기" class="btn" onclick="fnSell();">
+            </div>
+            <?php }?>
+        <div class="price_bg"></div>
+    </div>
+    <?php /*if($view["pd_type"]==2 && $view["pd_type2"]==8){*/?><!--
     <div class="talk_info">
         <input type="button" value="거래유의사항 전달" class="">
     </div>
-    <?php }?>
+    --><?php /*}*/?>
     <div class="msg_container" id="msg_container" <?php if(count($mywordss)<0){?>style="height: calc(100% - 55.3vw);"<?php }?> >
         <div class="msg_bg"></div>
         <?php if(count($talk_list)==0){?>
@@ -256,7 +314,7 @@ $viewlikecnt = sql_fetch($sql);
         <input type="text" name="talk_content" id="message" value="" placeholder="메세지를 입력하세요.">
         <input type="button" value="보내기" class="send_msg" onclick="fnSendMsg();">
     </div>
-    
+    <!--
     <div class="price">
         <p><?php if($view['pd_type']==1){ if($view['pd_type2']==4){?>구매예상금액<?php }else{?>판매금액<?php } }else{if($view['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></p>
         <h2><?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]);}else{ if($view["pd_type2"]==8){echo "0원";}else{echo "제시요망";}}?></h2>
@@ -267,7 +325,7 @@ $viewlikecnt = sql_fetch($sql);
         <?php }?>
         <div class="price_bg"></div>
     </div>
-    
+    -->
 </div>
 <div id="sell" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
     <div class="sell_con">
@@ -350,21 +408,20 @@ $viewlikecnt = sql_fetch($sql);
             <span class="txt">
                 <div><?php echo $profile[mb_nick];?></div>
             </span>
-                <?php if($profile["like_set"]== 1){?>
+            <?php if($profile["like_set"]== 1 && $view["pd_type2"] == 8){?>
             <div class="pd_like">
                 <img src="<?php echo G5_IMG_URL?>/view_like.svg" alt="" class="likeimg" id="<?php echo $view["pd_id"];?>">
                 <span><?php echo $viewlikecnt["cnt"];?></span>
             </div>
-                <?php }?>
-        </div>
-        <div class="content">
-            <?php if($view["pd_images"]!="" || $view["pd_video"]!=""){?>
-            <h2><?php echo $view["pd_tag"];?></h2>
             <?php }?>
+        </div>
+        <div class="content <?php if($view["pd_type"]==2 && $view["pd_price"] && $view["pd_price2"]){?>content_height<?php }?>">
+            <h2><?php echo $view["pd_tag"];?></h2>
             <?php if($view["pd_price"]==0){?>
                 <h1><?php echo "제시요망";?></h1>
-            <?php }else{ ?>
-                <h1><?php echo "￦ ".number_format($view["pd_price"]);?></h1>
+            <?php }else{
+                ?>
+                <h1><?php if($view["pd_type"]==1){echo "￦ ".number_format($view["pd_price"]); }else{ if($view["pd_price"] && $view["pd_price2"]){echo  "<span class='price_span'>계약금 : ￦ ".number_format($view["pd_price2"]). "</span><span class='price_span'>거래완료금 : ￦ " .number_format($view["pd_price"])."</span>"; }else if($view["pd_price"] && $view["pd_price2"] == 0){ echo "￦ ".number_format($view["pd_price"]); } }?></h1>
             <?php }?>
         </div>
         <div class="view_btns">
@@ -471,7 +528,7 @@ $viewlikecnt = sql_fetch($sql);
             <div class="con">
                 <div class="pd_contents">
                     <h2>상세설명</h2>
-                    <p><?php echo ($view["pd_content"]!=" ")?$view["pd_content"]:"등록된 상세 설명이 없습니다.";?></p>
+                    <p><?php echo ($view["pd_content"]!=" ")? str_replace("<br>","\n",$view["pd_content"]) :"등록된 상세 설명이 없습니다.";?></p>
                 </div>
                 <?php if($view["pd_video_link"]){?>
                 <div class="link_video">
@@ -557,70 +614,53 @@ $viewlikecnt = sql_fetch($sql);
                     <h2><?php if($view["pd_type2"]=="4"){?>제시목록<?php }else if($view["pd_type2"]=="8"){?>딜목록<?php }?></h2>
                     <div class="pricing cm_box">
                         <ul class="pri_container">
-                            <?php for($i=0;$i<count($pricing);$i++){
+                            <?php
+                                for($i=0;$i<count($pricing);$i++){
                                 $rand = rand(1,13);
                                 $pd_tag = explode("/",$pricing[$i]["pd_tag"]);
-                                    if($pricing["pd_type"]==2){
+                                $mb = get_member($pricing[$i]["mb_id"]);
+                                    if($view["pd_type2"]==4){
                                 ?>
-                            <li onclick="fn_viewer2('<?php echo $pricing[$i]["pricing_pd_id"];?>')">
-                                <div class="profile <?php if(!$pricing[$i]["pd_images"] || $pricing[$i]["pd_images"]==""){echo "rand_bg".$rand; }?>"  >
-                                    <?php
-                                    if($pricing[$i]["pd_images"]){
-                                        $img = explode(",",$pricing[$i]["pd_images"]);
-                                        $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
-                                    ?>
-                                        <img src="<?php echo G5_DATA_URL."/product/".$img1;?>" alt="">
-                                    <?php }else{
-                                        for($s=0;$s<count($pd_tag);$s++){
-                                            echo "#".$pd_tag[$s];
-                                        }
-                                    } ?>
-                                </div>
-                                <div class="coms">
-                                    <p><?php echo "￦ ".number_format($pricing[$i]["pd_price"]);?> / <?php echo distTran($pricing[$i]["distance"]);?></p>
-                                    <h2><?php echo $pricing[$i]["pricing_content"];?></h2>
-<!--                                    <div class="product_vi">
-                                        <input type="button" value="물건보기" onclick="fn_viewer2('<?php /*echo $pricing[$i]["pricing_pd_id"];*/?>')">
-                                    </div>-->
-                                </div>
-                            </li>
+                                <!--<li onclick="fn_viewer2('<?php /*echo $pricing[$i]["pricing_pd_id"];*/?>')">-->
+                                <li>
+                                    <div>
+                                        <?php if($member["mb_id"] == $view["mb_id"]){ ?>
+                                        <div style="position:absolute;right:0;top:4vw;z-index:10">
+                                            <input type="button" value="상품보기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;display:inline-block;' onclick="fn_viewer('<?php echo $pricing[$i]["pricing_pd_id"];?>')">       <br><br>
+                                            <input type="button" value="구매요청" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="fnPricing3('<?php echo $pricing[$i]["pricing_pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing[$i]["id"];?>')">
+                                        </div>
+                                        <?php }?>
+                                        <div class="coms" style="padding:3vw 3vw 3vw 0;position:relative;left:0;margin:0;">
+                                            <p style="margin:0;font-weight:normal"><span <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')" <?php }?> style="text-decoration: underline"><strong><?php echo $mb["mb_nick"];?></strong></span> / <span>거리 : <?php echo distTran($pricing[$i]["distance"]);?></span> / <span><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?></span></p>
+                                            <h2 style="margin-top:2vw"><?php echo $pricing[$i]["pricing_content"];?></h2>
+                                        </div>
+                                    </div>
+                                </li>
                             <?php }else{
-                                        $mb = get_member($pricing[$i]["mb_id"]);
-                                        $sql = "select * from `mysetting` where mb_id = '{$mb["mb_id"]}' ";
-                                        $set = sql_fetch($sql);
-                                        ?>
-                                    <li style="display:table">
-                                        <div style="display:table-row">
-                                            <div style="position:absolute;right:0;top:9vw;z-index:10">
-                                                <input type="button" value="판매하기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="addSell2('<?php echo $view["pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $mb["mb_id"];?>','<?php echo $pricing["id"];?>')">
-                                            </div>
-                                            <div class="profile" style="width:15vw;height:15vw;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;float:none;display:table-cell;vertical-align:middle;"  <?php if($member["mb_id"] == $view["mb_id"]){?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')"<?php }?>>
-                                                <?php if($mb["mb_profile"]){?>
-                                                    <img src="<?php echo $mb["mb_profile"];?>" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
-                                                <?php }else{?>
-                                                    <img src="<?php echo G5_IMG_URL;?>/no-profile.svg" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
-                                                <?php } ?>
-                                            </div>
-                                            <div class="coms" style="display:table-cell;padding:3vw 20vw 3vw 3vw;position:relative;left:0;margin:0;">
-                                                <p style="margin:0;font-weight:bold"><?php echo $mb["mb_nick"];?></p>
-                                                <p style="margin:0"><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?> <br> 거리 : <?php echo distTran($pricing[$i]["distance"]);?></p>
-                                                <h2 style="margin-top:2vw"><?php echo $pricing[$i]["pricing_content"];?></h2>
-                                            </div>
+
+                                $sql = "select * from `mysetting` where mb_id = '{$mb["mb_id"]}' ";
+                                $set = sql_fetch($sql);
+                                ?>
+                                <li>
+                                    <div>
+                                        <?php if($member["mb_id"] == $view["mb_id"]){ ?>
+                                        <div style="position:absolute;right:0;top:8vw;z-index:10">
+                                            <input type="button" value="판매하기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="fnPricing('<?php echo $pricing[$i]["pricing_pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing[$i]["id"];?>')">
                                         </div>
-                                        <div class="control" id="mb_<?php echo $pricing[$i]["id"];?>">
-                                            <div style="">
-                                                <ul>
-                                                    <?php if($set["hp_set"] != 0){?>
-                                                    <li onclick="location.href='tel:<?php echo $mb["mb_hp"];?>'">전화하기</li>
-                                                    <?php }if($set["sms_set"]!=0){?>
-                                                    <li onclick="location.href='sms:<?php echo $mb["mb_hp"];?>'">문자하기</li>
-                                                    <?php }if($set["chat_set"]!=0){?>
-                                                    <li onclick="fnTalk2('<?php echo $mb["mb_id"];?>')">대화하기</li>
-                                                    <?php }?>
-                                                </ul>
-                                            </div>
+                                        <?php }?>
+                                        <!--<div class="profile" style="width:15vw;height:15vw;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;float:none;display:table-cell;vertical-align:middle;"  <?php /*if($member["mb_id"] == $view["mb_id"]){*/?>onclick="fnShow('<?php /*echo $pricing[$i]["id"];*/?>')"<?php /*}*/?>>
+                                            <?php /*if($mb["mb_profile"]){*/?>
+                                                <img src="<?php /*echo $mb["mb_profile"];*/?>" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
+                                            <?php /*}else{*/?>
+                                                <img src="<?php /*echo G5_IMG_URL;*/?>/no-profile.svg" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
+                                            <?php /*} */?>
+                                        </div>-->
+                                        <div class="coms" style="padding:3vw 3vw 3vw 0;position:relative;left:0;margin:0;">
+                                            <p style="margin:0;font-weight:normal"><span <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')"<?php } ?> style="text-decoration: underline"><strong><?php echo $mb["mb_nick"];?></strong></span> / <span>거리 : <?php echo distTran($pricing[$i]["distance"]);?></span> / <span><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?></span></p>
+                                            <h2 style="margin-top:2vw"><?php echo $pricing[$i]["pricing_content"];?></h2>
                                         </div>
-                                    </li>
+                                    </div>
+                                </li>
                                 <?php }?>
                             <?php }?>
                         </ul>
@@ -839,8 +879,8 @@ $viewlikecnt = sql_fetch($sql);
 
             ?>
             <li class="item video" >
-                <video autoplay controls width="360px" height="640px" class="view_video" preload="metadata">
-                    <source src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>#t=2" type="video/mp4">
+                <video controls width="360px" height="640px" class="view_video" preload="metadata" >
+                    <source src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>#t=1" type="video/mp4">
                 </video>
             </li>
             <?php } ?>
@@ -854,6 +894,7 @@ $viewlikecnt = sql_fetch($sql);
 <a style="display:none;" id="copylink" href="http://mave01.cafe24.com/index.php?pd_id=<?php echo $pd_id;?>">http://mave01.cafe24.com/index.php?pd_id=<?php echo $pd_id;?></a>
 
 <script>
+
 // Slide functions
 var index = 0;
 var list = "";
@@ -952,6 +993,8 @@ $(function(){
 
     if($("li.video").length > 0){
         $(".view_video").attr({width:width+"px",height:(height - topheight)+"px"});
+        $("#c1").attr({width:width+"px",height:(height - topheight)+"px"});
+        $("#c2").attr({width:width+"px",height:(height - topheight)+"px"});
     }
     <?php if($view["pd_images"]!="" || $view["pd_video"]!=""){?>
     var container = document.getElementById('main');
@@ -1025,9 +1068,8 @@ $(function(){
 
     function previewImg(){
         var count = 0;
-        $(".list .item").each(function(e) {
+        $(".list .item").not($(".list .item.video")).each(function(e) {
             count = e+1;
-            console.log(e);
         });
         //$(".item").each(function(e){
         if(count > 0) {
@@ -1041,7 +1083,6 @@ $(function(){
         $(".item2").eq(index).css("transform","scale("+scale+")");
     }
     function zoomOut(){
-        console.log("A");
         $(".item2").eq(index).css({transform:"scale(1)"});
     }
 
@@ -1078,8 +1119,9 @@ function fnPricing(pd_id,type){
     $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.my_product.php",
         method:"POST",
-        data:{}
+        data:{type:type}
     }).done(function(data){
+        console.log(data);
         if(data=="1"){
             alert("로그인이 필요합니다.");
             location.href=g5_bbs_url+"/login.php";
@@ -1094,6 +1136,7 @@ function fnPricing(pd_id,type){
             $("#id07 h2").text("딜하기");
             $("#id07 #up_btn").val("딜등록");
             $("#id07 #pricing_price").val("<?php echo $view["pd_price"];?>");
+            $("#id07 #pricing_price").attr("readonly",false);
             $("#id07 #pricing_content").attr("placeholder","딜내용을 입력해주세요.");
         }else {
             $("#id07 select").append(data);
@@ -1106,6 +1149,27 @@ function fnPricing(pd_id,type){
         $("html, body").css("height","100vh");
         location.hash = "#modal";
     });
+}
+
+function fnPricing3(pd_id,price,pricing_id){
+    var sell_mb_id = "<?php echo $member["mb_id"];?>";
+
+    if(confirm("구매요청 하시겠습니까?\r\n해당 게시글은 거래중으로 표시 되며,\r\n요청 후에는 판매자가 승인을 하면 해당 제시에 대한 결제가 진행됩니다.")){
+        $.ajax({
+            url: g5_url + "/mobile/page/ajax/ajax.insert_cart.php",
+            method: "POST",
+            data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 0,pricing_id:pricing_id}
+        }).done(function (data) {
+            if(data=="7"){
+                alert("이미 진행 중인 거래 입니다.");
+                return false;
+            }else if(data=="3"){
+                location.href=g5_url+'/mobile/page/mypage/cart.php';
+            }
+        });
+    }else{
+        $("#sell").css({"display":"none"});
+    }
 }
 
 function fnwished(pd_id){
@@ -1150,7 +1214,13 @@ function fnwished(pd_id){
 }
 
 function fnDelete(pd_id){
-    if(confirm("해당 게시물을 영구 삭제하겠습니까?")){
+    <?php if($view["pd_type"]==2){?>
+    var msg = "해당 게시물을 연구 삭제하시겠습니까?\r능력의 경우 해당 게시물의 평가도 모두 삭제 됩니다.";
+    <?php }else{?>
+    var msg = "해당 게시물을 영구 삭제하겠습니까?";
+    <?php }?>
+
+    if(confirm(msg)){
         location.href=g5_url+'/mobile/page/product_delete.php?pd_id='+pd_id;
     }else{
         return false;
@@ -1346,6 +1416,14 @@ $(function(){
 
     <?php if($view["mb_id"]!=$member["mb_id"]){?>
     $(".likeimg").click(function(){
+        <?php if($likeper==false){?>
+            alert("구매자만 평가 할 수 있습니다.");
+            return false;
+        <?php }?>
+        <?php if($likewrite==false){?>
+            alert("이미 평가한 게시글입니다.");
+            return false;
+        <?php }?>
         var pd_id = $(this).attr("id");
         $("#like_id").val(pd_id)
         $("#id02").css({"display":"block","z-index":"9000000"});
@@ -1428,7 +1506,7 @@ function fnBlind(pd_id,cm_id){
         method:"post",
         data:{pd_id:pd_id,type:"modal",cm_id:cm_id}
     }).done(function(data){
-        $("#id01s").css({"display":"block","z-index":"9002"})
+        $("#id01s").css({"display":"block","z-index":"9002"});
         $("#id01s .con").html('');
         $("#id01s .con").append(data);
         $("html, body").css("overflow","hidden");
@@ -1670,25 +1748,49 @@ function addSell(){
     var pd_id = $("#pd_id").val();
     var sell_mb_id = $("#sell_mb_id").val();
 
+    if(confirm("구매예약 하시겠습니까?\r\n예약 후에는 판매자가 승인을 하면 해당 게시글에 대한 결제가 진행됩니다.")){
+        $.ajax({
+            url: g5_url + "/mobile/page/ajax/ajax.insert_cart.php",
+            method: "POST",
+            data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 0}
+        }).done(function (data) {
+            console.log(data);
+            if(data=="3") {
+                location.href = g5_url + '/mobile/page/mypage/cart.php';
+            }
+        });
+    }else{
+        $("#sell").css({"display":"none"});
+    }
+}
+
+function fnSell2(){
+    var price = $("#price").val();
+    var pd_id = $("#pd_id").val();
+    var sell_mb_id = $("#sell_mb_id").val();
+
     $.ajax({
         url: g5_url + "/mobile/page/ajax/ajax.insert_cart.php",
         method: "POST",
-        data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 0}
+        data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1,pd_type:2 }
     }).done(function (data) {
-        console.log(data);
-        if(data=="3"){
-            if(confirm("구매예약이 완료 되었습니다.\r장바구니로 이동 하시겠습니까?")){
-                location.href=g5_url+'/mobile/page/mypage/cart.php';
-            }else{
-                $("#sell").css({"display":"none"});
-            }
+        if(data=="3") {
+            location.href=g5_url+'/mobile/page/mypage/cart.php?pd_type=2';
         }
     });
-
 }
 
 function fnShow(id){
-    $("#mb_"+id).toggleClass("active");
+    // 연락자 정보 가져오기
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.get_member.php"
+    }).done(function(){
+        
+    });
+    //$("#mb_"+id).toggleClass("active");
+    $("#id08").css({"display":"block","z-index":"9002"});
+    $("#id08").css("display","block");
+    location.hash = "#modal";
 }
 
 function fnLink(url){

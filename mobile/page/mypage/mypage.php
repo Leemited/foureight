@@ -76,9 +76,9 @@ if($wish_id) {
 }
 $total1=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 1 and pd_status < 10 ");
 $total2=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 2 and pd_status < 10 ");
-$total3=sql_fetch("select count(*) as cnt from `cart` where pd_id in ({$my_pd_ids}) and c_status != 2");
-$total4=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status != 2 and p.pd_type = 1");
-$total5=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status != 2 and p.pd_type = 2");
+$total3=sql_fetch("select count(*) as cnt from `cart` where pd_id in ({$my_pd_ids}) and c_status != 2 and c_status != 3 and c_status != 10");
+$total4=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status != 2 and c_status != 3 and c_status != 10 and p.pd_type = 1");
+$total5=sql_fetch("select count(*) as cnt from `cart` as c left join `product` as p on c.pd_id = p.pd_id  where c.pd_id in ({$my_pd_ids}) and c_status != 2 and c_status != 3 and c_status != 10 and p.pd_type = 2");
 
 $total = $total["cnt"];
 $wishtotal = $wish["cnt"];
@@ -163,6 +163,8 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
             </div>
             <div>
                 <input type="button" value="확인" onclick="modalClose(this)">
+                <input type="button" value="상세보기" id="blind_view_btn" style="width:auto" onclick="">
+                <input type="button" value="관리자문의" id="admin_qa" style="width:auto"  onclick="">
             </div>
         </div>
     </div>
@@ -232,6 +234,7 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
         </div>
     </div>
 </div>
+
 <div class="loader" >
     <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
     <!--<div style="background-color:#000;opacity: 0.4;width:100%;height:100%;position:absolute;top:0;left:0;"></div>-->
@@ -248,14 +251,7 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
 		<div class="settings" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/settings.php'"><img src="<?php echo G5_IMG_URL?>/ic_profile_settings.svg" alt=""></div>
         <?php } ?>
 		<div class="user_con">
-			<div class="user_profile" >
-
-			<?php if($mb["mb_profile"]){?>
-				<img src="<?php echo $mb["mb_profile"];?>" alt="" class="profile">
-			<?php }else{ ?>
-				<img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="">
-			<?php } ?>
-			</div>
+			<div class="user_profile" style="<?php if($mb["mb_profile"]){?>background-image:url('<?php echo $mb["mb_profile"];?>');<?php }else{ ?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg')<?php } ?>;background-size:cover;background-position:center;background-repeat: no-repeat"></div>
 			<div class="user_text">
 				<h4>
                 <?php if($sns_login["sm_service"]){?>
@@ -286,17 +282,17 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
 	<section class="user_tab">
         <?php if($mode=="profile"){?>
         <ul id="my_ul">
-            <li class="myprofile <?php if($type==1){echo 'active';}?>">
+            <li class="myprofile myboard <?php if($type==1){echo 'active';}?>">
                 <div>My List</div>
-                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_mylist.svg" alt=""><?php echo number_format($total);?></h2>
+                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_mylist.svg" alt=""><span><?php echo number_format($total);?></span></h2>
             </li>
-            <li class="myprofile <?php if($type==2){echo 'active';}?>">
+            <li class="myprofile order_tab <?php if($type==2){echo 'active';}?>">
                 <div>거래진행중</div>
-                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_orders.svg" alt=""><?php echo number_format($total3);?></h2>
+                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_orders.svg" alt=""><span><?php echo number_format($total3);?></span></h2>
             </li>
-            <li class="myprofile <?php if($type==3){echo 'active';}?>">
+            <li class="myprofile wishes <?php if($type==3){echo 'active';}?>">
                 <div>관심상품</div>
-                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_wish.svg" alt=""><?php echo number_format($wishtotal);?></h2>
+                <h2><img src="<?php echo G5_IMG_URL?>/ic_mypage_wish.svg" alt=""><span><?php echo number_format($wishtotal);?></span></h2>
             </li>
         </ul>
         <ul class="sub_ul">
@@ -363,11 +359,11 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                                     ?>
                                     <div class="bg rand_bg<?php echo $rand;?> item_images" >
                                         <div class="tags">
-                                            <?php for($k=0;$k<count($tags);$k++){
+                                            <?php //for($k=0;$k<count($tags);$k++){
                                                 $rand_font = rand(3,6);
                                                 ?>
-                                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                                            <?php }?>
+                                                <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+                                            <?php //}?>
                                         </div>
                                         <div class="clear"></div>
                                     </div>
@@ -378,18 +374,18 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                                 ?>
                                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
                                     <div class="tags">
-                                        <?php for($k=0;$k<count($tags);$k++){
+                                        <?php //for($k=0;$k<count($tags);$k++){
                                             $rand_font = rand(3,6);
                                             ?>
-                                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                                        <?php }?>
+                                            <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+                                        <?php //}?>
                                     </div>
                                     <div class="clear"></div>
                                 </div>
                             <?php }?>
                             <div class="top">
                                 <div>
-                                    <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
+                                    <h2><?php echo ($list[$i]["pd_status"]==0)?"판매중":($list[$i]["pd_status"]==1)?"거래중":"";?></h2>
                                     <div>
                                         <ul>
                                             <li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -403,7 +399,7 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                                     <h2><?php echo $list[$i]["pd_name"];?></h2>
                                 <?php }?>
                                 <div>
-                                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
                                 </div>
                             </div>
 
@@ -645,11 +641,12 @@ function fnlist2(num,type1,type,mb_id){
             $(".loader").css("display","none");
         }
     }).done(function(data){
-        console.log(data);
         if(data.indexOf("no-member")>0){
             alert("회원정보가 없습니다.");
             return false;
         }
+
+
         if(data.indexOf("no-list")==-1){
             if(num == 1){
                 //새리스트
@@ -670,7 +667,40 @@ function fnlist2(num,type1,type,mb_id){
 
                 page++;
             }
+
+            if(type1 == 1 || type1 == 2){
+                var cnt1 = $("#listCount1").val();
+                var ncnt1 = Number(cnt1);
+                var incnt1 = ncnt1.numberFormat();
+                var cnt2 = $("#listCount2").val();
+                var ncnt2 = Number(cnt2);
+                var incnt2 = ncnt2.numberFormat();
+                var total = ncnt1 + ncnt2;
+                total = total.numberFormat();
+                $("#mul label").html(incnt1);
+                $("#avil label").html(incnt2);
+                if(type1 == 1){
+                    $(".myboard span").html(total);
+                }else{
+                    $(".order_tab span").html(total);
+                }
+            }
+            //if(type1 == 2){
+
+            //}
+            if(type1 == 3){
+                var total = $("#listCount").val();
+                total = Number(total);
+                total = total.numberFormat();
+                $("#wishes span").html(total);
+            }
         }else{
+            data = data.split("//");
+
+            if(type1 == 1 || type1 == 2) {
+                $("#mul label").html(data[1]);
+                $("#avil label").html(data[2]);
+            }
             if(num==1){
                 $(".grid").html('');
             }
@@ -707,6 +737,17 @@ function fn_block(){
     }
 
 }
+// 숫자 타입에서 쓸 수 있도록 format() 함수 추가
+Number.prototype.numberFormat = function(){
+    if(this==0) return 0;
+
+    var reg = /(^[+-]?\d+)(\d{3})/;
+    var n = (this + '');
+
+    while (reg.test(n)) n = n.replace(reg, '$1' + ',' + '$2');
+
+    return n;
+};
 </script>
 
 <?php 

@@ -15,9 +15,12 @@ while($row = sql_fetch_array($res)){
         <article>
             <div class="model_list">
                 <table>
-
-                </table>
-                <table>
+                    <colspan>
+                        <col width="10%">
+                        <col width="*">
+                        <col width="20%">
+                        <col width="15%">
+                    </colspan>
                     <tr>
                         <th>번호</th>
                         <th>사유</th>
@@ -28,8 +31,8 @@ while($row = sql_fetch_array($res)){
                     ?>
                         <tr>
                             <td><?php echo count($list)-$i;?></td>
-                            <td><?php echo $list[$i]["mb_id"];?></td>
                             <td><?php echo $list[$i]["blind_content"];?></td>
+                            <td><?php echo $list[$i]["mb_id"];?></td>
                             <td><?php echo $list[$i]["blind_date"];?></td>
                         </tr>
                     <?php
@@ -45,7 +48,12 @@ while($row = sql_fetch_array($res)){
                 </table>
             </div>
             <div class="submit_gr no_print">
-                <a href="<?php echo G5_URL."/admin/product_list.php?"; ?>" class="adm-btn01">게시글 목록</a>
+                <?php if($back=="qa"){?>
+                    <a href="<?php echo G5_URL."/admin/product_blind_reset.php?page=".$page."&sfl=".$sfl."&stx=".$stx."&qa_id=".$qa_id."&pd_id=".$pd_id; ?>" class="adm-btn01">블라인드 해제</a>
+                    <a href="<?php echo G5_URL."/admin/qa_view.php?page=".$page."&sfl=".$sfl."&stx=".$stx."&qa_id=".$qa_id; ?>" class="adm-btn01">돌아가기</a>
+                <?php }else{ ?>
+                    <a href="<?php echo G5_URL."/admin/product_list.php?"; ?>" class="adm-btn01">게시글 목록</a>
+                <?php }?>
             </div>
         </article>
     </section>

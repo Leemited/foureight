@@ -18,7 +18,7 @@ if($group_id){
     sql_query($sql);
 }
 
-$sql = "select *,p.mb_id as pd_mb_id from `cart` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and p.pd_type = {$pd_type} and c.c_status != 2 order by c_status desc";
+$sql = "select *,p.mb_id as pd_mb_id from `cart` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and p.pd_type = {$pd_type} and c.c_status != 2 and c.c_status != 10 order by c_status desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $cart[] = $row;
@@ -51,13 +51,13 @@ $back_url = G5_URL;
 <div class="alert_list" style="height:calc(100vh - 42vw);">
     <div class="list_con">
         <?php for($i=0;$i<count($cart);$i++){
-            $mb = get_member($cart["pd_mb_id"]);
+            $mb = get_member($cart[$i]["pd_mb_id"]);
             if($cart[$i]["c_status"]==0 && $chk != true){
             ?>
             <p style="margin:2vw 2vw 2vw 2vw;">구매승인대기</p>
             <div style="width:calc(100% - 4vw);height:1px;background-color:#000;margin:2vw;border:1px inset #eee;opacity:0.5"></div>
             <?php $chk = true; } ?>
-        <div class="alarm_item <?php if($cart[$i]["c_status"]==0){?>no_order<?php }else{?> active <?php }?>" id="item_<?php echo $cart[$i]["pd_id"];?>" <?php if($cart[$i]["c_status"]==1){?>onclick="addOrder('<?php echo $cart[$i]["pd_id"];?>','<?php echo $cart[$i]["c_price"];?>','<?php echo $cart[$i]['cid'];?>');" <?php }?>>
+        <div class="alarm_item <?php if($cart[$i]["c_status"]==0){?>no_order<?php }else{?> active <?php }?>" id="item_<?php echo $cart[$i]["cid"];?>" <?php if($cart[$i]["c_status"]==1){?>onclick="addOrder('<?php echo $cart[$i]["pd_id"];?>','<?php echo $cart[$i]["c_price"];?>','<?php echo $cart[$i]['cid'];?>');" <?php }?>>
             <?php if($cart[$i]["pd_images"]!=""){
                 $img = explode(",",$cart[$i]["pd_images"]);
                 $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
@@ -103,19 +103,44 @@ $back_url = G5_URL;
                 <?php if($cart[$i]["c_status"]==0){?>
                 <div class="no_order">구매예약</div>
                 <?php }?>
-                <?php if($cart[$i]["c_status"]==1){?>
-                <div class="no_order">구매승인</div>
+                <?php if($cart[$i]["c_status"]==1){
+                    if($pd_type==1){
+                    ?>
+                    <div class="no_order">구매승인</div>
+                <?php }else{?>
+                    <div class="no_order">계약대기</div>
                 <?php }?>
                 <?php if($cart[$i]["c_status"]==2){?>
-                <div class="no_order">구매종료</div>
+                <div class="no_order">구매취소</div>
+                <?php }?>
+                <?php }?>
+                <?php if($cart[$i]["c_status"]==3){?>
+                <div class="no_order">예약거절</div>
                 <?php }?>
                 <h2><?php echo $cart[$i]["pd_name"];?></h2>
                 <p>판매자 : <?php echo $mb["mb_nick"];?> </p>
                 <div>
-                    <?php echo number_format($cart[$i]["c_price"])." 원";?>
+                    <?php
+                        if($pd_type==2){
+                            if($cart[$i]["pd_price2"]){
+                                echo number_format($cart[$i]["pd_price2"])." 원";
+                            }else {
+                                echo number_format($cart[$i]["c_price"]) . " 원";
+                            }
+                        }else{
+                             echo number_format($cart[$i]["c_price"])." 원";
+                        }
+                    ?>
                 </div>
             </div>
             <div class="clear"></div>
+            <?php if($cart[$i]["c_status"]==3){?>
+            <div class="controls">
+                <div class="btn_controls">
+                    <input type="button" value="삭제하기" onclick="fnCartDelItem('<?php echo $cart[$i]['cid'];?>')">
+                </div>
+            </div>
+            <?php } ?>
         </div>
         <?php } ?>
         <?php if(count($cart)==0){?>
@@ -166,13 +191,14 @@ function addOrder(pd_id,price,cid){
     var pd_ids = $("#pd_ids").val();
     var cart_ids = $("#cart_ids").val();
     var prices = $("#prices").val();
-    if($("#item_"+pd_id).hasClass("active")) {
-        $("#item_"+pd_id).removeClass("active");
-        $("#item_"+pd_id).addClass("noactive");
+    if($("#item_"+cid).hasClass("active")) {
+        // 빼기
+        $("#item_"+cid).removeClass("active");
+        $("#item_"+cid).addClass("noactive");
         var to_price = $(".cart_div:first-child .right").text();
-        to_price = to_price.replace(" 원", "");
-        to_price = to_price.replace(",","");
-        var end_price = Number(to_price) - Number(price);
+        //to_price = to_price.replace(" 원", "");
+        var tot_price = to_price.replace(/[^0-9]/g,"");
+        var end_price = Number(tot_price) - Number(price);
         $("#total_price").val(end_price);
         end_price = end_price.numberFormat();
         $(".cart_div .right").html(end_price + " 원");
@@ -199,12 +225,13 @@ function addOrder(pd_id,price,cid){
             $("#prices").val(re_prices);
         }
     }else{
-        $("#item_"+pd_id).addClass("active");
-        $("#item_"+pd_id).removeClass("noactive");
+        //더하기
+        $("#item_"+cid).addClass("active");
+        $("#item_"+cid).removeClass("noactive");
         var to_price = $(".cart_div:first-child .right").text();
-        to_price = to_price.replace(" 원", "");
-        to_price = to_price.replace(",","");
-        var end_price = Number(to_price) + Number(price);
+        var tot_price = to_price.replace(/[^0-9]/g,"");
+        var end_price = Number(tot_price) + Number(price);
+        console.log(end_price);
         $("#total_price").val(end_price);
         end_price = end_price.numberFormat();
         $(".cart_div .right").html(end_price + " 원");
@@ -239,6 +266,25 @@ function fnCartOrder(){
 function fnCartDel(){
     $("#type2").val("del");
     document.cartform.submit();
+}
+
+function fnCartDelItem(cid){
+    $.ajax({
+       url:g5_url+"/mobile/page/ajax/ajax.cart_delete.php",
+        method:"POST",
+        data:{cid:cid}
+    }).done(function (data) {
+        console.log(data);
+        if(data=="1"){
+            alert("삭제할 아이템이 없습니다.");
+        }
+        if(data=="3"){
+            alert("삭제하지 못하였습니다.\r다시 시도해 주세요.");
+        }
+        if(data == "2"){
+            $("#item_"+cid).remove();
+        }
+    });
 }
 
 // 숫자 타입에서 쓸 수 있도록 format() 함수 추가

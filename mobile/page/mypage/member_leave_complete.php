@@ -2,6 +2,17 @@
 include_once ("../../../common.php");
 include_once (G5_MOBILE_PATH."/head.login.php");
 $back_url = G5_URL;
+
+$app = false;
+if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
+    $app = true;
+}
+
+$app2 = false;
+if($_SERVER["HTTP_USER_AGENT"] == "iosApp"){
+    $app2 = true;
+}
+
 ?>
 <div class="sub_head">
     <h2>회원 탈퇴 완료</h2>
@@ -22,6 +33,14 @@ $back_url = G5_URL;
     </div>
 
 </div>
+<script>
+    <?php if($app){?>
+    var chk = window.android.setLogout();
+    <?php }?>
+    <?php if($app2){?>
+    webkit.messageHandlers.onLogout.postMessage("logout");
+    <?php }?>
+</script>
 <?php
 include_once (G5_MOBILE_PATH."/tail.php");
 ?>

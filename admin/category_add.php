@@ -8,7 +8,7 @@ $ca_temp_id = $_REQUEST["ca_temp_id"];
 
 
 if($parent_ca_id){
-
+    // 세부 카테고리
 	$sql = "select * from `categorys` where cate_type = '{$cate_type}' and parent_ca_id = '{$parent_ca_id}' order by cate_order desc limit 0, 1";
 	$order = sql_fetch($sql);
 
@@ -17,6 +17,7 @@ if($parent_ca_id){
 	$sql = "insert into `categorys` set cate_type = '{$cate_type}', cate_name = '{$cate_name}', parent_ca_id = '{$parent_ca_id}', cate_order = '{$auto_order}', cate_depth = 2 ";
 
 }else{
+    // 카테고리
     @mkdir(G5_DATA_PATH.'/cate/', G5_DIR_PERMISSION);
     @chmod(G5_DATA_PATH.'/cate/', G5_DIR_PERMISSION);
 

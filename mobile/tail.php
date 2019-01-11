@@ -243,7 +243,13 @@ function fnStatusUpdate(){
         data:{status:status,pd_id:pd_id}
     }).done(function(data){
         console.log(data);
-        if(data=="1"){
+        if(data=="3"){
+            alert("해당 물품은 거래중인 상품으로 상태 변경할 수 없습니다.");
+            modalClose();
+        }else if(data=="4"){
+            alert("해당 물품은 판매완료된 상품으로 판매완료 상태이외는 변경할 수 없습니다.");
+            modalClose();
+        }else if(data=="1"){
             alert("상태변경이 완료 되었습니다.");
             modalClose();
         }else{
@@ -260,7 +266,10 @@ function fnBlindView(pd_id){
         method:"POST",
         data:{pd_id:pd_id}
     }).done(function(data){
+        console.log(data);
         if($("#id06").css("display")=="none"){
+            $("#blind_view_btn").attr("onclick","location.href='"+g5_url+"/mobile/page/mypage/blind_view.php?pd_id="+pd_id+"'");
+            $("#admin_qa").attr("onclick","fnAdminWrite('"+pd_id+"')");
             $("#id06").css("display","block");
             $("html, body").css("overflow","hidden");
             $("html, body").css("height","100vh");
@@ -268,6 +277,11 @@ function fnBlindView(pd_id){
         }
         $("#id06 .con p").html(data);
     });
+}
+
+function fnAdminWrite(pd_id){
+    //TODO : 관리자에게 문의 남기기;
+    location.href= g5_bbs_url+"/qawrite.php?pd_id="+pd_id;
 }
 
 $(function() {
@@ -310,26 +324,6 @@ function addSell2(pd_id,price,sell_mb_id,id){
     }
 }
 
-
-function setCookie(name, value, expiredays){
-    var todayDate = new Date();
-    todayDate.setDate( todayDate.getDate() + expiredays );
-    document.cookie = name + "=" + escape( value ) + "; path=/; expires=" + todayDate.toGMTString() + ";"
-}
-
-function getCookie(cName) {
-    cName = cName + '=';
-    var cookieData = document.cookie;
-    var start = cookieData.indexOf(cName);
-    var cValue = '';
-    if(start != -1){
-        start += cName.length;
-        var end = cookieData.indexOf(';', start);
-        if(end == -1)end = cookieData.length;
-        cValue = cookieData.substring(start, end);
-    }
-    return unescape(cValue);
-}
 function showMenu(){
     $(".write").show();
     $("#ft").show();

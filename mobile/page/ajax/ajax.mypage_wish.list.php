@@ -49,6 +49,7 @@ for($i=0;$i<count($list);$i++){
 			break;
 	}
 ?>
+    <input type="hidden" id="listCount" value="<?php echo count($list);?>">
 <div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" onclick="<?php if($list[$i]["pd_blind"]<10){?>fn_viewer('<?php echo $list[$i]["pd_id"];?>')<?php }?>">
     <?php if($list[$i]["pd_blind"]>=10){?>
         <div class="blind_bg">
@@ -114,7 +115,7 @@ for($i=0;$i<count($list);$i++){
 		<div class="bottom">
 			<h2><?php echo $list[$i]["pd_name"];?></h2>
 			<div>
-				<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+				<h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
 			</div>
 		</div>
 		

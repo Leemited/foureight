@@ -39,7 +39,11 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
     $mbs = get_member($mb_id);
 
     $apiKey = "AAAATdHUVhc:APA91bHBoGTQnwcHrTgeBbZJaF6dz9TQ2EsMSayHCbsJntos5kqxwF9RT5ujrwfSe8mXZcbIlhKAUEuuYGNV1TDqKtixh08m6HSwjVNIWEZGA9meaJ1kMjs3VuyIn5qp0-pri79r0ql9";
-    $regId_array=array($reg_id);
+    if(is_array($reg_id)){
+        $regId_array = $reg_id;
+    }else {
+        $regId_array = array($reg_id);
+    }
     $url = 'https://fcm.googleapis.com/fcm/send';
     if($mbs["sdkVersion"] == "ios"){
         $fields = array(

@@ -3,6 +3,9 @@ if (!defined('_GNUBOARD_')) exit; // 개별 페이지 접근 불가
 
 // add_stylesheet('css 구문', 출력순서); 숫자가 작을 수록 먼저 출력됨
 add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
+if($pd_id){
+    $pro = sql_fetch("select * from `product` where pd_id = '{$pd_id}'");
+}
 ?>
 <div class="sub_head">
     <div class="sub_back" onclick="location.href=g5_url"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
@@ -29,20 +32,23 @@ add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
     <input type="hidden" name="sca" value="<?php echo $sca ?>">
     <input type="hidden" name="stx" value="<?php echo $stx ?>">
     <input type="hidden" name="page" value="<?php echo $page ?>">
-    <?php
-    $option = '';
-    $option_hidden = '';
-    $option = '';
+    <input type="hidden" name="qa_1" value="<?php echo $pd_id;?>">
+        <?php
+        $option = '';
+        $option_hidden = '';
+        $option = '';
 
-    if ($is_dhtml_editor) {
-        $option_hidden .= '<input type="hidden" name="qa_html" value="1">';
-    } else {
-        $option .= "\n".'<input type="checkbox" id="qa_html" name="qa_html" onclick="html_auto_br(this);" value="'.$html_value.'" '.$html_checked.'>'."\n".'<label for="qa_html">html</label>';
-    }
+        if ($is_dhtml_editor) {
+            $option_hidden .= '<input type="hidden" name="qa_html" value="1">';
+        } else {
+            $option .= "\n".'<input type="checkbox" id="qa_html" name="qa_html" onclick="html_auto_br(this);" value="'.$html_value.'" '.$html_checked.'>'."\n".'<label for="qa_html">html</label>';
+        }
 
-    echo $option_hidden;
-    ?>
-
+        echo $option_hidden;
+        ?>
+        <?php if($pd_id){?>
+            <input type="hidden" value="게시물" name="qa_category">
+        <?php }else{ ?>
         <?php if ($category_option) { ?>
             <div class="tbl_frm01 tbl_wrap">
                 <select name="qa_category" id="qa_category" required class="write_input" >
@@ -51,11 +57,12 @@ add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
                 </select>
             </div>
         <?php } ?>
+        <?php } ?>
         <?php if ($is_email) { ?>
             <div class="tbl_frm01 tbl_wrap">
                 <input type="email" name="qa_email" value="<?php echo get_text($write['qa_email']); ?>" id="qa_email" <?php echo $req_email; ?> class="<?php echo $req_email.' '; ?> write_input email" maxlength="100" placeholder="이메일">
                 <input type="checkbox" name="qa_email_recv" value="1" id="qa_email_recv" <?php if($write['qa_email_recv']) echo 'checked="checked"'; ?>>
-                <label for="qa_email_recv">답변받기</label>
+                <label for="qa_email_recv" class="qa_email_label">이메일로 답변받기 <img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""></label>
             </div>
         <?php } ?>
         <?php if ($is_hp) { ?>
@@ -67,11 +74,12 @@ add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
             </div>
         <?php } ?>
         <div class="tbl_frm01 tbl_wrap">
-            <input type="text" name="qa_subject" value="<?php echo get_text($write['qa_subject']); ?>" id="qa_subject" required class="write_input" maxlength="255" placeholder="문의제목">
+            <input type="text" name="qa_subject" value="<?php echo ($pd_id)?$pro["pd_tag"]."의 블라인드 사유 문의":get_text($write['qa_subject']); ?>" id="qa_subject" required class="write_input" maxlength="255" placeholder="문의제목">
         </div>
         <div class="tbl_frm01 tbl_wrap">
                 <?php echo $editor_html; // 에디터 사용시는 에디터로, 아니면 textarea 로 노출 ?>
         </div>
+        <?php if(!$pd_id) {?>
         <div class="tbl_frm01 tbl_wrap">
                 <input type="file" name="bf_file[1]" title="파일첨부 1 :  용량 <?php echo $upload_max_filesize; ?> 이하만 업로드 가능" class="frm_file write_input">
                 <?php if($w == 'u' && $write['qa_file1']) { ?>
@@ -84,7 +92,7 @@ add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
                 <input type="checkbox" id="bf_file_del2" name="bf_file_del[2]" value="1"> <label for="bf_file_del2"><?php echo $write['qa_source2']; ?> 파일 삭제</label>
                 <?php } ?>
         </div>
-
+        <?php }?>
         <div class="btn_confirm">
             <input type="submit" value="작성완료" id="btn_submit" accesskey="s" class="btn_b02">
             <a href="<?php echo $list_href; ?>" class="btn_b01">목록</a>

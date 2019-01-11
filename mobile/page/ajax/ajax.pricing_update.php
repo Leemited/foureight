@@ -24,11 +24,10 @@ if($pd_type==1){
     $myPricing = sql_fetch($sql);
 
     if($myPricing["cnt"]>0){
-        $sql = "update `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}' where id = '{$myPricing["id"]}'";;
+        $sql = "update `product_pricing` set pd_id = '{$pd_id}', pricing_pd_id = '{$pricing_pd_id}', pricing_content = '{$pricing_content}', pricing_price = '{$pricing_price}', pd_type = '{$pd_type}', sign_date = now(), mb_id = '{$mb_id}',status = 0 where id = '{$myPricing["id"]}'";
     }else{
-        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(),status = 0, mb_id = '{$mb_id}'";
+        $sql = "insert into `product_pricing` set pd_id = '{$pd_id}', pricing_pd_id = '{$pricing_pd_id}', pricing_content = '{$pricing_content}', pricing_price = '{$pricing_price}', pd_type = '{$pd_type}', sign_date = now(), status = 0, mb_id = '{$mb_id}'";
     }
-
 
     if (sql_query($sql)) {
 
@@ -40,9 +39,7 @@ if($pd_type==1){
         }
 
         $mb = get_member($pd["mb_id"]);
-
-        send_FCM($mb["regid"],$pd["pd_tag"],"게시물에 제시/딜 요청등록",G5_URL."/index.php?pd_id=".$pd_id,'pricing_set','제시/딜 알림',$mb["mb_id"],$pd["pd_id"],$img);
-
+        send_FCM($mb["regid"],$pd["pd_tag"],"게시물에 제시/딜 요청등록",G5_URL."/index.php?pd_id=".$pd_id,'pricing_set','제시/딜알림',$mb["mb_id"],$pd["pd_id"],$img);
         echo "4";
     } else {
         echo "5";
@@ -70,9 +67,9 @@ if($pd_type==2) {
     $myPricing = sql_fetch($sql);
 
     if($myPricing["cnt"]>0){
-        $sql = "update `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(), mb_id = '{$mb_id}' where id = '{$myPricing["id"]}'";;
+        $sql = "update `product_pricing` set pd_id = '{$pd_id}', pricing_pd_id = '{$pricing_pd_id}', pricing_content = '{$pricing_content}', pricing_price = '{$pricing_price}', pd_type = '{$pd_type}', sign_date = now(), mb_id = '{$mb_id}',status = 0 where id = '{$myPricing["id"]}'";
     }else{
-        $sql = "insert into `product_pricing` set pd_id = {$pd_id}, pricing_content = '{$pricing_content}', pricing_price = {$pricing_price}, pd_type = {$pd_type}, sign_date = now(),status = 0, mb_id = '{$mb_id}'";
+        $sql = "insert into `product_pricing` set pd_id = '{$pd_id}', pricing_pd_id = '{$pricing_pd_id}', pricing_content = '{$pricing_content}', pricing_price = '{$pricing_price}', pd_type = '{$pd_type}', sign_date = now(),status = 0, mb_id = '{$mb_id}'";
     }
 
     if (sql_query($sql)) {
@@ -85,7 +82,7 @@ if($pd_type==2) {
 
         $mb = get_member($pd["mb_id"]);
 
-        send_FCM($mb["regid"],$pd["pd_tag"],"게시물에 제시/딜 요청등록",G5_URL."/index.php?pd_id=".$pd_id,'pricing_set','제시/딜 알림',$mb["mb_id"],$pd["pd_id"],$img);
+        send_FCM($mb["regid"],$pd["pd_tag"],"게시물에 제시/딜 요청등록",G5_URL."/index.php?pd_id=".$pd_id,'pricing_set','제시/딜알림',$mb["mb_id"],$pd["pd_id"],$img);
         echo "4";
     } else {
         echo "5";

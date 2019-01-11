@@ -68,11 +68,6 @@ for($i=0;$i<count($list);$i++){
 	}
 ?>
 <div class="grid__item <?php if($list[$i]["pd_images"]!=""){echo ' no-photo';} if($list_type == "true"){echo " type_list";}?> <?php if($flag){echo "wishedon";} ?>" id="list_<?php echo $list[$i]['pd_id'];?>">
-    <?php if($list[$i]["pd_blind"]>=10){?>
-        <div class="blind_bg">
-            <input type="button" value="사유보기" class="list_btn"  >
-        </div>
-    <?php }?>
 	<div>
         <?php if($list[$i]["pd_images"]!=""){
             $img = explode(",",$list[$i]["pd_images"]);
@@ -87,7 +82,7 @@ for($i=0;$i<count($list);$i++){
                     <?php }?>
                 </div>
             <?php }else{
-                $tags = explode("/",$list[$i]["pd_tag"]);
+                $tags = explode("#",$list[$i]["pd_tag"]);
                 $rand = rand(1,13);
                 ?>
                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
@@ -95,14 +90,14 @@ for($i=0;$i<count($list);$i++){
                         <?php //for($k=0;$k<count($tags);$k++){
                             $rand_font = rand(3,6);
                             ?>
-                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $list[$i]["pd_tag"];?></div>
+                            <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
                         <?php //}?>
                     </div>
                     <div class="clear"></div>
                 </div>
             <?php }?>
         <?php }else{
-            $tags = explode("/",$list[$i]["pd_tag"]);
+            $tags = explode("#",$list[$i]["pd_tag"]);
             $rand = rand(1,13);
             ?>
             <div class="bg rand_bg<?php echo $rand;?> item_images" >
@@ -110,7 +105,7 @@ for($i=0;$i<count($list);$i++){
                     <?php //for($k=0;$k<count($tags);$k++){
                         $rand_font = rand(3,6);
                         ?>
-                        <div class="rand_size<?php echo $rand_font;?>">#<?php echo $list[$i]["pd_tag"];?></div>
+                        <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
                     <?php //}?>
                 </div>
                 <div class="clear"></div>

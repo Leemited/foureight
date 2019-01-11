@@ -56,6 +56,7 @@ if(!$pd_id) {
     $pd_price2 = str_replace(",","",$_REQUEST["wr_price2"]);
     $pd_timeFrom = $mySetting["pd_timeFrom"];
     $pd_timeTo = $mySetting["pd_timeTo"];
+    $pd_timeType = $mySetting["pd_timeType"];
     $pd_video_link = $_REQUEST["pd_video_link"];
     $pd_discount = $_REQUEST["pd_discount"];
     $pd_content = $_REQUEST["pd_content"];
@@ -74,11 +75,12 @@ if(!$pd_id) {
     $sc = $write["pd_cate2"];
     $title = $write["pd_name"];
     $filename = $write["pd_images"];
-    $videoname = $write["pd_videos"];
+    $videoname = $write["pd_video"];
     $pd_price = $write["pd_price"];
     $pd_price2 = $write["pd_price2"];
     $pd_timeFrom = $write["pd_timeFrom"];
     $pd_timeTo = $write["pd_timeTo"];
+    $pd_timeType = $write["pd_timeType"];
     $pd_video_link = $write["pd_video_link"];
     $pd_discount = $write["pd_discount"];
     $pd_content = $write["pd_content"];
@@ -87,9 +89,21 @@ if(!$pd_id) {
     $pd_location_name = $write["pd_location_name"];
     $pd_infos = $write["pd_infos"];
 }
-
 ?>
-
+<style>
+    #head {
+        position: fixed;
+        z-index: 901;
+    }
+    .sub_head{    height: 10vw;
+        width: 100%;
+        position: fixed;
+        box-shadow: 0px -5px 20px 0px #000;
+        background-color: #fff;
+        z-index: 900;
+        top: 6vw;}
+    .write_form{position: relative;overflow-y: auto;height:auto;margin-top: 19vw;margin-bottom: 17vw;}
+</style>
 <div id="id01" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
 	<div class="w3-modal-content w3-card-4">
 		<div class="w3-container">
@@ -209,8 +223,8 @@ if(!$pd_id) {
 		<input type="hidden" value="<?php echo $pd_type2;?>" name="type2" id="type2">
 		<input type="hidden" value="<?php echo $c;?>" name="cate1" id="cate1">
 		<input type="hidden" value="<?php echo $sc;?>" name="cate2" id="cate2">
-		<input type="hidden" value="<?php echo $filename;?>" name="filename" id="filename">
-        <input type="hidden" value="<?php echo $videoname;?>" name="videoname" id="videoname">
+		<input type="hidden" value="<?php echo $filename;?>" name="filename" id="filename" style="width:100%">
+        <input type="hidden" value="<?php echo $videoname;?>" name="videoname" id="videoname" style="width:100%">
         <!--<input type="text" value="" name="addr" id="addr">-->
         <input type="hidden" value="<?php echo $write["pd_lat"];?>" name="pd_lat" id="pd_lat">
         <input type="hidden" value="<?php echo $write["pd_lng"];?>" name="pd_lng" id="pd_lng">
@@ -221,9 +235,9 @@ if(!$pd_id) {
                 <article>
                     <div>
                         <div class="videoArea sc avility">
-                            <h2>거래 조건 및 유의 사항</h2><br><br>
-                            <p>거래시 유의사항을 적어주세요. 대화하기에서 구매 안내에 사용됩니다.</p>
-                            <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" style="margin-top:5vw" required onkeyup="fnfilter(this.value,'pd_infos')"><?php echo str_replace("<br/>","\n", $pd_infos);?></textarea>
+                            <h2 style="position: relative;">거래 조건 및 유의 사항</h2><br>
+                            <p style="font-size:2.8vw;">거래시 유의사항을 적어주세요. 대화하기에서 구매 안내에 사용됩니다.</p>
+                            <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" style="margin-top:5vw" required onkeyup="fnfilter(this.value,'pd_infos')"><?php echo str_replace("<br/>","\r", $pd_infos);?></textarea>
                         </div>
                     </div>
                 </article>
@@ -275,10 +289,8 @@ if(!$pd_id) {
 							<!--<input type="button" value="+ 개인문구 추가하기" class="word_add" onclick="addMyword();">-->
 						</div>
 						<div class="content">
-                            <div class="in_content" style="padding:0;">
-
-                            </div>
-							<textarea name="wr_content" id="wr_content" class="autosize" placeholder="상세 설명" onkeyup="fnfilter(this.value,'wr_content')"><?php echo str_replace("<br/>","\n", $pd_content);?></textarea>
+                            <div class="in_content" style="padding:0;"></div>
+							<textarea name="wr_content" id="wr_content" class="autosize" placeholder="상세 설명" onkeyup="fnfilter(this.value,'wr_content')"><?php echo str_replace("<br/>","\r", $pd_content);?></textarea>
 						</div>
 					</div>
 				</div>
@@ -289,17 +301,18 @@ if(!$pd_id) {
                 <div>
                     <div class="videoArea sc">
                         <h2>거래가능 시간</h2>
-                        <div>
-                            <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:15vw">
-                                <?php for($i = 0; $i< 24; $i++){
+                        <div class="pd_times">
+                            <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3 sel_cate" style="width:12vw">
+                                <?php for($i = 1; $i< 25; $i++){
                                     $time = str_pad($i,"2","0",STR_PAD_LEFT);
                                     ?>
                                     <option value="<?php echo $time;?>" <?php if($pd_timeFrom==$time){?>selected<?php }?>><?php echo $time;?></option>
                                 <?php }?>
                             </select> 시부터
                              ~
-                            <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:15vw">
-                                <?php for($i = 0; $i< 24; $i++){
+                            <input type="checkbox" value="1" name="pd_timeType" id="pd_timetype" <?php if($pd_timeType==1){?>checked<?php }?>><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일 </label>
+                            <select name="pd_timeTo" id="pd_timeTo" class="write_input3 sel_cate" style="width:12vw;margin-left:1vw">
+                                <?php for($i = 1; $i< 25; $i++){
                                     $time = str_pad($i,"2","0",STR_PAD_LEFT);
                                     ?>
                                     <option value="<?php echo $time;?>" <?php if($pd_timeTo==$time){?>selected<?php }?>><?php echo $time;?></option>
@@ -323,11 +336,11 @@ if(!$pd_id) {
                         <?php for($i=0;$i<count($images);$i++){
                                 $img = get_images(G5_DATA_PATH."/product/".$images[$i],500,500);
                             ?>
-                                <div class="image_box app" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }?>  style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;">
+                                <div class="image_box app" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;">
                                     <label for="images<?php echo $i;?>">
                                         <img src="<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
-                                        <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" >
+                                        <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                                         <?php } ?>
                                     </label>
                                 </div>
@@ -336,11 +349,11 @@ if(!$pd_id) {
                         if($image_cnt > 0){
                         for($i=$image_cnt;$i<5;$i++){
                             ?>
-                            <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;"  <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"<?php }?> >
+                            <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;"  <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  >
                                 <label for="images<?php echo $i;?>">
                                     <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                     <?php if(!$app){?>
-                                    <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;">
+                                    <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                                     <?php } ?>
                                 </label>
                             </div>
@@ -349,11 +362,11 @@ if(!$pd_id) {
                         <?php }else{
                             for($i=0;$i<5;$i++){
                                 ?>
-                                <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }?> >
+                                <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  >
                                     <label for="images<?php echo $i;?>">
                                         <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
-                                        <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;">
+                                        <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                                         <?php } ?>
                                     </label>
                                 </div>
@@ -364,6 +377,28 @@ if(!$pd_id) {
                 <?php if($app || $app2){?>
                 <div class="photo_msg">사진을 로드중입니다.</div>
                 <?php }?>
+            </article>
+        </section>
+        <section class="write_sec">
+            <article>
+                <div>
+                    <div class="videoArea">
+                        <h2>동영상 수정</h2>
+                        <div class="edit_video" id="edit_video" <?php if($app){?>onclick="window.android.camereOn3('<?php echo $member["mb_id"];?>')"<?php } if($app2){?>onclick="fnVideoEdit()"<?php }?>>
+                            <label for="video">영상수정</label>
+                            <?php if(!$app && !$app2){?>
+                            <input type="file" id="video" name="video" style="display:none;" accept="video/mp4">
+                            <?php }?>
+                        </div>
+                        <div class="preview_video" style="position:relative;margin-top:10px;padding-top:10px;border-top:1px solid #ddd;">
+                        <?php if($write["pd_video"] || $videoname){
+                                $video = ($write["pd_video"])?$write["pd_video"]:$videoname;
+                            ?>
+                            <video controls width="400px;" height="400px;" class="view_video" id="view_video" preload="metadata" src="<?php echo G5_DATA_URL."/product/".$video;?>" type="video/mp4"></video>
+                        <?php }?>
+                        </div>
+                    </div>
+                </div>
             </article>
         </section>
 		<?php /*if($filename=="" && $chkMobile == false && !$pd_id){*/?><!--
@@ -448,7 +483,7 @@ if(!$pd_id) {
                         <div class="videoArea sc" style="margin-bottom:3vw;border-bottom:1px solid #ddd">
                             <h2>거래가격 단위</h2>
                             <div>
-                                <select name="pd_price_type" id="pd_price_type" class="write_input3" style="width:25vw">
+                                <select name="pd_price_type" id="pd_price_type" class="write_input3 sel_cate" style="width:25vw">
                                     <option value="0" <?php if($pd_price_type == 0){?>selected<?php }?>>회당</option>
                                     <option value="1" <?php if($pd_price_type == 1){?>selected<?php }?>>시간당</option>
                                     <option value="2" <?php if($pd_price_type == 2){?>selected<?php }?>>하루당</option>
@@ -518,25 +553,27 @@ function setImages(img,index){
 
     var filename = $("#filename").val();
     var files = filename.split(',');
+
     var newfile = '';
-    for(var i = 0; i<files.length ; i++){
-        console.log(files[i]);
-        if(i==index){
-            if(i==0){
-                newfile = img;
-            }else{
-                newfile = newfile + "," + img;
-            }
-        }else{
-            if(i==0){
-                newfile = files[i];
-            }else{
-                newfile = newfile + "," + files[i];
+    if(index >= files.length){
+        newfile = filename + "," +img;
+    }else {
+        for (var i = 0; i < files.length; i++) {
+            if (i == index) {
+                if (i == 0) {
+                    newfile = img;
+                } else {
+                    newfile = newfile + "," + img;
+                }
+            } else {
+                if (i == 0) {
+                    newfile = files[i];
+                } else {
+                    newfile = newfile + "," + files[i];
+                }
             }
         }
     }
-
-    console.log("filename = "+newfile);
 
     $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.edit_image.php",
@@ -547,27 +584,77 @@ function setImages(img,index){
         var imgs = "url('"+g5_url+"/data/product/"+data+"')";
         $("#box"+index).css("background-image",imgs);
         if($("#filename").val()=="") {
-            $("#filename").val(newfile);
+            $("#filename").val(img);
         }else{
             $("#filename").val(newfile);
         }
     });
 }
 
+function setVideo(video){
+    $("#videoname").val(video);
+
+    setTimeout(function(){
+        $(".view_video").attr("src",g5_url+"/data/product/"+video);
+        //비디오 사이즈 조절
+        var videoSection = document.getElementById('view_video');
+        setTimeout(function(){
+            var width = videoSection.videoWidth;
+            var height = videoSection.videoHeight;
+            var elmwidth = $("#edit_video").width();
+
+            var ratio = width / elmwidth;
+            width = width / ratio;
+            height = height / ratio;
+            $(".view_video").attr("width",width+"px");
+            $(".view_video").attr("height",height+"px");
+        },2000);
+    },1000);
+}
+
+function fnVideoEdit(){
+    webkit.messageHandlers.onVideoEdit.postMessage('<?php echo $member["mb_id"];?>');
+}
+
 $(document).on("change","#pd_timeFrom",function(){
-    var time = $(this).val();
-    setCookie("pd_timeFrom",$(this).val(),'1');
-    $("#pd_timeTo option").each(function(e){
-        if(Number($(this).val()) < Number(time)){
-            $(this).attr("disabled",true);
-        }else{
+    if($("#pd_timetype").prop("checked")!=true) {
+        var time = $(this).val();
+        setCookie("pd_timeFrom", $(this).val(), '1');
+        $("#pd_timeTo option").each(function (e) {
+            if (Number($(this).val()) < Number(time)) {
+                $(this).attr("disabled", true);
+            } else {
+                $(this).attr("disabled", false);
+            }
+            if (Number(time) + 1 == e) {
+                console.log(e + 1);
+                $(this).attr("selected", true);
+            }
+        })
+    }
+});
+
+$(document).on("click","#pd_timetype",function(){
+    if($(this).prop("checked")==true){
+        $("#pd_timeTo option").each(function(e) {
             $(this).attr("disabled",false);
-        }
-        if(Number(time)+1 == e){
-            console.log(e+1);
-            $(this).attr("selected",true);
-        }
-    })
+        });
+        setCookie("pd_timetype", 1);
+    }else{
+        var time = $("#pd_timeFrom").val();
+
+        $("#pd_timeTo option").each(function (e) {
+            if (Number($(this).val()) < Number(time)) {
+                $(this).attr("disabled", true);
+            } else {
+                $(this).attr("disabled", false);
+            }
+            if (Number(time) + 1 == e) {
+                $(this).attr("selected", true);
+            }
+        })
+        setCookie("pd_timetype", 0);
+    }
 });
 
 //판매 구매 설정
@@ -832,6 +919,21 @@ $(document).on("click",".loc_ul_list li",function(){
    }
 });
 $(function(){
+    //비디오 사이즈 조절
+    var videoSection = document.getElementById('view_video');
+    <?php if($video){?>
+    setTimeout(function(){
+        var width = videoSection.videoWidth;
+        var height = videoSection.videoHeight;
+        var elmwidth = $("#edit_video").width();
+        var ratio = width / elmwidth;
+        width = width/ratio;
+        height = height/ratio;
+
+        $(".view_video").attr("width",width+"px");
+        $(".view_video").attr("height",height+"px");
+    },3000);
+    <?php }?>
     $("#locs1").keyup(function(key){
         if(key.keyCode == 13){
             mapSelect();
@@ -855,24 +957,23 @@ $(function(){
         $(this).val(price);
     });
 
-
     $(".myword").click(function(){
+        $("#wr_content").focus();
         var text = $(this).text();
+        var leng = text.length;
         var start = document.getElementById("wr_content").selectionStart;
         var content = $("#wr_content").val();
-        var addcontent = content.slice(0,start)+text+content.slice(start);
+        var orileng = content.slice(0,start).length;
+        var addcontent = content.slice(0,start)+text+"\r\n"+content.slice(start);
         $("#wr_content").val(addcontent);
-        //$(this).toggleClass("active");
-        //var chk = $(".in_content").html();
-        //var item = "<div class='"+$(this).text()+"'>"+$(this).text()+"<input type='hidden' name='words[]' value='"+$(this).text()+"'></div><br>";
-        //if($(".in_content div").hasClass($(this).text())){
-        //    console.log("cccc"+$(this).text());
-        //    $(".in_content div."+$(this).text()).remove();
-        //}else{
-        //   $(".in_content").append(item);
-        //}
-
+        //setTimeout(function(){
+            var cusor = orileng + leng + 1;
+            $("#wr_content").selectRange(cusor,cusor);
+            $("#wr_content").height(1).height( $("#wr_content").prop('scrollHeight')+12 );
+        //},100);
     });
+
+
 
     $("#cate_up").change(function(){
         var ca_id = $(this).val();
@@ -883,6 +984,7 @@ $(function(){
             method:"POST",
             data:{ca_id:ca_id}
         }).done(function(data){
+            console.log(data);
             $("#cate1").val(name);
             $("#cate2_up option").remove();
             $("#cate2_up").append(data);
@@ -946,7 +1048,7 @@ $(function(){
     });
 
     //사진 검증
-    <?php if($filename!=""){?>
+    <?php //if($filename!=""){?>
     setTimeout(function(){
         $.ajax({
             url:g5_url+"/mobile/page/write_photoload.php",
@@ -958,8 +1060,8 @@ $(function(){
              $(".filelist").append(data);
              $(".photo_msg").html('');
         });
-    },2000);
-    <?php }?>
+    },1000);
+    <?php //}?>
 
     //textarea resizeHeight
     $("textarea.autosize").height(1).height( $("textarea.autosize").prop('scrollHeight')+12 );
@@ -1235,7 +1337,8 @@ $(function(){
     setTimeout(function(){
 
     },1000);
-})
+});
+
 
 function fnLocation(locatioin,lat,lng){
     if(confirm("해당 위치로 등록 하시겠습니까?")){

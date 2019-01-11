@@ -47,10 +47,10 @@ if(strpos($agent,"foureight")!==false){
 		<input type="hidden" name="old_email" value="<?php echo $member['mb_email'] ?>">
 		<input type="hidden" name="mb_email" value="<?php echo isset($member['mb_email'])?$member['mb_email']:''; ?>" id="reg_mb_email" required class="frm_input email required" size="50" maxlength="100">	
 		<input type="hidden" name="mb_nick_default" value="<?php echo isset($member['mb_nick'])?get_text($member['mb_nick']):''; ?>">
-		<input type="hidden" name="mb_nick" value="<?php echo "FE".strtotime(date('Y-m-d'));?>" id="reg_mb_nick" required class="frm_input required nospace" maxlength="20">
+		<input type="hidden" name="mb_nick" value="" id="reg_mb_nick" required class="frm_input required nospace" maxlength="20">
 		<div class="tbl_frm01 tbl_wrap">
 			<input type="text" name="mb_id" value="<?php echo $member['mb_id'] ?>" id="reg_mb_id" class="frm_input <?php echo $readonly ?>" minlength="3" maxlength="20" <?php echo $required ?> <?php echo $readonly ?> placeholder="이메일[ID]" />
-			<input type="password" name="mb_password" id="reg_mb_password" class="frm_input" minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호" style="font-family:sans-serif,'nsr'"/>
+			<input type="password" name="mb_password" id="reg_mb_password" class="frm_input" minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호" style="font-family:sans-serif"/>
 			<input type="password" name="mb_password_re" id="reg_mb_password_re" class="frm_input " minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호 확인" style="font-family:Sans-serif">
 			<select name="mb_sex" id="reg_mb_sex"  <?php echo $required ?> ><option value="">성별</option><option value="남" <?php if($member['mb_sex']=="남"){?>selected<?php } ?>>남</option><option value="여" <?php if($member['mb_sex']=="여"){?>selected<?php } ?>>여</option>
 			</select>	
@@ -287,6 +287,8 @@ if(strpos($agent,"foureight")!==false){
 			$("#reg_mb_id").keyup(function(){
 				var id = $(this).val();
 				$("#reg_mb_email").val(id);
+				var emid = id.split("@");
+				$("#reg_mb_nick").val(emid[0]);
 			});
 
 			$("#reg_mb_name").keyup(function(){

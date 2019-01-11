@@ -111,7 +111,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 		</ul>
 	</div>
     <div class="setting_wrap ">
-        <h2>찬단목록</h2>
+        <h2>차단목록</h2>
         <ul>
             <li class="single" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/member_block_list.php?id=<?php echo $settings['id'];?>'">차단회원 목록</li>
         </ul>

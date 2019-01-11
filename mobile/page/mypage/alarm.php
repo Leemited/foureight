@@ -118,6 +118,9 @@ function alarmRead(pd_id,type,id,link){
 }
 
 $(function() {
+    <?php if($app){?>
+    window.android.resetBadge();
+    <?php } ?>
     $("div[id^=list]").each(function(){
         var id = $(this).attr("id");
         var alarm_id = id.replace("list_","");

@@ -3,12 +3,8 @@ include_once("../../../common.php");
 
 $page = $_REQUEST["page"];
 
-
 //검색 
 $search = " p.pd_status < 10 ";
-
-//정렬
-$od = " order by p.pd_date desc";
 
 //구분[구분 없음]
 $type1 = $_REQUEST["type1"];
@@ -21,12 +17,29 @@ if($mb_id){
     $search .= " and p.mb_id = '{$mb_id}'";
 }
 
+$sql = "select *, m.mb_id as mb_id from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where p.pd_status < 10  and p.mb_id = '{$mb_id}' order by p.pd_date desc";
+$res =sql_query($sql);
 
+$type1Count = 0;
+$type2Count = 0;
+
+while($row = sql_fetch_array($res)){
+    if($row["pd_type"]==1){
+        $type1Count++;
+    }else{
+        $type2Count++;
+    }
+}
 $sql = "select *, m.mb_id as mb_id from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where  {$search} order by p.pd_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;
+
 }
+?>
+<input type="hidden" id="listCount1" value="<?php echo $type1Count;?>">
+<input type="hidden" id="listCount2" value="<?php echo $type2Count;?>">
+<?php
 for($i=0;$i<count($list);$i++){
 	switch($list[$i]["pd_type"]){
 		case "1":
@@ -46,6 +59,7 @@ for($i=0;$i<count($list);$i++){
 		}
 	}
 ?>
+
 <div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" <?php if($list[$i]["pd_blind"]<10){?>onclick="fn_viewer('<?php echo $list[$i]["pd_id"];?>')"<?php }?>>
     <?php if($list[$i]["pd_blind"]>=10){?>
         <div class="blind_bg">
@@ -100,7 +114,7 @@ for($i=0;$i<count($list);$i++){
         <?php }?>
 		<div class="top">
 			<div>
-                <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
+                <h2><?php echo ($list[$i]["pd_status"]==0)?"판매중":($list[$i]["pd_status"]==1)?"거래중":"";?></h2>
 				<div>
 					<ul>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($list_type == "true"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -116,13 +130,15 @@ for($i=0;$i<count($list);$i++){
                 <h2><?php echo $list[$i]["pd_name"];?></h2>
             <?php }?>
             <div>
-                <h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+                <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
             </div>
 		</div>
 		
 	</div>
 </div>
 <?php }
-if(count($list)==0){echo "no-list//".$odr;}
+if(count($list)==0){
+    echo "no-list//".$type1Count."//".$type2Count;
+}
 ?>
 

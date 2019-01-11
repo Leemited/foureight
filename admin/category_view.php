@@ -55,7 +55,7 @@ while($data=sql_fetch_array($query)){
 								<!--<input type="button" value="수정" class="adm-btn01" style="border:none;width:auto" onclick="fnCateName('<?php /*echo $ca_id;*/?>');">-->
 							</td>
 						</tr>
-                        <tr>
+                        <!--<tr>
                             <th>카테고리 키워드 등록</th>
                             <td class="subject" style="cursor:auto">
                                 <input type="text" name="cate_tag" id="cate_tag" class="write_input01 grid_90" value="<?php echo $view["cate_tag"];?>" placeholder="<?php if($view["cate_tag"]==""){echo "미등록";}?>">
@@ -66,7 +66,7 @@ while($data=sql_fetch_array($query)){
 							<th>판매자-카테고리안내문구</th>
 							<td class="subject" style="cursor:auto">
 								<input type="text" name="info_text1" id="info_text1" class="write_input01 grid_90" value="<?php echo $view["info_text1"];?>" placeholder="<?php if($view["info_text1"]==""){echo "미등록";}?>">
-                                <!--<p>키워드는 ','구분하여 등록바랍니다.</p>-->
+                                <!--<p>키워드는 ','구분하여 등록바랍니다.</p>--
 							</td>
 						</tr>
                         <tr>
@@ -75,6 +75,7 @@ while($data=sql_fetch_array($query)){
                                 <input type="text" name="info_text2" id="info_text2" class="write_input01 grid_90" value="<?php echo $view["info_text2"];?>" placeholder="<?php if($view["info_text2"]==""){echo "미등록";}?>">
                             </td>
                         </tr>
+                        -->
 					</tbody>
 				</table>
 			</div>

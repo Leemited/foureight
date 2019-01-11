@@ -65,12 +65,11 @@ while($row = sql_fetch_array($res)){
                                 ?>
                                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
                                     <div class="tags">
-                                        <?php for($k=0;$k<count($tags);$k++){
+                                        <?php //for($k=0;$k<count($tags);$k++){
                                             $rand_font = rand(3,6);
-                                            if($tags[$k]!=""){
-                                                ?>
-                                                <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                                            <?php } }?>
+                                        ?>
+                                            <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+                                        <?php //} ?>
                                     </div>
                                     <div class="clear"></div>
                                 </div>
@@ -81,12 +80,11 @@ while($row = sql_fetch_array($res)){
                             ?>
                             <div class="bg rand_bg<?php echo $rand;?> item_images" >
                                 <div class="tags">
-                                    <?php for($k=0;$k<count($tags);$k++){
+                                    <?php //for($k=0;$k<count($tags);$k++){
                                         $rand_font = rand(3,6);
-                                        if($tags[$k]!=""){
-                                            ?>
-                                            <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
-                                        <?php } }?>
+                                     ?>
+                                        <div class="rand_size<?php echo $rand_font;?>"><?php echo $list[$i]["pd_tag"];?></div>
+                                    <?php //} ?>
                                 </div>
                                 <div class="clear"></div>
                             </div>
@@ -107,7 +105,7 @@ while($row = sql_fetch_array($res)){
 						<div class="bottom">
 							<h2><?php echo $list[$i]["pd_name"];?></h2>
 							<div>
-								<h1>￦ <?php echo number_format($list[$i]["pd_price"]);?></h1>
+								<h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
 								<img src="<?php echo G5_IMG_URL?>/ic_trash_del.svg" alt="복원아이콘" class="" onclick="fnTrashDelete('<?php echo $list[$i]["pd_id"];?>');">
 								<!-- <?php 		
 								

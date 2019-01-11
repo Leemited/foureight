@@ -6,11 +6,11 @@ if(!$pd_ids || !$cart_ids || !$prices){
 }
 
 
+$pd_ids = explode(",", $_REQUEST["pd_ids"]);
+$cart_ids = explode(",", $_REQUEST["cart_ids"]);
+$prices = explode(",", $_REQUEST["prices"]);
 
 if($type=="insert") {
-    $pd_ids = explode(",", $_REQUEST["pd_ids"]);
-    $cart_ids = explode(",", $_REQUEST["cart_ids"]);
-    $prices = explode(",", $_REQUEST["prices"]);
     $groupid = "od_" . strtotime(date("Ymdhis"));
     $step = 0;
 
@@ -38,8 +38,26 @@ if($type=="insert") {
         alert("주문 페이지로 이동합니다.", G5_MOBILE_URL . "/page/mypage/orders.php?group_id=" . $groupid);
     }
 }else if($type=="del"){
-    $sql = "delete from `cart` where cid in ({$cart_ids})";
+    $cart_ids = implode(",",$cart_ids);
+    $sql = "update `cart` set c_status = 10 where cid in ({$cart_ids})";
+
     if(sql_query($sql)){
+        //취소 알림
+        //물건일 경우 상태 해당 상태 변경
+        $pdids = implode(",",$pd_ids);
+        $sql = "update `product` set pd_status = 0 where pd_id in ($pdids) and pd_status > 0";
+        sql_query($sql);
+
+        $sql = "select * from `product` where pd_id in ($pd_ids)";
+        $res = sql_query($sql);
+        while($row=sql_fetch_array($res)){
+            $mb = get_member($row["mb_id"]);
+            if ($row["pd_images"]) {
+                $imgs = explode(",", $row["pd_images"]);
+                $img = G5_DATA_URL . "/product/" . $imgs[0];
+            }
+            send_FCM($mb["regid"], $row["pd_tag"], $row["pd_tag"] . "의 구매가 취소되었습니다.", G5_MOBILE_URL . "/page/mypage.php", 'pay_reser_set', '구매관련 알림', $mb["mb_id"], $row["pd_id"], $img);
+        }
         alert("삭제 되었습니다.");
     }else{
         alert("이미 삭제 되었거나 잘못된 요청입니다.");

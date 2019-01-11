@@ -41,6 +41,12 @@ if($ad_id) {
                         </td>
                     </tr>
                     <tr>
+                        <th>키워드</th>
+                        <td class="con">
+                            <input type="text" name="ad_keyword" id="ad_keyword" required class="write_input01 grid_60" placeholder="|로 구분" value="<?php echo $write["ad_keyword"];?>">
+                        </td>
+                    </tr>
+                    <tr>
                         <th>사진</th>
                         <td class="con" style="position:relative;">
                             <input type="file" name="ad_photo" id="ad_photo" <?php if(!$ad_id){echo "required";}?> onchange="$('#ad_photo_name').val(this.value);" style="display:none;"><label for="ad_photo" style="position:absolute;left:calc(60% - 76px);top:20px;padding:5px 10px;background-color:#000;color:#fff">사진선택</label>
@@ -231,7 +237,17 @@ if($ad_id) {
                     data:{cate:$("#cate1").val(),type:type,id:"<?php echo $write["ad_cate2"];?>"}
                 }).done(function(data){
                     $("#cate2").html(data);
-
+                    $.ajax({
+                        url:g5_url+"/admin/ajax.category_list_count.php",
+                        method:"post",
+                        data:{cate:$("#cate2").val(),type:type}
+                    }).done(function(data){
+                        if(data==0) {
+                            $(".product_cnt").html("해당 카테고리에 등록된 제품이 없음, (기본값 0 입력)");
+                        }else{
+                            $(".product_cnt").html("0부터 " + data + "사이값 입력");
+                        }
+                    });
                 });
                 <?php }?>
             });

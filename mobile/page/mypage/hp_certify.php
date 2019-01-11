@@ -11,6 +11,7 @@ $settings = sql_fetch($sql);
 $mywords = explode(",",$settings["my_words"]);
 
 $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
+
 ?>
     <script src="<?php echo G5_JS_URL ?>/certify.js?v=<?php echo G5_JS_VER; ?>"></script>
     <style>
@@ -26,7 +27,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
             <input type="hidden" name="cert_type" value="<?php echo $member['mb_certify']; ?>" id="cert_type">
             <input type="hidden" name="cert_no" id="cert_no" value="">
             <input type="hidden" name="mb_name" id="mb_name" value="<?php echo $member["mb_name"];?>">
-            <input type="hidden" name="mb_hp" id="reg_mb_hp" value="123123131231" readonly>
+            <input type="hidden" name="mb_hp" id="reg_mb_hp" value="" readonly>
             <input type="hidden" name="mb_id" id="reg_mb_id" value="<?php echo $member["mb_id"];?>">
 
             <div class="setting_wrap">

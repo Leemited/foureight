@@ -1,78 +1,24 @@
-<?php 
-
-
-$sql = "select * from `categorys` where `cate_depth` = 2 and cate_type = 1 order by `cate_order`";
+<?php
+$sql = "select ca_id from `categorys` where `cate_depth` = 1 and cate_type = 1 order by `cate_order`";
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
-	switch($row["parent_ca_id"]){
-		case 1:
-			$scate[0][] = $row;
-			break;
-		case 2:
-			$scate[1][] = $row;
-			break;
-		case 3:
-			$scate[2][] = $row;
-			break;
-		case 4:
-			$scate[3][] = $row;
-			break;
-		case 5:
-			$scate[4][] = $row;
-			break;
-		case 6:
-			$scate[5][] = $row;
-			break;
-		case 7:
-			$scate[6][] = $row;
-			break;
-		case 8:
-			$scate[7][] = $row;
-			break;
-		case 9:
-			$scate[8][] = $row;
-			break;
-		case 10:
-			$scate[9][] = $row;
-			break;
-		case 11:
-			$scate[10][] = $row;
-			break;
-		case 12:
-			$scate[11][] = $row;
-			break;
-		case 13:
-			$scate[12][] = $row;
-			break;
-		case 14:
-			$scate[13][] = $row;
-			break;
-		case 15:
-			$scate[14][] = $row;
-			break;
-		case 16:
-			$scate[15][] = $row;
-			break;
-		case 17:
-			$scate[16][] = $row;
-			break;
-		case 18:
-			$scate[17][] = $row;
-			break;
-	}
-	
+    $parent[] = $row["ca_id"];
 }
+
 ?>
 <div class="category2">
     <ul class="scate00000 active">
         <li id="00000" ><a href="#">전체</a></li>
     </ul>
-	<?php for($i=0;$i<count($scate);$i++){ ?>
-	<ul class="scate<?php echo ($i+1);?>">
-		<?php for($j=0;$j<count($scate[$i]);$j++){?>
-		<li id="<?php echo $scate[$i][$j]["cate_code"];?>"><a href="#"><?php echo $scate[$i][$j]["cate_name"];?></a></li>
+	<?php for($i=0;$i<count($parent);$i++){
+        $sql = "select * from `categorys` where `cate_depth` = 2 and `cate_type` = 1 and parent_ca_id = {$parent[$i]} order by cate_order, ca_id asc";
+        $res = sql_query($sql);
+	    ?>
+	<ul class="scate<?php echo $parent[$i];?>">
+        <?php for($j=0;$row=sql_fetch_array($res);$j++){?>
+		<li id="<?php echo $row["cate_code"];?>"><a href="#"><?php echo $row["cate_name"];?></a></li>
 		<?php }?>
-        <li onclick="fnsuggestion2('<?php echo $scate[$i]['parent_ca_id'];?>');">제안하기</li>
+        <li onclick="fnsuggestion2('<?php echo $parent[$i]-1;?>');">제안하기</li>
 	</ul>
 	<?php }?>
 
