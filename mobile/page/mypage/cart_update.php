@@ -21,7 +21,8 @@ if($type=="insert") {
         if ($pro["pd_type2"] == 2) {
             $step = 1;
         }
-        $sql = "insert into `order_temp` set cid = '{$cart_ids[$i]}', pd_id = '{$pd_ids[$i]}', mb_id = '{$member["mb_id"]}', od_price = '{$prices[$i]}', od_status = 0, od_date = now() , od_pd_type = {$pro["pd_type2"]}, od_step=0, group_id = '{$groupid}'";
+        $sql = "insert into `order_temp` set cid = '{$cart_ids[$i]}', pd_id = '{$pd_ids[$i]}', mb_id = '{$member["mb_id"]}', pd_price = '{$pro["pd_price"]}',od_price = '{$prices[$i]}', od_status = 0, od_date = now() , od_pd_type = {$pd_type}, od_step=0, group_id = '{$groupid}'";
+
         if (sql_query($sql)) {
             $sql = "update `cart` set c_status = 2 where cid = {$cart_ids[$i]}";
             sql_query($sql);

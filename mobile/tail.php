@@ -34,11 +34,11 @@ if($member["mb_id"]) {
 
             </li>
 			<?php if($p == "index"){?>
-			<li id="home" onclick="location.href='<?php echo G5_URL;?>'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="최상위로"></li>
+			<li id="home" onclick="fnHome()"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="최상위로"></li>
 			<?php }else{?>
-			<li onclick="location.href='<?php echo G5_URL?>'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="홈"></li>
+			<li onclick="fnHome()"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="홈"></li>
 			<?php }?>
-			<li onclick="fnRecent()"><img src="<?php echo G5_IMG_URL?>/bottom_icon_03.svg" alt="최근본항목"></li>
+			<li onclick="fnRecent()" class="ft_menu_04"><img src="<?php echo G5_IMG_URL?>/bottom_icon_03.svg" alt="검색항목"></li>
 			<li onclick="location.href=g5_url+'/mobile/page/productmap/'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_04.svg" alt="지도보기"></li>
 		</ul>
     </div>
@@ -63,6 +63,18 @@ if ($config['cf_analytics']) {
 
 
 <script>
+
+function fnHome(){
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
+        method:"post",
+        data:{key:"type1",value:"1"}
+    }).done(function(data){
+        console.log(data);
+    });
+
+    location.href=g5_url;
+}
 function fnPricingUpdate(){
     var pd_id = $("#p_pd_id").val();
     var pd_type = $("#p_type").val();
@@ -121,6 +133,7 @@ function fnPricingUpdate(){
     });
 }
 function fn_viewer(id){
+
     if(id==""){
         alert("잘못된 요청입니다.");
         return false;
@@ -288,7 +301,7 @@ $(function() {
     $(document).scroll(function(){
         if($(this).scrollTop() <= 0){
             var home = "<?php echo G5_IMG_URL;?>/bottom_icon_home.svg";
-            $("#home").attr("onclick","location.href='<?php echo G5_URL;?>'");
+            $("#home").attr("onclick","fnHome");
             $("#home img").attr("src",home);
         }else{
             var home = "<?php echo G5_IMG_URL;?>/bottom_icon_05.svg";

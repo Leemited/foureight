@@ -7,6 +7,10 @@ if(stripos($_SERVER["HTTP_USER_AGENT"],"foureight")){
     $app = true;
 }
 
+$app2 = false;
+if($_SERVER["HTTP_USER_AGENT"] == "iosApp"){
+    $app2 = true;
+}
 //접속 카운트
 
 if($member["mb_id"]){
@@ -71,6 +75,9 @@ if($mb_id == ""){
     $mb_id = session_id();
 }
 
+//해당 제품의 판매 여부
+$sql = "select count(*)as cnt from `order` where od_status = 1 and pd_id = '{$pd_id}'";
+$pdorder = sql_fetch($sql);
 //해당 제품의 대화목록
 $sql = "select  * from `product_chat` where pd_id = {$pd_id} and (send_mb_id = '{$mb_id}' or read_mb_id = '{$mb_id}') order by msg_datetime asc";
 $res = sql_query($sql);
@@ -183,9 +190,19 @@ if($view["pd_type"]==1) {
         $likeper = false;
     }
 }
+switch ($view["pd_price_type"]){
+    case 0:
+        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_01.svg' alt=''></span>";
+        break;
+    case 1:
+        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_02.svg' alt=''></span>";
+        break;
+    case 2:
+        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_03.svg' alt=''></span>";
+        break;
+}
 ?>
 <?php include_once(G5_PATH .'/' . G5_PLUGIN_DIR . '/nodejs_connect/simple_view.php');?>
-
 <style>
     .DetailImage{width:100%;height:100%;background-color:#000;position:absolute;z-index:90000;top:0;left:0;overflow: hidden;transform:translate(0, 0)}
     .DetailImage #imgs{width:100%;height:100%;display:inline-block;vertical-align: middle}
@@ -207,18 +224,20 @@ if($view["pd_type"]==1) {
             <?php }
             if ($view["pd_video"]!=""){?>
                 <li class="item2">
-                    <video controls width="360px" height="640px" class="view_video" preload="metadata" >
+                    <video controls width="360px" height="640px" class="view_video" preload="metadata" id="view_video2" >
                         <source src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>#t=1" type="video/mp4">
                     </video>
                 </li>
             <?php }?>
         </ul>
     </div>
-    <div class="close" onclick="$('.DetailImage').hide()"><img src="<?php echo G5_IMG_URL?>/ic_view_close.svg" alt=""></div>
+    <div class="close" onclick="fnDetailHide()">
+        <img src="<?php echo G5_IMG_URL?>/ic_view_close.svg" alt="">
+    </div>
 </div>
 <div class="talk">
     <div class="close" onclick="modalCloseTalk();">
-        <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
+        <img src="<?php echo G5_IMG_URL?>/<?php if($view["pd_type"] == 1){?>view_close.svg<?php }else if($view["pd_type"] == 2){?>view_close2.svg<?php }?>" alt="" >
     </div>
     <div class="price">
         <h1><?php echo $view["pd_tag"];?></h1>
@@ -344,7 +363,8 @@ if($view["pd_type"]==1) {
     <div class="view_top">
 <!--        <div class="close" onclick="gotolist();">-->
         <div class="close" onclick="modalCloseThis();">
-            <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
+            <img src="<?php echo G5_IMG_URL?>/<?php if($view["pd_type"] == 1){?>view_close.svg<?php }else if($view["pd_type"] == 2){?>view_close2.svg<?php }?>" alt="" >
+            <!--<img src="<?php /*echo G5_IMG_URL*/?>/view_close.svg" alt="" >-->
         </div>
         <div class="slider_nav">
             <?php for($i=0;$i<count($photo);$i++){?>
@@ -421,20 +441,22 @@ if($view["pd_type"]==1) {
                 <h1><?php echo "제시요망";?></h1>
             <?php }else{
                 ?>
-                <h1><?php if($view["pd_type"]==1){echo "￦ ".number_format($view["pd_price"]); }else{ if($view["pd_price"] && $view["pd_price2"]){echo  "<span class='price_span'>계약금 : ￦ ".number_format($view["pd_price2"]). "</span><span class='price_span'>거래완료금 : ￦ " .number_format($view["pd_price"])."</span>"; }else if($view["pd_price"] && $view["pd_price2"] == 0){ echo "￦ ".number_format($view["pd_price"]); } }?></h1>
+                <h1><?php if($view["pd_type"]==1){echo "￦ ".number_format($view["pd_price"]); }else{ if($view["pd_price"] && $view["pd_price2"]){echo  "<span class='price_span'>".$pd_price_type."계약금 : ￦ ".number_format($view["pd_price2"]). "</span><span class='price_span'>거래완료금 : ￦ " .number_format($view["pd_price"])."</span>"; }else if($view["pd_price"] && $view["pd_price2"] == 0){ echo $pd_price_type."￦ ".number_format($view["pd_price"]); } }?></h1>
             <?php }?>
         </div>
         <div class="view_btns">
             <?php if($member["mb_id"] == $view["mb_id"]){
                 $width = 3;
                 ?>
-                <?php if($view["pd_update_cnt"] < 5){
+                <?php if($pdorder["cnt"]==0){?>
+                    <?php if($view["pd_update_cnt"] < 5){
                     $width = 4;
                     ?>
-                <input type="button" value="업하기" onclick="fnProductUp();" class="point">
+                <input type="button" value="상단UP" onclick="fnProductUp();" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>">
                 <?php } ?>
                 <input type="button" value="상태변경" onclick="fnStatus('<?php echo $view["pd_id"];?>','<?php echo $view["pd_status"];?>');" >
-                <input type="button" value="글수정" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/write.php?pd_id=<?php echo $pd_id;?>'">
+                <input type="button" value="수정" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/write.php?pd_id=<?php echo $pd_id;?>'">
+                <?php } ?>
                 <input type="button" value="삭제" onclick="fnDelete('<?php echo $view[pd_id];?>')">
             <?php }else{
                 $width = 1;
@@ -445,12 +467,12 @@ if($view["pd_type"]==1) {
                         $width = 2; ?>
                     <input type="button" value="딜하기" onclick="fnPricing('<?php echo $view["pd_id"];?>',1)">
                     <?php }?>
-                    <input type="button" value="구매예약" class="point" onclick="fnSell()">
+                    <input type="button" value="구매예약" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>" onclick="fnSell()">
                     <?php }else{
                         $width = 2;
                         ?>
                     <input type="button" value="대화하기" onclick="fnTalk();">
-                    <input type="button" value="계약하기" class="point" onclick="fnSell2()">
+                    <input type="button" value="계약하기" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>" onclick="fnSell2()">
                     <?php }?>
                 <?php }else if($view["pd_type2"] == 4){
                     $width = 2;
@@ -469,12 +491,16 @@ if($view["pd_type"]==1) {
         <div class="detail_content">
             <div class="top">
                 <div class="detail_close" >
-                    <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
+                    <img src="<?php echo G5_IMG_URL?>/<?php if($view["pd_type"] == 1){?>view_close.svg<?php }else if($view["pd_type"] == 2){?>view_close2.svg<?php }?>" alt="" >
+                    <!--<img src="<?php /*echo G5_IMG_URL*/?>/view_close.svg" alt="" >-->
                 </div>
                 <div class="info">
                      <div class="view_cnt">
                          <img src="<?php echo G5_IMG_URL?>/ic_hit_list.svg" alt="">
-                         <span class="count"><?php echo "";?></span>/<?php echo $view["pd_hits"];?>
+                         <?php echo $view["pd_hits"];?>/<span class="count_<?php echo $pd_id;?>"></span>
+                         <div class="count_msg active">
+                             현재 <span class="count_<?php echo $pd_id;?>"></span>명이 이글을 보고 있습니다.
+                         </div>
                      </div>
                     <div class="view_blind_cnt" <?php if($view["mb_id"]!= $member["mb_id"] && $blind_cnt['cnt'] <= 0 ){?>onclick="fnBlind('<?php echo $pd_id;?>','')"<?php }?>>
                         <?php
@@ -530,6 +556,11 @@ if($view["pd_type"]==1) {
                     <h2>상세설명</h2>
                     <p><?php echo ($view["pd_content"]!=" ")? str_replace("<br>","\n",$view["pd_content"]) :"등록된 상세 설명이 없습니다.";?></p>
                 </div>
+                <?php if($view["pd_timeTo"] && $view["pd_timeFrom"] && $view["pd_type"] == 2 && $view["pd_type2"] == 8){?>
+                <div class="pd_times">
+                    <p><strong>거래 가능시간</strong> : <?php echo $view["pd_timeFrom"];?>시 부터 <?php if($view["pd_tiemType"]==1){echo "익일";} echo $view["pd_timeTo"];?>시 까지 </p>
+                </div>
+                <?php }?>
                 <?php if($view["pd_video_link"]){?>
                 <div class="link_video">
                     <?php $links = explode(",", $view["pd_video_link"]);
@@ -587,14 +618,19 @@ if($view["pd_type"]==1) {
                         <!--<li onclick="fnMsg()">
                             <img src="<?php /*echo G5_IMG_URL;*/?>/view_share_msg.png" alt="">
                         </li>-->
-                        <?php if(!$app){?>
-                        <li class="clipboard" data-clipboard-action="copy" data-clipboard-target="#copylink">
-                            <img src="<?php echo G5_IMG_URL;?>/view_share_link.png" alt="">
-                        </li>
+                        <?php if($app){?>
+                            <li onclick="fnLink('<?php echo G5_URL;?>/index.php?pd_id=<?php echo $view["pd_id"]?>');">
+                                <img src="<?php echo G5_IMG_URL;?>/view_share_link.png" alt="">
+                            </li>
+                        <?php  }else if($app2){?>
+                            <li onclick="fnLinkIos('<?php echo G5_URL;?>/index.php?pd_id=<?php echo $view["pd_id"]?>');">
+                                <img src="<?php echo G5_IMG_URL;?>/view_share_link.png" alt="">
+                            </li>
                         <?php }else{?>
-                        <li onclick="fnLink('<?php echo G5_URL;?>/index.php?pd_id=<?php echo $view["pd_id"]?>');">
-                            <img src="<?php echo G5_IMG_URL;?>/view_share_link.png" alt="">
-                        </li>
+                            <li class="clipboard" onclick="copyLink('<?php echo G5_URL;?>/index.php?pd_id=<?php echo $view["pd_id"]?>')">
+                                <img src="<?php echo G5_IMG_URL;?>/view_share_link.png" alt="">
+                            </li>
+
                         <?php } ?>
                     </ul>
                     <div class="clear"></div>
@@ -609,7 +645,7 @@ if($view["pd_type"]==1) {
 <!--                        메시지를 입력하세요 <input type='text' id='txtChat' name="txtChat">-->
 <!--                    </div>-->
 <!--                </div>-->
-                <?php if(count($pricing)>0){?>
+                <?php if(count($pricing)>0 && $is_member && $view["mb_id"]==$member["mb_id"]){?>
                 <div class="comment">
                     <h2><?php if($view["pd_type2"]=="4"){?>제시목록<?php }else if($view["pd_type2"]=="8"){?>딜목록<?php }?></h2>
                     <div class="pricing cm_box">
@@ -674,6 +710,18 @@ if($view["pd_type"]==1) {
                     <input type="hidden" name="comment_re_cm_id" id="comment_re_cm_id" value="">
                     <h2>댓글</h2>
                     <div class="cm_box">
+                        <div class="cm_in">
+                            <?php if($is_member){?>
+                                <p class="re_com" style="padding:0;margin:0;font-size:2.8vw;position:absolute;top:2.5vw;left:2vw;"></p>
+                                <div>
+                                    <input type="checkbox" id="secret" name="secret" value="3" style="display:none;" <?php if($is_comment){?>checked<?php }?> ><label for="secret" class="secret">비공개</label>
+                                </div>
+                                <div class="recm_cancel" <?php if($is_comment){?>style=""<?php }?>>X</div>
+                                <input type="text" id="comment_content" placeholder="댓글을 남겨주세요" class="comment_input"><input type="button" class="comment_btn" id="comment_btn" value="등록">
+                            <?php }else{?>
+                                <input type="button" value="로그인" class="comment_btn grid_100" style="width:calc(100% - 4vw)" onclick="location.href=g5_url+'/mobile/page/login_intro.php'">
+                            <?php }?>
+                        </div>
                         <ul class="cm_container">
                             <?php for($i=0;$i<count($comment);$i++){
                                 $sql = "select *,m.mb_id as member_id from `product_comment` as p left join `g5_member` as m on p.mb_id = m.mb_id where p.parent_cm_id = {$comment[$i]["cm_id"]} order by p.comment_datetime asc";
@@ -798,18 +846,6 @@ if($view["pd_type"]==1) {
                                 <li class="no-comment">등록된 댓글이 없습니다.</li>
                             <?php }?>
                         </ul>
-                        <div class="cm_in">
-                            <?php if($is_member){?>
-                            <p class="re_com" style="padding:0;margin:0;font-size:2.8vw;position:absolute;top:1vw;left:2vw;"></p>
-                            <div>
-                                <input type="checkbox" id="secret" name="secret" value="3" style="display:none;" <?php if($is_comment){?>checked<?php }?> ><label for="secret" class="secret">비공개</label>
-                            </div>
-                            <div class="recm_cancel" <?php if($is_comment){?>style=""<?php }?>>X</div>
-                            <input type="text" id="comment_content" placeholder="댓글을 남겨주세요" class="comment_input"><input type="button" class="comment_btn" id="comment_btn" value="등록">
-                            <?php }else{?>
-                                <input type="button" value="로그인" class="comment_btn grid_100" style="width:calc(100% - 4vw)" onclick="location.href=g5_url+'/mobile/page/login_intro.php'">
-                            <?php }?>
-                        </div>
                     </div>
                 </div>
                 <?php }?>
@@ -879,7 +915,7 @@ if($view["pd_type"]==1) {
 
             ?>
             <li class="item video" >
-                <video controls width="360px" height="640px" class="view_video" preload="metadata" >
+                <video controls width="360px" height="640px" class="view_video" preload="metadata" id="view_video" >
                     <source src="<?php echo G5_DATA_URL."/product/".$view["pd_video"];?>#t=1" type="video/mp4">
                 </video>
             </li>
@@ -898,6 +934,8 @@ if($view["pd_type"]==1) {
 // Slide functions
 var index = 0;
 var list = "";
+var video = document.getElementById("view_video");
+var video2 = document.getElementById("view_video2");
 $(function(){
 
     $(".DetailImage").hide();
@@ -905,9 +943,16 @@ $(function(){
     var height = $(window).height();
     var width = $(window).width();
     var topheight = $(".top_header").height();
+    var element = document.getElementById("msg_container");
+    element.scrollTop = element.scrollHeight;
 
     $("#profile").click(function(){
         
+    });
+
+    $("#message").focus(function(objEvent){
+        //스크롤 위치
+        setTimeout(function(){element.scrollTop = element.scrollHeight;},1000);
     });
 
     $(".infomenu").click(function(){
@@ -1053,9 +1098,16 @@ $(function(){
     }
 
     function next () {
+        console.log("A");
         if (index < items.length - 1 || index < items2.length - 1) {
             index++;
             slide();
+        }
+        if(video) {
+            video.pause();
+        }
+        if(video2) {
+            video2.pause();
         }
     }
 
@@ -1063,6 +1115,12 @@ $(function(){
         if (index > 0) {
             index--;
             slide();
+        }
+        if(video) {
+            video.pause();
+        }
+        if(video2){
+            video2.pause();
         }
     }
 
@@ -1092,11 +1150,13 @@ $(function(){
         $(".view_top").css("display","none");
         $(".view_detail").css("top","0");
         $(".detail_arrow").stop(true).animate({top:'0vw',opacity:0},30);
+        setTimeout(function(){$(".count_msg").removeClass("active")},1500);
         location.hash = "#detailview";
     });
     $(".detail_close, .detail_arrow_close").click(function(){
         $(".view_top").css("display","block");
         $(".view_detail").css("top","100vh");
+        $(".count_msg").addClass("active");
         $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
     });
 });
@@ -1412,7 +1472,18 @@ $(function(){
 
     var width = Number("<?php echo $width?>");
     col = 100 / width;
-    $(".view_btns input").css("width","calc("+col+"% - 2vw)");
+    $(".view_btns input").css({"width":"calc("+col+"% - 2vw)"});
+    if(width > 1){
+        $(".view_btns input").css({"margin-right":"2vw"});
+        $(".view_btns input:last-child").css({"margin-right":"0"});
+    }
+    if(width == 4){
+        $(".view_btns input").css({"margin-right":"1vw"});
+        $(".view_btns input:first-child").css({"width":"calc(35% - 2vw)"});
+        $(".view_btns input:nth-child(2)").css({"width":"calc(25%  - 2vw)"});
+        $(".view_btns input:nth-child(3)").css({"width":"calc(20%  - 2vw)"});
+        $(".view_btns input:last-child").css({"width":"20%","margin-right":"0"});
+    }
 
     <?php if($view["mb_id"]!=$member["mb_id"]){?>
     $(".likeimg").click(function(){
@@ -1458,7 +1529,7 @@ function fnProductUp(){
         data:{pd_id:"<?php echo $pd_id;?>"}
     }).done(function(data){
         if(data=="upcnt"){
-            alert('이미 업하기 횟수(5번)를 모두 사용하였습니다.');
+            alert('이미 상단UP 횟수(5번)를 모두 사용하였습니다.');
         }else if(data=="time"){
             alert("1시간에 한번씩 업할 수 있습니다.");
         }else if(data=="failed"){
@@ -1521,7 +1592,6 @@ function fnMapView(pd_id,location,lat,lng){
         method:"post",
         data:{pd_id:pd_id,location:location,lat:lat,lng:lng}
     }).done(function(data){
-        console.log(data);
         $("#id01s").css({"display":"block","z-index":"9002"})
         $("html, body").css("overflow","hidden");
         $("html, body").css("height","100vh");
@@ -1566,6 +1636,7 @@ function fnTalk(){
     $(".view_detail").hide();
     $(".view_bottom").hide();
     $(".DetailImage").hide();
+    $("#id08").hide();
     $(".profile_menu").removeClass("active");
     $(".view_top").css("display","block");
     $(".view_detail").css("top","100vh");
@@ -1654,6 +1725,7 @@ function fnTalk2(mb_id){
 
 
 function fnSendMsg(){
+    $("#message").focus();
     var type = $("#talk_type").val();
     var pd_id = "<?php echo $view["pd_id"];?>";
     var mb_id = "<?php echo $member["mb_id"];?>";
@@ -1783,18 +1855,58 @@ function fnSell2(){
 function fnShow(id){
     // 연락자 정보 가져오기
     $.ajax({
-        url:g5_url+"/mobile/page/ajax/ajax.get_member.php"
-    }).done(function(){
-        
+        url:g5_url+"/mobile/page/ajax/ajax.get_member.php",
+        method:"post",
+        data:{id:id},
+        dataType:"json"
+    }).done(function(data){
+        $("#id08 .contacts ul").html('');
+        $("#id08 .contacts ul").append(data.obj);
+        //$("#mb_"+id).toggleClass("active");
+        $("#id08").css({"display":"block","z-index":"9002"});
+        $("#id08").css("display","block");
+        location.hash = "#modal";
     });
-    //$("#mb_"+id).toggleClass("active");
-    $("#id08").css({"display":"block","z-index":"9002"});
-    $("#id08").css("display","block");
-    location.hash = "#modal";
+
 }
 
 function fnLink(url){
     window.android.copyLink(url);
+    alert("링크가 복사되었습니다. 원하시는 곳에 붙여넣기 하세요.");
+}
+
+function fnLinkIos(url){
+    try{
+
+        var dataString = {
+            url : url
+        };
+
+        webkit.messageHandlers.copyLink.postMessage(dataString);
+    }catch (err) {
+        console.log(err);
+    }
+    alert("링크가 복사되었습니다. 원하시는 곳에 붙여넣기 하세요.");
+}
+
+function copyLink(url){
+    var t = document.createElement("textarea");
+    document.body.appendChild(t);
+    t.value = url;
+    t.select();
+    document.execCommand('copy');
+    document.body.removeChild(t);
+    alert("링크가 복사되었습니다. 원하시는 곳에 ctrl+c로 붙여넣기 하세요.");
+}
+
+function fnDetailHide(){
+    if(video) {
+        video.pause();
+    }
+    if(video2) {
+        video2.pause();
+    }
+    $('.DetailImage').hide();
 }
 </script>
 <?php

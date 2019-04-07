@@ -2,6 +2,7 @@
 function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id='',$imgurls=''){
     //대화저장일경우 중복알림 저장이 아니라 업데이트 되어야 함
     //알림 저장
+
     if($chennal == "chat_alarm_set"){
         $sql = "select * from `my_alarms` where pd_id = '{$pd_id}' and mb_id = '{$mb_id}'";
         $id = sql_fetch($sql);
@@ -19,6 +20,7 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
 
     $sql = "select * from `mysetting` where mb_id = '{$mb_id}'";
     $set = sql_fetch($sql);
+
     if($set["push_set"] == 0) return false;
 
     //현재 시간 체크 [에티켓설정시]
@@ -49,7 +51,7 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
         $fields = array(
             'registration_ids' => $regId_array,
             'priority' => 'high',
-            'notification' => array("title" => $title, "body" => $content, "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls)
+            'notification' => array("title" => $title, "body" => $content, "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls,"content_available" => 'true')
         );
     }else {
         $fields = array(
@@ -59,6 +61,7 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
             'sound' => 'default'
         );
     }
+
     $headers = array(
         'Authorization: key='.$apiKey,
         'Content-Type: application/json'
@@ -77,7 +80,7 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
     curl_close($ch);
     $decode = json_decode($result, true);
 
-    return $result;
+    return $result."//".$sql;
 }
 //전체 보내기
 function send_reserve_FCM($title,$content,$urls){

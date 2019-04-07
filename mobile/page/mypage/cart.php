@@ -18,7 +18,13 @@ if($group_id){
     sql_query($sql);
 }
 
-$sql = "select *,p.mb_id as pd_mb_id from `cart` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and p.pd_type = {$pd_type} and c.c_status != 2 and c.c_status != 10 order by c_status desc";
+if($pd_type==1){
+    $where = ' and c.c_status != 2 and c.c_status != 10';
+}else{
+    $where = ' and c.c_status != 3 and c.c_status != 10';
+}
+
+$sql = "select *,p.mb_id as pd_mb_id from `cart` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and p.pd_type = {$pd_type} {$where} order by c_status desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $cart[] = $row;
@@ -141,6 +147,7 @@ $back_url = G5_URL;
                 </div>
             </div>
             <?php } ?>
+
         </div>
         <?php } ?>
         <?php if(count($cart)==0){?>
@@ -153,6 +160,7 @@ $back_url = G5_URL;
     <div class="cart_btns">
         <form action="<?php echo G5_MOBILE_URL?>/page/mypage/cart_update.php" name="cartAll" method="post">
             <input type="hidden" name="pd_ids" value="<?php echo $pd_ids;?>">
+            <input type="hidden" name="pd_type" value="<?php echo $pd_type;?>">
             <input type="hidden" name="cart_ids" value="<?php echo $cart_ids;?>">
             <input type="hidden" name="prices"value="<?php echo $pd_prices;?>">
             <input type="hidden" name="total_price" value="<?php echo $total;?>">
@@ -160,6 +168,7 @@ $back_url = G5_URL;
         </form>
         <form action="<?php echo G5_MOBILE_URL?>/page/mypage/cart_update.php" method="post" name="cartform" >
             <input type="hidden" name="pd_ids" id="pd_ids" value="<?php echo $pd_ids;?>">
+            <input type="hidden" name="pd_type" value="<?php echo $pd_type;?>">
             <input type="hidden" name="cart_ids" id="cart_ids" value="<?php echo $cart_ids;?>">
             <input type="hidden" name="prices" id="prices" value="<?php echo $pd_prices;?>">
             <input type="hidden" name="total_price" id="total_price" value="<?php echo $total;?>">

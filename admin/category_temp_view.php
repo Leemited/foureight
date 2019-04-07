@@ -28,6 +28,7 @@ $view = sql_fetch("select * from `category_user_temp` where `ca_temp_id` = '{$ca
                             <th>제안자 아이디</th>
                             <td class="subject" style="cursor:auto"><?php echo $view["mb_id"];?></td>
                         </tr>
+                        <?php if($view["cate_name"]){?>
                         <tr>
                             <th>제안카테고리명</th>
                             <td class="subject" style="cursor:auto"><?php echo $view["cate_name"];?></td>
@@ -40,6 +41,7 @@ $view = sql_fetch("select * from `category_user_temp` where `ca_temp_id` = '{$ca
                                 <p>키워드는 ','구분하여 등록바랍니다.</p>
                             </td>
                         </tr>
+                        <?php }?>
                         <?php }?>
                         <tr>
                             <th>제안내용</th>
@@ -58,7 +60,9 @@ $view = sql_fetch("select * from `category_user_temp` where `ca_temp_id` = '{$ca
                 </div>
                 <div class="submit_gr no_print">
                     <input type="button" onclick="location.href='<?php echo G5_URL."/admin/category_temp_list.php?page=".$page; ?>'" class="adm-btn01" style="border:none;width:auto" value="목록">
+                    <?php if($view["cate_name"]){?>
                     <input type="button" onclick="fnCateAdd('<?php echo G5_URL."/admin/category_temp_update.php?cate_name=".$view["cate_name"]."&cate_name2=".$view["cate_name2"]."&ca_temp_id=".$view["ca_temp_id"]; ?>')" class="adm-btn01" style="border:none;width:auto" value="바로등록">
+                    <?php }?>
                 </div>
             </form>
         </article>

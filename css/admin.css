@@ -147,8 +147,11 @@ header .left .lnb{position:relative;top:0;z-index:2}
 
 .model_list {width:100%;position:relative;}
 .model_list table{width:100%}
-.model_list table tr{border-bottom:1px solid #e5e5e5;background-color:#fff}
+.model_list table tr{border-bottom:1px solid #e5e5e5;background-color:#fff;border-left:5px solid #ddd;}
+.model_list table tr:first-child{border-left:none;}
 .model_list table tr.sec{background-color:#eee}
+.model_list table tr.qa_blind{border-left:5px solid red;}
+.model_list table tr.qa_price{border-left:5px solid dodgerblue;}
 .model_list table th{padding:18px;font-size:18px;border-top:2px solid #6e6e6e;border-right:1px solid #e5e5e5}
 .model_list table th:last-child{border-right:none;}
 .model_list table th.link{cursor: pointer;

@@ -107,7 +107,7 @@ if($order_sort){
                 '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].'>'.
                 '<span class="round">가격순</span></label>';
         }
-        if($order_sorts[$i]=="pd_recom"){
+        if($order_sorts[$i]=="pd_recome"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
                 $ods[] = " p.pd_recom desc";
@@ -139,13 +139,23 @@ if($order_sort){
     }
     //print_r2($ods);
     $od = " order by ". implode(",",$ods);
+}else{
+    if($_SESSION["lat"] && $_SESSION["lng"] || $lat && $lng){
+        $od = " order by ISNULL(p.pd_lat) asc, distance asc, p.pd_price asc";
+    }else {
+        $od = " order by p.pd_price asc";
+    }
 }
 
 
-if($_SESSION["lat"] && $_SESSION["lng"]){
-    $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
+if($_SESSION["lat"] && $_SESSION["lng"] || $lat && $lng){
+    if($lat && $lng) {
+        $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$lat} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$lng} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$lat}))), SQRT(1 - POW(SIN(RADIANS({$lat} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$lng} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$lat})))) AS distance";
+    }
+    if($_SESSION["lat"] && $_SESSION["lng"]){
+        $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
+    }
 }
-
 $total=sql_fetch("select count(*) as cnt from `product` where {$search} ");
 if(!$page)
     $page=1;
@@ -182,6 +192,14 @@ $sqls = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_
 $res = sql_query($sqls);
 while($row = sql_fetch_array($res)){
     $list[] = $row;
+}
+
+if(count($list) > 0) {
+    $test = array();
+    foreach ($list as $item) {
+        $test[] = $item['pd_date'];
+    }
+    array_multisort($test, SORT_DESC, $list);
 }
 
 //ad 가져오기
@@ -257,7 +275,42 @@ for($i=0;$i<count($list);$i++){
 		}
 	}
 
+	switch ($list[$i]["pd_price_type"]){
+        case 0:
+            $pd_price_type = "<span class='bg1'></span>";
+            break;
+        case 1:
+            $pd_price_type = "<span class='bg2'></span>";
+            break;
+        case 2:
+            $pd_price_type = "<span class='bg3'></span>";
+            break;
+    }
+
     $wished_cnt = sql_fetch("select count(*)as cnt from `wish_product` where pd_id = {$list[$i]["pd_id"]}");
+    switch (strlen($wished_cnt["cnt"])){
+        case 1: //일
+            $wishedcnt = $wished_cnt["cnt"];
+            break;
+        case 2: //십
+            $wishedcnt = $wished_cnt["cnt"];
+            break;
+        case 3: //백
+            $wishedcnt = $wished_cnt["cnt"];
+            break;
+        case 4: //천
+            $wishedcnt = substr($wished_cnt["cnt"],0,1)." T";
+            break;
+        case 5: //만
+            $wishedcnt = substr($wished_cnt["cnt"],0,1)." M";
+            break;
+        case 6: //십만
+            $wishedcnt = substr($wished_cnt["cnt"],0,2)." M";
+            break;
+        case 7: //백만
+            $wishedcnt = substr($wished_cnt["cnt"],0,3)." M";
+            break;
+    }
 
     if($list[$i]["pd_date"]) {
         $loc_data = $list[$i]["pd_date"];
@@ -311,6 +364,11 @@ for($i=0;$i<count($list);$i++){
             <input type="button" value="사유보기" class="list_btn"  >
         </div>
     <?php }?>
+    <div class="wished_active <?php if($list[$i]["pd_type"]==2){?>bg2<?php }?>" style="" id="heart_<?php echo $list[$i]["pd_id"];?>">
+        <div class="wished_ani">
+            <img class="heart" src="<?php echo G5_IMG_URL;?>/ic_wish_on<?php if($list[$i]["pd_type"]==2){?>2<?php }?>.svg" alt="">
+        </div>
+    </div>
     <div class="in_grid">
 		<?php if($list[$i]["pd_images"]!=""){
             $img = explode(",",$list[$i]["pd_images"]);
@@ -356,15 +414,15 @@ for($i=0;$i<count($list);$i++){
         <?php }?>
 		<div class="top">
 			<div>
-                <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
+                <h2 style="font-weight:normal"><?php echo ($list[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
 				<div>
 					<ul>
                         <?php if($list_type=="list"||$_SESSION["list_type"]=="list"){?>
                         <li style="margin-right:2vw;"><?php echo $time_gep;?></li>
                         <?php }?>
-						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
+						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><span><?php echo $list[$i]["pd_hits"];?></span></li>
 						<?php if($app || $app2){?>
-						<li><img src="<?php echo G5_IMG_URL?>/ic_loc<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><?php echo $dist;?></li>
+						<li><img src="<?php echo G5_IMG_URL?>/ic_loc<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><span><?php echo $dist;?></span></li>
 						<?php }?>
 					</ul>
 				</div>
@@ -383,12 +441,9 @@ for($i=0;$i<count($list);$i++){
                     case "4":
                         $pt2 = "[삽니다]";
                         break;
-                    case "8":
-                        $pt2 = "[팝니다]";
-                        break;
                 }
                 ?>
-                <h2><?php echo $pt2." ".$list[$i]["pd_tag"];?></h2>
+                <h2><?php echo ($pt2)?$pt2." ".$list[$i]["pd_tag"]:$list[$i]["pd_tag"];?></h2>
             <?php }?>
 			<div>
 
@@ -396,20 +451,15 @@ for($i=0;$i<count($list);$i++){
                     <?php if($list[$i]["pd_price"]==0){?>
                         <h1>가격 제시</h1>
                     <?php }else{ ?>
-                        <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
+                        <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?> <?php if($list[$i]["pd_type"]==2 && $list[$i]["pd_type2"]==8){echo $pd_price_type;}?></h1>
                     <?php }?>
                 <?php }else{?>
-                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
+                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?> <?php if($list[$i]["pd_type"]==2 && $list[$i]["pd_type2"]==8){echo $pd_price_type;}?></h1>
                 <?php }?>
-                <?php if($wished_cnt["cnt"]>0){?>
-                    <div class="list_wished_cnt"><?php echo $wished_cnt["cnt"];?></div>
-                <?php }?>
-				<?php 
-				if($flag){?>
-
-				<img src="<?php echo G5_IMG_URL?>/ic_wish_on.svg" alt="" class="wished" >
-				<?php }else{ ?>
-				<img src="<?php echo G5_IMG_URL?>/ic_wish.svg" alt="" class="wished" >
+                <?php if($wished_cnt["cnt"]>0 && $flag){?>
+                    <div class="list_wished_cnt active wished <?php if($list[$i]["pd_type"]==2){?>bg2<?php }?>"><?php echo $wishedcnt;?></div>
+                <?php }else{?>
+                    <div class="list_wished_cnt wished <?php if($list[$i]["pd_type"]==2){?>bg2<?php }?>"></div>
 				<?php }?>
 			</div>
 		</div>
@@ -503,7 +553,8 @@ if(count($list)==0){echo "no-list//".$sqls;}
                         $("#"+id).removeClass("wishedon");
                         var wished = $("#"+id).children().find($(".wished"));
                         wished.removeClass("element-animation");
-                        wished.attr("src",g5_url+"/img/ic_wish.svg");
+                        wished.removeClass("active");
+                        $("#heart_"+pd_id).removeClass("active");
                         $.ajax({
                             url:g5_url+"/mobile/page/ajax/ajax.wish.php",
                             method:"POST",
@@ -516,7 +567,8 @@ if(count($list)==0){echo "no-list//".$sqls;}
                         var wished = $("#"+id).children().find($(".wished"));
                         wished.removeClass("element-animation");
                         wished.addClass("element-animation");
-                        wished.attr("src",g5_url+"/img/ic_wish_on.svg");
+                        wished.addClass("active");
+                        $("#heart_"+pd_id).addClass("active");
                         $.ajax({
                             url:g5_url+"/mobile/page/ajax/ajax.wish.php",
                             method:"POST",

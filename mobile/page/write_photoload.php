@@ -12,10 +12,10 @@ if($filename != ""){
         //$exif = @exif_read_data(G5_DATA_PATH."/product/".$images[$i]);
         //print_r2($exif);
         ?>
-        <div class="image_box app" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"  <?php } if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>   style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;">
+        <div class="image_box app" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"  <?php } if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>   style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;" >
             <label for="images<?php echo $i;?>">
-                <!--<img src="<?php /*echo G5_DATA_URL;*/?>/product/<?php /*echo $img;*/?>" alt="image<?php /*echo $i;*/?>" style="opacity: 0" class="img_<?php /*echo $i;*/?>">-->
                 <?php if(!$app && !$app2){?>
+                    <img src="<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                     <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                 <?php } ?>
             </label>
@@ -25,10 +25,10 @@ if($filename != ""){
     if($image_cnt > 0){
         for($i=$image_cnt;$i<5;$i++){
             ?>
-            <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;"  <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"  <?php } if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>   >
+            <div class="image_box" id="box<?php echo $i;?>" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"  <?php } if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;"   >
                 <label for="images<?php echo $i;?>">
-                    <!--<img src="<?php /*echo G5_IMG_URL;*/?>/no_images.svg" alt="image<?php /*echo $i;*/?>" style="opacity: 0" class="img_<?php /*echo $i;*/?>">-->
                     <?php if(!$app && !$app2){?>
+                        <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                         <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                     <?php } ?>
                 </label>
@@ -40,8 +40,8 @@ if($filename != ""){
         ?>
         <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');"  <?php } if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  >
             <label for="images<?php echo $i;?>">
-                <!--<img src="<?php /*echo G5_IMG_URL;*/?>/no_images.svg" alt="image<?php /*echo $i;*/?>" style="opacity: 0" class="img_<?php /*echo $i;*/?>">-->
                 <?php if(!$app && !$app2){?>
+                    <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                     <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                 <?php } ?>
             </label>
@@ -50,7 +50,26 @@ if($filename != ""){
 }?>
 
 <script>
+    $(function(){
+        $("input[id^=image]").each(function(e){
+            console.log(e);
+            $(this).on("change",function(){
+                console.log("aaa : "+this);
+                readUrl(this,e);
+            })
+        });
+    });
 
+    function readUrl(file,cnt){
+        if(file.files && file.files[0]){
+            var reader = new FileReader();
+
+            reader.onload = function(e){
+                $("#box"+cnt).css("background-image","url('"+e.target.result+"')");
+            }
+            reader.readAsDataURL(file.files[0]);
+        }
+    }
     function fnEditIos(mb_id,index){
         try{
 

@@ -103,6 +103,7 @@ while($row = sql_fetch_array($comment)){
             </div>
             <div class="submit_gr no_print">
                 <?php if($view["qa_1"]){?>
+                    <input type="button" onclick="location.href='<?php echo G5_URL."/admin/product_view.php?pd_id=".$view['qa_1']; ?>'" class="adm-btn01" value="게시물보기" style="width:auto;border:none;">
                     <input type="button" onclick="location.href='<?php echo G5_URL."/admin/product_blind_view.php?page=".$page."&sfl=".$sfl."&stx=".$stx."&pd_id=".$view["qa_1"]."&back=qa&qa_id=".$view["qa_id"]; ?>'" class="adm-btn01" value="사유보기" style="width:auto;border:none;">
                 <?php }?>
                 <input type="button" onclick="location.href='<?php echo G5_URL."/admin/qa_list.php?page=".$page."&sfl=".$sfl."&stx=".$stx; ?>'" class="adm-btn01" value="목록" style="width:auto;border:none;">
@@ -129,13 +130,13 @@ while($row = sql_fetch_array($comment)){
                             <tr>
                                 <th>제목</th>
                                 <td colspan="3" class="con">
-                                    <input type="text" name="qa_subject" id="qa_subject" class="write_input01 grid_50">
+                                    <input type="text" name="qa_subject" id="qa_subject" class="write_input01 grid_50" required>
                                 </td>
                             </tr>
                             <tr>
                                 <th>답변</th>
                                 <td colspan="3" class="con">
-                                    <textarea name="qa_content" id="qa_content" cols="30" rows="10"></textarea>
+                                    <textarea name="qa_content" id="qa_content" cols="30" rows="10" required></textarea>
                                 </td>
                             </tr>
                         </tbody>

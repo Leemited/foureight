@@ -36,14 +36,14 @@ if($lat && $lng && $is_member){
     sql_query($sql);
 }
 
-$sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1 order by cate_order";
+$sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1  and `cate_status` = 0 order by cate_order";
 
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $category1[] = $row;
 }
 
-$sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1 order by cate_order";
+$sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1  and `cate_status` = 0  order by cate_order";
 
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
@@ -55,6 +55,14 @@ $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $help[] = $row;
 }
+
+//내 물건 카운트
+$sql = "select count(*) as cnt from `product` where mb_id ='{$member["mb_id"]}' and pd_status != 10 and pd_type = 1";
+$my_pro1 = sql_fetch($sql);
+
+//내 능력 카운트
+$sql = "select count(*) as cnt from `product` where mb_id ='{$member["mb_id"]}' and pd_status != 10 and pd_type = 2";
+$my_pro2 = sql_fetch($sql);
 ?>
 <div id="id01s" class="w3-modal w3-animate-opacity">
     <div class="w3-modal-content w3-card-4">
@@ -233,13 +241,13 @@ while($row = sql_fetch_array($res)){
                 <input type="hidden" value="search" name="searchActive" >
                 <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
                 <input type="hidden" value="<?php echo $priceTo; ?>" id="sc_priceTo" name="priceTo">
-                <input type="hidden" value="<?php echo $order_sort;?>" name="order_sort" id="order_sort">
-                <input type="hidden" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
+                <input type="hidden" value="<?php echo ($order_sort)?$order_sort:"pd_loc,pd_price,pd_date,pd_recome,pd_hits";?>" name="order_sort" id="order_sort">
+                <input type="hidden" value="<?php echo ($order_sort_active)?$order_sort_active:"1,1,0,0,0";?>" name="order_sort_active" id="order_sort_active">
                 <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
                 <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
                 <div class="sch_top">
                     <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
-                    <a href="javascript:fnsuggestion();">제안하기</a>
+                    <a href="javascript:fnsuggestion('1');">제안하기</a>
                 </div>
                 <div class="types sch_mid">
                     <label class="radio_tag" for="four">
@@ -257,25 +265,25 @@ while($row = sql_fetch_array($res)){
                 </div>
                 <div class="sch_ord">
                     <?php if(count($order_item)==0){?>
-                        <label class="align" id="sortable" for="pd_date">
-                            <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" checked>
-                            <span class="round">최신순</span>
+                        <label class="align" id="sortable" for="pd_loc">
+                            <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
+                            <span class="round">거리순</span>
                         </label>
                         <label class="align" id="sortable" for="pd_price">
                             <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked>
                             <span class="round">가격순</span>
                         </label>
+                        <label class="align" id="sortable" for="pd_date">
+                            <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" >
+                            <span class="round">최신순</span>
+                        </label>
                         <label class="align" id="sortable" for="pd_recom">
-                            <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" checked>
+                            <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" >
                             <span class="round">추천순</span>
                         </label>
                         <label class="align" id="sortable" for="pd_hits">
-                            <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" checked>
+                            <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" >
                             <span class="round">인기순</span>
-                        </label>
-                        <label class="align" id="sortable" for="pd_loc">
-                            <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
-                            <span class="round">거리순</span>
                         </label>
                     <?php }else{
                         for($i=0;$i<count($order_item);$i++){
@@ -289,6 +297,45 @@ while($row = sql_fetch_array($res)){
                         <p class="price" id="schp"></p>
                     </div>
                     <div id="slider-range"></div>
+                </div>
+                <div class="types sch_mid timesel" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
+                    <label class="radio_tag" for="workcnt">
+                        <input type="radio" name="pd_price_type" id="workcnt" value="0" <?php if($pd_price_type ==0 || $pd_price_type==""){?>checked<?php }?>>
+                        <span class="slider2 round">회당</span>
+                    </label>
+                    <label class="radio_tag" for="worktime">
+                        <input type="radio" name="pd_price_type" id="worktime" value="1" <?php if($pd_price_type ==1){?>checked<?php }?>>
+                        <span class="slider2 round">시간당</span>
+                    </label>
+                    <label class="radio_tag" for="workday">
+                        <input type="radio" name="pd_price_type" id="workday" value="2" <?php if($pd_price_type ==2){?>checked<?php }?>>
+                        <span class="slider2 round">하루당</span>
+                    </label>
+                </div>
+                <div class="sch_btn_group meettime" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
+                    <div>
+                        <h2>거래가능시간</h2>
+                    </div>
+                    <div class="pd_times">
+                        <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:17vw">
+                            <option value="">시간선택</option>
+                            <?php for($i = 1; $i< 25; $i++){
+                                $time = str_pad($i,"2","0",STR_PAD_LEFT);
+                                ?>
+                                <option value="<?php echo $time;?>" <?php if($pd_timeFrom == $time){?>selected<?php }?>><?php echo $time;?></option>
+                            <?php }?>
+                        </select> 시부터
+                        ~
+                        <input type="checkbox" name="pd_timeType" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?> style="display:none;"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
+                        <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:17vw;margin-left:1vw;">
+                            <option value="">시간선택</option>
+                            <?php for($i = 1; $i< 25; $i++){
+                                $time = str_pad($i,"2","0",STR_PAD_LEFT);
+                                ?>
+                                <option value="<?php echo $time;?>" <?php if($pd_timeTo == $time){?>selected<?php }?>><?php echo $time;?></option>
+                            <?php }?>
+                        </select> 시사이
+                    </div>
                 </div>
             <div class="sch_btn_group">
                 <input type="submit" value="검색" class="sch_btn" style="width:100%" >
@@ -316,7 +363,7 @@ while($row = sql_fetch_array($res)){
                 <?php }else{?>
                     <p><a href="<?php echo G5_BBS_URL?>/logout.php?url=../index.php?device=mobile">로그아웃</a></p>
                 <?php } ?>
-                <div onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
+                <div class="profiles" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
                     <?php if($member["mb_id"] && $member["mb_profile"]){?>
                         <img src="<?php echo $member["mb_profile"];?>" alt="" class="user_profile">
                     <?php }else{?>
@@ -325,37 +372,53 @@ while($row = sql_fetch_array($res)){
                 </div>
                 <?php if(!$member["mb_id"]){?>
                     <h4>지금 로그인하세요</h4>
-                    <div class="addr">로그인 상태가 아닙니다.</div>
                 <?php }else{?>
-                    <h4><?php echo $member["mb_nick"];?></h4>
-                    <div class="addr"><?php echo ($member["mb_addr1"])?$member["mb_addr1"]:"저장된 주소가 없습니다.";?></div>
-                    <div class="alert" onclick="fnAlertView();">
-                        <?php if($alarms['cnt'] > 0){?><div><?php echo $alarms['cnt'];?></div><?php }?>
-                        <img src="<?php echo G5_IMG_URL?>/ic_alert.svg " alt="">
+                    <h4 onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'"><?php echo $member["mb_nick"];?></h4>
+                    <div class="mylist" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
+                        <div>내 물건 <span><?php echo number_format($my_pro1["cnt"]);?></span></div>
+                        <div>내 능력 <span><?php echo number_format($my_pro2["cnt"]);?></span></div>
                     </div>
                 <?php }?>
+                <div class="profile_menus">
+                    <div class="search_list" onclick="fnRecent()">
+                        <img src="<?php echo G5_IMG_URL;?>/ic_profile_search.svg" alt="">
+                    </div>
+                    <div class="wished" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/wish/wish.list.php'">
+                        <img src="<?php echo G5_IMG_URL;?>/ic_profile_wished.svg" alt="">
+                    </div>
+                    <div class="alert" onclick="fnAlertView();">
+                        <?php if($alarms['cnt'] > 0){?><div><?php echo $alarms['cnt'];?></div><?php }?>
+                        <img src="<?php echo G5_IMG_URL?>/ic_profile_alarm.svg " alt="">
+                    </div>
+                </div>
+                <div class="clear"></div>
             </div>
-            <ul>
+            <ul class="menu">
                 <li class="menu1"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
                 <li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/talk/talk.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
-                <li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/wish/wish.list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_wish.svg" alt="">위시리스트</a></li>
+                <!--<li class="menu2"><a href="<?php /*echo G5_MOBILE_URL*/?>/page/wish/wish.list.php"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_wish.svg" alt="">위시리스트</a></li>-->
                 <li class="menu3"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/cart.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
                 <li class="menu4"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/order_history.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
                 <li class="menu6"><a href="<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
                 <li class="menu6"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=notice"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
-                <li class="menu6"><a href="<?php echo G5_BBS_URL?>/page/company/company.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_company.svg" alt="">회사소개</a></li>
+                <!--<li class="menu6"><a href="<?php /*echo G5_BBS_URL*/?>/page/company/company.php"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_company.svg" alt="">회사소개</a></li>-->
                 <li class="menu7"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">도움말</a></li>
                 <li class="menu8"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/settings.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_settings.svg" alt="">설정</a>
-                    <div class="sugg"><a href="javascript:fnsuggestion();">제안하기</a></div>
                 </li>
+
             </ul>
+            <div class="sugg"><a href="javascript:fnsuggestion('1');">제안하기</a></div>
+            <div class="clear"></div>
+            <!--<div class="copyright <?php /*if($_SESSION["type1"]==2){*/?>bg2<?php /*}*/?>" style="">-->
             <div class="copyright" style="">
                 <h2>디자인율 | 48</h2>
-                <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>대표전화 : 070 4090 4811</p>
-                <ul class="agreement">
+                <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>통신판매신고번호 : 제 2018-충북청주-1575 호</p><p>대표전화 : 070-4090-4811</p>
+                <p style="padding-bottom:4vw">소재지 : 충청북도 청주시 흥덕구 <br>풍산로133번길 48, 304호(복대동)</p>
+                <ul class="agreement" >
                     <li onclick="location.href=g5_url+'/mobile/page/company/agreement.php'">이용약관</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/privacy.php'">개인정보 취급방침</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/location.php'">위치정보 수집약관</li>
+                    <li onclick="location.href=g5_url+'/mobile/page/company/refund.php'">환불 약관</li>
                 </ul>
             </div>
         </div>
@@ -371,7 +434,7 @@ while($row = sql_fetch_array($res)){
                 <?php for($i=0;$i<count($category1);$i++){ ?>
                     <li class="cate<?php echo $category1[$i]["ca_id"]; ?>" id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
                 <?php } ?>
-                <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
+                <li class="sugg" onclick="fnsuggestion('');"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
             </ul>
         </div>
         <?php include_once(G5_MOBILE_PATH."/subcategory3.php"); ?>
@@ -515,10 +578,20 @@ while($row = sql_fetch_array($res)){
 
         $(".schtype .slider").click(function(){
             if($(this).prev().prop("checked") == true){
-                $(this).html("물품");
+                $(".top_header").removeClass("bg2");
+                $("#mobile_header").removeClass("bg2");
+                $(".user_box").removeClass("bg2");
+                $(".wished").removeClass("bg2");
+                $(".copyright").removeClass("bg2");
+                $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03.svg");
+                $(this).html("물건");
                 $(this).css({"text-align":"right"});
                 $("#set_type").val(1);
                 $("#set_type2").val(1);
+                $(".timesel").css("display","none");
+                $(".meettime").css("display","none");
+                $("#cate").val('');
+                $("#cate2").val('');
                 //카테고리 설정
                 $.ajax({
                     url:g5_url+"/mobile/page/ajax/ajax.category.php",
@@ -530,11 +603,29 @@ while($row = sql_fetch_array($res)){
                     $("#cate2 option").remove();
                     $("#cate2").append("<option value=''>전체</option>");
                 });
+
+                $.ajax({
+                    url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
+                    method:"post",
+                    data:{key:"type1",value:"1"}
+                }).done(function(data){
+                    console.log(data);
+                });
             }else{
+                $(".top_header").addClass("bg2");
+                $("#mobile_header").addClass("bg2");
+                $(".wished").addClass("bg2");
+                $(".user_box").addClass("bg2");
+                $(".copyright").addClass("bg2");
+                $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03_2.svg");
                 $(this).html("능력");
                 $(this).css({"text-align":"left"});
                 $("#set_type").val(2);
                 $("#set_type2").val(2);
+                $(".timesel").css("display","block");
+                $(".meettime").css("display","block");
+                $("#cate").val('');
+                $("#cate2").val('');
                 //카테고리 설정
                 $.ajax({
                     url:g5_url+"/mobile/page/ajax/ajax.category.php",
@@ -546,7 +637,16 @@ while($row = sql_fetch_array($res)){
                     $("#cate2 option").remove();
                     $("#cate2").append("<option value=''>전체</option>");
                 });
+
+                $.ajax({
+                    url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
+                    method:"post",
+                    data:{key:"type1",value:"2"}
+                }).done(function(data){
+                    console.log(data);
+                });
             }
+            priceSet();
         });
 
         $("#cate").change(function(){
@@ -617,16 +717,18 @@ while($row = sql_fetch_array($res)){
             if($("#eight").prop("checked") == true){
                 $("#type2").val(8);
                 $(".sch_save_write").css("display","none");
+                if($("#set_type").val()==2) {
+                    $(".timesel, .meettime").css("display", "none");
+                }
             }else{
                 $("#type2").val(4);
                 $(".sch_save_write").css("display","inline");
+                if($("#set_type").val()==2) {
+                    $(".timesel, .meettime").css("display", "block");
+                }
             }
         });
-        <?php if(!$sc_id){?>
-        var max = 500000;
-        <?php }else{?>
-        var max = $("#sc_priceTo").val();
-        <?php }?>
+        max = priceSet();
 
         slider = $( "#slider-range" ).slider({
             range: true,
@@ -757,6 +859,72 @@ while($row = sql_fetch_array($res)){
         });
         <?php }?>
     });
+
+    function priceSet(){
+        var cate1 = $("#cate").val();
+        var cate2 = $("#cate2").val();
+        var pd_type = $("#set_type").val();
+        console.log(cate1+"//"+pd_type);
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.category_minmax.php",
+            method:"POST",
+            dataType:"json",
+            data:{cate2:cate2,cate1:cate1,pd_type:pd_type}
+        }).done(function(data){
+            console.log(data);
+            if(data.max != null) {
+                if(data.max==0){
+                    $("#priceFrom").val(50000);
+                    $("#schp").text('<?php echo number_format(1000);?>' + " ~ " + '<?php echo number_format(50000);?>');
+                    slider = $( "#slider-range" ).slider({
+                        range: true,
+                        min: 1000,
+                        max: 50000,
+                        values: [1000 , 50000 ],
+                        step:1000,
+                        slide: function( event, ui ) {
+                            $("#sc_priceTo").val(ui.values[1]);
+                            $("#sc_priceFrom").val(ui.values[0]);
+                            $("#schp").text( number_format(ui.values[0])+" ~ "+number_format(ui.values[1]));
+                        }
+                    });
+                }else {
+                    $("#priceFrom").val(data.max);
+                    <?php if($priceFrom && $priceTo) { ?>
+                    $("#schp").text('<?php echo number_format($priceFrom);?>' + " ~ " + '<?php echo number_format($priceTo);?>');
+                    slider = $( "#slider-range" ).slider({
+                        range: true,
+                        min: 1000,
+                        max: data.max,
+                        values: [<?php echo $priceFrom;?> , <?php echo $priceTo;?> ],
+                        step:1000,
+                        slide: function( event, ui ) {
+                            $("#sc_priceTo").val(ui.values[1]);
+                            $("#sc_priceFrom").val(ui.values[0]);
+                            $("#schp").text( number_format(ui.values[0])+" ~ "+number_format(ui.values[1]));
+                        }
+                    });
+                    <?php }else{ ?>
+                    $("#schp").text(number_format(1000) + " ~ " + number_format(data.max));
+
+                    slider = $( "#slider-range" ).slider({
+                        range: true,
+                        min: 1000,
+                        max: data.max,
+                        values: [1000 , data.max ],
+                        step:1000,
+                        slide: function( event, ui ) {
+                            $("#sc_priceTo").val(ui.values[1]);
+                            $("#sc_priceFrom").val(ui.values[0]);
+                            $("#schp").text( number_format(ui.values[0])+" ~ "+number_format(ui.values[1]));
+                        }
+                    });
+                    <?php }?>
+                }
+            }
+        });
+    }
+
     function fnSaveSch(){
         var sort = "";
         var sortActive = "";

@@ -7,14 +7,14 @@ if($sfl && $stx){
     $where = " and {$sfl} like '%{$stx}%'";
 }
 
-$total=sql_fetch("select count(*) as cnt from g5_qa_content where qa_type = '0' {$where} ");
+$total=sql_fetch("select count(*) as cnt from g5_qa_content where qa_type = '0' and qa_status != 3 {$where} ");
 if(!$page)
     $page=1;
 $total=$total['cnt'];
 $rows=10;
 $start=($page-1)*$rows;
 $total_page=ceil($total/$rows);
-$sql = "select * from g5_qa_content where qa_type = '0' {$where} order by qa_num limit {$start},{$rows}";
+$sql = "select * from g5_qa_content where qa_type = '0' and qa_status != 3 {$where} order by qa_num limit {$start},{$rows}";
 $query=sql_query($sql);
 $j=0;
 while($data=sql_fetch_array($query)){
@@ -85,7 +85,7 @@ while($data=sql_fetch_array($query)){
                                 break;
                         }
                         ?>
-                        <tr>
+                        <tr <?php if($list[$i]["qa_1"]){?>class="qa_blind"<?php } if($list[$i]["qa_category"]){?>class="qa_price"<?php } if($list[$i]["qa_status"]==1){?>style="background-color:#eee;" <?php }?> >
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/qa_view.php?page=".$page."&qa_id=".$list[$i]["qa_id"]."&sfl=".$sfl."&stx=".$stx; ?>'"><?php echo $list[$i]['num']; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/qa_view.php?page=".$page."&qa_id=".$list[$i]["qa_id"]."&sfl=".$sfl."&stx=".$stx; ?>'"><?php echo $list[$i]["qa_subject"];?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/qa_view.php?page=".$page."&qa_id=".$list[$i]["qa_id"]."&sfl=".$sfl."&stx=".$stx; ?>'"><?php echo $list[$i]["qa_name"]; ?></td>
@@ -93,7 +93,7 @@ while($data=sql_fetch_array($query)){
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/qa_view.php?page=".$page."&qa_id=".$list[$i]["qa_id"]."&sfl=".$sfl."&stx=".$stx; ?>'"><?php echo $list[$i]["qa_datetime"]; ?></td>
                             <td class="">
                                 <a href="<?php echo G5_URL."/admin/qa_view.php?qa_id=".$list[$i]['qa_id']; ?>"><img src="<?php echo G5_IMG_URL?>/ic_edit.png" alt=""></a>
-                                <a href="<?php echo G5_BBS_URL."/qa_delete.php?qa_id=".$list[$i]['qa_id']; ?>" class=""><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt=""></a>
+                                <a href="<?php echo G5_URL."/admin/qa_delete.php?qa_id=".$list[$i]['qa_id']; ?>" class=""><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt=""></a>
                             </td>
 
                         </tr>

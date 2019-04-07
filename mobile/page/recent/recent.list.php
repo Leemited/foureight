@@ -56,7 +56,7 @@ while($row = sql_fetch_array($res)){
                                     <h3><?php if($list2[$i]["sc_tag"]){echo $list2[$i]["sc_tag"];}else{echo "검색어 없음";}?> | <?php echo number_format($list2[$i]["sc_priceFrom"]);?> 원 ~ <?php echo number_format($list2[$i]["sc_priceTo"]);?> 원</h3>
                                     <span><?php if($list2[$i]["sc_cate1"]){echo $list2[$i]["sc_cate1"];}else{echo "전체검색 ";}?><?php if($list2[$i]["sc_cate2"]){echo " / ". $list2[$i]["sc_cate2"];}else{echo " / 전체검색";}?></span>
                                 <?php  }else{ ?>
-                                <h3>간편검색 : <?php if($list2[$i]["sc_type"]==1){echo "<span>[물건]</span>";}else{echo "<span>[능력]</span>";}?><?php if($list2[$i]["sc_tag"]){echo $list2[$i]["sc_tag"];}else{echo "검색어 없음";}?>
+                                <h3>검색저장 : <?php if($list2[$i]["sc_type"]==1){echo "<span>[물건]</span>";}else{echo "<span>[능력]</span>";}?><?php if($list2[$i]["sc_tag"]){echo $list2[$i]["sc_tag"];}else{echo "검색어 없음";}?>
                                     <?php }?>
                             </div>
                             <div class="btn">

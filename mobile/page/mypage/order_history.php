@@ -11,7 +11,7 @@ if(!$pd_type){
     $pd_type = 1;
 }
 
-$sql = "select *,p.mb_id as pd_mb_id from `order` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and c.od_status = 1 and c.od_pay_status = 1 and pd_type = {$pd_type} order by od_date desc";
+$sql = "select *,p.mb_id as pd_mb_id from `order` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and c.od_status = 1 and pd_type = {$pd_type} order by od_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $cart[] = $row;
@@ -50,10 +50,10 @@ $back_url = G5_URL;
     </div>
     <div class="list_con">
         <?php for($i=0;$i<count($cart);$i++){
-            $mb = get_member($cart["pd_mb_id"]);
+            $mb = get_member($cart[$i]["pd_mb_id"]);
 
                 ?>
-            <div class="alarm_item" id="item_<?php echo $cart[$i]["pd_id"];?>">
+            <div class="alarm_item" id="item_<?php echo $cart[$i]["pd_id"];?>" onclick="location.href=g5_url+'/mobile/page/mypage/order_view.php?od_id=<?php echo $cart[$i]["od_id"];?>'">
                 <?php if($cart[$i]["pd_images"]!=""){
                     $img = explode(",",$cart[$i]["pd_images"]);
                     $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
@@ -61,9 +61,9 @@ $back_url = G5_URL;
                         ?>
                         <div class="item_images" style="background-image:url('<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>');background-repeat:no-repeat;background-size:cover;background-position:center;">
                             <?php if($img1!=""){?>
-                                <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0">
+                                <img src="<?php echo G5_DATA_URL?>/product/<?php echo $img1;?>" alt="" class="main" style="opacity:0;display:none">
                             <?php }else{ ?>
-                                <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="" class="main" style="opacity:0">
+                                <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="" class="main" style="opacity:0;display:none">
                             <?php }?>
                         </div>
                     <?php }else{
@@ -97,13 +97,13 @@ $back_url = G5_URL;
                     </div>
                 <?php }?>
                 <div class="item_text cart">
-<!--                    <?php /*if($cart[$i]["od_status"]==1 && $cart[$i]["od_step"]==0){*/?>
-                        <div class="no_order">구매종료</div>
-                    <?php /*}*/?>
-                    <?php /*if($cart[$i]["od_status"]==1 && $cart[$i]["od_step"]==1){*/?>
-                        <div class="no_order">계약완료</div>
-                    --><?php /*}*/?>
-                    <h2><?php echo $cart[$i]["pd_name"];?></h2>
+                    <?php if($cart[$i]["od_status"]==1 && $cart[$i]["od_pay_status"]==5){?>
+                        <div class="no_order">입금확인중</div>
+                    <?php }?>
+                    <?php if($cart[$i]["od_status"]==1 && $cart[$i]["od_pay_status"]==3){?>
+                        <div class="no_order">취소</div>
+                    <?php }?>
+                    <h2 style="font-size:3.8vw;"><?php echo $cart[$i]["pd_name"];?></h2>
                     <p>판매자 : <?php echo $mb["mb_nick"];?> </p>
                     <div>
                         <?php echo number_format($cart[$i]["od_price"])." 원";?>

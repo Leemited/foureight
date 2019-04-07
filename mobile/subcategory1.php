@@ -1,10 +1,10 @@
 <?php 
 
-$sql = "select * from `categorys` where `cate_depth` = 2 and cate_type = 1 order by `parent_ca_id`, `cate_order`";
+$sql = "select * from `categorys` where `cate_depth` = 2 and cate_type = 1 and cate_status = 0 order by `parent_ca_id`, `cate_order`";
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
     $scate[$row["parent_ca_id"]][] = $row;
-    $parent3[$row["parent_ca_id"]][] = $row["parent_ca_id"];
+    $parentss[$row["parent_ca_id"]][] = $row["parent_ca_id"];
 }
 
 $sql = "select ca_id from `categorys` where `cate_depth` = 1 and cate_type = 1 order by `cate_order`";
@@ -24,7 +24,7 @@ while($row=sql_fetch_array($res)){
 		<?php for($j=0;$j<count($scate[$num]);$j++){?>
 		<li id="<?php echo $scate[$num][$j]["cate_code"];?>"><a href="#"><?php echo $scate[$num][$j]["cate_name"];?></a></li>
 		<?php }?>
-        <li onclick="fnsuggestion2('<?php echo $parent3[$i]["parent_ca_id"];?>');">제안하기</li>
+        <li onclick="fnsuggestion2('<?php echo $parentss[$i]["parent_ca_id"];?>');">제안하기</li>
     </ul>
 	<?php }?>
 

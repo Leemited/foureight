@@ -72,7 +72,7 @@ if(count($all_pd_ids)>0) {
 }
 
 if($wish_id) {
-    $wish = sql_fetch("select count(*) as cnt from `wish_product` where mb_id = '{$mb_id}' and pd_id != '' and pd_status < 10  {$search}");
+    $wish = sql_fetch("select count(*) as cnt from `wish_product` as w left join `product` as p on w.pd_id = p.pd_id where w.mb_id = '{$mb_id}' and w.pd_id != '' and p.pd_status < 10  ");
 }
 $total1=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 1 and pd_status < 10 ");
 $total2=sql_fetch("select count(*) as cnt from `product` where mb_id = '{$mb_id}' and pd_type = 2 and pd_status < 10 ");
@@ -265,18 +265,18 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
 				<?php }?>
 				</div>
                 <?php } ?>
-				<?php echo $mb["mb_nick"]; if($mb["mb_level"] == 4){ echo "<span>기업회원</span>";}?></h4>
+                    <?php echo $mb["mb_nick"]; if($mb["mb_level"] == 4){ echo "<span>기업회원</span>";} if($member["mb_id"]!=$mb["mb_id"]){?><span onclick="fnUserHidden('<?php echo $mb["mb_id"];?>');" class="">차단하기</span><?php }?></h4>
                 <p><img src="" alt=""><?php if($settings["hp_set"]==0 && count($settings) > 0){echo "비공개";}else{echo ($mb["mb_hp"])?$mb["mb_hp"]:"전화번호 정보가 없습니다.";}?></p>
 				<!--<p><img src="" alt=""><?php /*echo ($mb["mb_email"])?$mb["mb_email"]:"이메일정보가 없습니다.";*/?></p>-->
 				<p><img src="" alt="">가입일 : <?php echo $mb["mb_datetime"];?></p>
 				<p><img src="" alt=""><?php echo ($mb["mb_addr1"])?$mb_address:"등록된 주소가 없습니다.";?></p>
 			</div>
 		</div>
-        <?php if($member["mb_id"]!=$mb["mb_id"]){?>
-        <div onclick="fnUserHidden('<?php echo $mb["mb_id"];?>');" class="user_block">
-            <img src="<?php echo G5_IMG_URL?>/ic_mypage_hidden.svg" alt="">
+        <?php /*if($member["mb_id"]!=$mb["mb_id"]){*/?><!--
+        <div onclick="fnUserHidden('<?php /*echo $mb["mb_id"];*/?>');" class="user_block">
+            <img src="<?php /*echo G5_IMG_URL*/?>/ic_mypage_hidden.svg" alt="">
         </div>
-        <?php }?>
+        --><?php /*}*/?>
 		<div class="bg"></div>
 	</section>
 	<section class="user_tab">
@@ -385,7 +385,7 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                             <?php }?>
                             <div class="top">
                                 <div>
-                                    <h2><?php echo ($list[$i]["pd_status"]==0)?"판매중":($list[$i]["pd_status"]==1)?"거래중":"";?></h2>
+                                    <h2><?php if($list[$i]["pd_status"]==0){echo "판";}else if($list[$i]["pd_status"]==1){echo "거";}?></h2>
                                     <div>
                                         <ul>
                                             <li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -427,9 +427,9 @@ var scrollchk = true;
 var finish = false;
 
 $(document).ready(function(){
-    $("#id02 ul li").click(function(){
+    $("#id09 ul li").click(function(){
         $(this).addClass("active");
-        $("#id02 ul li").not($(this)).removeClass("active");
+        $("#id09 ul li").not($(this)).removeClass("active");
        var text = $(this).text();
        switch (text){
            case "1개월 차단":
@@ -633,14 +633,9 @@ function fnlist2(num,type1,type,mb_id){
     $.ajax({
         url:url,
         method:"POST",
-        data:{mb_id:mb_id,page:page,type1:type},
-        beforeSend:function(){
-            $(".loader").css("display","block");
-        },
-        complete:function(){
-            $(".loader").css("display","none");
-        }
+        data:{mb_id:mb_id,page:page,type1:type}
     }).done(function(data){
+        console.log(data);
         if(data.indexOf("no-member")>0){
             alert("회원정보가 없습니다.");
             return false;

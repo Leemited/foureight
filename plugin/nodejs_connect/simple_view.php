@@ -11,31 +11,24 @@ var whish_cnt = "<?=$wish['cnt'];?>";
 if(whish_cnt == ""){
     whish_cnt = 0;
 }
-console.log("aA " + whish_cnt);
+
 socket.connect();
 
-socket.emit('add connect', {pd_id:pd_id});
+socket.emit('add connect', {pd_id:pd_id,cnt_type:"plus"});
 
 socket.on('view connect', function(data){
-    var cnt = Number(whish_cnt) + Number(data);
-    $(".view_cnt .count").html(cnt);
+    var cnt = Number(data.cnt);
+    $(".view_cnt .count_"+data.pd_id).html(cnt);
 });
 socket.on('insert connect', function(data){
-    var cnt = Number(whish_cnt) + Number(data);
-    $(".view_cnt .count").html(cnt);
+    var cnt = Number(data.cnt);
+    $(".view_cnt .count_"+data.pd_id).html(cnt);
 });
-/*
-socket.on('view disconnect', function(data){
-    var cnt = Number(whish_cnt) + Number(data);
-    $(".view_cnt .count").html(cnt);
-});
-socket.on('insert disconnect', function(data){
-    var cnt = Number(whish_cnt) + Number(data);
-    $(".view_cnt .count").html(cnt);
-});
-*/
+
 $(".view_top .close").click(function(){
-    whish_cnt = 0;
+
+    socket.emit('add connect', {pd_id:pd_id,cnt_type:"minus"})
     socket.disconnect();
+
 });
 </script>

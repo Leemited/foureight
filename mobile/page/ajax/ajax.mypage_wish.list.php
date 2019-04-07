@@ -1,7 +1,7 @@
 <?php
 include_once("../../../common.php");
 
-$search = " p.pd_status < 10 ";
+$search = " pd_status < 10 ";
 
 if($mb_id){
     $now = date("Y-m-d");
@@ -19,7 +19,7 @@ if($mb_id){
 }
 
 if($pd_ids) {
-    $search .= " pd_id in ({$pd_ids}) ";
+    $search .= " and pd_id in ({$pd_ids}) ";
 
 //유저 차단 목록
 $block_time = date("Y-m-d H:i:s");
@@ -31,7 +31,7 @@ while($row = sql_fetch_array($res)){
 
 if(count($my_block)>0){
     $block_id = implode(",",$my_block["target_id"]);
-    $search .= " and p.mb_id not in ({$block_id}) ";
+    $search .= " and mb_id not in ({$block_id}) ";
 }
 
 $sql = "select * from `product` where {$search} order by pd_id desc ";
@@ -101,7 +101,7 @@ for($i=0;$i<count($list);$i++){
         <?php }?>
 		<div class="top">
 			<div>
-                <h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
+                <h2 style="font-weight:normal"><?php echo ($list[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
 				<div>
 					<ul>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>

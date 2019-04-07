@@ -38,7 +38,7 @@ while($data=sql_fetch_array($query)){
 					<colgroup>
 						<col width="8%" class="md_none">
 						<col width="*">
-						<col width="10%">
+						<col width="18%">
 						<col width="15%">
 						<col width="10%">
 						<col width="10%">
@@ -48,8 +48,8 @@ while($data=sql_fetch_array($query)){
 					<thead>
 						<tr>
 							<th class="md_none">번호</th>							
-							<th class="">제안카테고리</th>
-							<th class="">제안상세카테고리</th>
+							<th class="">제안사항1</th>
+							<th class="">제안사항2</th>
 							<th class="">등록자</th>
 							<th class="">등록일</th>
 							<th class="">상태</th>
@@ -70,7 +70,8 @@ while($data=sql_fetch_array($query)){
 							}
 					?>
 						<tr>
-							<td class="md_none" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]['num']; ?></td>						
+							<td class="md_none" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]['num']; ?></td>		
+                            <?php if($list[$i]["cate_name"]){?>
 							<td class="" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]['cate_name']; ?></td>
 							<td class="" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo ($list[$i]['cate_name2'])?$list[$i]["cate_name2"]:"-"; ?></td>
 							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]["mb_id"]; ?></td>
@@ -82,8 +83,15 @@ while($data=sql_fetch_array($query)){
 									<option value="2">능력</option>
 								</select>
 							</td>
+                            <?php }else{?>
+							<td class="" onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'" colspan="2"><?php echo "일반 제안"?></td>
+							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]["mb_id"]; ?></td>
+							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo $list[$i]["insert_date"];?></td>
+							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo "-";?></td>
+							<td onclick="location.href='<?php echo G5_URL."/admin/category_temp_view.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>'"><?php echo "-";?></td>
+                            <?php }?>
 							<td>
-								<?php if($list[$i]["status"]!=1){?>
+								<?php if($list[$i]["status"]!=1 && $list[$i]["cate_name"]){?>
 								<a href="javascript:fnCateAdd('<?php echo G5_URL."/admin/category_temp_update.php?cate_name=".$list[$i]["cate_name"]."&cate_name2=".$list[$i]["cate_name2"]."&ca_temp_id=".$list[$i]["ca_temp_id"]; ?>')" class="" ><img src="<?php echo G5_IMG_URL?>/ic_add.png" alt="바로등록"></a>
 								<?php }?>
 								<a href="javascript:fnDel('<?php echo G5_URL."/admin/category_temp_delete.php?ca_temp_id=".$list[$i]["ca_temp_id"]; ?>');" class="" ><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt="삭제"></a>

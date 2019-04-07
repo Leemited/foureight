@@ -22,12 +22,14 @@ if($priceFrom && $priceTo){
     $search .= " and p.pd_price between '{$priceFrom}' and '{$priceTo}'";
 }
 if($order_sort){
+    $od = "";
     $order_sorts = explode(",",$order_sort);
     $actives = explode(",",$order_sort_active);
     for($i=0;$i<count($order_sorts);$i++){
         if($order_sorts[$i]=="pd_date"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
+                $ods[] = " p.pd_date desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
                 '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].'>'.
@@ -36,6 +38,7 @@ if($order_sort){
         if($order_sorts[$i]=="pd_price"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
+                $ods[] = " p.pd_price asc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
                 '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].'>'.
@@ -44,6 +47,7 @@ if($order_sort){
         if($order_sorts[$i]=="pd_recom"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
+                $ods[] = " p.pd_recom desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
                 '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].'>'.
@@ -52,19 +56,30 @@ if($order_sort){
         if($order_sorts[$i]=="pd_hits"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
+                $ods[] = " p.pd_hits desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
-                        '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].'>'.
-                        '<span class="round">인기순</span></label>';
+                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].'>'.
+                '<span class="round">인기순</span></label>';
         }
         if($order_sorts[$i]=="pd_loc"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
+                if($_SESSION["lat"] && $_SESSION["lng"]) {
+                    $ods[] = " ISNULL(p.pd_lat) asc, distance asc";
+                }
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
-                        '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].'>'.
-                        '<span class="round">거리순</span></label>';
+                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].'>'.
+                '<span class="round">거리순</span></label>';
         }
+    }
+    $od = " order by ". implode(",",$ods);
+}else{
+    if($_SESSION["lat"] && $_SESSION["lng"]){
+        $od = " order by ISNULL(p.pd_lat) asc, distance asc, p.pd_price asc";
+    }else {
+        $od = " order by p.pd_price asc";
     }
 }
 
@@ -89,7 +104,7 @@ if($member["mb_id"]){
     $wished_id = $ss_id;
     $search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$ss_id}') ";
 }
-$sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
+$sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} ";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $pro[] = $row;
@@ -99,7 +114,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
 ?>
 <style>
     #map{margin-top: 20vw;height: calc(100vh - 20vw);}
-    #map .wrap{width:26vw;background: #fff;padding: 10px;border-radius: 10px;top:0px;left: -16vw;-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);}
+    #map .wrap{width:26vw;background: #fff;padding: 10px;border-radius: 10px;top:0;left: -16vw;-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);}
     #map .wrap .close{position:absolute;top:1vw;right:1vw;width:4vw;height:4vw;}
     #map .wrap .info{width:100%;font-size: 3vw;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;padding: 3vw 0 0 0;}
     #map .wrap .info p{padding-top:2vw;font-weight:bold;font-size:4vw;text-align:center;}
@@ -109,12 +124,12 @@ include_once(G5_MOBILE_PATH."/head.map.php");
     #map_list ul{overflow-y:scroll;height:100%;}
     #map_list li.item{position:relative;clear:both;padding:1px;width:calc(100% - 2px);-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);margin-bottom: 1vw;display: inline-block;overflow: hidden}
     #map_list li.item .item_images{width:35vw;height:26vw;float:left}
-    #map_list li.item .info{float: left;width: calc(65vw - 2px);position: relative;height:26vw;}
+    #map_list li.item .info{float: left;width: calc(65vw - 8px);position: relative;height:26vw;}
     #map_list li.item .info .top{background: #eee;position: absolute;top: 0;width: 100%;height: 6vw;}
     #map_list li.item .info .top h2{font-size: 4vw;position: absolute;left: 1vw;top: 1vw;color: #565656;}
     #map_list li.item .info .top div{position: relative;text-align: right;height: 100%;}
     #map_list li.item .info .top div ul{width: 50vw;text-align: right;right: 0;position: absolute;top: 1px;}
-    #map_list li.item .info .top div ul li{font-size: 2vw;float: right;font-size:3vw;margin:0 1vw;line-height:6vw;color:#565656}
+    #map_list li.item .info .top div ul li{float: right;font-size:3vw;margin:0 1vw;line-height:6vw;color:#565656}
     #map_list li.item .info .top div ul li img{width:4.4vw;margin-top:-1vw}
     #map_list li.item .info .bottom{position: absolute;bottom: 0;height: calc(26vw - 7vw);}
     #map_list li.item .info .bottom h2{font-size: 4vw;padding: 1vw 2vw;word-break: keep-all}
@@ -125,7 +140,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
         <div id="map_list" style="display:block;">
             <ul>
                 <?php for($i=0;$i<count($pro);$i++){
-                    if($pro["pd_lat"]==0 && $pro["pd_lng"]==0){
+                    if($pro[$i]["pd_lat"]==0 && $pro[$i]["pd_lng"]==0){
                         $dist = "정보없음";
                     }else {
                         $dist = round($pro[$i]["distance"],1) . "km";
@@ -209,7 +224,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
                                 <h2><?php echo ($pro[$i]["mb_level"]==4)?"전":"　";?></h2>
                                 <div>
                                     <ul>
-                                        <?php if($app || $pro[$i]["distance"]){?>
+                                        <?php if($app && $app2 || $pro[$i]["distance"]){?>
                                         <li><img src="<?php echo G5_IMG_URL?>/ic_loc_list.svg" alt=""><?php echo $dist;?></li>
                                         <?php }?>
                                         <li><img src="<?php echo G5_IMG_URL?>/ic_hit_list.svg" alt=""> <?php echo $pro[$i]["pd_hits"];?></li>
@@ -231,9 +246,11 @@ include_once(G5_MOBILE_PATH."/head.map.php");
         </div>
     <?php }?>
 	<div id="map" style="width:100%;<?php if($stx || $searchActive == "search"){?>height:calc(100vh - 20vw - 41vh);<?php }?>">
-        <div class="current" onclick="fnReset();" >
+        <?php if($app || $app2){?>
+        <div class="current" <?php if($app){?>onclick="fnReset();" <?php } if($app2){?>onclick="webkit.messageHandlers.getLocation.postMessage('latlng');"<?php } ?> >
             <img src="<?php echo G5_IMG_URL?>/ic_current_map.svg" alt="">
         </div>
+        <?php }?>
     </div>
 
 </div>
@@ -417,6 +434,15 @@ function fnReset(){
     var locs = latlng.split("/");
     // 이동할 위도 경도 위치를 생성합니다
     var moveLatLon = new daum.maps.LatLng(locs[0], locs[1]);
+
+    // 지도 중심을 부드럽게 이동시킵니다
+    // 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동합니다
+    map.panTo(moveLatLon);
+}
+
+function setLocation(lat,lng){
+    // 이동할 위도 경도 위치를 생성합니다
+    var moveLatLon = new daum.maps.LatLng(lat, lng);
 
     // 지도 중심을 부드럽게 이동시킵니다
     // 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동합니다

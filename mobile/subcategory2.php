@@ -1,6 +1,6 @@
 <?php
 
-$sql = "select * from `categorys` where `cate_depth` = 1 and cate_type = 2 order by `cate_order`";
+$sql = "select * from `categorys` where `cate_depth` = 1 and cate_type = 2 and cate_status = 0 order by `cate_order`";
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
     $parent2[] = $row;

@@ -21,8 +21,10 @@ if($is_member) {
     if ($sdkVersion) {
         $_SESSION["sdkVersion"] = $sdkVersion;
     }
-    $sql = "update `g5_member` set regid = '{$regid}', sdkVersion = '{$sdkVersion}' where mb_id ='{$member[mb_id]}'";
-    sql_query($sql);
+    if($regid) {
+        $sql = "update `g5_member` set regid = '{$regid}', sdkVersion = '{$sdkVersion}' where mb_id ='{$member[mb_id]}'";
+        sql_query($sql);
+    }
 }
 
 if($lat && $lng && $is_member){
@@ -30,14 +32,14 @@ if($lat && $lng && $is_member){
     sql_query($sql);
 }
 
-$sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1 order by cate_order";
+$sql = "select * from `categorys` where `cate_type` = 1 and `cate_depth` = 1 and `cate_status` = 0 order by cate_order";
 
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$category1[] = $row;
 }
 
-$sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1 order by cate_order";
+$sql = "select * from `categorys` where `cate_type` = 2 and `cate_depth` = 1  and `cate_status` = 0  order by cate_order";
 
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
@@ -68,8 +70,13 @@ $end = date("Y-m-d", strtotime("-3 month"));
 $sql = "select count(*) as cnt from `my_alarms` where mb_id = '{$mb_id}' and alarm_status = 0 and alarm_date BETWEEN '{$end}' and '{$start}'";
 $alarms = sql_fetch($sql);
 
-//제시하기 내 판매글 선택 불러오기
+//내 물건 카운트
+$sql = "select count(*) as cnt from `product` where mb_id ='{$member["mb_id"]}' and pd_status != 10 and pd_type = 1";
+$my_pro1 = sql_fetch($sql);
 
+//내 능력 카운트
+$sql = "select count(*) as cnt from `product` where mb_id ='{$member["mb_id"]}' and pd_status != 10 and pd_type = 2";
+$my_pro2 = sql_fetch($sql);
 ?>
 <div id="id01s" class="w3-modal w3-animate-opacity">
     <div class="w3-modal-content w3-card-4">
@@ -177,8 +184,10 @@ $alarms = sql_fetch($sql);
         <div class="w3-container">
             <form name="write_from" id="write_from" method="post" action="">
                 <h2>연락하기</h2>
-                <div>
+                <div class="contacts">
+                    <ul>
 
+                    </ul>
                 </div>
                 <div>
                     <input type="button" value="닫기" onclick="modalClose2()">
@@ -218,6 +227,7 @@ $alarms = sql_fetch($sql);
 
 <!-- 모바일 헤더 시작 -->
 <div id="head">
+	<!--<div class="top_header <?php /*if($_SESSION["type1"]==2){*/?>bg2<?php /*}*/?>" onclick="location.href='<?php /*echo G5_URL*/?>';" <?php /*if($set_type==2){*/?>style="background-color: rgb(255, 61, 0);"<?php /*}*/?>>-->
 	<div class="top_header" onclick="location.href='<?php echo G5_URL?>';" <?php if($set_type==2){?>style="background-color: rgb(255, 61, 0);"<?php }?>>
 		<div class="owl-carousel" id="helps">
 			<?php for($i=0;$i<count($help);$i++){?>
@@ -243,7 +253,8 @@ $alarms = sql_fetch($sql);
         <div class="trash-ani2">
             <img src="<?php echo G5_IMG_URL?>/ic_index_trash2.svg" alt="">
         </div>
-        <header id="mobile_header">
+        <!--<header id="mobile_header" <?php /*if($_SESSION["type1"]==2){*/?>class="bg2"<?php /*}*/?>>-->
+        <header id="mobile_header" >
             <!-- <h1><a href="<?php echo G5_URL; ?>" title="HOME" class="logos"><i></i></a></h1> -->
             <div class="search">
                 <input type="text" style="display:none;">
@@ -252,7 +263,7 @@ $alarms = sql_fetch($sql);
                 <input type="hidden" name="set_type2" id="set_type2" value="<?php if($type2){echo $type2;}?>">
                 <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
                 <?php //print_r2($member);?>
-                <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
+                <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으신가요?" onkeyup="fnKeyword();" />
                 <label class="switch schtype" >
                     <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"){?>checked<?php }?> >
                     <span class="slider round" <?php if($set_type=="2"){?>style="text-align:left"<?php }?>>
@@ -264,27 +275,40 @@ $alarms = sql_fetch($sql);
             <a href="javascript:fnSetting();" id="mobile_setting_btn" title="SETTING"><i></i></a>
         </header>
         <div class="keyword">
-            <div>
-                연관검색어
+            <div class="search_re">
+                <span>연관검색어 :</span>
             </div>
-            <ul>
-                <li>인기 검색어</li>
-                <li>최신 검색어</li>
+            <ul class="tab">
+                <li class="popular_tab">인기 검색어</li>
+                <li class="recent_tab">최근 검색어</li>
             </ul>
+            <div class="search_popular">
+                <ul>
+                    <li>인기 검색어가 없습니다.</li>
+                </ul>
+            </div>
+            <div class="search_recent">
+                <ul>
+                    <li>최근 검색어가 없습니다.</li>
+                </ul>
+            </div>
+            <div class="bg">
+
+            </div>
         </div>
         <div class="search_setting">
             <input type="hidden" value="<?php echo $searchActive;?>" name="searchActive" id="searchActive" >
             <input type="hidden" value="" name="set_status" id="set_status" >
             <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
             <input type="hidden" value="<?php echo $priceTo; ?>" id="sc_priceTo" name="priceTo">
-            <input type="hidden" value="<?php echo $order_sort;?>" name="order_sort" id="order_sort">
-            <input type="hidden" value="<?php echo $order_sort_active;?>" name="order_sort_active" id="order_sort_active">
+            <input type="hidden" value="<?php echo ($order_sort)?$order_sort:"pd_loc,pd_price,pd_date,pd_recome,pd_hits";?>" name="order_sort" id="order_sort">
+            <input type="hidden" value="<?php if($order_sort_active){$order_sort_active;}else if(!$order_sort_active){if(!$app && !$app2){echo "0,1,0,0,0";}else{echo "1,1,0,0,0";}};?>" name="order_sort_active" id="order_sort_active">
             <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
             <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
             <input type="hidden" value="<?php echo $pd_price_type;?>" name="pd_price_type" id="pd_price_type">
             <div class="sch_top">
                 <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
-                <a href="javascript:fnsuggestion();">제안하기</a>
+                <a href="javascript:fnsuggestion('1');">제안하기</a>
             </div>
             <div class="types sch_mid">
                 <label class="radio_tag" for="four">
@@ -300,14 +324,14 @@ $alarms = sql_fetch($sql);
                     <span class="slider2 round">전문가</span>
                 </label>
             </div>
-            <div class="sch_ord">
+            <div class="sch_ord" id="sc_sorts">
                 <?php if(count($order_item)==0){?>
-                    <label class="align" id="sortable" for="pd_loc">
-                        <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
+                    <label class="align" id="sortable" for="pd_loc" >
+                        <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" <?php if($app || $app2){?>checked <?php } ?> >
                         <span class="round">거리순</span>
                     </label>
                     <label class="align" id="sortable" for="pd_price">
-                        <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked>
+                        <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked >
                         <span class="round">가격순</span>
                     </label>
                     <label class="align" id="sortable" for="pd_date">
@@ -365,7 +389,7 @@ $alarms = sql_fetch($sql);
                         <?php }?>
                     </select> 시부터
                     ~
-                    <input type="checkbox" name="pd_timetype" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?>><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
+                    <input type="checkbox" name="pd_timeType" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?> style="display: none"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
                     <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:17vw;margin-left:1vw;">
                         <option value="">시간선택</option>
                         <?php for($i = 1; $i< 25; $i++){
@@ -396,7 +420,8 @@ $alarms = sql_fetch($sql);
 	<div class="mobile_menu">
 		<span></span>
 		<div class="menu">
-			<div class="user_box">
+			<!--<div class="user_box <?php /*if($_SESSION["type1"]==2){*/?>bg2<?php /*}*/?>">-->
+            <div class="user_box">
                 <div class="close">
                     <img src="<?php echo G5_IMG_URL?>/ic_close.png" alt="">
                 </div>
@@ -405,7 +430,7 @@ $alarms = sql_fetch($sql);
 				<?php }else{?>
 				<p><a href="<?php echo G5_BBS_URL?>/logout.php?url=../index.php?device=mobile">로그아웃</a></p>
 				<?php } ?>
-				<div onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
+				<div class="profiles" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
 					<?php if($member["mb_id"] && $member["mb_profile"]){?>
 					<img src="<?php echo $member["mb_profile"];?>" alt="" class="user_profile">
 					<?php }else{?>
@@ -414,38 +439,53 @@ $alarms = sql_fetch($sql);
 				</div>
 				<?php if(!$member["mb_id"]){?>
 				<h4>지금 로그인하세요</h4>
-				<div class="addr">로그인 상태가 아닙니다.</div>
 				<?php }else{?>
-				<h4><?php echo $member["mb_nick"];?></h4>
-				<div class="addr"><?php echo ($member["mb_addr1"])?$member["mb_addr1"]:"저장된 주소가 없습니다.";?></div>
-                <div class="alert" onclick="fnAlertView();">
-                    <?php if($alarms['cnt'] > 0){?><div></div><?php }?>
-                    <img src="<?php echo G5_IMG_URL?>/ic_alert.svg " alt="">
+				<h4 onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'"><?php echo $member["mb_nick"];?></h4>
+                <div class="mylist" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
+                    <div>내 물건 <span><?php echo number_format($my_pro1["cnt"]);?></span></div>
+                    <div>내 능력 <span><?php echo number_format($my_pro2["cnt"]);?></span></div>
                 </div>
 				<?php }?>
+                <div class="profile_menus">
+                    <div class="search_list" onclick="fnRecent()">
+                        <img src="<?php echo G5_IMG_URL;?>/ic_profile_search.svg" alt="">
+                    </div>
+                    <div class="wished" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/wish/wish.list.php'">
+                        <img src="<?php echo G5_IMG_URL;?>/ic_profile_wished.svg" alt="">
+                    </div>
+                    <div class="alert" onclick="fnAlertView();">
+                        <?php if($alarms['cnt'] > 0){?><div><?php echo $alarms['cnt'];?></div><?php }?>
+                        <img src="<?php echo G5_IMG_URL?>/ic_profile_alarm.svg " alt="">
+                    </div>
+                </div>
+                <div class="clear"></div>
 			</div>
-			<ul>
-				<li class="menu1"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
-				<li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/talk/talk.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
-				<li class="menu2"><a href="<?php echo G5_MOBILE_URL?>/page/wish/wish.list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_wish.svg" alt="">위시리스트</a></li>
-				<li class="menu3"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/cart.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
-				<li class="menu4"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/order_history.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
-				<li class="menu6"><a href="<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
-                <li class="menu6"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=notice"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
+			<ul class="menu">
+				<li class="menu1" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
+				<li class="menu2" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/talk/talk.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
+				<!--<li class="menu2"><a href="<?php /*echo G5_MOBILE_URL*/?>/page/wish/wish.list.php"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_wish.svg" alt="">위시리스트</a></li>-->
+				<li class="menu3" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/cart.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
+				<li class="menu4" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/order_history.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
+				<li class="menu6" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
+                <li class="menu6" onclick="location.href='<?php echo G5_BBS_URL?>/board.php?bo_table=notice'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
                 <!--<li class="menu6"><a href="<?php /*echo G5_BBS_URL*/?>/page/company/company.php"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_company.svg" alt="">회사소개</a></li>-->
-				<li class="menu7"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">도움말</a></li>
-				<li class="menu8"><a href="<?php echo G5_MOBILE_URL?>/page/mypage/settings.php"><img src="<?php echo G5_IMG_URL?>/ic_menu_settings.svg" alt="">설정</a>
-                    <div class="sugg"><a href="javascript:fnsuggestion();">제안하기</a></div>
+				<li class="menu7" onclick="location.href='<?php echo G5_BBS_URL?>/board.php?bo_table=help'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">도움말</a></li>
+				<li class="menu8" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/settings.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_settings.svg" alt="">설정</a>
                 </li>
 
 			</ul>
+            <div class="sugg"><a href="javascript:fnsuggestion('1');">제안하기</a></div>
+            <div class="clear"></div>
+			<!--<div class="copyright <?php /*if($_SESSION["type1"]==2){*/?>bg2<?php /*}*/?>" style="">-->
 			<div class="copyright" style="">
 				<h2>디자인율 | 48</h2>
-                <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>대표전화 : 070-4090-4811</p>
-                <ul class="agreement">
+                <p>대표 : 김용호</p><p>사업자등록번호 : 541-44-00091</p><p>통신판매신고번호 : 제 2018-충북청주-1575 호</p><p>대표전화 : 070-4090-4811</p>
+                <p style="padding-bottom:4vw">소재지 : 충청북도 청주시 흥덕구 <br>풍산로133번길 48, 304호(복대동)</p>
+                <ul class="agreement" >
                     <li onclick="location.href=g5_url+'/mobile/page/company/agreement.php'">이용약관</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/privacy.php'">개인정보 취급방침</li>
                     <li onclick="location.href=g5_url+'/mobile/page/company/location.php'">위치정보 수집약관</li>
+                    <li onclick="location.href=g5_url+'/mobile/page/company/refund.php'">환불 약관</li>
                 </ul>
 			</div>
 		</div>
@@ -463,7 +503,7 @@ $alarms = sql_fetch($sql);
                     <a href="#"><?php if($category1[$i]["icon"]){?><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php }?><?php echo $category1[$i]["cate_name"];?></a>
                 </li>
 				<?php } ?>
-                <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
+                <li class="sugg" onclick="fnsuggestion('');"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
 			</ul>
 		</div>
 		<?php include_once(G5_MOBILE_PATH."/subcategory1.php"); ?>
@@ -479,7 +519,7 @@ $alarms = sql_fetch($sql);
 				<?php for($i=0;$i<count($category2);$i++){ ?>
 				<li class="cate<?php echo $category2[$i]["ca_id"]; ?> <?php if($i==0){?>active<?php }?>" id="scate<?php echo $category2[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category2[$i][icon]; ?>" alt=""><?php echo $category2[$i]["cate_name"];?></a></li>
 				<?php } ?>
-                <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
+                <li class="sugg" onclick="fnsuggestion('');"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
 			</ul>
 		</div>
 		<?php include_once(G5_MOBILE_PATH."/subcategory2.php"); ?>
@@ -495,7 +535,7 @@ $alarms = sql_fetch($sql);
                 <?php for($i=0;$i<count($category1);$i++){ ?>
                     <li class="cate<?php echo $category1[$i]["ca_id"]; ?> " id="scate<?php echo $category1[$i]["ca_id"]; ?>"><a href="#"><img src="<?php echo G5_DATA_URL."/cate/".$category1[$i][icon]; ?>" alt=""><?php echo $category1[$i]["cate_name"];?></a></li>
                 <?php } ?>
-                <li class="sugg" onclick="fnsuggestion();"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
+                <li class="sugg" onclick="fnsuggestion('');"><img src="<?php echo G5_IMG_URL?>/ic_menu_help.svg" alt="">제안하기</li>
             </ul>
         </div>
         <?php include_once(G5_MOBILE_PATH."/subcategory3.php"); ?>
@@ -527,13 +567,13 @@ $alarms = sql_fetch($sql);
 				</label>
 			</div>-->
 			<div class="right">
-				<label class="switch align" for="paplur">
-					<input type="checkbox" name="paplur" id="paplur" value="1" <?php if($_SESSION["list_basic_order"]=="location"){?>checked<?php }?>>
-					<span class="slider round" style="<?php if($_SESSION["list_basic_order"]=="location"){?>text-align: left;<?php }?>"><?php if($_SESSION["list_basic_order"]=="hits"){?>최신<?php }else{?>거리<?php }?></span>
-				</label>
-				<label class="switch list" for="list_type">
+				<!--<label class="switch align" for="paplur">
+					<input type="checkbox" name="paplur" id="paplur" value="1" <?php /*if($_SESSION["list_basic_order"]=="location"){*/?>checked<?php /*}*/?>>
+					<span class="slider round" style="<?php /*if($_SESSION["list_basic_order"]=="location"){*/?>text-align: left;<?php /*}*/?>"><?php /*if($_SESSION["list_basic_order"]=="hits"){*/?>최신<?php /*}else{*/?>거리<?php /*}*/?></span>
+				</label>-->
+				<label class="switch list <?php if($_SESSION["list_type"]=="list"){?><?php }?>" for="list_type">
 					<input type="checkbox" name="list_type" id="list_type" <?php if($_SESSION["list_type"]=="list"){?>checked<?php }?>>
-					<span class="slider round" style="<?php if($_SESSION["list_type"]=="list"){?>background-image: url('<?php echo G5_IMG_URL?>/ic_switch_list.svg');<?php }?>"></span>
+					<span class="slider slider2 round" style="<?php if($_SESSION["list_type"]=="list"){?>background-image: url('<?php echo G5_IMG_URL?>/ic_switch_list.svg');<?php }else{?>background-position:calc(100% - 1vw);<?php }?>"></span>
 				</label>
 			</div>
 		</div>
@@ -545,11 +585,75 @@ $alarms = sql_fetch($sql);
 var slider = null;
 var fnc = true;
 var max = 0;
+var chksearch = null;
 function fnKeyword(){
     var text = $("#stx").val();
     fnfilter(text,"stx");
     $("#searchActive").val("search");
+    var search_id = $(".search_setting").attr("id");
 
+    if(search_id != "menu_on"){
+        if(chksearch!=null){
+            clearTimeout(chksearch);
+        }
+        chksearch = setTimeout(function(){
+            if(text.length >= 1) {
+                $.ajax({
+                    url:g5_url+"/mobile/page/ajax/ajax.get_search_list.php",
+                    method:"post",
+                    data:{text:text},
+                    dataType:"json"
+                }).done(function(data){
+                    chksearch = true;
+                    var popular = '';
+                    var recent = '';
+                    var searchs = '';
+                    console.log(data);
+                    if(data.searchs != null){
+                        if(data.searchs.length > 0){
+                            for(var i = 0 ; i < data.searchs.length; i++){
+                                searchs += '<span>'+data.searchs[i].pd_tag+'</span>';
+                            }
+                        }
+                        $(".search_re").html("<span>연관검색어 : </span>");
+                        $(".search_re append").append(popular);
+                    }else{
+                        $(".search_re").html("<span>연관검색어 : </span>");
+                        $(".search_re").append('인기 검색어가 없습니다.');
+                    }
+
+                    if(data.popular != null){
+                        if(data.popular.length > 0){
+                            for(var i = 0 ; i < data.popular.length; i++){
+                               popular += '<li>'+(i+1)+'<span>'+data.popular[i].pp_word+'</span></li>';
+                            }
+                        }
+                        $(".search_popular ul").html(popular);
+                    }else{
+                        $(".search_popular ul").html('<li class="no-list">인기 검색어가 없습니다.</li>');
+                    }
+                    if(data.recent != null) {
+                        if (data.recent.length > 0) {
+                            for (var i = 0; i < data.recent.length; i++) {
+                                recent += '<li>' + data.recent[i].pp_word + '</li>';
+                            }
+                        }
+                        $(".search_recent ul").html(recent);
+                    }else{
+                        $(".search_recent ul").html('<li class="no-list">최근 검색어가 없습니다.</li>');
+                    }
+                    $(".tab .popular_tab").addClass("active");
+                    $(".search_popular").addClass("active");
+                    location.hash = "#search"
+                    $(".keyword").addClass("active");
+                });
+            }else{
+                $(".keyword").removeClass("active");
+            }
+        },600);
+    }else{
+        $(".keyword").removeClass("active");
+    }
     //엔터가 아닐때
     if(window.event.keyCode != 13) {
         if (fnc == true) {
@@ -590,6 +694,27 @@ function fnkeywordon(){
 }
 
 $(function(){
+    $(".tab li").click(function(){
+        if(!$(this).hasClass("active")){
+            $(this).addClass("active");
+            $(".tab li").not($(this)).removeClass("active");
+            if($(this).text()=="인기 검색어"){
+                $(".search_popular").addClass("active");
+                $(".search_recent").removeClass("active");
+            }else{
+                $(".search_popular").removeClass("active");
+                $(".search_recent").addClass("active");
+            }
+        }
+    });
+    $(document).on("click",".search_popular li , .search_recent li",function(){
+        if(!$(this).hasClass("no-list")){
+            var stx = $(this).children().text();
+            $("#stx").val(stx);
+            document.simplesearch.submit();
+        }
+    });
+
     $(".mobile_menu .menu .close ").click(function(){
         $(".mobile_menu").fadeOut(300,function(){
             $(".mobile_menu").removeClass("active");
@@ -619,16 +744,21 @@ $(function(){
 
     //getRegid
     try{
+        <?php if($app){?>
         var regid = window.android.getRegid();
         var sdkVersion = window.android.getSdkVersion();
-        console.log("sdkVersion : " +sdkVersion.toString());
-        $.ajax({
-            url:g5_url+"/mobile/page/ajax/ajax.regid.update.php",
-            method:"post",
-            data:{regid:regid,mb_id:"<?php echo $member["mb_id"];?>",sdkVersion:sdkVersion}
-        }).done(function(data){
-            console.log(data);
-        })
+        <?php }else if($app2 && $regid){ ?>
+        var regid = "<?php echo $regid;?>";
+        <?php } ?>
+        if(regid != "") {
+            $.ajax({
+                url: g5_url + "/mobile/page/ajax/ajax.regid.update.php",
+                method: "post",
+                data: {regid: regid, mb_id: "<?php echo $member["mb_id"];?>", sdkVersion: sdkVersion}
+            }).done(function (data) {
+                console.log(data);
+            })
+        }
     }catch(err){
         var regId = undefined;
         console.log(err);
@@ -643,8 +773,15 @@ $(function(){
             $("#searchActive").val("search");
         }
 		if($(this).prev().prop("checked") == true){
+            $(".top_header").removeClass("bg2");
+            $("#mobile_header").removeClass("bg2");
+            $(".user_box").removeClass("bg2");
+            $(".wished").removeClass("bg2");
+            $(".copyright").removeClass("bg2");
+            $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03.svg");
 			$(this).html("물건");
 			$(this).css({"text-align":"right"});
+
 
             $("#set_type").val(1);
             //$("#set_type2").val(1);
@@ -655,7 +792,9 @@ $(function(){
 
             $(".top_header").css("background-color","#000");
             $("#search").attr("placeholder","원하는 물건이 있으세요?");
-            $(".text").css({"background-color":"#ffe400","color":"#000"});
+            //$(".text").css({"background-color":"#ffe400","color":"#000"});
+            $(".text").addClass("bg1");
+            $(".text").removeClass("bg2");
             $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_1.svg");
             $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn.svg");
             $("#theme-color").attr("content","#000000");
@@ -683,6 +822,12 @@ $(function(){
             });
             fnlist(1,'');
 		}else{
+            $(".top_header").addClass("bg2");
+            $("#mobile_header").addClass("bg2");
+            $(".wished").addClass("bg2");
+            $(".user_box").addClass("bg2");
+            $(".copyright").addClass("bg2");
+            $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03_2.svg");
 			$(this).html("능력");
 			$(this).css({"text-align":"left"});
 			$("#set_type").val(2);
@@ -695,7 +840,9 @@ $(function(){
             }
             $(".top_header").css("background-color","#ff3d00");
             $("#search").attr("placeholder","누군가의 능력이 필요하세요?");
-            $(".text").css({"background-color":"#ff3d00","color":"#fff"});
+            //$(".text").css({"background-color":"#ff3d00","color":"#fff"});
+            $(".text").addClass("bg2");
+            $(".text").removeClass("bg1");
             $(".text img").attr("src","<?php echo G5_IMG_URL?>/write_text_2.svg");
             $(".write_btn img").attr("src","<?php echo G5_IMG_URL;?>/ic_write_btn_2.svg");
             $("#theme-color").attr("content","#000000");
@@ -837,72 +984,61 @@ $(function(){
     <?php }else{?>
     //$( "#schp" ).text(number_format($("#sc_priceFrom").val()) + " ~ " +number_format($("#sc_priceTo").val()));
     <?php }?>
+
+    //드래그 소트
+    //$(".sorter").amigoSorter();
+
 	var change = false;
 
     $(".sch_ord").sortable({
         axis:"x",
+        forcePlaceholderSize:false,
+        //delay:100,
         start:function(event,ui){
             var id = ui.item.context.firstElementChild;
         }
         ,
         stop:function(event,ui){
-            var id = ui.item.context.firstElementChild;
-            if(change==false){
-                if($(id).is(":checked")==true){
-                    $(id).prop("checked",false);
-                    var disabled_align =  $("#un_order_sort").val();
-                    if(disabled_align == ""){
-                        $("#un_order_sort").val($(id).val());
-                    }else{
-                        $("#un_order_sort").val(disabled_align +","+ $(id).val());
-                    }
-                }else{
-                    $(id).prop("checked",true);
-                    var disabled_align =  $("#un_order_sort").val();
-                    var aligns = disabled_align.split(",");
-                    var data = '';
-                    if(aligns.length == 1){
-                        $("#un_order_sort").val('');
-                    }else{
-                        for(var i = 0; i < aligns.length; i ++){
-                            if($(id).val() != aligns[i]){
-                                if(data==''){
-                                    data = aligns[i];
-                                }else{
-                                    data = data + "," + aligns[i];
-                                }
-                            }
-                        }
-                        $("#un_order_sort").val(data);
-                    }
-                }
-            }
-            change = false;
-            var active = '';
+            var chk = false;
             $("input[name^=orders]").each(function(e){
-                if(e==0) {
-                    $("#order_sort").val($(this).val());
-                }else{
-                    var align = $("#order_sort").val();
-                    var data = align + ","+$(this).val();
-                    $("#order_sort").val(data);
+                if($(this).prop("checked") == true){
+                    chk = true;
                 }
-
-                if($(this).is(":checked")==true){
-                    if(active == ''){
-                        active = "1";
-                    }else{
-                        active = active + ",1";
-                    }
-                }else{
-                    if(active == ''){
-                        active = "0";
-                    }else{
-                        active = active + ",0";
-                    }
-                }
-                $("#order_sort_active").val(active);
             });
+            var id = ui.item.context.firstElementChild;
+            var active = '';
+
+            if(chk==true) {
+                $("input[name^=orders]").each(function (e) {
+                    if (e == 0) {
+                        $("#order_sort").val($(this).val());
+                    } else {
+                        var align = $("#order_sort").val();
+                        var data = align + "," + $(this).val();
+                        $("#order_sort").val(data);
+                    }
+
+                    if ($(this).is(":checked") == true) {
+                        if (active == '') {
+                            active = "1";
+                        } else {
+                            active = active + ",1";
+                        }
+
+                    } else {
+                        if (active == '') {
+                            active = "0";
+                        } else {
+                            active = active + ",0";
+                        }
+                    }
+                    $("#order_sort_active").val(active);
+                });
+            }else{
+                alert("하나 이상의 조건이 필요합니다.");
+                $(id).attr("checked",true);
+                return false;
+            }
         },
         change:function(event,ui){
             change = true;
@@ -911,42 +1047,50 @@ $(function(){
         }
 
     }).disableSelection();
+});
 
-	<?php if(!$chkMobile){?>
+$(document).on("click",".sch_ord label",function(){
+    var id = $(this).prev().attr("id");
+    var chk = false;
+    $("input[name^=orders]").each(function(e){
+        if($(this).prop("checked") == true){
+            chk = true;
+        }
+    });
+    //alert("Afeaea");
+    var active = '';
+    if(chk==true) {
+        $("input[name^=orders]").each(function (e) {
 
-    $(".sch_ord .align input").each(function(e){
-        $(this).change(function(){
-            var active = '';
-            if($(this).is(":checked") == false){
-                var disabled_align = $("#un_order_sort").val();
-                if(disabled_align == ""){
-                    $("#un_order_sort").val($(this).val());
-                }else{
-                    $("#un_order_sort").val(disabled_align +","+ $(this).val());
+            if (e == 0) {
+                $("#order_sort").val($(this).val());
+            } else {
+                var align = $("#order_sort").val();
+                var data = align + "," + $(this).val();
+                $("#order_sort").val(data);
+            }
+
+            if ($(this).is(":checked") == true) {
+                if (active == '') {
+                    active = "1";
+                } else {
+                    active = active + ",1";
                 }
-            }else{
-                var disabled_align =  $("#un_order_sort").val();
-                var aligns = disabled_align.split(",");
-                var data = '';
-                if(aligns.length == 1){
-                    $("#un_order_sort").val('');
-                }else{
-                    for(var i = 0; i < aligns.length; i ++){
-                        if($(this).val() != aligns[i]){
-                            if(data==''){
-                                data = aligns[i];
-                            }else{
-                                data = data + "," + aligns[i];
-                            }
-                        }
-                    }
-                    $("#un_order_sort").val(data);
+
+            } else {
+                if (active == '') {
+                    active = "0";
+                } else {
+                    active = active + ",0";
                 }
             }
+            $("#order_sort_active").val(active);
         });
-    });
-    <?php }?>
-
+    }else{
+        alert("하나 이상의 조건이 필요합니다.");
+        $(id).attr("checked",true);
+        return false;
+    }
 });
 
 function priceSet(){
@@ -1076,7 +1220,10 @@ function fnWrite(){
     document.simplesearch.submit();
 
 }
-
+//검색조건 정렬
+function fnSort(index) {
+    console.log(index);
+}
 
 function fnwrite2(){
     var type = $("#set_type").val();

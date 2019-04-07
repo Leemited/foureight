@@ -11,6 +11,7 @@ include_once (G5_MOBILE_PATH."/head.login.php");
         <li onclick="location.href=g5_url+'/mobile/page/company/agreement.php'">이용약관</li>
         <li onclick="location.href=g5_url+'/mobile/page/company/privacy.php'">개인정보취급방침</li>
         <li class="active">위치정보수집약관</li>
+        <li onclick="location.href=g5_url+'/mobile/page/company/refund.php'">환불약관</li>
     </ul>
     <div class="clear"></div>
 </div>

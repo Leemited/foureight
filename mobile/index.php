@@ -44,7 +44,7 @@ if($searchActive !="save") {
     //그냥 검색일경우
     if($stx) {
         //전체 검색어 업데이트
-        $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), '" . $_SERVER["REMOTE_ADDR"] . "')";
+        $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip,mb_id) values ('{$stx}', now(), '{$_SERVER["REMOTE_ADDR"]}' , '{$member["mb_id"]}')";
         sql_query($sql);
         //저장된 검색어를 불러올 경우 실행
         //검색목록 저장 or 업데이트
@@ -54,10 +54,10 @@ if($searchActive !="save") {
     }
 }else if($searchActive == "save"){
     //전체 검색어 업데이트
-    $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip) values ('{$stx}', now(), '" . $_SERVER["REMOTE_ADDR"] . "')";
+    $sql = "insert into `g5_popular` (pp_word,pp_date,pp_ip,mb_id) values ('{$stx}', now(), '{$_SERVER["REMOTE_ADDR"]}' , '{$member["mb_id"]}')";
     sql_query($sql);
 
-    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_priceFrom = '{$priceFrom}', sc_priceTo = '{$priceTo}',sc_align='{$order_sort}',sc_align_active='{$order_sort_active}', sc_price_type = '{$pd_price_type}', sc_timeFrom = '{$pd_timeFrom}' , sc_timeTo = '{$pd_timeTo}', sc_savetype = 2, set_alarm = '{$set_status}'";
+    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$stx}', mb_id = '{$mb_id}', sc_datetime = now(), sc_priceFrom = '{$priceFrom}', sc_priceTo = '{$priceTo}',sc_align='{$order_sort}',sc_align_active='{$order_sort_active}', sc_price_type = '{$pd_price_type}', sc_timeFrom = '{$pd_timeFrom}' , sc_timeTo = '{$pd_timeTo}' , sc_timeType = '{$pd_timeType}', sc_savetype = 2, set_alarm = '{$set_status}'";
     sql_query($sql);
     $sc_id = sql_insert_id();
 }
@@ -77,6 +77,7 @@ if($sc_id){
     $pd_price_type = $schopt["sc_price_type"];
     $pd_timeFrom = $schopt["sc_timeFrom"];
     $pd_timeTo = $schopt["sc_timeTo"];
+    $pd_timeType = $schopt["sc_timeType"];
 }
 
 if($set_type){
@@ -123,7 +124,7 @@ if($order_sort){
                 $ods[] = " p.pd_date desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
-                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].'>'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].' onclick="fnSort(\'1\')">'.
                 '<span class="round">최신순</span></label>';
         }
         if($order_sorts[$i]=="pd_price"){
@@ -132,16 +133,16 @@ if($order_sort){
                 $ods[] = " p.pd_price asc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
-                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].'>'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].' onclick="fnSort(\'2\')">'.
                 '<span class="round">가격순</span></label>';
         }
-        if($order_sorts[$i]=="pd_recom"){
+        if($order_sorts[$i]=="pd_recome"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
                 $ods[] = " p.pd_recom desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
-                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].'>'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].' onclick="fnSort(\'3\')">'.
                 '<span class="round">추천순</span></label>';
         }
         if($order_sorts[$i]=="pd_hits"){
@@ -150,7 +151,7 @@ if($order_sort){
                 $ods[] = " p.pd_hits desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
-                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].'>'.
+                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].' onclick="fnSort(\'4\')">'.
                 '<span class="round">인기순</span></label>';
         }
         if($order_sorts[$i]=="pd_loc"){
@@ -161,15 +162,27 @@ if($order_sort){
                 }
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
-                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].'>'.
+                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].' onclick="fnSort(\'5\')">'.
                 '<span class="round">거리순</span></label>';
         }
     }
-    $od = " order by ". implode(",",$ods);
+    if(count($ods)>0)
+        $od = " order by ". implode(",",$ods);
+}else{
+    if($_SESSION["lat"] && $_SESSION["lng"] || $lat && $lng){
+        $od = " order by ISNULL(p.pd_lat) asc, distance asc, p.pd_price asc";
+    }else {
+        $od = " order by p.pd_price asc";
+    }
 }
 
-if($_SESSION["lat"] && $_SESSION["lng"]){
-    $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
+if($_SESSION["lat"] && $_SESSION["lng"] || $lat && $lng){
+    if($lat && $lng) {
+        $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$lat} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$lng} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$lat}))), SQRT(1 - POW(SIN(RADIANS({$lat} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$lng} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$lat})))) AS distance";
+    }
+    if($_SESSION["lat"] && $_SESSION["lng"]){
+        $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
+    }
 }
 
 $total=sql_fetch("select count(*) as cnt from `product` where {$search} ");
@@ -210,6 +223,15 @@ $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
 	$list[] = $row;
 }
+
+if(count($list) > 0) {
+    $test = array();
+    foreach ($list as $item) {
+        $test[] = $item['pd_date'];
+    }
+    array_multisort($test, SORT_DESC, $list);
+}
+
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od}";
 
 $res = sql_query($sql);
@@ -277,15 +299,15 @@ while($row = sql_fetch_array($res)){
 }
 ?>
 
-<div class="loader" >
-    <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
-</div>
-</div>
+<!--<div class="loader" >
+    <img src="<?php /*echo G5_IMG_URL*/?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
+</div>-->
+
 <input type="hidden" value="<?php echo $schopt['sorts'];?>" id="sorts">
 <div id="id01" class="w3-modal w3-animate-opacity no-view">
 	<div class="w3-modal-content w3-card-4">
 		<div class="w3-container">
-			<form name="write_form" id="write_form" method="post" action="" onsubmit="return false;">
+			<form name="write_form" id="write_form" method="post" action="" onsubmit="return false">
                 <input type="hidden" value="<?php if($type1){echo $type1;}else{echo 1;}?>" name="wr_type1" id="wr_type1">
                 <input type="hidden" name="cate1" id="c" value="<?php echo $cate1;?>">
 				<input type="hidden" name="cate2" id="sc" value="<?php echo $cate2;?>">
@@ -300,14 +322,14 @@ while($row = sql_fetch_array($res)){
 				<h2>검색어</h2>
 				<div>
                     <p class="write_help"></p>
-					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 띄어쓰기로 가능합니다." required value="#" onkeyup="fnfilter(this.value,'wr_title')">
+					<input type="text" name="title" id="wr_title" placeholder="검색어 구분은 띄어쓰기로 가능합니다." required value="#" onkeyup="fnfilter(this.value,'wr_title')" <?php if($app2){?>onkeydown="fnInputs(event)"<?php }?>>
                     <ul class="pd_price_type">
                         <li class="active" id="pd_price_type0">회당</li>
                         <li id="pd_price_type1">시간당</li>
                         <li id="pd_price_type2">하루당</li>
                     </ul>
                     <input type="number" name="wr_price2" id="wr_price2" placeholder="계약금" required value="" onkeyup="number_only(this)" style="width:24%;margin-top:0;<?php if($type1=="2"){?>display:inline-block;<?php }else{?>display:none;<?php }?>;opacity: 0.6;">
-					<input type="number" name="wr_price" id="wr_price" placeholder="<?php if($type1=="1"){?>판매금액<?php }else{?>계약완료금<?php }?>" required value="<?php echo $type1;?>" onkeyup="number_only(this)" style="<?php if($type1=="2"){?>width:40%;<?php }else{?>width:70%<?php }?>margin-right:5%;margin-top:0">
+					<input type="number" name="wr_price" id="wr_price" placeholder="<?php if($type1=="1"){?>판매금액<?php }else{?>계약완료금<?php }?>" required value="<?php echo $type1;?>" onkeyup="number_only(this)" style="<?php if($type1=="2"){?>width:40%;<?php }else{?>width:70%<?php }?>margin-right:5%;margin-top:0" <?php if($app2){?>onkeydown="fnInputsPrice(event)"<?php }?>>
 				</div>
 				<div class="price_box">
 					<input type="button" value="확인" style="background-color:yellow" onclick="<?php if($app){ ?>fnOnCam();<?php }else if($app2){?>fnOnCamIos()<?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL."/page/write.php";?>');<?php }?>" class="types1">
@@ -365,16 +387,39 @@ while($row = sql_fetch_array($res)){
                     }else {
                         $dist = round($list[$i]["distance"],1) . "km";
                     }
-				for($j=0;$j<count($wished);$j++){
-					if($wished[$j]["pd_id"]==$list[$i]["pd_id"]){
-						$flag = true;
-						break;
-					}else{
-						$flag = false;
-					}
-				}
+                    for($j=0;$j<count($wished);$j++){
+                        if($wished[$j]["pd_id"]==$list[$i]["pd_id"]){
+                            $flag = true;
+                            break;
+                        }else{
+                            $flag = false;
+                        }
+                    }
 
 				$wished_cnt = sql_fetch("select count(*)as cnt from `wish_product` where pd_id = {$list[$i]["pd_id"]}");
+                switch (strlen($wished_cnt["cnt"])){
+                    case 1: //일
+                        $wishedcnt = $wished_cnt["cnt"];
+                        break;
+                    case 2: //십
+                        $wishedcnt = $wished_cnt["cnt"];
+                        break;
+                    case 3: //백
+                        $wishedcnt = $wished_cnt["cnt"];
+                        break;
+                    case 4: //천
+                        $wishedcnt = substr($wished_cnt["cnt"],0,1)." T";
+                        break;
+                    case 5: //만
+                        $wishedcnt = substr($wished_cnt["cnt"],0,1)." M";
+                        break;
+                    case 6: //십만
+                        $wishedcnt = substr($wished_cnt["cnt"],0,2)." M";
+                        break;
+                    case 7: //백만
+                        $wishedcnt = substr($wished_cnt["cnt"],0,3)." M";
+                        break;
+                }
 
                 if($list[$i]["pd_date"]) {
                     $loc_data = $list[$i]["pd_date"];
@@ -431,7 +476,7 @@ while($row = sql_fetch_array($res)){
                     <?php }?>
                     <div class="wished_active" style="" id="heart_<?php echo $list[$i]["pd_id"];?>">
                         <div class="wished_ani">
-                            <i class="fa fa-heart fa-3x"></i>
+                            <img class="heart"  src="<?php echo G5_IMG_URL;?>/ic_wish_on<?php if($list[$i]["pd_type"]==2){?>2<?php }?>.svg" alt="">
                         </div>
                     </div>
 					<div class="in_grid">
@@ -482,16 +527,18 @@ while($row = sql_fetch_array($res)){
                         <?php }?>
 						<div class="top">
 							<div>
-								<h2><?php echo ($list[$i]["mb_level"]==4)?"전":"　";?></h2>
+								<h2 style="font-weight:normal"><?php echo ($list[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
 								<div>
 									<ul>
                                         <?php if($_SESSION["list_type"]=="list"){?>
                                         <li><?php echo $time_gep;?></li>
                                         <?php }?>
-										<li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
-										<?php if($app || $list[$i]["distance"] && $app2 || $list[$i]["distance"]){?><li><img src="<?php echo G5_IMG_URL?>/ic_loc.svg" alt="">
-                                            <?php echo $dist;?>
-                                            </li><?php }?>
+										<li>
+                                            <img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""><span><?php echo $list[$i]["pd_hits"];?></span>
+                                        </li>
+										<?php if($app || $list[$i]["distance"] && $app2 || $list[$i]["distance"]){?>
+                                            <li><img src="<?php echo G5_IMG_URL?>/ic_loc.svg" alt=""><span><?php echo $dist;?></span></li>
+                                        <?php }?>
 									</ul>
                                     <div class="clear"></div>
 								</div>
@@ -509,12 +556,9 @@ while($row = sql_fetch_array($res)){
                                     case "4":
                                         $pt2 = "[삽니다]";
                                         break;
-                                    case "8":
-                                        $pt2 = "[팝니다]";
-                                        break;
                                 }
 							    ?>
-							<h2><?php echo $pt2." ".$list[$i]["pd_tag"];?></h2>
+							<h2><?php echo ($pt2)?$pt2." ".$list[$i]["pd_tag"]:$list[$i]["pd_tag"];?></h2>
 							<?php }?>
 							<div>
                                 <?php if($list[$i]["pd_type2"]==4){?>
@@ -526,14 +570,18 @@ while($row = sql_fetch_array($res)){
                                 <?php }else{?>
 								<h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
                                 <?php }?>
-                                <div class="list_wished_cnt"><?php echo $wished_cnt["cnt"];?></div>
+                                <?php if($wished_cnt["cnt"]>0 && $flag){?>
+                                    <div class="list_wished_cnt active wished"><?php echo $wishedcnt;?></div>
+                                <?php }else{?>
+                                    <div class="list_wished_cnt wished"></div>
+                                <?php }?>
 								<?php
-								if($flag){
-								?>
-								<img src="<?php echo G5_IMG_URL?>/ic_wish_on.svg" alt="" class="wished" >
-								<?php }else{ ?>
-								<img src="<?php echo G5_IMG_URL?>/ic_wish.svg" alt="" class="wished" >
-								<?php } ?>
+/*								if($flag){
+								*/?><!--
+								<img src="<?php /*echo G5_IMG_URL*/?>/ic_wish_on.svg" alt="" class="wished" >
+								<?php /*}else{ */?>
+								<img src="<?php /*echo G5_IMG_URL*/?>/ic_wish.svg" alt="" class="wished" >
+								--><?php /*} */?>
 							</div>
 						</div>
 
@@ -577,7 +625,7 @@ function initpkgd(){
 	$grid = $('.grid').masonry({
 	  itemSelector: '.none', // select none at first
 	  columnWidth: '.grid__item',
-	  gutter: 10,
+	  gutter: 5,
       //  horizontalOrder:true,
 	  percentPosition: true,
 	  //stagger: 30,
@@ -590,7 +638,7 @@ function initpkgd(){
 	// initial items reveal
 	$grid.imagesLoaded( function() {
 	  $grid.removeClass('are-images-unloaded');
-	  $grid.masonry( 'option', { itemSelector: '.grid__item' ,columnWidth: '.grid__item', percentPosition:true,gutter: 10,});
+	  $grid.masonry( 'option', { itemSelector: '.grid__item' ,columnWidth: '.grid__item', percentPosition:true,gutter: 5});
 	  var $items = $grid.find('.grid__item');
 	  $grid.masonry( 'appended', $items );
 	});
@@ -663,6 +711,7 @@ $(document).ready(function(){
                 //$(".price_box").append('<p class="write_help price_help">필요시 계약금을 설정할 수 있습니다.</p>');
             }
         }else{
+
             $(this).html('구매');
             $(this).css("text-align","left");
             //등록 버튼 수정
@@ -742,27 +791,27 @@ $(document).ready(function(){
                 method:"post",
                 data:{key:"list_type",value:"gird"}
             }).done(function(data){
-                console.log(data);
+                console.log('a');
+                $("#set_list_type").val("gird");
+                $(".list .slider").css({"background-image":"url(./img/ic_switch_grid.svg)","background-position":"calc(100% - 1vw) center"});
+                $(".grid__item").removeClass("type_list");
+                finish = false;
+                fnlist(1,'false');
             });
-		    $("#set_list_type").val("gird");
-			$(this).css({"background-image":"url(./img/ic_switch_grid.svg)"});
-			$(".grid__item").removeClass("type_list");
-            finish = false;
-			fnlist(1,'false');
-			//fnlist(1,'');
+
 		}else{//GIRD
             $.ajax({
                 url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
                 method:"post",
                 data:{key:"list_type",value:"list"}
             }).done(function(data){
-                console.log(data);
+                $("#set_list_type").val("list");
+                $(".list .slider").css({"background-image":"url(./img/ic_switch_list.svg)","background-position":"1vw center"});
+                $(".grid__item").addClass("type_list");
+                finish = false;
+                fnlist(1,'true');
             });
-            $("#set_list_type").val("list");
-			$(this).css({"background-image":"url(./img/ic_switch_list.svg)"});
-			$(".grid__item").addClass("type_list");
-            finish = false;
-			fnlist(1,'true');
+
 		}
 	});
 
@@ -809,8 +858,6 @@ $(document).ready(function(){
                             $("#id01 .write_help.price_help").html("필요시 계약금을 설정할 수 있습니다.");
                         }
                         $("#id01 #wr_title").val("#");
-                        $("#id01 #wr_title").focus();
-                        $("#id01 #wr_title").selectRange(2,2);
                     });
                     cateClose();
                     if(type==1){
@@ -838,9 +885,15 @@ $(document).ready(function(){
                     $("html, body").css("overflow", "hidden");
                     $("html, body").css("height", "100vh");
                     location.hash = "#modal";
-                    //$("#id01 #wr_title").selectRange(1,2);
                     <?php if($app){?>
-                    window.android.Onkeyboard();
+                        $("#id01 #wr_title").focus();
+                        $("#id01 #wr_title").selectRange(2,2);
+                        window.android.Onkeyboard();
+                    <?php }if($app2){?>
+                        setTimeout(function(){
+                            $("#id01 #wr_title").focus();
+                            $("#id01 #wr_title").selectRange(2,2);
+                        },500);
                     <?php }?>
                 //}
             });
@@ -950,7 +1003,7 @@ $(document).ready(function(){
                             }
                             $("#heart_"+pd_id).removeClass("active");
                             wished.removeClass("element-animation");
-                            wished.attr("src", g5_url + "/img/ic_wish.svg");
+                            wished.removeClass("active");
                             wished_cnt.html(wished_total);
                         }else{
 
@@ -973,7 +1026,7 @@ $(document).ready(function(){
                             $("#heart_"+pd_id).addClass("active");
                             wished.removeClass("element-animation");
                             wished.addClass("element-animation");
-                            wished.attr("src",g5_url+"/img/ic_wish_on.svg");
+                            wished.addClass("active");
                             wished_cnt.html(wished_total);
                         }
                     });
@@ -1038,9 +1091,11 @@ $(document).ready(function(){
         }
     });
 });
+var chklist = false;
 function fnlist(num,list_type){
+
 	//사고팔고/ /카테코리1/카테고리2/가격시작/가격끝/정렬순서1/정렬순서2/정렬순서3/정렬순서4/정렬순서5
-	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,mb_id,sc_id,align,orderactive,typecompany,price_type,meetFrom,meetTo,meetType;
+	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,app2,mb_id,sc_id,align,orderactive,typecompany,price_type,meetFrom,meetTo,meetType;
 
 	if(num == 1){
 		page=0;
@@ -1058,6 +1113,7 @@ function fnlist(num,list_type){
 
     stx = $("#stx").val();
     app = "<?php echo $app;?>";
+    app2 = "<?php echo $app2;?>";
     type1 = $("#set_type").val();
     type2 = $("#set_type2").val();
     if($("#mb_level").prop("checked")==true) {
@@ -1080,16 +1136,12 @@ function fnlist(num,list_type){
     meetTo = $("#pd_timeTo").val();
     meetType = $("#pd_timetype").val();
 
-
     var list_type = $("#set_list_type").val();
     var pd_ids = "<?php echo $saves["pd_ids"];?>";
-
-    console.log(type1+"//"+type2+"//"+cate1+"//"+cate2+"//"+priceFrom+"//"+priceTo+"//"+sorts+"//"+align+"//"+mb_id+"//"+list_type+"//"+stx+"//"+pd_ids+"//"+orderactive+"//"+typecompany +"//" +set_search + "//" + price_type + "//" + meetFrom + "//" + meetTo);
-
 	$.ajax({
 		url:g5_url+"/mobile/page/ajax/ajax.index.list.php",
 		method:"POST",
-		data:{page:page,list_type:list_type,stx:stx,app:app,set_type:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo,pd_timeType:meetType},
+		data:{page:page,list_type:list_type,stx:stx,app:app,app2:app2,set_type:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo,pd_timeType:meetType,lat:"<?php echo $_SESSION["lat"];?>",lng:"<?php echo $_SESSION["lng"]?>"},
 		beforeSend:function(){
             $('.loader').show();
 		},
@@ -1203,8 +1255,6 @@ function fnwrite(){
 		return false;
 	}
 }
-
-
 function fnWriteStep2(url){
     if($("#wr_title").val()=="" || $("#wr_title").val()=="#"){
         alert("검색어를 입력해주세요.");
@@ -1212,7 +1262,9 @@ function fnWriteStep2(url){
     }
 	document.write_form.action = url;
     //console.log(url + document.getElementById("write_from").action);
+    <?php if(!$app2 && !$app){?>
 	document.write_form.submit();
+	<?php }?>
 }
 
 function fnOnCam(){
@@ -1333,6 +1385,19 @@ function doNotReload(){
     }
 }
 document.onkeydown = doNotReload;
+
+function fnInputs(e){
+    if(e.keyCode == 13){
+        $("#wr_price").focus();
+    }
+}
+function fnInputsPrice(e){
+    if(e.keyCode == 13){
+        fnOnCamIos();
+    }
+}
+
+
 
 <?php if($pd_id){ ?>
 setTimeout(function(){fn_viewer("<?php echo $pd_id;?>")},150);

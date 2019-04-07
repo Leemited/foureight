@@ -114,7 +114,7 @@ for($i=0;$i<count($list);$i++){
         <?php }?>
 		<div class="top">
 			<div>
-                <h2><?php echo ($list[$i]["pd_status"]==0)?"판매중":($list[$i]["pd_status"]==1)?"거래중":"";?></h2>
+                <h2 style="font-weight:normal"><?php if($list[$i]["pd_status"]==0){echo "판";}else if($list[$i]["pd_status"]==1){echo "거";}?></h2>
 				<div>
 					<ul>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($list_type == "true"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>

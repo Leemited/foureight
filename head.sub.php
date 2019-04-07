@@ -72,7 +72,7 @@ if (G5_IS_MOBILE) {
     echo '<meta name="HandheldFriendly" content="true">'.PHP_EOL;
     echo '<meta name="format-detection" content="telephone=no">'.PHP_EOL;
 } else {
-	echo '<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=0,maximum-scale=1,user-scalable=yes">'.PHP_EOL;
+	echo '<meta name="viewport" content="width=800,initial-scale=1.0,minimum-scale=0,maximum-scale=1,user-scalable=yes">'.PHP_EOL;
     echo '<meta http-equiv="imagetoolbar" content="no">'.PHP_EOL;
     echo '<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">'.PHP_EOL;
     echo '<meta name="format-detection" content="telephone=no">'.PHP_EOL;
@@ -97,6 +97,7 @@ if (defined('G5_IS_ADMIN')) {
 <meta property="og:image"         content="<?php echo G5_DATA_URL?>/product/<?php echo $tagimg;?>" />
 <link rel="stylesheet" href="<?php echo G5_CSS_URL?>/jquery-ui.css">
 <link rel="stylesheet" href="<?php echo G5_CSS_URL?>/owl.carousel.css">
+<link rel="stylesheet" href="<?php echo G5_CSS_URL?>/theme-default.css">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
     <!-- <link rel="stylesheet" href="<?php echo G5_CSS_URL?>/pace-theme-center-simple.css"> -->
@@ -122,6 +123,7 @@ var g5_admin_url = "<?php echo G5_ADMIN_URL; ?>";
 <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 <script src="<?php echo G5_JS_URL?>/jquery-ui.js"></script>
 <script src="<?php echo G5_JS_URL ?>/jquery.ui.touch-punch.js"></script>
+
 <!-- <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script> -->
 <?php /*}else{ */?><!--
 <script src="https://ajax.googleapis.com/ajaxajax/libs/jquery/1.12.4/jquery.min.js"></script>

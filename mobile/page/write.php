@@ -68,6 +68,8 @@ if(!$pd_id) {
         $pd_location_name = $mylocations[0];
     }
     $pd_infos = $_REQUEST["pd_infos"];
+    $pd_lat = $mylat[0];
+    $pd_lng = $mylng[0];
 }else{
     $type1 = $write["pd_type"];
     $pd_type2 = $write["pd_type2"];
@@ -88,6 +90,8 @@ if(!$pd_id) {
     $pd_location = $write["pd_location"];
     $pd_location_name = $write["pd_location_name"];
     $pd_infos = $write["pd_infos"];
+    $pd_lat = $write["pd_lat"];
+    $pd_lng = $write["pd_lng"];
 }
 ?>
 <style>
@@ -101,7 +105,7 @@ if(!$pd_id) {
         box-shadow: 0px -5px 20px 0px #000;
         background-color: #fff;
         z-index: 900;
-        top: 6vw;}
+        top: 5vw;}
     .write_form{position: relative;overflow-y: auto;height:auto;margin-top: 19vw;margin-bottom: 17vw;}
 </style>
 <div id="id01" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
@@ -226,8 +230,8 @@ if(!$pd_id) {
 		<input type="hidden" value="<?php echo $filename;?>" name="filename" id="filename" style="width:100%">
         <input type="hidden" value="<?php echo $videoname;?>" name="videoname" id="videoname" style="width:100%">
         <!--<input type="text" value="" name="addr" id="addr">-->
-        <input type="hidden" value="<?php echo $write["pd_lat"];?>" name="pd_lat" id="pd_lat">
-        <input type="hidden" value="<?php echo $write["pd_lng"];?>" name="pd_lng" id="pd_lng">
+        <!--<input type="hidden" value="<?php /*echo $write["pd_lat"];*/?>" name="pd_lat" id="pd_lat">
+        <input type="hidden" value="<?php /*echo $write["pd_lng"];*/?>" name="pd_lng" id="pd_lng">-->
         <input type="hidden" class="write_input width_80" name="wr_subject" id="wr_subject" value="<?php if($pd_id){echo $write["pd_tag"];}else{echo $title;}?>" >
         <input type="hidden" name="mywords" value="">
         <?php if($type1 == 2){?>
@@ -310,7 +314,7 @@ if(!$pd_id) {
                                 <?php }?>
                             </select> 시부터
                              ~
-                            <input type="checkbox" value="1" name="pd_timeType" id="pd_timetype" <?php if($pd_timeType==1){?>checked<?php }?>><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일 </label>
+                            <input type="checkbox" value="1" name="pd_timeType" id="pd_timetype" <?php if($pd_timeType==1){?>checked<?php }?> style="display:none"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일 </label>
                             <select name="pd_timeTo" id="pd_timeTo" class="write_input3 sel_cate" style="width:12vw;margin-left:1vw">
                                 <?php for($i = 1; $i< 25; $i++){
                                     $time = str_pad($i,"2","0",STR_PAD_LEFT);
@@ -340,7 +344,7 @@ if(!$pd_id) {
                                     <label for="images<?php echo $i;?>">
                                         <img src="<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
-                                        <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
+                                        <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                                         <?php } ?>
                                     </label>
                                 </div>
@@ -353,7 +357,7 @@ if(!$pd_id) {
                                 <label for="images<?php echo $i;?>">
                                     <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                     <?php if(!$app){?>
-                                    <input type="file" id="images<?php /*echo $i;*/?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
+                                    <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
                                     <?php } ?>
                                 </label>
                             </div>
@@ -518,14 +522,14 @@ if(!$pd_id) {
                             <div class="myloc">
                                 <?php if($pd_location){echo $pd_location;}else{echo $pd_location_name;}?>
                                 <img src="<?php echo G5_IMG_URL?>/ic_write_close.svg" alt="" class="locsDel">
-                                <input type="hidden" value="<?php echo $pd_location;?>" name="locs_name" id="">
-                                <input type="hidden" value="<?php echo $pd_location_name;?>" name="locs" id="">
-                                <input type="hidden" value="<?php echo $mylat[0];?>" name="pd_lat" id=""/>
-                                <input type="hidden" value="<?php echo $mylng[0];?>" name="pd_lng" id=""/>
                             </div>
                         <?php } ?>
 					</div>
 				</div>
+                <input type="hidden" value="<?php echo $pd_location;?>" name="locs_name" id="locs_name">
+                <input type="hidden" value="<?php echo $pd_location_name;?>" name="locs" id="locs">
+                <input type="hidden" value="<?php echo $pd_lat;?>" name="pd_lat" id="pd_lat"/>
+                <input type="hidden" value="<?php echo $pd_lng;?>" name="pd_lng" id="pd_lng"/>
 			</article>
 		</section>
 
@@ -745,7 +749,7 @@ $(".modal_sel li").click(function(){
 		$(this).addClass("active");
 		$(".modal_sel li").not($(this)).removeClass("active");
         $(".loclist").html('');
-		var item = '<div class="myloc">'+text+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+text+'" name="locs" id="locs"/></div>';
+		var item = '<div class="myloc">'+text+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+text+'" name="locs" /></div>';
 	}
     $(".loclist").append(item);
 });
@@ -807,7 +811,10 @@ $(document).on("click",".linkDels",function(){
 
 $(document).on("click",".locsDel",function(){
     var parent = $(this).parent();
-    $("#locs1").val('');
+    $("#locs_name").val('');
+    $("#locs").val('');
+    $("#pd_lat").val('');
+    $("#pd_lng").val('');
     parent.remove();
 });
 
@@ -854,6 +861,8 @@ function mapSelect(num){
         setMarkers(null);
         markers = [];
         mapon = false;
+        $("html, body").css("overflow","auto");
+        $("html, body").css("height","auto");
     }
 }
 var locitem = "";
@@ -875,6 +884,10 @@ function mapSet(){
         }
     });
     mapon = false;
+    $("#locs_name").val(locs_name);
+    $("#locs").val(locs);
+    $("#pd_lat").val(newlat);
+    $("#pd_lng").val(newlng);
     locitem="";
     setMarkers(null);
     markers = [];
@@ -899,11 +912,15 @@ function nowLoc(num){
             var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
             detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
 
-            var item = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' +
-                '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
+            var item = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"></div>';
 
-            setCookie("pd_location",result[0].address.address_name)
-            setCookie("pd_location_name",result[0].address.address_name)
+            setCookie("pd_location",result[0].address.address_name);
+            setCookie("pd_location_name",result[0].address.address_name);
+
+            $("#pd_lat").val(lat);
+            $("#pd_lng").val(lng);
+            $("#locs_name").val(result[0].address.address_name);
+            $("#locs").val(result[0].address.address_name);
 
             $(".loclist").html('');
             $(".loclist").append(item);
@@ -966,6 +983,7 @@ $(function(){
         var orileng = content.slice(0,start).length;
         var addcontent = content.slice(0,start)+text+"\r\n"+content.slice(start);
         $("#wr_content").val(addcontent);
+        setCookie("pd_content", addcontent, '1');
         //setTimeout(function(){
             var cusor = orileng + leng + 1;
             $("#wr_content").selectRange(cusor,cusor);
@@ -1000,8 +1018,9 @@ $(function(){
 
 
     $("input[id^=image]").each(function(e){
+        console.log(e);
         $(this).on("change",function(){
-            console.log(this);
+            console.log("aaa : "+this);
             readUrl(this,e);
         })
     });
@@ -1093,6 +1112,7 @@ function readUrl(file,cnt){
 var itemadd = '',addrs = '';
 var lat = '';
 var lng = '';
+var newlat = '',newlng = '', locs_name ='', locs = '';
 var marker;
 <?php if($_SESSION["lat"] && $_SESSION["lng"]){?>
 lat = "<?php echo $_SESSION["lat"];?>";
@@ -1124,10 +1144,11 @@ daum.maps.event.addListener(map, 'click', function(mouseEvent) {
             item += "<li class='active' onclick=\"setCenter(\'"+mouseEvent.latLng.jb+"\',\'"+mouseEvent.latLng.ib+"\',\'"+result[0].address.address_name+"\',\'"+result[0].address.address_name+"\',\'"+i+"\')\" >";
             item += result[0].address.address_name;
             item += "</li>";
+
             $(".loc_ul_list li").removeClass("active");
             $(".loc_ul_list").append(item);
-            locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' +
-                '<input type="hidden" value="'+mouseEvent.latLng.jb+'" name="pd_lat" id=""/><input type="hidden" value="'+mouseEvent.latLng.ib+'" name="pd_lng" id=""/></div>';
+
+            locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"></div>';
             displayMarker(data);
             setCookie("pd_location",result[0].address.address_name,'1');
             setCookie("pd_location_name",result[0].address.address_name,'1');
@@ -1197,10 +1218,18 @@ function setCenter(lat,lng,place_name,place_address,num) {
     // 지도 중심을 이동 시킵니다
     map.setCenter(moveLatLon);
 
-    locitem = '<div class="myloc">'+place_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+place_address+'" name="locs" id="locs"/><input type="hidden" value="'+place_name+'" name="locs_name" id=""/>' +
-        '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
+    locitem = '<div class="myloc">'+place_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"></div>';
     setCookie("pd_location",place_address,'1');
     setCookie("pd_location_name",place_name,'1');
+
+    newlat = lat;
+    newlng = lng;
+    locs_name = place_name;
+    locs = place_address;
+    //$("#pd_lat").val(lat);
+    //$("#pd_lng").val(lng);
+    //$("#locs_name").val(place_name);
+    //$("#locs").val(place_address);
 }
 
 // 지도에 마커를 표시하는 함수입니다
@@ -1305,7 +1334,7 @@ $(function(){
     setCookie("pd_location","<?php echo $pd_location;?>","1");
     setCookie("pd_location_name","<?php echo $pd_location_name;?>","1");
     setCookie("pd_infos",$("#pd_infos").val(),"1");
-    setCookie("pd_content",$("#wr_content").val(),"1");
+    //setCookie("pd_content",$("#wr_content").val(),"1");
     if(cookie_id != "") {
         $("#wr_content").change(function () {
             setCookie("pd_content", $(this).val(), '1');
@@ -1340,12 +1369,15 @@ $(function(){
 });
 
 
-function fnLocation(locatioin,lat,lng){
+function fnLocation(location,lat,lng){
     if(confirm("해당 위치로 등록 하시겠습니까?")){
-        var locitem = '<div class="myloc">'+locatioin+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+locatioin+'" name="locs" id="locs"/><input type="hidden" value="'+locatioin+'" name="locs_name" id=""/>' +
-            '<input type="hidden" value="'+lat+'" name="pd_lat" id=""/><input type="hidden" value="'+lng+'" name="pd_lng" id=""/></div>';
-         $(".loclist ").html('');
-         $(".loclist ").append(locitem);
+        $("#pd_lat").val(lat);
+        $("#pd_lng").val(lng);
+        $("#locs_name").val(location);
+        $("#locs").val(location);
+        var locitem = "<div class='myloc'>"+location+"<img src='"+g5_url+"/img/ic_write_close.svg' class='locsDel'></div>";
+         $(".loclist").html('');
+         $(".loclist").html(locitem);
          modalClose();
     }else{
         return false;

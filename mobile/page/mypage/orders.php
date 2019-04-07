@@ -7,14 +7,17 @@ if(!$group_id){
     return false;
 }
 
-$sql = "select * from `order_temp` as o left join `product` as p on o.pd_id = p.pd_id where group_id = '{$group_id}'  ";
+$sql = "select *,p.pd_id from `order_temp` as o left join `product` as p on o.pd_id = p.pd_id where group_id = '{$group_id}'  ";
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
     $order_list[] = $row;
     $total += (int)$row["od_price"];
     $cart_ids[] = $row["cid"];
+    $pd_ids[] = $row["pd_id"];
+    $od_pd_type = $row["od_pd_type"];
 }
 $cart_idss = implode(",",$cart_ids);
+$pd_idss = implode(",",$pd_ids);
 $order_item_name = $order_list[0]["pd_name"];
 if(count($order_list)>1){
     $order_item_name .= " 외 ".(count($order_list)-1)."개";
@@ -122,9 +125,16 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
         </ul>
         <div class="clear"></div>
     </div>
-    <form action="<?php echo G5_MOBILE_URL?>/page/mypage/order_update.php" name="order_form_update">
+    <!--form action="<?php echo G5_MOBILE_URL?>/page/mypage/order_update.php" name="order_form_update"-->
+    <form action="<?php echo G5_MOBILE_URL?>/page/mypage/stdpay/requestPay.php" name="order_form_update" method="post">
     <div class="order_write">
+        <input type="hidden" name="od_item_name" id="od_item_name" value="<?php echo $order_item_name;?>">
+        <input type="hidden" name="od_total" id="od_total" value="<?php echo $total;?>">
+        <input type="hidden" name="od_price" id="od_price" value="<?php echo $total;?>">
         <input type="hidden" name="group_id" id="group_id" value="<?php echo $group_id;?>">
+        <input type="hidden" name="ca_id" id="ca_id" value="<?php echo $cart_idss;?>">
+        <input type="hidden" name="pd_id" id="pd_id" value="<?php echo $pd_idss;?>">
+        <input type="hidden" name="od_pd_type" id="od_pd_type" value="<?php echo $od_pd_type;?>">
         <div class="write_form">
             <div class="row">
                 <div class="cell title">받는분</div>
@@ -193,12 +203,26 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                 </div>
             </div>
         </div>
+        <!--<div class="write_form">
+            <input type="hidden" name="od_type" value="1" id="od_type">
+            <div class="row">
+                <div class="cell title">결제수단</div>
+                <div class="cell inputs">
+                    <ul class="paysel">
+                        <li onclick="fnOderType('1')" class="active" >카드결제</li>
+                        <li onclick="fnOderType('2')" >가상계좌</li>
+                        <li onclick="fnOderType('3')" >계좌이체</li>
+                        <li onclick="fnOderType('4')" >핸드폰</li>
+                    </ul>
+                </div>
+            </div>
+        </div>-->
     </div>
     <div class="order_info">
         <h2>사기조회 / 안전개래 안내</h2>
         <div>
-            48에서는 직접적인 거래 사기와 피해를 보장해 주지 않습니다.<br>
-            따라서 결제전 신중하게 판단 하시기 바랍니다.
+            <!--48에서는 직접적인 거래 사기와 피해를 보장해 주지 않습니다.<br>
+            따라서 결제전 신중하게 판단 하시기 바랍니다.-->
             <div class="order_info_link" style="position: relative;width:100%;text-align: center;margin:4vw 0 6vw;display: inline-block">
             <div style="background-color:#0c0c94;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-right:1vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://thecheat.co.kr/rb/?mod=_search'">
                 <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 사기조회 하기
@@ -216,40 +240,22 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
     </div>
     </form>
 </div>
+<script type="text/javascript" src="https://testpg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js" ></script>
 <script>
+function fnOderType(type) {
+    $("#od_type").val(type);
+}
+
 function orderUpdate(){
+
     if(confirm("해당 주문건에 대한 결제를 하시겠습니까?")){
         var od_name = $("#od_name").val();
         var od_tel = $("#tel1").val()+"-"+$("#tel2").val()+"-"+$("#tel3").val();
         var od_address = $("#od_address1").val()+" "+$("#od_address2").val();
         var od_zipcode = $("#od_zipcode").val();
         var mt_id = $("#group_id").val();
-        var IMP = window.IMP; // 생략해도 괜찮습니다.
-        IMP.init("imp55770254"); // "imp00000000" 대신 발급받은 "가맹점 식별코드"를 사용합니다.
 
-        // IMP.request_pay(param, callback) 호출
-        IMP.request_pay({ // param
-            pg: "html5_inicis",
-            escrow:true,
-            pay_method: "card",
-            merchant_uid: mt_id,
-            name: "<?php echo $order_item_name;?>",
-            amount: <?php echo $total;?>,
-            buyer_email: "<?php echo $member["mb_id"];?>",
-            buyer_name: od_name,
-            buyer_tel: od_tel,
-            buyer_addr: od_address,
-            buyer_postcode: od_zipcode,
-            m_redirect_url: g5_url+"/mobile/page/mypage/order_update.php?group_id="+mt_id+"&od_name="+od_name+"&od_address1="+$("#od_address1").val()+"&od_address2="+$("#od_address2").val()+"&tel1="+$("#tel1").val()+"&tel2="+$("#tel2").val()+"&tel3="+$("#tel3").val()+"&od_zipcode="+od_zipcode+"&od_content="+$("#od_content").val()
-        }, function (rsp) { // callback
-            if (rsp.success) {
-                console.log(rsp.mt_id);
-                document.order_form_update.submit();
-            } else {
-                alert(rep);
-            }
-        });
-        //document.order_form_update.submit();
+        document.order_form_update.submit();
     }else{
         return false;
     }
@@ -325,9 +331,7 @@ function fnAddrSave(type){
 }
 $(function(){
    $(document).on("click",".address_tab li",function(){
-       console.log("A");
       if(!$(this).hasClass("active")){
-       console.log("B");
           var id = $(this).attr("id");
           $(this).addClass("active");
           $(".address_tab li").not($(this)).removeClass("active");
@@ -345,6 +349,12 @@ $(function(){
           })
       }
    });
+    $(document).on("click",".paysel li",function(){
+        if(!$(this).hasClass("active")){
+            $(".paysel li").not($(this)).removeClass("active");
+            $(this).addClass("active");
+        }
+    });
 });
 </script>
 <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>

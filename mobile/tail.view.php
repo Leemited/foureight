@@ -48,13 +48,12 @@ if ($config['cf_analytics']) {
 <script src="https://hammerjs.github.io/dist/hammer.js"></script>
 
 <script>
-function modalClose(){
-    console.log("AAA");
+/*function modalClose(){
 	$("[id^=id]").each(function(){
 		$(this).css("display","none");
 	});
 	//$("#id01").css("display","none");
-}
+}*/
 
 
 function fnRecent(){

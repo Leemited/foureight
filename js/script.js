@@ -180,14 +180,21 @@ if (myHistory) {
     sessionStorage.setItem('myHistory', JSON.stringify(newHistory));
 }
 
-function fnsuggestion(){
+function fnsuggestion(type){
 	if($(".mobile_menu").attr("class").indexOf("active")!=-1){
 		$(".mobile_menu").fadeOut(300,function(){
 			$(".mobile_menu").removeClass("active");
 		});
 	}
-    $("#id00 #cate_name").attr("readonly", false);
-    $("#id00 #cate_name2").css("display","none");
+	if(!type) {
+        $("#id00 #cate_name").attr("readonly", false);
+        $("#id00 #cate_name2").css("display", "none");
+    }else{
+        $("#id00 #cate_name").css("display", "none");
+        $("#id00 #cate_name").attr("required", false);
+        $("#id00 #cate_name2").css("display", "none");
+        $("#id00 #cate_content").attr("placeholder", "자유롭게 제안해 주세요.");
+    }
 	$("#id00").css({"display":"block","z-index":"100000"});
     $("html, body").css("overflow","hidden");
     $("html, body").css("height","100vh");
@@ -201,7 +208,6 @@ function fnsuggestion2(ca_id){
         method:"POST",
         data:{ca_id:ca_id}
     }).done(function(data){
-        console.log(data);
         cate_name = data;
         if(cate_name!="") {
             $("#id00 #cate_name").val(cate_name);
@@ -243,8 +249,8 @@ function modalCloseTalk(){
     location.hash='';
 }
 function modalClose(){
-    $("html").css("overflow","auto");
-    $("body").css("overflow","unset");
+    $("html").css({"overflow":"auto","height":"auto"});
+    $("body").css({"overflow":"unset","height":"auto"});
     $(".no-view").each(function(){
         $(this).css("display","none");
     });
@@ -277,7 +283,7 @@ function fnSetting(){
         //$("#set").val(2);
         location.hash = "#search";
         $(".search_setting").attr("id","menuon");
-        $(".search_setting").css("top","20vw");
+        $(".search_setting").css({"top":"17vw","z-index":"20"});
         $("html, body").css("overflow","hidden");
         $("html, body").css("height","100vh");
     }
@@ -325,14 +331,14 @@ function fnSettingMap2(){
 
 function hidePreview(){
 	$("#DetailImage").hide();
-	location.hash= '';
+	location.hash= '#view';
 }
 
 function hideDetail(){
     $(".view_top").css("display","block");
     $(".view_detail").css("top","100vh");
     $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
-    location.hash= '';
+    location.hash= '#view';
 }
 
 function cateClose(){
@@ -368,12 +374,12 @@ function fnfilter(content,attr){
             }
             var retext = content.replace(data.content, "");
             $("#"+attr).val(retext);
-            if(attr=="wr_content") {
-                setCookie("pd_content", retext, 1);
-            }else if(attr=="sub_title"){
-                setCookie("title", retext, 1);
-                setCookie("pd_tag", retext, 1);
-            }
+            //if(attr=="wr_content") {
+            //    setCookie("pd_content", retext, 1);
+            //}else if(attr=="sub_title"){
+            //    setCookie("title", retext, 1);
+            //    setCookie("pd_tag", retext, 1);
+            //}
         }
     });
 }

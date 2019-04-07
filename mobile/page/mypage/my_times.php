@@ -33,7 +33,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                             <?php }?>
                         </select> 시부터
                         ~
-                        <input type="checkbox" value="1" name="pd_timeType" id="pd_timetype" <?php if($pd_timeType==1){?>checked<?php }?>><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일 </label>
+                        <input type="checkbox" value="1" name="pd_timeType" id="pd_timetype" <?php if($settings["pd_timeType"]==1){?>checked<?php }?> style="display: none"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일 </label>
                         <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:16vw;margin-left:1vw">
                             <?php for($i = 1; $i< 25; $i++){
                                 $time = str_pad($i,"2","0",STR_PAD_LEFT);

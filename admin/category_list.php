@@ -113,6 +113,15 @@ while($data=sql_fetch_array($query)){
 								<a href="javascript:fnsort('down','<?php echo $list[$i]["ca_id"];?>','<?php echo $page; ?>','<?php echo $cate_type; ?>','<?php echo $list[$i]["cate_order"];?>')" class="" ><img src="<?php echo G5_IMG_URL?>/ic_down.png" alt=""></a>
 							</td>
 							<td>
+                                <?php if($list[$i]["cate_status"]==0){?>
+                                    <a href="<?php echo G5_URL."/admin/category_used_update.php?ca_id=".$list[$i]['ca_id']."&page=".$page."&cate_type=".$cate_type."&status=1"; ?>" class="" >
+                                        <img src="<?php echo G5_IMG_URL?>/ic_stop.png" alt="">
+                                    </a>
+                                <?php }else{?>
+								<a href="<?php echo G5_URL."/admin/category_used_update.php?ca_id=".$list[$i]['ca_id']."&page=".$page."&cate_type=".$cate_type."&status=0"; ?>" class="" >
+                                    <img src="<?php echo G5_IMG_URL?>/ic_reset.png" alt="">
+                                </a>
+                                <?php }?>
 								<a href="<?php echo G5_URL."/admin/category_view.php?ca_id=".$list[$i]['ca_id']."&page=".$page."&cate_type=".$cate_type; ?>" class="" ><img src="<?php echo G5_IMG_URL?>/ic_edit.png" alt=""></a>
 								<a href="javascript:fnDel('<?php echo G5_URL."/admin/category_delete.php?ca_id=".$list[$i]['ca_id']."&page=".$page."&cate_type=".$cate_type; ?>');" class="" ><img src="<?php echo G5_IMG_URL?>/ic_del.png" alt=""></a>
 							</td> 

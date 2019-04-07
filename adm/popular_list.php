@@ -55,6 +55,7 @@ $sql = " select *
             {$sql_search}
             {$sql_order}
             limit {$from_record}, {$rows} ";
+echo $sql;
 $result = sql_query($sql);
 
 $listall = '<a href="'.$_SERVER['SCRIPT_NAME'].'" class="ov_listall">전체목록</a>';

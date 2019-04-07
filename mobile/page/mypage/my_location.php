@@ -25,6 +25,8 @@ body{overflow: hidden}
     <div class="all_clear" onclick="fnLocationReset();"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash_all.svg" alt=""></div>
 </div>
 <div id="settings">
+    <input type="hidden" value="" id="changelat">
+    <input type="hidden" value="" id="changelng">
 	<!--<form action="<?php /*echo G5_MOBILE_URL*/?>/page/mypage/my_location_update.php" method="post" onsubmit="return false;">-->
 		<div class="setting_wrap">
 			<h2>거래 위치 목록</h2>
@@ -150,6 +152,7 @@ body{overflow: hidden}
                 item += "</li>";
                 $(".loc_ul_list li").removeClass("active");
                 $(".loc_ul_list").append(item);
+
                 //locitem = '<div class="myloc">'+result[0].address.address_name+'<img src="'+g5_url+'/img/ic_write_close.svg" alt="" class="locsDel"><input type="hidden" value="'+result[0].address.address_name+'" name="locs" id="locs"/><input type="hidden" value="'+result[0].address.address_name+'" name="locs_name" id=""/>' + '<input type="hidden" value="'+mouseEvent.latLng.jb+'" name="pd_lat" id=""/><input type="hidden" value="'+mouseEvent.latLng.ib+'" name="pd_lng" id=""/></div>';
                 locitem = result[0].address.address_name;
                 lat = mouseEvent.latLng.jb;
@@ -230,8 +233,8 @@ body{overflow: hidden}
         }else{
             locitem = place_address;
         }
-        lat = lat;
-        lng = lng;
+        $("#changelat").val(lat);
+        $("#changelng").val(lng);
         //setCookie("pd_location",place_address,'1');
         //setCookie("pd_location_name",place_name,'1');
     }
@@ -302,12 +305,12 @@ body{overflow: hidden}
         //$("#addr").val('');
         $("#map_sel").css({"bottom": "-100vw","top":"unset","height":"100vw"});
         mapon = false;*/
-
+        console.log(lat+"//"+lng);
         var num = $("#setnum").val();
         $("#locs"+num).val(locitem);
         $("#location"+num).val(locitem);
-        $("#mylat"+num).val(lat);
-        $("#mylng"+num).val(lng);
+        $("#mylat"+num).val($("#changelat").val());
+        $("#mylng"+num).val($("#changelng").val());
         $("#map_sel").css({"bottom": "-100vh","top":"unset","height":"100vw"});
         $(".loclist").html('');
         $("#setnum").val('');

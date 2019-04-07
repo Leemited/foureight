@@ -40,7 +40,7 @@ if ($qaconfig['qa_category']) {
 
 if(is_file($skin_file)) {
     $sql_common = " from {$g5['qa_content_table']} ";
-    $sql_search = " where qa_type = '0' ";
+    $sql_search = " where qa_type = '0' and qa_status != 3";
 
     if(!$is_admin)
         $sql_search .= " and mb_id = '{$member['mb_id']}' ";

@@ -53,7 +53,7 @@ if (count($words) > 1) {
     $words = '';
 }
 
-$wr_content = $words.' '.$wr_content;
+//$wr_content = $words.' '.$wr_content;
 
 if(count($links) > 1) {
     $links = array_filter($links);
@@ -116,11 +116,17 @@ if(!$pd_id || $pd_id == ""){
     }
 
     //글등록시 검색 등록된 것과 비교해서 조건에 맞는 회원 불러오기
-	$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where ('{$sub_title}' like CONCAT('%', sc_tag ,'%') or '{$sub_title}' like CONCAT('%', sc_cate1 ,'%') or '{$sub_title}' like CONCAT('%', sc_cate2 ,'%') or '{$wr_content}' like CONCAT('%', sc_tag ,'%') or '{$wr_content}' like CONCAT('%', sc_cate1 ,'%') or '{$wr_content}' like CONCAT('%', sc_cate2 ,'%') or '{$wr_content}') and ({$price} between sc_priceFrom and sc_priceTo) and set_alarm = 1 and sc_type = {$type} and sc_type2 = {$type2} {$search} ";
+    if($wr_content){
+	    //$where =  " and ('{$wr_content}' like CONCAT('%', sc_tag ,'%') or '{$wr_content}' like CONCAT('%', sc_cate1 ,'%') or '{$wr_content}' like CONCAT('%', sc_cate2 ,'%'))";
+	    $where =  " or (INSTR( '{$wr_content}',s.sc_tag) > 0 or INSTR('{$wr_content}',if(s.sc_cate1 != '', s.sc_cate1, 'null')) > 0 or INSTR('{$wr_content}',if(s.sc_cate2 != '', s.sc_cate2, 'null')) > 0 )";
+    }
+	//$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where ('{$sub_title}' like CONCAT('%', sc_tag ,'%') or '{$sub_title}' like CONCAT('%', sc_cate1 ,'%') or '{$sub_title}' like CONCAT('%', sc_cate2 ,'%')) {$where} and ({$price} between sc_priceFrom and sc_priceTo) and set_alarm = 1 and sc_type = {$type} and sc_type2 = {$type2} {$search} ";
+	$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where ((INSTR('{$sub_title}',s.sc_tag) > 0 or INSTR('{$sub_title}',if(s.sc_cate1 != '', s.sc_cate1, 'null')) > 0 or INSTR('{$sub_title}',if(s.sc_cate2 != '', s.sc_cate2, 'null')) > 0 ) {$where}) and set_alarm = 1 and sc_type = {$type} and sc_type2 = {$type2} {$search} and ({$price} between sc_priceFrom and sc_priceTo) ";
+
     $res = sql_query($sql);
     while($row = sql_fetch_array($res)){
         if($row["regid"]!="" && $row["mb_id"] != $member["mb_id"]) {
-            echo send_FCM($row["regid"],"검색알림",$row["sc_tag"]."의 게시물이 등록되었습니다.", G5_URL."/index.php?sc_id=".$row["sc_id"],"search_alarm_set","검색알림",$row["mb_id"],$pd_id,$img);
+            send_FCM($row["regid"],"검색알림",$row["sc_tag"]."의 게시물이 등록되었습니다.", G5_URL."/index.php?sc_id=".$row["sc_id"],"search_alarm_set","검색알림",$row["mb_id"],$pd_id,$img);
         }
     }
 }else{

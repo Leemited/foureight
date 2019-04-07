@@ -50,7 +50,7 @@ for($i=0;$i<count($talk);$i++){
         $data["msg"][] =
             "<div class='msg_box read_msg'>" .
                 "<div class='in_box'>" .
-                    "<div class='read_profile' style='position:relative;".$background.";background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;border: 1px solid #fff;'></div>" .
+                    "<div class='read_profile' style='position:relative;".$background.";background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;border: 3px solid #fff;'></div>" .
                     "<div class='box_con'>" .
                         "<div class='read_name'>".$nick."</div>" .
                         "<div class='msg'>".$talk[$i]["message"]."</div>" .

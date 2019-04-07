@@ -37,6 +37,21 @@ $mywordss = explode("!@~",$mywords[2]);
 
 $sql = "select * from `product` where pd_id = {$pd_id}";
 $pro = sql_fetch($sql);
+
+//거래상태 체크
+$sql = "select *,p.mb_id as pd_mb_id from `cart` as c left join `product` as p on c.pd_id = p.pd_id where c.pd_id = '{$pd_id}'";
+$res = sql_query($sql);
+$btn = true;
+while($row = sql_fetch_array($res)){
+    if($row["pd_mb_id"]==$pro["mb_id"] && $row["pd_status"] == 1){
+        $btn = false;
+    }
+}
+
+
+
+$bg = array('#acc7dc','#ff9681','#eeebdc','#e2d4d4','#d9d1cf','#f0e0a2','#bfb1d5','#ddf1e8','#bfe2ca','#fed88f','#d0e2ec','#f4858e','#f48b52');
+$rand = rand(1,13);
 ?>
 <div id="id01" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
     <div class="w3-modal-content w3-card-4">
@@ -53,7 +68,7 @@ $pro = sql_fetch($sql);
         </div>
     </div>
 </div>
-<div class="talk talk_view_container" style="<?php if($img1!=""){?>background-image:url('<?php echo G5_DATA_URL."/product/".$img1;?>');<?php }?>background-size:cover;background-repeat:no-repeat;background-position:center;">
+<div class="talk talk_view_container" style="<?php if($img1!=""){?>background-image:url('<?php echo G5_DATA_URL."/product/".$img1;?>')<?php }else{?>background-color:<?php echo $bg[$rand];  }?>;background-size:cover;background-repeat:no-repeat;background-position:center;">
     <div class="close" onclick="location.href='<?php echo $back_url;?>'">
         <img src="<?php echo G5_IMG_URL?>/view_close.svg" alt="" >
     </div>
@@ -63,7 +78,11 @@ $pro = sql_fetch($sql);
             <?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]+$talk_list[0]["pd_price2"]);}else{echo "0원";}?></h2>
         <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8 && $talk_list[0]["mb_id"] == $member["mb_id"]){?>
             <div class="sell_btn">
+                <?php if($btn==true){?>
                 <input type="button" value="결제요청하기" class="btn" onclick="fnSell();">
+                <?php }else{?>
+                <input type="button" value="결제대기중" class="btn" disabled>
+                <?php }?>
             </div>
         <?php }?>
         <div class="price_bg"></div>
@@ -74,7 +93,7 @@ $pro = sql_fetch($sql);
         </div>
     --><?php /*}*/?>
     <div class="msg_container" id="msg_container">
-        <div class="msg_bg"></div>
+        <div class="msg_bg" <?php if($img1==""){?>style="opacity: 0.6"<?php }?>></div>
         <?php if(count($talk_list)==0){?>
             <div class="no-list">
                 <p>대화방에 참여 하였습니다.</p>
@@ -112,8 +131,7 @@ $pro = sql_fetch($sql);
                     ?>
                     <div class='msg_box read_msg'>
                         <div class="in_box">
-                            <div class="read_profile" style="position:relative;<?php if($mb['mb_profile']){?>background-image:url('<?php echo $mb["mb_profile"];?>')<?php }else{?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg')<?php }?>;background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;
-                                border: 3px solid #fff;"></div>
+                            <div class="read_profile" style="position:relative;<?php if($mb['mb_profile']){?>background-image:url('<?php echo $mb["mb_profile"];?>')<?php }else{?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg')<?php }?>;background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;border: 3px solid #fff;"></div>
                             <div class="box_con">
                                 <div class="read_name"><?php echo $mb["mb_nick"];?></div>
                                 <div class='msg'><?php echo $talk_list[$i]["message"];?></div>
@@ -131,6 +149,7 @@ $pro = sql_fetch($sql);
 
     <div class="msg_controls">
         <input type="hidden" value="<?php echo $talk_read_ids;?>" id="talk_ids">
+        <input type="hidden" value="<?php echo $read_mb_id;?>" id="">
         <input type="text" name="talk_content" id="message" value="" placeholder="메세지를 입력하세요.">
         <?php if(count($mywordss)>0){?>
         <div class='panel noselect'>
@@ -177,7 +196,7 @@ $pro = sql_fetch($sql);
         setInterval(function(){
             var pd_id = "<?php echo $pd_id;?>";
             var mb_id = "<?php echo $member["mb_id"];?>";
-            var read_mb_id = "<?php echo $send_mb_id;?>";
+            var read_mb_id = "<?php echo $read_mb_id;?>";
             //누적 메시지 체크
             var read_id = $("#talk_ids").val();
 
@@ -211,7 +230,7 @@ $pro = sql_fetch($sql);
             fnSendMsSimple($(this).find(".column-left").text());
         });
 
-        $("#message").focus(function(objEvent){
+        $("#message").focus(function(){
             //스크롤 위치
             setTimeout(function(){element.scrollTop = element.scrollHeight;},1000);
         });
@@ -262,7 +281,7 @@ $pro = sql_fetch($sql);
     function fnSendMsSimple(msg){
         var pd_id = "<?php echo $pd_id;?>";
         var mb_id = "<?php echo $member["mb_id"];?>";
-        var read_mb_id = "<?php echo $send_mb_id;?>";
+        var read_mb_id = "<?php echo $read_mb_id;?>";
         var message = msg;
         if(message == ""){
             alert('메세지를 입력해 주세요');
@@ -311,6 +330,12 @@ $pro = sql_fetch($sql);
                 data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1}
             }).done(function (data) {
                 console.log(data);
+                if(data=="3"){
+                    fnSendMsSimple("결제요청을 보냈습니다. <br>장바구니에서 확인해 주세요.");
+                    $(".sell_btn .btn").attr("disabled","disabled");
+                    $(".sell_btn .btn").val("결제대기중");
+                    modalClose();
+                }
             });
         }else{
             return false;

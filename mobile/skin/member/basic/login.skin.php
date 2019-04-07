@@ -51,7 +51,7 @@ if(strpos($agent,"foureight")!==false){
 				<a href="<?php echo G5_BBS_URL;?>/password_lost.php" >비밀번호를 잊으셨나요?</a>
 			</div>
 			<div>
-				<input type="submit" value="로그인" class="btn_submit">
+				<input type="submit" value="로그인" class="btn_submit <?php if($_SESSION["type1"]==2){?>bg2<?php }?>">
 
 			</div>
 			<div class="login_link">
