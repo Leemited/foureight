@@ -70,7 +70,6 @@ function fnHome(){
         method:"post",
         data:{key:"type1",value:"1"}
     }).done(function(data){
-        console.log(data);
     });
 
     location.href=g5_url;
@@ -87,7 +86,6 @@ function fnPricingUpdate(){
         method:"POST",
         data:{pd_id:pd_id,pricing_pd_id:pricing_pd_id,pricing_content:pricing_content,mb_id:mb_id,pd_type:pd_type,pricing_price:pricing_price}
     }).done(function(data){
-       console.log(data);
        if(pd_type==1){
            if (data == "0") {
                alert("로그인이 필요합니다.");
@@ -132,64 +130,6 @@ function fnPricingUpdate(){
        }
     });
 }
-function fn_viewer(id){
-
-    if(id==""){
-        alert("잘못된 요청입니다.");
-        return false;
-    }
-    if($("#list_"+id).hasClass("blinds")){
-        return false;
-    }
-
-    var width = $("#dWidth").val();
-    var height = $("#dHeight").val();
-    var url = g5_url+"/mobile/page/view.php";
-    window.oriScroll = $(document).scrollTop();
-    $.ajax({
-        url : url,
-        method:"POST",
-        data:{pd_id:id,dWidth:width,dHeight:height}
-    }).done(function(data){
-        //console.log(data);
-        location.hash = "#view";
-        $("#id0s div.con").html('');
-        $("#id0s div.con").append(data);
-        $("#id0s").css("display","block");
-        $("html, body").css("overflow","hidden");
-        $("html, body").css("height","100vh");
-    });
-	//location.href=g5_url+"/mobile/page/view.php?pd_id="+id+"&dWidth="+width+"&dHeight="+height;
-}
-
-function fn_viewer2(id){
-    modalCloseThis();
-    if(id==""){
-        alert("잘못된 요청입니다.");
-        return false;
-    }
-    if($("#list_"+id).hasClass("blinds")){
-        return false;
-    }
-
-    var width = $("#dWidth").val();
-    var height = $("#dHeight").val();
-    var url = g5_url+"/mobile/page/view.php";
-    window.oriScroll = $(document).scrollTop();
-    $.ajax({
-        url : url,
-        method:"POST",
-        data:{pd_id:id,dWidth:width,dHeight:height}
-    }).done(function(data){
-        location.hash = "#view";
-        $("#id0s div.con").html('');
-        $("#id0s div.con").append(data);
-        $("#id0s").css("display","block");
-        $("html, body").css("overflow","hidden");
-        $("html, body").css("height","100vh");
-    });
-    //location.href=g5_url+"/mobile/page/view.php?pd_id="+id+"&dWidth="+width+"&dHeight="+height;
-}
 
 function fnRecent(){
 	location.href=g5_url+'/mobile/page/recent/recent.list.php';
@@ -205,91 +145,6 @@ function fnRecent(){
 		initpkgd();
 		page=1;	
 	});*/
-}
-
-
-function fnStatus(pd_id,status){
-    $("#up_pd_id").val(pd_id);
-    if("<?php echo $view["pd_type"];?>"=="2"){
-        $("#status_buy").css("display","none");
-    }
-    switch (status){
-        case "0":
-            $("#status1").addClass("active");
-            $("#status2").removeClass("active");
-            $("#status3").removeClass("active");
-            $("#status4").removeClass("active");
-            break;
-        case "1":
-            $("#status1").removeClass("active");
-            $("#status2").addClass("active");
-            $("#status3").removeClass("active");
-            $("#status4").removeClass("active");
-            break;
-        case "2":
-            $("#status1").removeClass("active");
-            $("#status2").removeClass("active");
-            $("#status3").addClass("active");
-            $("#status4").removeClass("active");
-            break;
-        case "3":
-            $("#status1").removeClass("active");
-            $("#status2").removeClass("active");
-            $("#status3").removeClass("active");
-            $("#status4").addClass("active");
-            break;
-    }
-
-    $("#id03").css({"display":"block","z-index":"9999999"});
-    $("#id03 .w3-modal-content").css({"height":"62vw","margin-top":"-32vw"});
-    $("html, body").css("overflow","hidden");
-    $("html, body").css("height","100vh");
-    location.hash="#modal";
-}
-
-function fnStatusUpdate(){
-    var status = $("#id03 ul.modal_sel li.active").text();
-    var pd_id = $("#up_pd_id").val();
-    $.ajax({
-        url:g5_url+"/mobile/page/ajax/ajax.product_status_update.php",
-        method:"POST",
-        data:{status:status,pd_id:pd_id}
-    }).done(function(data){
-        console.log(data);
-        if(data=="3"){
-            alert("해당 물품은 거래중인 상품으로 상태 변경할 수 없습니다.");
-            modalClose();
-        }else if(data=="4"){
-            alert("해당 물품은 판매완료된 상품으로 판매완료 상태이외는 변경할 수 없습니다.");
-            modalClose();
-        }else if(data=="1"){
-            alert("상태변경이 완료 되었습니다.");
-            modalClose();
-        }else{
-            alert("상태변경 오류 입니다. 다시 시도해 주세요.");
-            modalClose();
-        }
-    });
-}
-function fnBlindView(pd_id){
-
-    //window.oriScroll = $(document).scrollTop();
-    $.ajax({
-        url:g5_url+"/mobile/page/ajax/ajax.blind_view.php",
-        method:"POST",
-        data:{pd_id:pd_id}
-    }).done(function(data){
-        console.log(data);
-        if($("#id06").css("display")=="none"){
-            $("#blind_view_btn").attr("onclick","location.href='"+g5_url+"/mobile/page/mypage/blind_view.php?pd_id="+pd_id+"'");
-            $("#admin_qa").attr("onclick","fnAdminWrite('"+pd_id+"')");
-            $("#id06").css("display","block");
-            $("html, body").css("overflow","hidden");
-            $("html, body").css("height","100vh");
-            location.hash = "#modal";
-        }
-        $("#id06 .con p").html(data);
-    });
 }
 
 function fnAdminWrite(pd_id){
@@ -313,13 +168,7 @@ $(function() {
     font_resize("container", get_cookie("ck_font_resize_rmv_class"), get_cookie("ck_font_resize_add_class"));
 
 });
-function removeDebug(){
-    $("#debug").removeClass("active");
-    $(".trash-ani").removeClass("active");
-    $(".trash-ani2").removeClass("active");
-    $(".trash-icon").removeClass("active");
-    $("#mobile_header #mobile_menu_btn").removeClass("active");
-}
+
 
 function addSell2(pd_id,price,sell_mb_id,id){
 

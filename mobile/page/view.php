@@ -59,7 +59,6 @@ while($row=sql_fetch_array($res)){
     $pricing[] = $row;
 }
 
-
 //게시글 설정
 $sql = "select * from `g5_member` as m left join `mysetting` as s on m.mb_id = s.mb_id where s.mb_id = '{$view[mb_id]}'";
 $profile = sql_fetch($sql);
@@ -76,7 +75,11 @@ if($mb_id == ""){
 }
 
 //해당 제품의 판매 여부
-$sql = "select count(*)as cnt from `order` where od_status = 1 and pd_id = '{$pd_id}'";
+if($view["pd_type"]==1) {
+    $sql = "select count(*)as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_step = 2 and pd_id = '{$pd_id}'";
+}else{
+    $sql = "select count(*)as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_step = 2 and pd_id = '{$pd_id}'";
+}
 $pdorder = sql_fetch($sql);
 //해당 제품의 대화목록
 $sql = "select  * from `product_chat` where pd_id = {$pd_id} and (send_mb_id = '{$mb_id}' or read_mb_id = '{$mb_id}') order by msg_datetime asc";
@@ -154,7 +157,7 @@ if($view["pd_type"]==1) {
     $sql = "select count(*) as cnt from `product_like` where pd_type = 1";
     $viewlikecnt = sql_fetch($sql);
     //좋아요 권한, 구매 확인
-    $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1";
+    $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1 and od_pay_status = 1 and od_step = 2";
     $chkLike = sql_fetch($sql);
     if($chkLike["cnt"] > 0){
         $likeper = true;
@@ -174,7 +177,7 @@ if($view["pd_type"]==1) {
     $sql = "select count(*) as cnt from `product_like` where pd_id = {$view["pd_id"]}";
     $viewlikecnt = sql_fetch($sql);
     //좋아요 권한, 구매 확인
-    $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1";
+    $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1 and od_pay_status = 1 ";
     $chkLike = sql_fetch($sql);
     if($chkLike["cnt"] > 0) {
         $likeper = true;
@@ -190,6 +193,7 @@ if($view["pd_type"]==1) {
         $likeper = false;
     }
 }
+
 switch ($view["pd_price_type"]){
     case 0:
         $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_01.svg' alt=''></span>";
@@ -235,17 +239,21 @@ switch ($view["pd_price_type"]){
         <img src="<?php echo G5_IMG_URL?>/ic_view_close.svg" alt="">
     </div>
 </div>
-<div class="talk">
+<div class="talk <?php if($view["pd_type"]==2){?>bg2<?php }?>">
     <div class="close" onclick="modalCloseTalk();">
-        <img src="<?php echo G5_IMG_URL?>/<?php if($view["pd_type"] == 1){?>view_close.svg<?php }else if($view["pd_type"] == 2){?>view_close2.svg<?php }?>" alt="" >
+        <img src="<?php echo G5_IMG_URL?>/<?php if($view["pd_type"] == 1){?>ic_talk_close.svg<?php }else if($view["pd_type"] == 2){?>ic_talk_close_bg2.svg<?php }?>" alt="" >
     </div>
     <div class="price">
         <h1><?php echo $view["pd_tag"];?></h1>
-        <h2> <span><?php if($view['pd_type']==1){ if($view['pd_type2']==4){ ?>구매예상금액<?php }else{?>판매금액<?php } }else{ if($view['pd_type2']==4){?>구매예상금액<?php }else{?>계약금<?php } }?></span>
+        <h2> <!--<span><?php /*if($view['pd_type']==1){ if($view['pd_type2']==4){ */?>구매예상금액<?php /*}else{*/?>판매금액<?php /*} }else{ if($view['pd_type2']==4){*/?>구매예상금액<?php /*}else{*/?>계약금<?php /*} }*/?></span>-->
             <?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]+$view["pd_price2"]);}else{echo "0원";}?></h2>
-            <?php if($view["pd_type"]==1 && $view["pd_type2"]==8 && $view["mb_id"] == $member["mb_id"]){?>
+            <?php if($view["pd_type"]==1 && $view["pd_type2"]== 8 && $view["mb_id"] != $member["mb_id"]){?>
             <div class="sell_btn">
-                <input type="button" value="결제요청하기" class="btn" onclick="fnSell();">
+                <input type="button" value="구매예약" class="btn" onclick="fnSell()">
+            </div>
+            <?php }else{?>
+            <div class="sell_btn">
+                <input type="button" value="구매요청하기" class="btn" onclick="fnSell()">
             </div>
             <?php }?>
         <div class="price_bg"></div>
@@ -260,20 +268,25 @@ switch ($view["pd_price_type"]){
         <?php if(count($talk_list)==0){?>
             <div class="no-list">
                 <p>대화방에 참여 하였습니다.</p>
-                <?php if($view["pd_type"]==2 && $view["pd_infos"] != ""){?>
-                <p style="border-radius: 10px;font-size: 4vw;background-color: #ffe22e;color: #000;text-align: left;padding: 2vw;width: calc(100% - 8vw);"><?php echo nl2br($view["pd_infos"]);?></p>
-
-                <?php }?>
             </div>
-        <?php }else {
+        <?php }?>
+        <?php if($view["pd_type"]==2 && $view["pd_infos"] != ""){?>
+            <div class="no-list">
+                <h2 style="padding-left:2vw;font-size:3vw;">거래 조건 및 유의 사항</h2>
+                <p class="info" style="border-radius: 10px;font-size: 2.5vw;color: #000;text-align: left;padding: 2vw;width: calc(100% - 8vw);"><?php echo nl2br($view["pd_infos"]);?></p>
+            </div>
+        <?php }?>
+
+            <?php
+
             $today = date("Y-m-d");
             for ($i = 0; $i < count($talk_list); $i++) {
                 if($talk_list[$i]["msg_date"] == $today){
                     $date = (date("a",strtotime($talk_list[$i]["msg_time"]))=="am")?"오전":"오후";
-                    $date .= " ".substr($talk_list[$i]["msg_time"],0,5);
+                    $date .= " ".substr(date("h:i",strtotime($talk_list[$i]["msg_time"])),0,5);
                 }else{
                     $ampm = (date("a",strtotime($talk_list[$i]["msg_time"]))=="am")?"오전":"오후";
-                    $date = $talk_list[$i]["msg_date"]."<br>".$ampm." ".substr($talk_list[$i]["msg_time"],0,5);
+                    $date = $talk_list[$i]["msg_date"]."<br>".$ampm." ".substr(date("h:i",strtotime($talk_list[$i]["msg_time"])),0,5);
                 }
 
                 if ($mb_id == $talk_list[$i]["send_mb_id"]) {?>
@@ -299,7 +312,7 @@ switch ($view["pd_price_type"]){
                     ?>
                     <div class='msg_box read_msg'>
                         <div class="in_box">
-                            <div class="read_profile" style="position:relative;<?php if($mb['mb_profile']){?>background-image:url('<?php echo $mb["mb_profile"];?>')<?php }else{?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg')<?php }?>;background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;
+                            <div class="read_profile" style="position:relative;<?php if($mb['mb_profile']){?>background-image:url('<?php echo $mb["mb_profile"];?>')<?php }else{?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg')<?php }?>;background-size:cover;background-repeat:no-repeat;background-position:center;width:11vw;height:11vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;
                                     border: 1px solid #fff;"></div>
                             <div class="box_con">
                                 <div class="read_name"><?php echo $nick;?></div>
@@ -311,27 +324,38 @@ switch ($view["pd_price_type"]){
                         <div class="clear"></div>
                     </div>
                 <?php }
-                }
             }?>
     </div>
-    <?php if(count($mywordss)>0){?>
-    <div class="my_word">
-        <ul>
-            <?php for($i=0;$i<count($mywordss);$i++) {
-                if ($mywordss[$i] != "") {
-                    ?>
-                    <li><?php echo $mywordss[$i]; ?></li>
-                <?php }
-            }?>
-        </ul>
-    </div>
-    <?php }?>
     <div class="msg_controls">
         <input type="hidden" value="<?php echo $talk_read_ids;?>" id="talk_ids">
         <input type="hidden" value="" id="talk_read_id">
         <input type="hidden" value="normal" id="talk_type">
-        <input type="text" name="talk_content" id="message" value="" placeholder="메세지를 입력하세요.">
-        <input type="button" value="보내기" class="send_msg" onclick="fnSendMsg();">
+        <textarea type="text" name="talk_content" id="message" value=""></textarea>
+        <?php if(count($mywordss)>0){?>
+            <div class='panel noselect'>
+                <div class='admin-panel'>
+                    <!-- <label class='text' for='toggle'>Admin Settings</label>-->
+                    <label class='' for='toggle'>
+                        <img src="<?php echo G5_IMG_URL;?>/ic_talk_menu.svg" alt="">
+                    </label>
+                </div>
+                <input type='checkbox' id='toggle' checked="false">
+                <div class='menu-panel'>
+
+                    <div class='arrow'></div>
+                    <?php for($i=0;$i<count($mywordss);$i++){
+                        if($mywordss[$i]!=""){
+                            ?>
+                            <a href='#' class='row'>
+                                <div class='column-left'><?php echo $mywordss[$i];?></div>
+                                <div class='column-right'></div>
+                            </a>
+                        <?php }
+                    }?>
+                </div>
+            </div>
+        <?php }?>
+        <div class="send_msg" onclick="fnSendMsg();"><img src="<?php echo G5_IMG_URL;?>/ic_send_btn.svg" alt=""></div>
     </div>
     <!--
     <div class="price">
@@ -429,8 +453,8 @@ switch ($view["pd_price_type"]){
                 <div><?php echo $profile[mb_nick];?></div>
             </span>
             <?php if($profile["like_set"]== 1 && $view["pd_type2"] == 8){?>
-            <div class="pd_like">
-                <img src="<?php echo G5_IMG_URL?>/view_like.svg" alt="" class="likeimg" id="<?php echo $view["pd_id"];?>">
+            <div class="pd_like" id="<?php echo $view["pd_id"];?>">
+                <img src="<?php echo G5_IMG_URL?>/view_like.svg" alt="" class="likeimg" >
                 <span><?php echo $viewlikecnt["cnt"];?></span>
             </div>
             <?php }?>
@@ -454,21 +478,23 @@ switch ($view["pd_price_type"]){
                     ?>
                 <input type="button" value="상단UP" onclick="fnProductUp();" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>">
                 <?php } ?>
-                <input type="button" value="상태변경" onclick="fnStatus('<?php echo $view["pd_id"];?>','<?php echo $view["pd_status"];?>');" >
+                <input type="button" value="상태변경" onclick="fnStatus('<?php echo $view["pd_id"];?>','<?php echo $view["pd_status"];?>','<?php echo $view["pd_type"];?>');" >
                 <input type="button" value="수정" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/write.php?pd_id=<?php echo $pd_id;?>'">
                 <?php } ?>
                 <input type="button" value="삭제" onclick="fnDelete('<?php echo $view[pd_id];?>')">
             <?php }else{
                 $width = 1;
                 ?>
+                <?php if($pdorder["cnt"]==0){?>
                 <?php if($view["pd_type2"] == 8){?>
                     <?php if($view["pd_type"]==1){?>
                     <?php if($view["pd_discount"]==1){
                         $width = 2; ?>
                     <input type="button" value="딜하기" onclick="fnPricing('<?php echo $view["pd_id"];?>',1)">
                     <?php }?>
-                    <input type="button" value="구매예약" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>" onclick="fnSell()">
-                    <?php }else{
+                        <input type="button" value="구매예약" class="point <?php if ($view["pd_type"] == 2) { ?> bg2 <?php } ?>" onclick="fnSell()">
+                    <?php
+                    }else{
                         $width = 2;
                         ?>
                     <input type="button" value="대화하기" onclick="fnTalk();">
@@ -477,8 +503,9 @@ switch ($view["pd_price_type"]){
                 <?php }else if($view["pd_type2"] == 4){
                     $width = 2;
                     ?>
-                    <input type="button" value="제시하기" onclick="fnPricing('<?php echo $view["pd_id"];?>',2)">
+                    <input type="button" value="제시하기" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>" onclick="fnPricing('<?php echo $view["pd_id"];?>',2)">
                     <input type="button" value="대화하기" onclick="fnTalk();">
+                <?php }?>
                 <?php }?>
             <?php }?>
         </div>
@@ -497,8 +524,8 @@ switch ($view["pd_price_type"]){
                 <div class="info">
                      <div class="view_cnt">
                          <img src="<?php echo G5_IMG_URL?>/ic_hit_list.svg" alt="">
-                         <?php echo $view["pd_hits"];?>/<span class="count_<?php echo $pd_id;?>"></span>
-                         <div class="count_msg active">
+                         <?php echo $view["pd_hits"];?>/<span class="count_<?php echo $pd_id;?>" id="top_count"></span>
+                         <div class="count_msg">
                              현재 <span class="count_<?php echo $pd_id;?>"></span>명이 이글을 보고 있습니다.
                          </div>
                      </div>
@@ -553,6 +580,10 @@ switch ($view["pd_price_type"]){
             </div>
             <div class="con">
                 <div class="pd_contents">
+                    <?php if($view["pd_type"]==2 && $view["pd_infos"] != ""){?>
+                    <h2>거래 조건 및 유의 사항 </h2>
+                    <p><?php echo ($view["pd_infos"])? nl2br($view["pd_infos"]) :"등록된 거래 조건 및 유의 사항이 없습니다.";?></p>
+                    <?php }?>
                     <h2>상세설명</h2>
                     <p><?php echo ($view["pd_content"]!=" ")? str_replace("<br>","\n",$view["pd_content"]) :"등록된 상세 설명이 없습니다.";?></p>
                 </div>
@@ -649,7 +680,7 @@ switch ($view["pd_price_type"]){
                 <div class="comment">
                     <h2><?php if($view["pd_type2"]=="4"){?>제시목록<?php }else if($view["pd_type2"]=="8"){?>딜목록<?php }?></h2>
                     <div class="pricing cm_box">
-                        <ul class="pri_container">
+                        <ul class="pri_container <?php if($view["pd_type"]==2){?>bg2<?php }?>">
                             <?php
                                 for($i=0;$i<count($pricing);$i++){
                                 $rand = rand(1,13);
@@ -659,31 +690,28 @@ switch ($view["pd_price_type"]){
                                 ?>
                                 <!--<li onclick="fn_viewer2('<?php /*echo $pricing[$i]["pricing_pd_id"];*/?>')">-->
                                 <li>
-                                    <div>
-                                        <?php if($member["mb_id"] == $view["mb_id"]){ ?>
-                                        <div style="position:absolute;right:0;top:4vw;z-index:10">
-                                            <input type="button" value="상품보기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;display:inline-block;' onclick="fn_viewer('<?php echo $pricing[$i]["pricing_pd_id"];?>')">       <br><br>
-                                            <input type="button" value="구매요청" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="fnPricing3('<?php echo $pricing[$i]["pricing_pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing[$i]["id"];?>')">
+                                    <div style="position: relative">
+                                        <div class="coms" style="padding:0;position:relative;left:0;margin:0;">
+                                            <p style="margin:0;font-weight:normal;color:#898989;font-size:3vw"><span <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')" <?php }?> style="text-decoration: underline;font-size:3.2vw;color:#101010"><strong><?php echo $mb["mb_nick"];?></strong></span> / <?php echo display_datetime($pricing[$i]["sign_date"]);?>  / <span style="font-size:3vw;">거리 : <?php echo distTran($pricing[$i]["distance"]);?></span></p>
+                                            <h2 style="margin-top:2vw;margin-bottom:2.5vw;width:100%;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;word-break: keep-all;"><?php echo $pricing[$i]["pricing_content"];?></h2>
                                         </div>
-                                        <?php }?>
-                                        <div class="coms" style="padding:3vw 3vw 3vw 0;position:relative;left:0;margin:0;">
-                                            <p style="margin:0;font-weight:normal"><span <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')" <?php }?> style="text-decoration: underline"><strong><?php echo $mb["mb_nick"];?></strong></span> / <span>거리 : <?php echo distTran($pricing[$i]["distance"]);?></span> / <span><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?></span></p>
-                                            <h2 style="margin-top:2vw"><?php echo $pricing[$i]["pricing_content"];?></h2>
-                                        </div>
+                                        <span style="position:absolute;top:0;right:0;color:#101010"><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?></span>
                                     </div>
+                                    <?php if($member["mb_id"] == $view["mb_id"]){ ?>
+                                    <div style="position:relative;text-align: right">
+                                        <input type="button" value="상품보기" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;margin-right:1vw' onclick="fn_viewer('<?php echo $pricing[$i]["pricing_pd_id"];?>')">
+                                        <input type="button" value="구매요청" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;' onclick="fnPricing3('<?php echo $pricing[$i]["pricing_pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing[$i]["id"];?>')">
+                                    </div>
+                                    <?php }?>
                                 </li>
                             <?php }else{
 
                                 $sql = "select * from `mysetting` where mb_id = '{$mb["mb_id"]}' ";
                                 $set = sql_fetch($sql);
                                 ?>
-                                <li>
-                                    <div>
-                                        <?php if($member["mb_id"] == $view["mb_id"]){ ?>
-                                        <div style="position:absolute;right:0;top:8vw;z-index:10">
-                                            <input type="button" value="판매하기" style='border: none;background-color: #ffe400;color: #000;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;' onclick="fnPricing('<?php echo $pricing[$i]["pricing_pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing[$i]["id"];?>')">
-                                        </div>
-                                        <?php }?>
+                                <li class="">
+                                    <div style="position:relative;">
+
                                         <!--<div class="profile" style="width:15vw;height:15vw;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;float:none;display:table-cell;vertical-align:middle;"  <?php /*if($member["mb_id"] == $view["mb_id"]){*/?>onclick="fnShow('<?php /*echo $pricing[$i]["id"];*/?>')"<?php /*}*/?>>
                                             <?php /*if($mb["mb_profile"]){*/?>
                                                 <img src="<?php /*echo $mb["mb_profile"];*/?>" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
@@ -691,11 +719,18 @@ switch ($view["pd_price_type"]){
                                                 <img src="<?php /*echo G5_IMG_URL;*/?>/no-profile.svg" alt="" style="-webkit-border-radius:50% ;-moz-border-radius:50% ;border-radius: 50%;">
                                             <?php /*} */?>
                                         </div>-->
-                                        <div class="coms" style="padding:3vw 3vw 3vw 0;position:relative;left:0;margin:0;">
-                                            <p style="margin:0;font-weight:normal"><span <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')"<?php } ?> style="text-decoration: underline"><strong><?php echo $mb["mb_nick"];?></strong></span> / <span>거리 : <?php echo distTran($pricing[$i]["distance"]);?></span> / <span><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?></span></p>
-                                            <h2 style="margin-top:2vw"><?php echo $pricing[$i]["pricing_content"];?></h2>
+                                        <div class="coms" style="position:relative;left:0;margin:0;">
+                                            <p style="margin:0;font-weight:normal;;font-size:3vw"><span <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')"<?php } ?> style="text-decoration: underline;font-size:3.2vw;color:#101010"><strong><?php echo $mb["mb_nick"];?></strong></span> / <?php echo display_datetime($pricing[$i]["sign_date"]);?> / <span style="font-size:3vw;">거리 : <?php echo distTran($pricing[$i]["distance"]);?></span></p>
+                                            <h2 style="margin-top:2vw;margin-bottom:2.5vw;width:100%;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;word-break: keep-all;color:#101010"><?php echo $pricing[$i]["pricing_content"];?></h2>
                                         </div>
+                                        <span style="position:absolute;top:0;right:0;color:#101010"><?php echo "￦ ".number_format($pricing[$i]["pricing_price"]);?></span>
                                     </div>
+                                    <?php if($member["mb_id"] == $view["mb_id"]){ ?>
+                                        <div style="position:relative;text-align: right">
+                                            <input type="button" value="연락하기" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;margin-right:1vw' <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')"<?php } ?>>
+                                            <input type="button" value="구매수락" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;' onclick="fnSellConfirm('<?php echo $pricing[$i]["mb_id"];?>','<?php echo $view["pd_id"];?>','<?php echo $pricing[$i]["id"];?>','<?php echo $pricing[$i]["pricing_price"];?>')">
+                                        </div>
+                                    <?php }?>
                                 </li>
                                 <?php }?>
                             <?php }?>
@@ -708,7 +743,7 @@ switch ($view["pd_price_type"]){
                     <input type="hidden" name="comment_re" id="comment_re" value="">
                     <input type="hidden" name="comment_re_mb_id" id="comment_re_mb_id" value="">
                     <input type="hidden" name="comment_re_cm_id" id="comment_re_cm_id" value="">
-                    <h2>댓글</h2>
+                    <h2 style="font-weight:bold;color:#000">댓글</h2>
                     <div class="cm_box">
                         <div class="cm_in">
                             <?php if($is_member){?>
@@ -716,10 +751,10 @@ switch ($view["pd_price_type"]){
                                 <div>
                                     <input type="checkbox" id="secret" name="secret" value="3" style="display:none;" <?php if($is_comment){?>checked<?php }?> ><label for="secret" class="secret">비공개</label>
                                 </div>
-                                <div class="recm_cancel" <?php if($is_comment){?>style=""<?php }?>>X</div>
-                                <input type="text" id="comment_content" placeholder="댓글을 남겨주세요" class="comment_input"><input type="button" class="comment_btn" id="comment_btn" value="등록">
+                                <!--<div class="recm_cancel" <?php /*if($is_comment){*/?>style=""<?php /*}*/?>>X</div>-->
+                                <textarea type="text" id="comment_content" placeholder="댓글을 남겨주세요" class="comment_input <?php if($view["pd_type"]==2){?>bg2<?php }?>"></textarea><input type="button" class="comment_btn" id="comment_btn" value="등록">
                             <?php }else{?>
-                                <input type="button" value="로그인" class="comment_btn grid_100" style="width:calc(100% - 4vw)" onclick="location.href=g5_url+'/mobile/page/login_intro.php'">
+                                <input type="button" value="로그인" class="comment_btn grid_100" style="width:calc(100% - 2vw);position:relative;" onclick="location.href=g5_url+'/mobile/page/login_intro.php'">
                             <?php }?>
                         </div>
                         <ul class="cm_container">
@@ -731,54 +766,48 @@ switch ($view["pd_price_type"]){
                                 }
 
                                 ?>
-                                <li class="<?php if($view["mb_id"]!=$member["mb_id"]  && $comment[$i]["mb_id"]!=$member["mb_id"]){if($comment[$i]["comment_status"]=="3" || $is_comment){echo "cm_lock ";} } ?>" id="cmt<?php echo $comment[$i][cm_id];?>">
-                                    <!--<div class="profile" <?php /*if($comment[$i]["member_id"] != $member["mb_id"]){ echo "onclick=fnRecom('".$comment[$i]["cm_id"]."','".$comment[$i]["member_id"]."','".$comment[$i]["mb_name"]."','".$comment[$i]["comment_status"]."')";} */?> >
-                                        <?php /*if($view["mb_id"]!=$member["mb_id"]){if($comment[$i]["comment_status"]=="3"  || $is_comment){ */?>
-                                        <img src="<?php /*echo G5_IMG_URL*/?>/profile_lock.svg" alt="" id="profile">
-                                        <?php /*}else if($comment[$i]["mb_profile"]){*/?>
-                                            <img src="<?php /*echo $comment[$i]["mb_profile"];*/?>" alt="" id="profile">
-                                        <?php /*}else if($comment[$i]["mb_profile"] ==""){ */?>
-                                            <img src="<?php /*echo G5_IMG_URL*/?>/no-profile.svg" alt="">
-                                        <?php /*} }else { if ($comment[$i]["mb_profile"]) { */?>
-                                                <img src="<?php /*echo $comment[$i]["mb_profile"]; */?>" alt="" id="profile">
-                                        <?php /*} else if ($comment[$i]["mb_profile"] == "") { */?>
-                                            <img src="<?php /*echo G5_IMG_URL */?>/no-profile.svg" alt="">
-                                        <?php /*}}*/?>
-                                    </div>-->
+                                <li class="<?php if($view["mb_id"]!=$member["mb_id"]  && $comment[$i]["mb_id"]!=$member["mb_id"]){if($comment[$i]["comment_status"]=="3" || $is_comment){echo "cm_lock ";} } ?>" id="cmt<?php echo $comment[$i]['cm_id'];?>">
                                     <div class="coms">
                                         <?php if($view["mb_id"]!=$member["mb_id"] && $comment[$i]["mb_id"]!=$member["mb_id"]){
-                                            if($comment[$i]["comment_status"]=="3"  || $is_comment ){?>
-                                            <p><?php echo "비공개"?> / <?php echo $comment[$i]["comment_datetime"];?></p>
+                                            if($comment[$i]["comment_status"]=="3"  || $is_comment){?>
+                                                <p><?php echo "비공개"?> <span>/ <?php echo display_datetime($comment[$i]["comment_datetime"]);?></span></p>
                                             <h2 class="loctitle">비공개</h2>
                                             <ul>
                                                 <li>비공개</li>
                                             </ul>
                                         <?php }else{ ?>
-                                        <p><?php echo $comment[$i]["mb_nick"];?> / <?php echo $comment[$i]["comment_datetime"];?></p>
-                                        <h2 <?php if($comment[$i]["mb_id"]!=$member["mb_id"]){?>onclick="fnRecom('<?php echo $comment[$i]["cm_id"];?>','<?php echo $comment[$i]["member_id"]; ?>','<?php echo $comment[$i]["mb_name"];?>','<?php echo $comment[$i]["comment_status"];?>')" <?php }?>><?php echo $comment[$i]["comment_content"];?></h2>
+                                                <p><?php echo $comment[$i]["mb_nick"];?> <span>/ <?php echo display_datetime($comment[$i]["comment_datetime"]);?></span></p>
+                                        <h2 ><?php echo nl2br($comment[$i]["comment_content"]);?></h2>
                                         <ul>
-                                            <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $view["pd_id"];?>','<?php echo $comment[$i]["cm_id"];?>');">신고</li>
-                                            <?php if($comment[$i]["comment_re"]== 0){?>
-                                            <li>댓글 <span><?php echo number_format($comment[$i]["re_comment_cnt"]);?></span></li>
+                                            <?php if($comment[$i]["mb_id"]!=$member["mb_id"]){?>
+                                            <li onclick="fnRecom('<?php echo $comment[$i]["cm_id"];?>','<?php echo $comment[$i]["member_id"]; ?>','<?php echo $comment[$i]["mb_name"];?>','<?php echo $comment[$i]["comment_status"];?>')" >답글</li>
                                             <?php }?>
-                                            <?php if($comment[$i]["mb_id"]!=$member["mb_id"] ){?>
-                                            <li onclick="fnLike('no','<?php echo $comment[$i]["cm_id"];?>')">반대 <span class="unlike<?php echo $comment[$i]["cm_id"];?>"><?php echo number_format($comment[$i]["unlike"]);?></span></li>
-                                            <li onclick="fnLike('yes','<?php echo $comment[$i]["cm_id"];?>')">추천 <span class="like<?php echo $comment[$i]["cm_id"];?>"><?php echo number_format($comment[$i]["like"]);?></span></li>
-                                            <?php }  ?>
+
+                                            <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $view["pd_id"];*/?>','<?php /*echo $comment[$i]["cm_id"];*/?>');">신고</li>
+                                            <?php /*if($comment[$i]["comment_re"]== 0){*/?>
+                                            <li>댓글 <span><?php /*echo number_format($comment[$i]["re_comment_cnt"]);*/?></span></li>
+                                            <?php /*}*/?>
+                                            <?php /*if($comment[$i]["mb_id"]!=$member["mb_id"] ){*/?>
+                                            <li onclick="fnLike('no','<?php /*echo $comment[$i]["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["unlike"]);*/?></span></li>
+                                            <li onclick="fnLike('yes','<?php /*echo $comment[$i]["cm_id"];*/?>')">추천 <span class="like<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["like"]);*/?></span></li>
+                                            --><?php /*}  */?>
                                         </ul>
                                         <?php }
                                         }else{ ?>
-                                            <p><?php echo $comment[$i]["mb_nick"];?> / <?php echo $comment[$i]["comment_datetime"];?></p>
-                                            <h2 <?php if($comment[$i]["mb_id"]!=$member["mb_id"]){?>onclick="fnRecom('<?php echo $comment[$i]["cm_id"];?>','<?php echo $comment[$i]["member_id"]; ?>','<?php echo $comment[$i]["mb_name"];?>','<?php echo $comment[$i]["comment_status"];?>')" <?php }?>><?php echo $comment[$i]["comment_content"];?></h2>
+                                            <p><?php echo $comment[$i]["mb_nick"];?> <span>/ <?php echo display_datetime($comment[$i]["comment_datetime"]);?></span></p>
+                                            <h2 ><?php echo nl2br($comment[$i]["comment_content"]);?></h2>
                                             <ul>
-                                                <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $view["pd_id"];?>','<?php echo $comment[$i]["cm_id"];?>');">신고</li>
-                                                <?php if($comment[$i]["comment_re"]== 0){?>
-                                                    <li>댓글 <span><?php echo number_format($comment[$i]["re_comment_cnt"]);?></span></li>
-                                                <?php }?>
                                                 <?php if($comment[$i]["mb_id"]!=$member["mb_id"]){?>
-                                                <li onclick="fnLike('no','<?php echo $comment[$i]["cm_id"];?>')">반대 <span class="unlike<?php echo $comment[$i]["cm_id"];?>"><?php echo number_format($comment[$i]["unlike"]);?></span></li>
-                                                <li onclick="fnLike('yes','<?php echo $comment[$i]["cm_id"];?>')">추천 <span class="like<?php echo $comment[$i]["cm_id"];?>"><?php echo number_format($comment[$i]["like"]);?></span></li>
+                                                    <li onclick="fnRecom('<?php echo $comment[$i]["cm_id"];?>','<?php echo $comment[$i]["member_id"]; ?>','<?php echo $comment[$i]["mb_name"];?>','<?php echo $comment[$i]["comment_status"];?>')" >답글</li>
                                                 <?php }?>
+                                                <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $view["pd_id"];*/?>','<?php /*echo $comment[$i]["cm_id"];*/?>');">신고</li>
+                                                <?php /*if($comment[$i]["comment_re"]== 0){*/?>
+                                                    <li>댓글 <span><?php /*echo number_format($comment[$i]["re_comment_cnt"]);*/?></span></li>
+                                                <?php /*}*/?>
+                                                <?php /*if($comment[$i]["mb_id"]!=$member["mb_id"]){*/?>
+                                                <li onclick="fnLike('no','<?php /*echo $comment[$i]["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["unlike"]);*/?></span></li>
+                                                <li onclick="fnLike('yes','<?php /*echo $comment[$i]["cm_id"];*/?>')">추천 <span class="like<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["like"]);*/?></span></li>
+                                                --><?php /*}*/?>
                                             </ul>
                                         <?php }?>
                                     </div>
@@ -786,52 +815,35 @@ switch ($view["pd_price_type"]){
                             <?php 
                                 if(count($recomment)!=0) {
                                     for($j=0;$j<count($recomment);$j++){
+                                        $sql = "select * from `product_comment` where cm_id = '{$recomment[$i]["parent_cm_id"]}'";
+                                        $chkParent = sql_fetch($sql);
+
                             ?>
-                                <li class="re_cm <?php if($view["mb_id"]!=$member["mb_id"]  && $comment[$i]["mb_id"]!=$member["mb_id"]){if($recomment[$j]["comment_status"]=="3" || $is_comment){echo "cm_lock ";} } ?>" id="cmt<?php echo $recomment[$j][parent_cm_id];?>">
-                                    <!--<div class="profile" <?php /*if($recomment[$j]["member_id"] != $member["mb_id"]){ echo "onclick=fnRecom('".$recomment[$j]["cm_id"]."','".$recomment[$j]["member_id"]."','".$recomment[$j]["mb_name"]."','".$recomment[$j]["comment_status"]."')";} */?> >
-                                        <?php /*if($view["mb_id"]!=$member["mb_id"]){if($recomment[$j]["comment_status"]=="3"  || $is_comment){ */?>
-                                            <img src="<?php /*echo G5_IMG_URL*/?>/profile_lock.svg" alt="" id="profile">
-                                        <?php /*}else if($recomment[$j]["mb_profile"]){*/?>
-                                            <img src="<?php /*echo $recomment[$j]["mb_profile"];*/?>" alt="" id="profile">
-                                        <?php /*}else if($recomment[$j]["mb_profile"] ==""){ */?>
-                                            <img src="<?php /*echo G5_IMG_URL*/?>/no-profile.svg" alt="">
-                                        <?php /*} }else { if ($recomment[$j]["mb_profile"]) { */?>
-                                            <img src="<?php /*echo $recomment[$j]["mb_profile"]; */?>" alt="" id="profile">
-                                        <?php /*} else if ($recomment[$j]["mb_profile"] == "") { */?>
-                                            <img src="<?php /*echo G5_IMG_URL */?>/no-profile.svg" alt="">
-                                        <?php /*}}*/?>
-                                    </div>-->
+                                <li class="re_cm cmt_<?php echo $recomment[$j]['parent_cm_id'];?> <?php if($view["mb_id"]!=$member["mb_id"]  && $comment[$i]["mb_id"]!=$member["mb_id"]){if($recomment[$j]["comment_status"]=="3" || $is_comment){echo "cm_lock ";} } ?>" id="cmt<?php echo $recomment[$j]['parent_cm_id'];?>">
                                     <div class="coms">
-                                        <?php if($view["mb_id"]!=$member["mb_id"] && $comment[$j]["mb_id"]!=$member["mb_id"]){if($recomment[$j]["comment_status"]=="3"  || $is_comment ){?>
-                                            <p><?php echo "비공개"?> / <?php echo $recomment[$j]["comment_datetime"];?></p>
+                                        <?php if($view["mb_id"]!=$member["mb_id"]){ //내글이 아닐때
+                                            if(($recomment[$j]["comment_status"]=="3" || $is_comment) && $chkParent["mb_id"]!=$member["mb_id"] || !$is_member){
+                                        ?>
+                                            <p><?php echo "비공개"?> <span>/ <?php echo display_datetime($recomment[$j]["comment_datetime"]);?></span></p>
                                             <h2 class="loctitle">비공개</h2>
                                             <ul>
                                                 <li>비공개</li>
                                             </ul>
                                         <?php }else{ ?>
-                                            <p><?php echo $recomment[$j]["mb_nick"];?> / <?php echo $recomment[$j]["comment_datetime"];?></p>
-                                            <h2 onclick="fnRecom('<?php echo $comment[$j]["cm_id"];?>','<?php echo $comment[$j]["member_id"]; ?>','<?php echo $comment[$j]["mb_name"];?>','<?php echo $comment[$j]["comment_status"];?>')" ><?php echo $recomment[$j]["comment_content"];?></h2>
+                                            <p><?php echo $recomment[$j]["mb_nick"];?> <span>/ <?php echo display_datetime($recomment[$j]["comment_datetime"]);?></span></p>
+                                            <h2><?php echo nl2br($recomment[$j]["comment_content"]);?></h2>
                                             <ul>
-                                                <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $view["pd_id"];?>','<?php echo $recomment[$j]["cm_id"];?>');">신고</li>
-                                                <?php if($recomment[$j]["comment_re"]== 0){?>
-                                                    <li>댓글 <span><?php echo number_format($recomment[$j]["re_comment_cnt"]);?></span></li>
-                                                <?php }?>
                                                 <?php if($recomment[$j]["mb_id"]!=$member["mb_id"]){?>
-                                                    <li onclick="fnLike('no','<?php echo $recomment[$j]["cm_id"];?>')">반대 <span class="unlike<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["unlike"]);?></span></li>
-                                                    <li onclick="fnLike('yes','<?php echo $recomment[$j]["cm_id"];?>')">추천 <span class="like<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["like"]);?></span></li>
-                                                <?php }  ?>
+                                                <li onclick="fnRecom('<?php echo $recomment[$j]['parent_cm_id'];?>','<?php echo $recomment[$j]["member_id"]; ?>','<?php echo $recomment[$j]["mb_name"];?>','<?php echo $recomment[$j]["comment_status"];?>')" >답글</li>
+                                                <?php }?>
                                             </ul>
-                                        <?php }}else{ ?>
-                                            <p><?php echo $recomment[$j]["mb_nick"];?> / <?php echo $recomment[$j]["comment_datetime"];?></p>
-                                            <h2 onclick="fnRecom('<?php echo $comment[$j]["cm_id"];?>','<?php echo $comment[$j]["member_id"]; ?>','<?php echo $comment[$j]["mb_name"];?>','<?php echo $comment[$j]["comment_status"];?>')" ><?php echo $recomment[$j]["comment_content"];?></h2>
+                                        <?php }
+                                        }else{ ?>
+                                            <p><?php echo $recomment[$j]["mb_nick"];?> <span>/ <?php echo display_datetime($recomment[$j]["comment_datetime"]);?></span></p>
+                                            <h2 ><?php echo nl2br($recomment[$j]["comment_content"]);?></h2>
                                             <ul>
-                                                <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $view["pd_id"];?>','<?php echo $recomment[$j]["cm_id"];?>');">신고</li>
-                                                <?php if($recomment[$j]["comment_re"]== 0){?>
-                                                    <li>댓글 <span><?php echo number_format($recomment[$j]["re_comment_cnt"]);?></span></li>
-                                                <?php }?>
                                                 <?php if($recomment[$j]["mb_id"]!=$member["mb_id"]){?>
-                                                    <li onclick="fnLike('no','<?php echo $recomment[$j]["cm_id"];?>')">반대 <span class="unlike<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["unlike"]);?></span></li>
-                                                    <li onclick="fnLike('yes','<?php echo $recomment[$j]["cm_id"];?>')">추천 <span class="like<?php echo $recomment[$j]["cm_id"];?>"><?php echo number_format($recomment[$j]["like"]);?></span></li>
+                                                <li onclick="fnRecom('<?php echo $recomment[$j]["parent_cm_id"];?>','<?php echo $recomment[$j]["member_id"]; ?>','<?php echo $recomment[$j]["mb_name"];?>','<?php echo $recomment[$j]["comment_status"];?>')" >답글</li>
                                                 <?php }?>
                                             </ul>
                                         <?php }?>
@@ -840,7 +852,7 @@ switch ($view["pd_price_type"]){
                             <?php }
                                 }
                                 unset($recomment);
-                                }
+                            }
                             ?>
                             <?php if(count($comment) == 0){?>
                                 <li class="no-comment">등록된 댓글이 없습니다.</li>
@@ -899,7 +911,7 @@ switch ($view["pd_price_type"]){
                 }else if($wRatio < $hRatio){
                     //너비가 더 작음
                     if ($ratio > 1) {
-                        $sssize = "auto calc(100% - 42vw)";
+                        $sssize = "auto calc(100% - 41vw)";
                         $height = "center calc(100vh - 100vh);height:100%;";
                     } else {
                         $sssize = "auto 100%";
@@ -1006,6 +1018,7 @@ $(function(){
             method:"post",
             data:{comment:comment,mb_id:"<?php echo $member["mb_id"];?>",pd_id:pd_id,secret:secret,cm_type:cm_type,pd_mb_id:"<?php echo $view["mb_id"];?>",comment_re:comment_re,comment_re_mb_id:comment_re_mb_id,comment_re_cm_id:comment_re_cm_id}
         }).done(function(data){
+            console.log(comment_re_cm_id);
             var cls= "";
             if(data=="0"){
                 alert("게시물 정보가 없습니다.");
@@ -1024,12 +1037,11 @@ $(function(){
                 $(".comment_input").val('');
                 $(".no-comment").remove();
                 if(comment_re == 1){
-                    $("#cmt"+comment_re_cm_id+":last-child").appendTo(data);
+                    $("#cmt"+comment_re_cm_id+":last-child").after(data);
                 }else {
                     $(".cm_box .cm_container").append(data);
                 }
                 var height = $(".cm_box .cm_container").height();
-                console.log(height);
                 $(".cm_box .cm_container").scrollTop(height);
             }
         })
@@ -1098,7 +1110,6 @@ $(function(){
     }
 
     function next () {
-        console.log("A");
         if (index < items.length - 1 || index < items2.length - 1) {
             index++;
             slide();
@@ -1154,9 +1165,14 @@ $(function(){
         location.hash = "#detailview";
     });
     $(".detail_close, .detail_arrow_close").click(function(){
+        var count = Number($("#top_count.count_<?php echo $pd_id;?>").text());
         $(".view_top").css("display","block");
         $(".view_detail").css("top","100vh");
-        $(".count_msg").addClass("active");
+        if(count > 1) {
+            $(".count_msg").addClass("active");
+        }else{
+            $(".count_msg").removeClass("active");
+        }
         $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
     });
 });
@@ -1486,7 +1502,7 @@ $(function(){
     }
 
     <?php if($view["mb_id"]!=$member["mb_id"]){?>
-    $(".likeimg").click(function(){
+    $(".pd_like").click(function(){
         <?php if($likeper==false){?>
             alert("구매자만 평가 할 수 있습니다.");
             return false;
@@ -1496,7 +1512,9 @@ $(function(){
             return false;
         <?php }?>
         var pd_id = $(this).attr("id");
+        var pd_mb_id = "<?php echo $view["mb_id"];?>";
         $("#like_id").val(pd_id)
+        $("#pd_mb_id").val(pd_mb_id)
         $("#id02").css({"display":"block","z-index":"9000000"});
         $("html, body").css("overflow","hidden");
         $("html, body").css("height","100vh");
@@ -1607,11 +1625,11 @@ function fnRecom(cm_id,mb_id,mb_name,cm_status){
     $("#comment_re").val(1);
     $(".comment_input").attr("placeholder",mb_name+"에게 답변");
     $(".comment_input").focus();
-    $(".recm_cancel").css("display","block");
-    if(cm_status==3){
-        $(".secret").css("display","none");
-        $("#secret").attr("checked","true");
-    }
+    /*$(".recm_cancel").css("display","block");*/
+    //if(cm_status==3){
+    //    $(".secret").css("display","none");
+    //    $("#secret").attr("checked","true");
+    //}
    /* $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.comment_reply.php",
         method:"POST",
@@ -1710,8 +1728,8 @@ function fnTalk2(mb_id){
         }).done(function(data){
             if(data.cnt > 0) {
                 for (var i = 0; i < data.cnt; i++) {
-                    var text = JSON.stringify(data.msg[i]);
-                    text = text.replace(/\"/g,"");
+                    /*var text = JSON.stringify(data.msg[i]);
+                    text = text.replace(/\"/g,"");*/
                     $(".msg_container").append(text);
                 }
                 element.scrollTop = element.scrollHeight;
@@ -1815,6 +1833,13 @@ function fnSell(){
     addSell();
 }
 
+function fnSellConfirm(buy_mb_id,pd_id,pricing_id,price){
+    //구매자에게 카트 등록 후 상품 상태 변경
+    if(confirm("해당 회원에게 이 제품을 판매 하시겠습니까?")){
+        location.href=g5_url+"/mobile/page/mypage/productSellConfirm.php?mb_id="+buy_mb_id+"&pd_id="+pd_id+"&pricing_id="+pricing_id+"&price="+price;
+    }
+}
+
 function addSell(){
     var price = $("#price").val();
     var pd_id = $("#pd_id").val();
@@ -1867,7 +1892,6 @@ function fnShow(id){
         $("#id08").css("display","block");
         location.hash = "#modal";
     });
-
 }
 
 function fnLink(url){

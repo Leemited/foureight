@@ -6,9 +6,18 @@ if(!$is_member){
 }
 
 if($mode=="insert"){
+    $sql = "select count(*) as cnt from `my_card` where mb_id = '{$member["mb_id"]}' and card_status = 1";
+    $cardcnt = sql_fetch($sql);
+    if($cardcnt["cnt"]==0){
+        $where = " , card_status = 1 ";
+    }else{
+        $where = " , card_status = 0 ";
+    }
+
     $card_com = explode("/",$card_company);
     $card_num = implode("-",$card_number);
-    $sql = "insert into `my_card` set card_name = '{$card_name}', card_company_name = '{$card_com[1]}', card_company_code = {$card_com[0]}, card_year = {$card_year}, card_month = {$card_month}, card_number= '{$card_num}', card_status =0, card_date = now(), mb_id = '{$member["mb_id"]}'";
+    $card_num = base64_encode($card_num);
+    $sql = "insert into `my_card` set card_name = '{$card_name}', card_company_name = '{$card_com[1]}', card_company_code = {$card_com[0]}, card_year = {$card_year}, card_month = {$card_month}, card_number= '{$card_num}', card_date = now(), mb_id = '{$member["mb_id"]}' {$where}";
 
     if(sql_query($sql)){
         alert("등록되었습니다.");

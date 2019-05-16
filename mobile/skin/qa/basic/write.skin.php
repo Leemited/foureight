@@ -7,7 +7,7 @@ if($pd_id){
     $pro = sql_fetch("select * from `product` where pd_id = '{$pd_id}'");
 }
 ?>
-<div class="sub_head">
+<div class="sub_head" style="background-color: #fff">
     <div class="sub_back" onclick="location.href=g5_url"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2>1:1 문의</h2>
 </div>

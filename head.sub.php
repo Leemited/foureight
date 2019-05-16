@@ -120,10 +120,10 @@ var g5_admin_url = "<?php echo G5_ADMIN_URL; ?>";
 <?php } ?>
 </script>
 <?php /*if($app || $chkMobile){*/?>
-<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<!--<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>-->
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="<?php echo G5_JS_URL?>/jquery-ui.js"></script>
 <script src="<?php echo G5_JS_URL ?>/jquery.ui.touch-punch.js"></script>
-
 <!-- <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script> -->
 <?php /*}else{ */?><!--
 <script src="https://ajax.googleapis.com/ajaxajax/libs/jquery/1.12.4/jquery.min.js"></script>

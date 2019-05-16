@@ -26,12 +26,13 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
         <!-- <div class="sub_add">추가</div> -->
     </div>
     <div id="settings">
-        <div class="setting_wrap">
+        <!--<div class="setting_wrap">
             <p>현재 결제모듈 연동중입니다. </p>
-        </div>
+        </div>-->
 
             <?php if(count($owner)>0){
-                $card_num = explode("-",$owner["card_number"]);
+                $card_num = base64_decode($owner["card_number"]);
+                $card_num = explode("-",$card_num);
                 ?>
             <div class="setting_wrap">
                 <h2>기본 카드 정보</h2>
@@ -69,10 +70,10 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                     </li>
                     <li><input type="number" class="setting_input" name="card_year" placeholder="유효년" value="" style="width:10vw" required> 년 / <input type="number" class="setting_input" name="card_month" placeholder="유효월" value="" style="width:10vw" required> 월</li>
                     <li>
-                        <input type="number" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
-                        <input type="password" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
-                        <input type="password" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
-                        <input type="number" class="setting_input" name="card_number[]" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required>
+                        <input type="number" class="setting_input" name="card_number[]" onkeyup="number_only(this)" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
+                        <input type="number" class="setting_input" name="card_number[]" onkeyup="number_only(this)" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
+                        <input type="number" class="setting_input" name="card_number[]" onkeyup="number_only(this)" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required> -
+                        <input type="password" class="setting_input" name="card_number[]" onkeyup="number_only(this)" placeholder="카드번호" value="" style="width:15vw" maxlength="4" required>
                     </li>
                 </ul>
                 <div class="btn_group">

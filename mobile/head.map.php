@@ -188,7 +188,7 @@ $my_pro2 = sql_fetch($sql);
 </div>
 <!-- 모바일 헤더 시작 -->
 <div id="head">
-    <div class="top_header" onclick="location.href='<?php echo G5_URL?>';" <?php if($schopt["sc_type1"]==2 || $_SESSION["type1"] == 2){?>style="background-color: rgb(255, 61, 0);"<?php }?>>
+    <div class="top_header <?php if($set_type==2||$set_type==""){?>bg2<?php }?>" onclick="location.href='<?php echo G5_URL?>';" >
         <div class="owl-carousel" id="helps">
             <?php for($i=0;$i<count($help);$i++){?>
                 <div class="item"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help&wr_id=<?php echo $help[$i]["wr_id"];?>"><?php echo $help[$i]["wr_subject"];?></a></div>
@@ -211,33 +211,24 @@ $my_pro2 = sql_fetch($sql);
         });
     </script>
     <form action="./" method="get" name="simplesearch" id="simplesearch" >
-            <header id="mobile_header">
+            <header id="mobile_header" <?php if($set_type==2||$set_type==""){?>class="bg2"<?php }?>>
                 <!-- <h1><a href="<?php echo G5_URL; ?>" title="HOME" class="logos"><i></i></a></h1> -->
                 <div class="search">
                     <input type="text" style="display:none;">
-                    <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 1;}?>">
+                    <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 2;}?>">
                     <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
                     <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으세요?" onkeyup="fnKeyword();" />
                     <label class="switch schtype" >
-                        <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"){?>checked<?php }?> >
-                        <span class="slider round" <?php if($set_type=="2"){?>style="text-align:left"<?php }?>>
-                    <?php if($set_type=="2"){?>능력<?php }else{ ?>물건<?php }?>
+                        <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"  || $set_type==""){?>checked<?php }?> >
+                        <span class="slider round" <?php if($set_type=="2" || $set_type==""){?>style="text-align:left"<?php }?>>
+                    <?php if($set_type=="2" || $set_type==""){?>능력<?php }else{ ?>물건<?php }?>
                 </span>
                     </label>
                 </div>
                 <a href="javascript:" id="mobile_menu_btn" class="mobile_menu_btn" title="MENU"><i></i></a>
                 <a href="javascript:fnSetting();" id="mobile_setting_btn" title="SETTING"><i></i></a>
             </header>
-            <div class="keyword">
-                <div>
-                    연관검색어
-                </div>
-                <ul>
-                    <li>인기 검색어</li>
-                    <li>최신 검색어</li>
-                </ul>
-            </div>
-            <div class="search_setting">
+            <div class="search_setting <?php if($set_type==2||$set_type==""){?>bg2<?php }?>">
                 <input type="hidden" value="search" name="searchActive" >
                 <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
                 <input type="hidden" value="<?php echo $priceTo; ?>" id="sc_priceTo" name="priceTo">
@@ -245,103 +236,105 @@ $my_pro2 = sql_fetch($sql);
                 <input type="hidden" value="<?php echo ($order_sort_active)?$order_sort_active:"1,1,0,0,0";?>" name="order_sort_active" id="order_sort_active">
                 <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
                 <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
-                <div class="sch_top">
-                    <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
-                    <a href="javascript:fnsuggestion('1');">제안하기</a>
-                </div>
-                <div class="types sch_mid">
-                    <label class="radio_tag" for="four">
-                        <input type="radio" name="type2" id="four" value="8" <?php if($type2=="8" || $type2 == ""){?>checked<?php  }?>>
-                        <span class="slider2 round">팝니다</span>
-                    </label>
-                    <label class="radio_tag" for="eight">
-                        <input type="radio" name="type2" id="eight" value="4" <?php if($type2=="4"){?>checked<?php } ?>>
-                        <span class="slider2 round">삽니다</span>
-                    </label>
-                    <label class="radio_tag" for="mb_level">
-                        <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($mb_level=="4"){?>checked<?php } ?>>
-                        <span class="slider2 round">전문가</span>
-                    </label>
-                </div>
-                <div class="sch_ord">
-                    <?php if(count($order_item)==0){?>
-                        <label class="align" id="sortable" for="pd_loc">
-                            <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
-                            <span class="round">거리순</span>
-                        </label>
-                        <label class="align" id="sortable" for="pd_price">
-                            <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked>
-                            <span class="round">가격순</span>
-                        </label>
-                        <label class="align" id="sortable" for="pd_date">
-                            <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" >
-                            <span class="round">최신순</span>
-                        </label>
-                        <label class="align" id="sortable" for="pd_recom">
-                            <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" >
-                            <span class="round">추천순</span>
-                        </label>
-                        <label class="align" id="sortable" for="pd_hits">
-                            <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" >
-                            <span class="round">인기순</span>
-                        </label>
-                    <?php }else{
-                        for($i=0;$i<count($order_item);$i++){
-                            echo $order_item[$i];
-                        } }?>
-                </div>
-                <div class="clear"></div>
-                <div class="sch_price">
-                    <div class="pr">
-                        <h2>금액설정</h2>
-                        <p class="price" id="schp"></p>
+                <div style="background-color:#f4f4f4 ">
+                    <div class="sch_top">
+                        <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
+                        <a href="javascript:fnsuggestion('1');">제안하기</a>
                     </div>
-                    <div id="slider-range"></div>
-                </div>
-                <div class="types sch_mid timesel" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
-                    <label class="radio_tag" for="workcnt">
-                        <input type="radio" name="pd_price_type" id="workcnt" value="0" <?php if($pd_price_type ==0 || $pd_price_type==""){?>checked<?php }?>>
-                        <span class="slider2 round">회당</span>
-                    </label>
-                    <label class="radio_tag" for="worktime">
-                        <input type="radio" name="pd_price_type" id="worktime" value="1" <?php if($pd_price_type ==1){?>checked<?php }?>>
-                        <span class="slider2 round">시간당</span>
-                    </label>
-                    <label class="radio_tag" for="workday">
-                        <input type="radio" name="pd_price_type" id="workday" value="2" <?php if($pd_price_type ==2){?>checked<?php }?>>
-                        <span class="slider2 round">하루당</span>
-                    </label>
-                </div>
-                <div class="sch_btn_group meettime" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
-                    <div>
-                        <h2>거래가능시간</h2>
+                    <div class="types sch_mid">
+                        <label class="radio_tag" for="four">
+                            <input type="radio" name="type2" id="four" value="8" <?php if($type2=="8" || $type2 == ""){?>checked<?php  }?>>
+                            <span class="slider2 round">팝니다</span>
+                        </label>
+                        <label class="radio_tag" for="eight">
+                            <input type="radio" name="type2" id="eight" value="4" <?php if($type2=="4"){?>checked<?php } ?>>
+                            <span class="slider2 round">삽니다</span>
+                        </label>
+                        <label class="radio_tag" for="mb_level">
+                            <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($mb_level=="4"){?>checked<?php } ?>>
+                            <span class="slider2 round">전문업체</span>
+                        </label>
                     </div>
-                    <div class="pd_times">
-                        <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:17vw">
-                            <option value="">시간선택</option>
-                            <?php for($i = 1; $i< 25; $i++){
-                                $time = str_pad($i,"2","0",STR_PAD_LEFT);
-                                ?>
-                                <option value="<?php echo $time;?>" <?php if($pd_timeFrom == $time){?>selected<?php }?>><?php echo $time;?></option>
-                            <?php }?>
-                        </select> 시부터
-                        ~
-                        <input type="checkbox" name="pd_timeType" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?> style="display:none;"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
-                        <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:17vw;margin-left:1vw;">
-                            <option value="">시간선택</option>
-                            <?php for($i = 1; $i< 25; $i++){
-                                $time = str_pad($i,"2","0",STR_PAD_LEFT);
-                                ?>
-                                <option value="<?php echo $time;?>" <?php if($pd_timeTo == $time){?>selected<?php }?>><?php echo $time;?></option>
-                            <?php }?>
-                        </select> 시사이
+                    <div class="sch_ord">
+                        <?php if(count($order_item)==0){?>
+                            <label class="align" id="sortable" for="pd_loc">
+                                <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" checked>
+                                <span class="round">거리순</span>
+                            </label>
+                            <label class="align" id="sortable" for="pd_price">
+                                <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked>
+                                <span class="round">가격순</span>
+                            </label>
+                            <label class="align" id="sortable" for="pd_date">
+                                <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" >
+                                <span class="round">최신순</span>
+                            </label>
+                            <label class="align" id="sortable" for="pd_recom">
+                                <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" >
+                                <span class="round">추천순</span>
+                            </label>
+                            <label class="align" id="sortable" for="pd_hits">
+                                <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" >
+                                <span class="round">인기순</span>
+                            </label>
+                        <?php }else{
+                            for($i=0;$i<count($order_item);$i++){
+                                echo $order_item[$i];
+                            } }?>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="sch_price">
+                        <div class="pr">
+                            <h2>금액설정</h2>
+                            <p class="price" id="schp"></p>
+                        </div>
+                        <div id="slider-range"></div>
+                    </div>
+                    <div class="types sch_mid timesel" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
+                        <label class="radio_tag" for="workcnt">
+                            <input type="radio" name="pd_price_type" id="workcnt" value="0" <?php if($pd_price_type ==0 || $pd_price_type==""){?>checked<?php }?>>
+                            <span class="slider2 round">회당</span>
+                        </label>
+                        <label class="radio_tag" for="worktime">
+                            <input type="radio" name="pd_price_type" id="worktime" value="1" <?php if($pd_price_type ==1){?>checked<?php }?>>
+                            <span class="slider2 round">시간당</span>
+                        </label>
+                        <label class="radio_tag" for="workday">
+                            <input type="radio" name="pd_price_type" id="workday" value="2" <?php if($pd_price_type ==2){?>checked<?php }?>>
+                            <span class="slider2 round">하루당</span>
+                        </label>
+                    </div>
+                    <div class="sch_btn_group meettime" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
+                        <div>
+                            <h2>거래가능시간</h2>
+                        </div>
+                        <div class="pd_times">
+                            <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:17vw">
+                                <option value="">시간선택</option>
+                                <?php for($i = 1; $i< 25; $i++){
+                                    $time = str_pad($i,"2","0",STR_PAD_LEFT);
+                                    ?>
+                                    <option value="<?php echo $time;?>" <?php if($pd_timeFrom == $time){?>selected<?php }?>><?php echo $time;?></option>
+                                <?php }?>
+                            </select> 시부터
+                            ~
+                            <input type="checkbox" name="pd_timeType" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?> style="display:none;"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
+                            <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:17vw;margin-left:1vw;">
+                                <option value="">시간선택</option>
+                                <?php for($i = 1; $i< 25; $i++){
+                                    $time = str_pad($i,"2","0",STR_PAD_LEFT);
+                                    ?>
+                                    <option value="<?php echo $time;?>" <?php if($pd_timeTo == $time){?>selected<?php }?>><?php echo $time;?></option>
+                                <?php }?>
+                            </select> 시사이
+                        </div>
                     </div>
                 </div>
             <div class="sch_btn_group">
-                <input type="submit" value="검색" class="sch_btn" style="width:100%" >
+                <input type="submit" value="검색" class="sch_btn point" style="width:100%" >
             </div>
             <div class="search_close" onclick="fnSettingMap2()">
-                <img src="<?php echo G5_IMG_URL?>/search_close.png" alt="">
+                <img src="<?php echo G5_IMG_URL?>/search_close.svg" alt="">
             </div>
             <div class="header_bg"></div>
         <?php if(count($pro)==0){?>
@@ -354,15 +347,15 @@ $my_pro2 = sql_fetch($sql);
     <div class="mobile_menu">
         <span></span>
         <div class="menu">
-            <div class="user_box">
+            <div class="user_box <?php if($set_type==2||$set_type==""){?>bg2<?php }?>">
                 <div class="close">
                     <img src="<?php echo G5_IMG_URL?>/ic_close.png" alt="">
                 </div>
-                <?php if(!$member["mb_id"]){?>
-                    <p><a href="<?php echo G5_URL?>/mobile/page/login_intro.php">로그인</a></p>
-                <?php }else{?>
-                    <p><a href="<?php echo G5_BBS_URL?>/logout.php?url=../index.php?device=mobile">로그아웃</a></p>
-                <?php } ?>
+                <?php /*if(!$member["mb_id"]){*/?><!--
+                    <p><a href="<?php /*echo G5_URL*/?>/mobile/page/login_intro.php">로그인</a></p>
+                <?php /*}else{*/?>
+                    <p><a href="<?php /*echo G5_BBS_URL*/?>/logout.php?url=../index.php?device=mobile">로그아웃</a></p>
+                --><?php /*} */?>
                 <div class="profiles" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
                     <?php if($member["mb_id"] && $member["mb_profile"]){?>
                         <img src="<?php echo $member["mb_profile"];?>" alt="" class="user_profile">
@@ -371,7 +364,7 @@ $my_pro2 = sql_fetch($sql);
                     <?php }?>
                 </div>
                 <?php if(!$member["mb_id"]){?>
-                    <h4>지금 로그인하세요</h4>
+                    <h4><a href="<?php echo G5_URL?>/mobile/page/login_intro.php">로그인</a></h4>
                 <?php }else{?>
                     <h4 onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'"><?php echo $member["mb_nick"];?></h4>
                     <div class="mylist" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
@@ -583,6 +576,7 @@ $my_pro2 = sql_fetch($sql);
                 $(".user_box").removeClass("bg2");
                 $(".wished").removeClass("bg2");
                 $(".copyright").removeClass("bg2");
+                $(".search_setting").removeClass("bg2");
                 $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03.svg");
                 $(this).html("물건");
                 $(this).css({"text-align":"right"});
@@ -617,6 +611,7 @@ $my_pro2 = sql_fetch($sql);
                 $(".wished").addClass("bg2");
                 $(".user_box").addClass("bg2");
                 $(".copyright").addClass("bg2");
+                $(".search_setting").addClass("bg2");
                 $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03_2.svg");
                 $(this).html("능력");
                 $(this).css({"text-align":"left"});

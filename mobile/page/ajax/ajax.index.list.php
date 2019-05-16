@@ -17,10 +17,11 @@ $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0 ";
 
 //검색 정렬 기본값
 if($_SESSION["list_basic_order"]=="location"){
-    $od = " order by ISNULL(p.pd_lat) asc,  distance asc, p.pd_update desc, p.pd_date desc";
+    $od = " order by ISNULL(p.pd_lat) asc, distance asc, p.pd_update desc, p.pd_date desc";
 }else {
     $od = " order by p.pd_update desc, p.pd_date desc";
 }
+
 if($member["mb_id"]){
     $mb_id = $member["mb_id"];
 }else{
@@ -84,7 +85,7 @@ if($pd_timeFrom && $pd_timeTo){
 if($mb_level){
     $search .= " and m.mb_level = 4 ";
 }
-if($order_sort){
+if($order_sort && $searchs=="true"){
     $od = "";
     $order_sorts = explode(",",$order_sort);
     $actives = explode(",",$order_sort_active);
@@ -107,7 +108,7 @@ if($order_sort){
                 '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].'>'.
                 '<span class="round">가격순</span></label>';
         }
-        if($order_sorts[$i]=="pd_recome"){
+        if($order_sorts[$i]=="pd_recom"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
                 $ods[] = " p.pd_recom desc";
@@ -141,12 +142,9 @@ if($order_sort){
     $od = " order by ". implode(",",$ods);
 }else{
     if($_SESSION["lat"] && $_SESSION["lng"] || $lat && $lng){
-        $od = " order by ISNULL(p.pd_lat) asc, distance asc, p.pd_price asc";
-    }else {
-        $od = " order by p.pd_price asc";
+        $od = " order by ISNULL(p.pd_lat) asc, distance asc, p.pd_update desc, p.pd_price asc";
     }
 }
-
 
 if($_SESSION["lat"] && $_SESSION["lng"] || $lat && $lng){
     if($lat && $lng) {
@@ -187,13 +185,16 @@ if(count($my_block)>0){
     $search .= " and p.mb_id not in ({$block_id}) ";
 }
 
-
 $sqls = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
 $res = sql_query($sqls);
 while($row = sql_fetch_array($res)){
+    $sql = "select count(*) as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_step = 2 and pd_id = '{$row["pd_id"]}'";
+    $cnt = sql_fetch($sql);
+    if($cnt["cnt"] > 0) continue;
     $list[] = $row;
 }
 
+/*
 if(count($list) > 0) {
     $test = array();
     foreach ($list as $item) {
@@ -201,7 +202,7 @@ if(count($list) > 0) {
     }
     array_multisort($test, SORT_DESC, $list);
 }
-
+*/
 //ad 가져오기
 /*$today = date("Y-m-d");
 $sql = "select * from `product_ad` where ad_status = 0 and  '{$today}' >= ad_from and '{$today}' < ad_to ";
@@ -249,9 +250,12 @@ while($row = sql_fetch_array($res)){
     $wished[] = $row;
 }
 
-
-
 for($i=0;$i<count($list);$i++){
+
+    $sql = "select count(*) as cnt from `order` where pd_id = '{$list[$i]["pd_id"]}' and od_status = 1 and od_pay_status = 2";
+    $chkres = sql_fetch($sql);
+    if($chkres["cnt"] > 0) continue;
+
     if($list[$i]["pd_lat"]==0 && $list[$i]["pd_lng"]==0){
         $dist = "정보없음";
     }else {
@@ -417,9 +421,9 @@ for($i=0;$i<count($list);$i++){
                 <h2 style="font-weight:normal"><?php echo ($list[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
 				<div>
 					<ul>
-                        <?php if($list_type=="list"||$_SESSION["list_type"]=="list"){?>
-                        <li style="margin-right:2vw;"><?php echo $time_gep;?></li>
-                        <?php }?>
+                        <?php /*if($list_type=="list"||$_SESSION["list_type"]=="list"){*/?><!--
+                        <li style="margin-right:2vw;"><?php /*echo $time_gep;*/?></li>
+                        --><?php /*}*/?>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><span><?php echo $list[$i]["pd_hits"];?></span></li>
 						<?php if($app || $app2){?>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_loc<?php if($_SESSION["list_type"] == "grid"){echo "_list";}?>.svg" alt=""><span><?php echo $dist;?></span></li>
@@ -494,6 +498,7 @@ if(count($list)==0){echo "no-list//".$sqls;}
                         $("#"+id).remove();
                         $grid.masonry('remove', this).masonry("layout");
                         $("#mobile_header #mobile_menu_btn").addClass("active");
+                        $(".trash-ani").addClass("active");
                         $("#debug").addClass("active");
                         $("#debug").html("휴지통으로 이동되었습니다.");
                         setTimeout(removeDebug, 1500);
@@ -515,6 +520,7 @@ if(count($list)==0){echo "no-list//".$sqls;}
                         $("#"+id).remove();
                         $grid.masonry('remove', this).masonry("layout");
                         $("#mobile_header #mobile_menu_btn").addClass("active");
+                        $(".trash-ani").addClass("active");
                         $("#debug").addClass("active");
                         $("#debug").html("휴지통으로 이동되었습니다.");
                         setTimeout(removeDebug, 1500);

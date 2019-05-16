@@ -51,7 +51,7 @@
 #bo_w .tbl_frm01 th {}
 #bo_w .tbl_frm01 td {}
 #bo_w .tbl_frm01 textarea, #bo_w .frm_input {}
-#bo_w .tbl_frm01 textarea {}
+#bo_w .tbl_frm01 textarea {width:calc(100% - 6px) !important}
 /*
 #bo_w .tbl_frm01 #captcha {}
 #bo_w .tbl_frm01 #captcha input {}
@@ -126,7 +126,7 @@
 #char_count {font-weight:bold}
 
 #qa_email {width:50%}
-#qa_subject {width:100%}
+#qa_subject {width:calc(100% - 4vw);text-overflow: ellipsis;white-space: nowrap;overflow: hidden;word-break: keep-all}
 
 /* 게시판 읽기 */
 #bo_v {}

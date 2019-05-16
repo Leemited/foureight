@@ -24,17 +24,17 @@ $today = date("Y-m-d");
 for($i=0;$i<count($talk);$i++){
     if($talk[$i]["msg_date"] == $today){
         $date = (date("a",strtotime($talk[$i]["msg_time"]))=="am")?"오전":"오후";
-        $date .= " ".substr($talk[$i]["msg_time"],0,5);
+        $date .= " ".substr(date("h:i",strtotime($talk[$i]["msg_time"])),0,5);
     }else{
         $ampm = (date("a",strtotime($talk[$i]["msg_time"]))=="am")?"오전":"오후";
-        $date = $talk[$i]["msg_date"]."<br>".$ampm." ".substr($talk[$i]["msg_time"],0,5);
+        $date = $talk[$i]["msg_date"]."<br>".$ampm." ".substr(date("h:i",strtotime($talk[$i]["msg_time"])),0,5);
     }
     if($mb_id == $talk[$i]["send_mb_id"]) {
         $data["msg"][] =
             "<div class='msg_box my_msg'>" .
                 "<div class='in_box'>" .
                     "<div class='date'>".$date."</div>" .
-                    "<div class='msg'>".$talk[$i]["message"]."</div>" .
+                    "<div class='msg'>bb".nl2br(stripslashes($talk[$i]["message"]))."</div>" .
                     "<div class='arrow'><img src='".G5_IMG_URL."/ic_chat.png' alt=''></div>".
                 "</div>" .
             "</div>";
@@ -52,10 +52,10 @@ for($i=0;$i<count($talk);$i++){
         $data["msg"][] =
         "<div class='msg_box read_msg'>" .
             "<div class='in_box'>" .
-                "<div class='read_profile' style='position:relative;".$background.";background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;border: 3px solid #fff;'></div>" .
+                "<div class='read_profile' style='position:relative;".$background.";background-size:cover;background-repeat:no-repeat;background-position:center;width:11vw;height:11vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;border: 3px solid #fff;'></div>" .
                 "<div class='box_con'>" .
                     "<div class='read_name'>".$nick."</div>" .
-                    "<div class='msg'>".$talk[$i]["message"]."</div>" .
+                    "<div class='msg'>".nl2br(stripslashes($talk[$i]["message"]))."</div>" .
                     "<div class='date'>".$date."</div>" .
                 "</div>" .
             "</div>" .

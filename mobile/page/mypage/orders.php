@@ -33,24 +33,42 @@ $my_addres_li = count($my_addres);
 
 $mb_hp = explode("-",$member["mb_hp"]);
 
-$back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=".$cart_idss;
+$back_url = G5_MOBILE_URL."/page/mypage/mypage.php?type=2";
+
+$sql = "select * from `my_card` where mb_id='{$member["mb_id"]}' and card_status = 1 ";
+$mycard = sql_fetch($sql);
+
+$mycard_num = base64_decode($mycard["card_number"]);
+
 ?>
 <div id="id00" class="w3-modal w3-animate-opacity no-view">
     <div class="w3-modal-content w3-card-4">
         <div class="w3-container">
-                <input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id" id="mb_id">
-                <input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id" id="mb_id">
-                <input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id" id="mb_id">
-                <h2>배송지저장</h2>
-                <div>
-                    <input type="text" value="" name="addr_name" id="addr_name" placeholder="배송지 이름" required>
-                </div>
-                <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="저장" onclick="fnAddrSave(1);" ><input type="button" value="기본배송지로저장" onclick="fnAddrSave(2);" style="width:auto;margin-left:1vw" >
-                </div>
+            <input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id" id="mb_id">
+            <h2>배송지저장</h2>
+            <div>
+                <input type="text" value="" name="addr_name" id="addr_name" placeholder="배송지 이름" required>
+            </div>
+            <div>
+                <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="저장" onclick="fnAddrSave(1);" ><input type="button" value="기본배송지로저장" onclick="fnAddrSave(2);" style="width:auto;margin-left:1vw" >
+            </div>
         </div>
     </div>
 </div>
+    <div id="idcard" class="w3-modal w3-animate-opacity no-view">
+        <div class="w3-modal-content w3-card-4">
+            <div class="w3-container">
+
+            </div>
+        </div>
+    </div>
+    <div id="id01" class="w3-modal w3-animate-opacity no-view">
+        <div class="w3-modal-content w3-card-4" style="height:auto;-webkit-transform: translateY(-50%);-moz-transform: translateY(-50%);-ms-transform: translateY(-50%);-o-transform: translateY(-50%);transform: translateY(-50%);margin-top:0">
+            <div class="w3-container" style="text-align: center">
+                <iframe src="https://api.thecheat.co.kr/web/widget.php?url=http://mave01.cafe24.com" width="281" height="118" frameborder="0" border="0" framespacing="0" marginheight="0" marginwidth="0" scrolling="no" noresize></iframe>
+            </div>
+        </div>
+    </div>
 <div class="sub_head">
     <div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2>주문/결제하기</h2>
@@ -126,7 +144,7 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
         <div class="clear"></div>
     </div>
     <!--form action="<?php echo G5_MOBILE_URL?>/page/mypage/order_update.php" name="order_form_update"-->
-    <form action="<?php echo G5_MOBILE_URL?>/page/mypage/stdpay/requestPay.php" name="order_form_update" method="post">
+    <form action="<?php echo G5_MOBILE_URL?>/page/mypage/payment/payment.php" name="order_form_update" method="post" onsubmit="fnPayment();">
     <div class="order_write">
         <input type="hidden" name="od_item_name" id="od_item_name" value="<?php echo $order_item_name;?>">
         <input type="hidden" name="od_total" id="od_total" value="<?php echo $total;?>">
@@ -135,9 +153,13 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
         <input type="hidden" name="ca_id" id="ca_id" value="<?php echo $cart_idss;?>">
         <input type="hidden" name="pd_id" id="pd_id" value="<?php echo $pd_idss;?>">
         <input type="hidden" name="od_pd_type" id="od_pd_type" value="<?php echo $od_pd_type;?>">
+        <input type="hidden" name="od_expd" id="od_expd" value="<?php echo str_pad($mycard["card_year"],"0",STR_PAD_LEFT).$mycard["card_month"];?>">
+        <input type="hidden" name="od_card_num" id="od_card_num" value="<?php echo str_replace("-","",$mycard_num);?>">
+        <input type="hidden" name="card_name" id="card_name" value="<?php echo $mycard["card_name"];?>">
+        <input type="hidden" name="card_add" id="card_add" value="">
         <div class="write_form">
             <div class="row">
-                <div class="cell title">받는분</div>
+                <div class="cell title"><?php if($od_pd_type==2){?>요청자<?php }else{?>받는분<?php }?></div>
                 <div class="cell inputs">
                     <input type="text" name="od_name" id="od_name" value="<?php echo $member["mb_name"];?>" class="order_input02" required>
                     <input type="button" value="배송지저장" class="order_addr" onclick="fnAddr();">
@@ -147,10 +169,10 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                 <div class="cell title">우편번호</div>
                 <div class="cell inputs">
                     <input type="text" name="od_zipcode" id="od_zipcode" value="<?php echo $member["mb_zip1"];?>" class="order_input02" required readonly>
-                    <input type="button" value="우편번호 검색" class="order_addr" onclick="sample3_execDaumPostcode()">
-                </div>
-                <div id="wraps" style="display:none;border:1px solid;width:100%;height:300px;margin:5px 0;position:relative">
-                    <img src="//t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
+                    <input type="button" value="우편번호 검색" class="order_addr" onclick="sample2_execDaumPostcode()">
+                    <div id="wraps" style="display:none;position:fixed;overflow:hidden;z-index:1;-webkit-overflow-scrolling:touch;">
+                        <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer" style="cursor:pointer;position:absolute;right:-3px;top:-3px;z-index:1" onclick="closeDaumPostcode()" alt="닫기 버튼">
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -203,20 +225,19 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
                 </div>
             </div>
         </div>
-        <!--<div class="write_form">
+        <div class="write_form">
             <input type="hidden" name="od_type" value="1" id="od_type">
             <div class="row">
                 <div class="cell title">결제수단</div>
                 <div class="cell inputs">
                     <ul class="paysel">
                         <li onclick="fnOderType('1')" class="active" >카드결제</li>
-                        <li onclick="fnOderType('2')" >가상계좌</li>
                         <li onclick="fnOderType('3')" >계좌이체</li>
-                        <li onclick="fnOderType('4')" >핸드폰</li>
+                        <!--<li onclick="fnOderType('4')" >핸드폰</li>-->
                     </ul>
                 </div>
             </div>
-        </div>-->
+        </div>
     </div>
     <div class="order_info">
         <h2>사기조회 / 안전개래 안내</h2>
@@ -224,11 +245,11 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
             <!--48에서는 직접적인 거래 사기와 피해를 보장해 주지 않습니다.<br>
             따라서 결제전 신중하게 판단 하시기 바랍니다.-->
             <div class="order_info_link" style="position: relative;width:100%;text-align: center;margin:4vw 0 6vw;display: inline-block">
-            <div style="background-color:#0c0c94;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-right:1vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://thecheat.co.kr/rb/?mod=_search'">
+            <div style="background-color:#0c0c94;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-right:1vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="fnTheCheat()">
                 <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 사기조회 하기
             </div>
             <div style="background-color:#2584c6;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-left:1vw;color:#FFF;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://www.unicro.co.kr/index.jsp'">
-                <img src="<?php echo G5_IMG_URL;?>/unicro_logo.jpg" alt="" style="width:36%"> 안전거래 하기
+                <img src="<?php echo G5_IMG_URL;?>/unicro_logo.jpg" alt="" style="width:36%;margin-top: -1vw;"> 안전거래 하기
             </div>
             </div>
             <div class="clear"></div>
@@ -240,22 +261,55 @@ $back_url = G5_MOBILE_URL."/page/mypage/cart.php?group_id=".$group_id."&cart_id=
     </div>
     </form>
 </div>
-<script type="text/javascript" src="https://testpg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js" ></script>
+
 <script>
+function fnTheCheat(){
+    $("#id01").css({"display":"block","z-index":"9002"});
+    $("#id01").css("display","block");
+    location.hash = "#modal";
+}
+
 function fnOderType(type) {
     $("#od_type").val(type);
 }
 
 function orderUpdate(){
-
+    if($("#od_name").val() == ""){
+        alert("받는분 성함을 입력해주세요.");
+        return false;
+    }
     if(confirm("해당 주문건에 대한 결제를 하시겠습니까?")){
-        var od_name = $("#od_name").val();
+        /*var od_name = $("#od_name").val();
         var od_tel = $("#tel1").val()+"-"+$("#tel2").val()+"-"+$("#tel3").val();
         var od_address = $("#od_address1").val()+" "+$("#od_address2").val();
         var od_zipcode = $("#od_zipcode").val();
         var mt_id = $("#group_id").val();
-
-        document.order_form_update.submit();
+        var ordertype = $("#od_type").val();
+        if(ordertype == 1) {
+            $.ajax({
+                url: g5_url + "/mobile/page/ajax/ajax.my_card.php",
+                method: "post",
+                data: {mb_id: "<--?php echo //$member["mb_id"];?>"},
+                dataType: "json"
+            }).done(function (data) {
+                if (data.result == 1) {
+                    if(confirm('등록된 카드정보로 결제 하시겠습니까?')){
+                        document.order_form_update.submit();
+                    }
+                } else {
+                    $("#card_add").val('add');
+                    $("#idcard").css({"display":"block","z-index":"9999999"});
+                    $("#idcard .w3-modal-content").html(data.data);
+                    $("#idcard .w3-modal-content").css({"height":"80vw","margin-top":"-40vw"});
+                    $("html, body").css("overflow","hidden");
+                    $("html, body").css("height","100vh");
+                    location.hash="#modal";
+                }
+            });
+        }else{*/
+            document.order_form_update.action = g5_url+"/mobile/page/mypage/stdpay/requestPay.php";
+            document.order_form_update.submit();
+        //}
     }else{
         return false;
     }
@@ -351,69 +405,98 @@ $(function(){
    });
     $(document).on("click",".paysel li",function(){
         if(!$(this).hasClass("active")){
-            $(".paysel li").not($(this)).removeClass("active");
             $(this).addClass("active");
+            $(".paysel li").not($(this)).removeClass("active");
         }
     });
 });
 </script>
 <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
 <script>
-    // 우편번호 찾기 찾기 화면을 넣을 element
-    var element_wrap = document.getElementById('wraps');
+    // 우편번호 찾기 화면을 넣을 element
+    var element_layer = document.getElementById('wraps');
 
-    function foldDaumPostcode() {
+    function closeDaumPostcode() {
         // iframe을 넣은 element를 안보이게 한다.
-        element_wrap.style.display = 'none';
+        element_layer.style.display = 'none';
     }
 
-    function sample3_execDaumPostcode() {
-        // 현재 scroll 위치를 저장해놓는다.
-        var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+    function sample2_execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function(data) {
                 // 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
 
                 // 각 주소의 노출 규칙에 따라 주소를 조합한다.
                 // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
-                var fullAddr = data.address; // 최종 주소 변수
-                var extraAddr = ''; // 조합형 주소 변수
+                var addr = ''; // 주소 변수
+                var extraAddr = ''; // 참고항목 변수
 
-                // 기본 주소가 도로명 타입일때 조합한다.
-                if(data.addressType === 'R'){
-                    //법정동명이 있을 경우 추가한다.
-                    if(data.bname !== ''){
+                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                    addr = data.jibunAddress;
+                }
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
                         extraAddr += data.bname;
                     }
-                    // 건물명이 있을 경우 추가한다.
-                    if(data.buildingName !== ''){
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
                         extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
                     }
-                    // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소를 만든다.
-                    fullAddr += (extraAddr !== '' ? ' ('+ extraAddr +')' : '');
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("sample2_extraAddress").value = extraAddr;
+
+                } else {
+                    document.getElementById("sample2_extraAddress").value = '';
                 }
 
                 // 우편번호와 주소 정보를 해당 필드에 넣는다.
-                document.getElementById('od_zipcode').value = data.zonecode; //5자리 새우편번호 사용
-                document.getElementById('od_address1').value = fullAddr;
+                document.getElementById('od_zipcode').value = data.zonecode;
+                document.getElementById("od_address1").value = addr;
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById("od_address2").focus();
 
                 // iframe을 넣은 element를 안보이게 한다.
                 // (autoClose:false 기능을 이용한다면, 아래 코드를 제거해야 화면에서 사라지지 않는다.)
-                element_wrap.style.display = 'none';
-
-                // 우편번호 찾기 화면이 보이기 이전으로 scroll 위치를 되돌린다.
-                document.body.scrollTop = currentScroll;
-            },
-            // 우편번호 찾기 화면 크기가 조정되었을때 실행할 코드를 작성하는 부분. iframe을 넣은 element의 높이값을 조정한다.
-            onresize : function(size) {
-                element_wrap.style.height = size.height+'px';
+                element_layer.style.display = 'none';
             },
             width : '100%',
-            height : '100%'
-        }).embed(element_wrap);
+            height : '100%',
+            maxSuggestItems : 5
+        }).embed(element_layer);
 
         // iframe을 넣은 element를 보이게 한다.
-        element_wrap.style.display = 'block';
+        element_layer.style.display = 'block';
+
+        // iframe을 넣은 element의 위치를 화면의 가운데로 이동시킨다.
+        initLayerPosition();
+    }
+
+    // 브라우저의 크기 변경에 따라 레이어를 가운데로 이동시키고자 하실때에는
+    // resize이벤트나, orientationchange이벤트를 이용하여 값이 변경될때마다 아래 함수를 실행 시켜 주시거나,
+    // 직접 element_layer의 top,left값을 수정해 주시면 됩니다.
+    function initLayerPosition(){
+        var width = 300; //우편번호서비스가 들어갈 element의 width
+        var height = 400; //우편번호서비스가 들어갈 element의 height
+        var borderWidth = 5; //샘플에서 사용하는 border의 두께
+
+        // 위에서 선언한 값들을 실제 element에 넣는다.
+        element_layer.style.width = width + 'px';
+        element_layer.style.height = height + 'px';
+        element_layer.style.border = borderWidth + 'px solid';
+        // 실행되는 순간의 화면 너비와 높이 값을 가져와서 중앙에 뜰 수 있도록 위치를 계산한다.
+        element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
+        element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
     }
 </script>
 <?php

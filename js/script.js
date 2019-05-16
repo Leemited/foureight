@@ -266,6 +266,7 @@ function modalClose2(){
 }
 
 function fnSetting(){
+    $(".keyword").removeClass("active");
     if($(".search_setting").attr("id") == "menuon"){
         //$("#set").val(1);
         $(".search_setting").attr("id","");
@@ -274,6 +275,7 @@ function fnSetting(){
         $("body").css("overflow","unset");
         location.hash='';
     }else{
+        $(".keyword").removeClass("active");
         var type = $("#set_type").val();
         var type2 = $("#set_type2").val();
         if(type == 2 && (type2=="" || type== 8)){
@@ -283,7 +285,7 @@ function fnSetting(){
         //$("#set").val(2);
         location.hash = "#search";
         $(".search_setting").attr("id","menuon");
-        $(".search_setting").css({"top":"17vw","z-index":"20"});
+        $(".search_setting").css({"top":"16.5vw","z-index":"20"});
         $("html, body").css("overflow","hidden");
         $("html, body").css("height","100vh");
     }
@@ -293,6 +295,7 @@ var set_search = '';
 
 function fnSetting2(){
     $("#searchActive").val("simple");
+    $(".keyword").removeClass("active");
     if($(".search_setting").attr("id") == "menuon"){
         $("#set").val(1);
         $(".search_setting").attr("id","");
@@ -300,13 +303,13 @@ function fnSetting2(){
         $("html").css("overflow","auto");
         $("body").css("overflow","unset");
 		set_search = "Y";
-        fnlist(1,'');
+        fnlist(1,'searchtrue');
         location.hash='';
     }else{
         $("#set").val(2);
         location.hash = "#search";
         $(".search_setting").attr("id","menuon");
-        $(".search_setting").css("top","20vw");
+        $(".search_setting").css({"top":"16.5vw","z-index":"20"});
         $("html, body").css("overflow","hidden");
         $("html, body").css("height","100vh");
     }

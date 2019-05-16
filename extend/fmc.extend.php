@@ -33,9 +33,12 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
             return false;
         }
     }
-    //설정 대입
-    if($set[$chennal] == 0){
-        return false;
+
+    if($chennal!="fcm_buy_channel") {
+        //설정 대입
+        if ($set[$chennal] == 0) {
+            return false;
+        }
     }
 
     $mbs = get_member($mb_id);
@@ -50,14 +53,12 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
     if($mbs["sdkVersion"] == "ios"){
         $fields = array(
             'registration_ids' => $regId_array,
-            'priority' => 'high',
             'notification' => array("title" => $title, "body" => $content, "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls,"content_available" => 'true')
         );
     }else {
         $fields = array(
             'registration_ids' => $regId_array,
             'data' => array("title" => $title, "message" => $content, "content_available" => 'true', "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls),
-            'priority' => 'high',
             'sound' => 'default'
         );
     }
@@ -79,8 +80,8 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
     // Close connection
     curl_close($ch);
     $decode = json_decode($result, true);
-
-    return $result."//".$sql;
+    //print_r2($result);
+    return $result;
 }
 //전체 보내기
 function send_reserve_FCM($title,$content,$urls){

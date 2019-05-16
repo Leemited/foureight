@@ -12,10 +12,12 @@ if($pro["cnt"] > 0){
         echo "7";
         return false;
     }
+
     $sql = "update `cart` set pd_id = {$pd_id} , mb_id = '{$member["mb_id"]}', c_status = {$status}, c_price = {$price}, c_date = now() where cid = {$pro["cid"]}";
 }else {
     $sql = "insert into `cart` set pd_id = {$pd_id} , mb_id = '{$member["mb_id"]}', c_status = {$status}, c_price = {$price}, c_date = now()";
 }
+
 if(sql_query($sql)){
     if($pricing_id){
         $sql = "update `product_pricing` set status = 2 where pd_id = '{$pd_id}'";

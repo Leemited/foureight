@@ -6,7 +6,7 @@ if(!$cid){
     return false;
 }
 
-$sql = "update `cart` set c_status = 2 where cid = '{$cid}'";
+$sql = "update `cart` set c_status = 10 where cid = '{$cid}'";
 if(sql_query($sql)){
     echo "2";
 }else{

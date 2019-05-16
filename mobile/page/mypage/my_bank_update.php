@@ -6,7 +6,17 @@ if(!$is_member){
 }
 
 if($mode=="insert"){
-    $sql = "insert into `my_bank` set account_name = '{$account_name}',bank_name = '{$bank_name}',bank_number= '{$bank_number}', bank_status =0, bank_date = now(), mb_id = '{$member["mb_id"]}'";
+    $sql = "select count(*) as cnt from `my_bank` where mb_id = '{$member["mb_id"]}' and bank_status = 1 ";
+    $bankcnt = sql_fetch($sql);
+    if($bankcnt["cnt"]==0){
+        $where = " , bank_status = 1 ";
+    }else{
+        $where = " , bank_status = 0 ";
+    }
+
+    $bank_number = base64_encode($bank_number);
+
+    $sql = "insert into `my_bank` set account_name = '{$account_name}',bank_name = '{$bank_name}',bank_number= '{$bank_number}', bank_date = now(), mb_id = '{$member["mb_id"]}' {$where}";
     if(sql_query($sql)){
         alert("등록되었습니다.");
     }else{

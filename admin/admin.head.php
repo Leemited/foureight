@@ -84,9 +84,9 @@ if (preg_match('/chrome/', $userAgent)) {
 				<li class="accordion" data-accordion>
 					<div data-control class="list-title">정산관리</div>
 					<div data-content class="list-item">
-						<div><a href="<?php echo G5_URL."/admin/"; ?>">거래내역</a></div>
-						<div><a href="<?php echo G5_URL."/admin/"; ?>">배송상태</a></div>
-						<div><a href="<?php echo G5_URL."/admin/"; ?>">정산</a></div>
+						<div><a href="<?php echo G5_URL."/admin/order_list.php"; ?>">거래내역</a></div>
+						<!--<div><a href="<?php /*echo G5_URL."/admin/order_delivery.php"; */?>">배송상태</a></div>-->
+						<div><a href="<?php echo G5_URL."/admin/order_confirm.php"; ?>">정산</a></div>
 					</div>
 				</li>
 			</ul>

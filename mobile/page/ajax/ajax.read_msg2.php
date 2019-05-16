@@ -32,7 +32,7 @@ for($i=0;$i<count($talk);$i++){
             "<div class='msg_box my_msg'>" .
                 "<div class='in_box'>" .
                     "<div class='date'>".$date."</div>" .
-                    "<div class='msg'>".$talk[$i]["message"]."</div>" .
+                    "<div class='msg'>".nl2br(str_replace(" ", "&nbsp;",$talk[$i]["message"]))."</div>" .
                     "<div class='arrow'><img src='".G5_IMG_URL."/ic_chat.png' alt=''></div>".
                 "</div>" .
             "</div>";
@@ -53,7 +53,7 @@ for($i=0;$i<count($talk);$i++){
                     "<div class='read_profile' style='position:relative;".$background.";background-size:cover;background-repeat:no-repeat;background-position:center;width:13vw;height:13vw;-webkit-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);-moz-box-shadow: 0 0 2vw RGBA(0,0,0,0.3);box-shadow: 0 0 2vw RGBA(0,0,0,0.3);border-radius: 50%;border: 3px solid #fff;'></div>" .
                     "<div class='box_con'>" .
                         "<div class='read_name'>".$nick."</div>" .
-                        "<div class='msg'>".$talk[$i]["message"]."</div>" .
+                        "<div class='msg'>".nl2br(str_replace(" ", "&nbsp;",$talk[$i]["message"]))."</div>" .
                         "<div class='date'>".$date."</div>" .
                         //"<div class='arrow'><img src='".G5_IMG_URL."/ic_chat_reply.png'></div>" .
                     "</div>" .

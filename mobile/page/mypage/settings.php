@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once("../../../common.php");
 include_once(G5_MOBILE_PATH."/head.login.php");
 if($member["mb_id"]==""){
@@ -44,6 +44,11 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 			<?php } ?>
             </div>
 		</div>
+        <?php if($mb["mb_level"] != 4){?>
+            <div class="company_btn">
+                <a href="<?php echo G5_MOBILE_URL?>/page/mypage/company_write.php">기업회원 신청</a>
+            </div>
+        <?php }?>
 	</div>
 	<div class="setting_wrap">
 		<h2>기본정보 설정</h2>
@@ -61,7 +66,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 			<?php }?> <span><?php echo ($member["mb_id"])?$member["mb_id"]:"아이디를 표시할 수 없습니다.";?></span></li>
 			<li onclick="fnEditNick();">닉네임 <span><?php echo ($member["mb_nick"])?$member["mb_nick"]:"닉네임이 설정되지 않았습니다.";?></span></li>
 			<li onclick="fnEditTel('<?php echo $member["mb_hp"];?>');">전화번호 <span><?php if($member["mb_certify"]!="hp"){echo "미인증"; }else{echo "인증완료";}?>&nbsp;&nbsp;<?php echo ($member["mb_hp"])?$member["mb_hp"]:"연락처를 표시 할 수 없습니다.";?></span></li>
-			<li class="set_sex">성별설정 <span><input type="radio" value="" name="mb_sex" id="no-sex" <?php if($member["mb_sex"]==""){?>checked<?php }?>><label for="no-sex">비공개</label><input type="radio" value="F" name="mb_sex" id="woman" <?php if($member["mb_sex"]=="F"){?>checked<?php }?>><label for="woman">여성</label> <input type="radio" value="M" name="mb_sex" id="man" <?php if($member["mb_sex"]=="M"){?>checked<?php }?>><label for="man">남성</label></span></li>
+			<!--<li class="set_sex">성별설정 <span><input type="radio" value="" name="mb_sex" id="no-sex" <?php /*if($member["mb_sex"]==""){*/?>checked<?php /*}*/?>><label for="no-sex">비공개</label><input type="radio" value="F" name="mb_sex" id="woman" <?php /*if($member["mb_sex"]=="F"){*/?>checked<?php /*}*/?>><label for="woman">여성</label> <input type="radio" value="M" name="mb_sex" id="man" <?php /*if($member["mb_sex"]=="M"){*/?>checked<?php /*}*/?>><label for="man">남성</label></span></li>-->
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/password_settings.php?id=<?php echo $settings['id'];?>'">비밀번호 변경</li>
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/address_settings.php?id=<?php echo $settings['id'];?>'">주소변경</li>
 		</ul>
@@ -96,10 +101,10 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 		</ul>
 	</div>
     <div class="setting_wrap">
-        <h2>결제설정</h2>
+        <h2>정산설정</h2>
         <ul>
-            <li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_card.php?id=<?php echo $settings['id'];?>'">카드등록</li>
-            <li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_bank.php?id=<?php echo $settings['id'];?>'">계좌등록</li>
+            <!--<li onclick="location.href='<?php /*echo G5_MOBILE_URL*/?>/page/mypage/my_card.php?id=<?php /*echo $settings['id'];*/?>'">카드등록</li>-->
+            <li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_bank.php?id=<?php echo $settings['id'];?>'">정산계좌등록</li>
         </ul>
     </div>
 	<div class="setting_wrap">
@@ -116,6 +121,14 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
             <li class="single" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/member_block_list.php?id=<?php echo $settings['id'];?>'">차단회원 목록</li>
         </ul>
     </div>
+    <?php if($is_member){?>
+    <div class="setting_wrap ">
+        <h2>로그아웃</h2>
+        <ul>
+            <li class="single" onclick="location.href='<?php echo G5_BBS_URL?>/logout.php'">로그아웃</li>
+        </ul>
+    </div>
+    <?php }?>
     <div class="setting_wrap ">
         <h2>회원탈퇴</h2>
         <ul>

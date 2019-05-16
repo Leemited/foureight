@@ -16,10 +16,10 @@ if(sql_query($sql)){
     $today = date("Y-m-d");
     if($msg["msg_date"] == $today){
         $date = (date("a",strtotime($msg["msg_time"]))=="am")?"오전":"오후";
-        $date .= " ".substr($msg["msg_time"],0,5);
+        $date .= " ".substr(date("h:i",strtotime($msg["msg_time"])),0,5);
     }else{
         $ampm = (date("a",strtotime($msg["msg_time"]))=="am")?"오전":"오후";
-        $date = $msg["msg_date"]."<br>".$ampm." ".substr($msg["msg_time"],0,5);
+        $date = $msg["msg_date"]."<br>".$ampm." ".substr(date("h:i",strtotime($msg["msg_time"])),0,5);
     }
     $mb = get_member($read_mb_id);
     $sql = "select * from `product` where pd_id = '{$pd_id}'";

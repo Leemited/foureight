@@ -69,7 +69,7 @@ while($row = sql_fetch_array($res)){
 </div>
 <div class="sub_head">
 	<div class="sub_back" onclick="location.href=g5_url"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
-	<h2>WISH LIST</h2>
+	<h2>찜 목록</h2>
     <div class="all_clear" onclick="fnwishedDelete();"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash_all.svg" alt=""></div>
 </div>
 <div id="container" style="background-color:#e7e7e7;height:calc(100vh - 30vw);overflow-y:scroll">

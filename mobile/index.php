@@ -5,6 +5,7 @@ if(defined('G5_THEME_PATH')) {
     require_once(G5_THEME_PATH.'/index.php');
     return;
 }
+
 //include_once(G5_EXTEND_PATH."/image.extend.php");
 
 if($is_member){
@@ -84,8 +85,15 @@ if($set_type){
     $search .= " and p.pd_type = '{$set_type}'";
     $type1 = $set_type;
 }else{
-    $search .= " and p.pd_type = 1";
+    if($_SESSION["type1"]==2 || $_SESSION["type1"]==""){
+        $set_type = 2;
+        $search .= " and p.pd_type = 2";
+    }else {
+        $set_type = 1;
+        $search .= " and p.pd_type = 1";
+    }
 }
+
 if($type2){
     $search .= " and p.pd_type2 = '{$type2}'";
 }
@@ -121,48 +129,48 @@ if($order_sort){
         if($order_sorts[$i]=="pd_date"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
-                $ods[] = " p.pd_date desc";
+                $ods[] = " p.pd_date asc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
-                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].' onclick="fnSort(\'1\')">'.
+                '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].' >'.
                 '<span class="round">최신순</span></label>';
         }
         if($order_sorts[$i]=="pd_price"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
-                $ods[] = " p.pd_price asc";
+                $ods[] = " p.pd_price desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_price">'.
-                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].' onclick="fnSort(\'2\')">'.
+                '<input type="checkbox" name="orders[]" value="pd_price" id="pd_price" '.$checked[$i].' >'.
                 '<span class="round">가격순</span></label>';
         }
         if($order_sorts[$i]=="pd_recome"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
-                $ods[] = " p.pd_recom desc";
+                $ods[] = " p.pd_recom asc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_recom">'.
-                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].' onclick="fnSort(\'3\')">'.
+                '<input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" '.$checked[$i].' >'.
                 '<span class="round">추천순</span></label>';
         }
         if($order_sorts[$i]=="pd_hits"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
-                $ods[] = " p.pd_hits desc";
+                $ods[] = " p.pd_hits asc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_hits">'.
-                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].' onclick="fnSort(\'4\')">'.
+                '<input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" '.$checked[$i].' >'.
                 '<span class="round">인기순</span></label>';
         }
         if($order_sorts[$i]=="pd_loc"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
                 if($_SESSION["lat"] && $_SESSION["lng"]) {
-                    $ods[] = " ISNULL(p.pd_lat) asc, distance asc";
+                    $ods[] = " ISNULL(p.pd_lat) desc, distance desc";
                 }
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_loc">'.
-                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].' onclick="fnSort(\'5\')">'.
+                '<input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" '.$checked[$i].' >'.
                 '<span class="round">거리순</span></label>';
         }
     }
@@ -170,9 +178,9 @@ if($order_sort){
         $od = " order by ". implode(",",$ods);
 }else{
     if($_SESSION["lat"] && $_SESSION["lng"] || $lat && $lng){
-        $od = " order by ISNULL(p.pd_lat) asc, distance asc, p.pd_price asc";
+        $od = " order by ISNULL(p.pd_lat) desc, distance asc, p.pd_price desc";
     }else {
-        $od = " order by p.pd_price asc";
+        $od = " order by p.pd_price desc";
     }
 }
 
@@ -221,6 +229,9 @@ $myblind = sql_fetch($sql);
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} limit {$start},{$rows}";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
+    $sql = "select count(*) as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_step = 2 and pd_id = '{$row["pd_id"]}'";
+    $cnt = sql_fetch($sql);
+    if($cnt["cnt"] > 0) continue;
 	$list[] = $row;
 }
 
@@ -365,14 +376,14 @@ while($row = sql_fetch_array($res)){
 	<!--<input type="hidden" value="<?php /*if($schopt["sc_type"]){echo $schopt["sc_type"];}else{echo "1";}*/?>" name="write_type" id="write_type">-->
 	<div class="write" onclick="<?php if(!$is_member){?>alert('로그인이 필요합니다.');location.href=g5_url+'/mobile/page/login_intro.php'; <?php }else if($member["mb_certify"]==""){ ?>alert('본인인증이 필요합니다.');location.href=g5_url+'/mobile/page/mypage/hp_certify.php';<?php }else if($member["mb_id"]){ ?>fnwrite();<?php } ?> ">
 		<div class="write_btn">
-            <?php if($set_type == 1 || $set_type == ""){?>
+            <?php if($set_type == 1){?>
             <img src="<?php echo G5_IMG_URL?>/ic_write_btn.svg" alt="">
             <?php }else{ ?>
             <img src="<?php echo G5_IMG_URL?>/ic_write_btn_2.svg" alt="">
             <?php }?>
         </div>
-		<div class="text" <?php if($set_type==2){?>style="background-color: rgb(255, 61, 0); color: rgb(255, 255, 255);"<?php }?>>
-            <img src="<?php if($set_type == 1 || $set_type==""){echo G5_IMG_URL."/write_text_1.svg"; }else{ echo G5_IMG_URL."/write_text_2.svg";}?>" alt="">
+		<div class="text <?php if($set_type==2 || $set_type ==""){?>bg2<?php }?>" >
+            <img src="<?php if($set_type == 1){echo G5_IMG_URL."/write_text_1.svg"; }else{ echo G5_IMG_URL."/write_text_2.svg";}?>" alt="">
         </div>
 	</div>
 	<section class="main_list">
@@ -530,9 +541,9 @@ while($row = sql_fetch_array($res)){
 								<h2 style="font-weight:normal"><?php echo ($list[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
 								<div>
 									<ul>
-                                        <?php if($_SESSION["list_type"]=="list"){?>
-                                        <li><?php echo $time_gep;?></li>
-                                        <?php }?>
+                                        <?php /*if($_SESSION["list_type"]=="list"){*/?><!--
+                                        <li><?php /*echo $time_gep;*/?></li>
+                                        --><?php /*}*/?>
 										<li>
                                             <img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""><span><?php echo $list[$i]["pd_hits"];?></span>
                                         </li>
@@ -571,7 +582,7 @@ while($row = sql_fetch_array($res)){
 								<h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
                                 <?php }?>
                                 <?php if($wished_cnt["cnt"]>0 && $flag){?>
-                                    <div class="list_wished_cnt active wished"><?php echo $wishedcnt;?></div>
+                                    <div class="list_wished_cnt active wished <?php if($set_type==2 || $set_type ==""){?>bg2<?php }?>"><?php echo $wishedcnt;?></div>
                                 <?php }else{?>
                                     <div class="list_wished_cnt wished"></div>
                                 <?php }?>
@@ -587,7 +598,9 @@ while($row = sql_fetch_array($res)){
 
 					</div>
 				</div>
-				<?php }
+				<?php
+                    $pt2 = "";
+				}
 				if(count($list)==0){?>
                     <div class="no-list">
                         검색된 리스트가 없습니다.
@@ -1038,6 +1051,7 @@ $(document).ready(function(){
 
     //게시글 등록 엔터
     $("#wr_title").keyup(function (e) {
+        alert("A");
         var type2 = $("#wr_type2").val();
         var text = $(this).val();
         /*if(text==""){
@@ -1063,12 +1077,20 @@ $(document).ready(function(){
             if(confirm("검색어는 최대 10개까지 등록가능합니다. \r등록 하시겠습니까?")){
                 if (type2 == 8) {
                     //판매시
-                    <?php if($app){ ?>fnOnCam();
-                    <?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL . "/page/write.php";?>');<?php }?>
+                    <?php if($app){ ?>
+                        alert("A");
+                        fnOnCam();
+                    <?php }else{ ?>
+                        fnWriteStep2('<?php  echo G5_MOBILE_URL . "/page/write.php";?>');
+                    <?php }?>
                 } else {
                     //구매시
-                    <?php if($app){ ?>fnOnCam();
-                    <?php }else{ ?>fnWriteStep2('<?php  echo G5_MOBILE_URL . "/page/write.php";?>');<?php }?>
+                    <?php if($app){ ?>
+                        alert("B");
+                        fnOnCam();
+                    <?php }else{ ?>
+                        fnWriteStep2('<?php  echo G5_MOBILE_URL . "/page/write.php";?>');
+                    <?php }?>
                 }
             }else{
                 return false;
@@ -1093,7 +1115,10 @@ $(document).ready(function(){
 });
 var chklist = false;
 function fnlist(num,list_type){
-
+    var searchs = false;
+    if(list_type != "" && list_type == "searchtrue"){
+        searchs = true
+    }
 	//사고팔고/ /카테코리1/카테고리2/가격시작/가격끝/정렬순서1/정렬순서2/정렬순서3/정렬순서4/정렬순서5
 	var type1,type2,cate1,cate2,stx,priceFrom,priceTo,sorts,app,app2,mb_id,sc_id,align,orderactive,typecompany,price_type,meetFrom,meetTo,meetType;
 
@@ -1125,7 +1150,7 @@ function fnlist(num,list_type){
     cate2 = $("#cate2").val();
     priceFrom = $("#sc_priceFrom").val();
     priceTo = $("#sc_priceTo").val();
-    sorts = $("#order_sort").val();
+    //sorts = $("#order_sort").val();
     mb_id = $("#mb_id").val();
     var searchActive = $("#searchActive").val();
     //if(searchActive != "search") {
@@ -1136,12 +1161,15 @@ function fnlist(num,list_type){
     meetTo = $("#pd_timeTo").val();
     meetType = $("#pd_timetype").val();
 
+    console.log(align+"//"+orderactive);
+
+
     var list_type = $("#set_list_type").val();
     var pd_ids = "<?php echo $saves["pd_ids"];?>";
 	$.ajax({
 		url:g5_url+"/mobile/page/ajax/ajax.index.list.php",
 		method:"POST",
-		data:{page:page,list_type:list_type,stx:stx,app:app,app2:app2,set_type:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sorts:sorts,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo,pd_timeType:meetType,lat:"<?php echo $_SESSION["lat"];?>",lng:"<?php echo $_SESSION["lng"]?>"},
+		data:{page:page,list_type:list_type,stx:stx,app:app,app2:app2,set_type:type1,type2:type2,cate1:cate1,cate2:cate2,priceFrom:priceFrom,priceTo:priceTo,sc_id:sc_id,mb_id:mb_id,order_sort:align,latlng:latlng,pd_ids:pd_ids,mb_level:typecompany,order_sort_active:orderactive,set_search:set_search,pd_price_type:price_type,pd_timeFrom:meetFrom,pd_timeTo:meetTo,pd_timeType:meetType,lat:"<?php echo $_SESSION["lat"];?>",lng:"<?php echo $_SESSION["lng"]?>",searchs:searchs},
 		beforeSend:function(){
             $('.loader').show();
 		},

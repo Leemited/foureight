@@ -25,7 +25,7 @@ while($row = sql_fetch_array($res)){
 </style>
 <!-- 모바일 헤더 시작 -->
 <div id="head">
-	<div class="top_header relative <?php if($_SESSION["type1"]==2){?>bg2<?php }?>" onclick="location.href='<?php echo G5_URL?>';" data-direction="reverse">
+	<div class="top_header relative <?php if($set_type==2 || $set_type==""){?>bg2<?php }?>" onclick="location.href='<?php echo G5_URL?>';" data-direction="reverse">
 		<div class="owl-carousel" id="helps">
 			<?php for($i=0;$i<count($help);$i++){?>
 			<div class="item"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help&wr_id=<?php echo $help[$i]["wr_id"];?>"><?php echo $help[$i]["wr_subject"];?></a></div>

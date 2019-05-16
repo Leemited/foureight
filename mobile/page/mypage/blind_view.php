@@ -41,7 +41,13 @@ include_once (G5_MOBILE_PATH."/head.login.php");
                     $mb = get_member($list[$i]["mb_id"]);
                 ?>
             <li><?php echo ($list[$i]["mb_id"])?preg_replace('/(?<=.{1})./u','*',$mb["mb_nick"]):"정보없음";?> / 사유 : <?php echo $list[$i]["blind_content"];?><span><?php echo $list[$i]["blind_date"];?></span></li>
-            <?php }?>
+            <?php }
+            if(count($list)==0) {
+            ?>
+            <li style="-webkit-border-radius: 2vw;-moz-border-radius: 2vw;border-radius: 2vw;">관리자 권한 처리</li>
+                <?php
+            }
+            ?>
         </ul>
     </div>
     <div class="btn_group" style="display:inline-block;width:100%;">

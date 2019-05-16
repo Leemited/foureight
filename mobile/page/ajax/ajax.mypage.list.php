@@ -17,6 +17,10 @@ if($mb_id){
     $search .= " and p.mb_id = '{$mb_id}'";
 }
 
+if($stx){
+    $search .= " and p.pd_tag like '%{$stx}%'";
+}
+
 $sql = "select *, m.mb_id as mb_id from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where p.pd_status < 10  and p.mb_id = '{$mb_id}' order by p.pd_date desc";
 $res =sql_query($sql);
 

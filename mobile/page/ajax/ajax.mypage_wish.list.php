@@ -3,6 +3,14 @@ include_once("../../../common.php");
 
 $search = " pd_status < 10 ";
 
+if($type1){
+    $where = " and pd_type = '{$type1}'";
+}
+
+if($stx){
+    $where .= " and pd_tag like '%{$stx}%'";
+}
+
 if($mb_id){
     $now = date("Y-m-d");
     $sql = "select * from `wish_product` where mb_id = '{$mb_id}'";
@@ -34,7 +42,7 @@ if(count($my_block)>0){
     $search .= " and mb_id not in ({$block_id}) ";
 }
 
-$sql = "select * from `product` where {$search} order by pd_id desc ";
+$sql = "select * from `product` where {$search} {$where} order by pd_id desc ";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $list[] = $row;

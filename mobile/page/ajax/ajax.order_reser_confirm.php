@@ -25,9 +25,9 @@ if(sql_query($sql)){
     }
 
     //나머지 취소
-    $sql = "update `cart` set c_status = 3 where pd_id = '{$pd_id}' and cid != '{$cid}'";
+    $sql = "update `cart` set c_status = -1 where pd_id = '{$pd_id}' and cid != '{$cid}'";
     sql_query($sql);
-    $sql = "select * from `cart` where pd_id = '{$pd_id}' and cid != '{$cid}'";
+    $sql = "select * from `cart` where pd_id = '{$pd_id}' and c_status = -1";
     $res = sql_query($sql);
     while($row = sql_fetch_array($res)){
         $cancel[] = $row;
@@ -49,6 +49,7 @@ if(sql_query($sql)){
         $sql = "update `product` set pd_status = 1 where pd_id = '{$pd_id}'";
         sql_query($sql);
     }
+    $result["pd_type"]=$pro["pd_type"];
     $result["msg"] = "2";
 }else{
     $result["msg"] = "1";

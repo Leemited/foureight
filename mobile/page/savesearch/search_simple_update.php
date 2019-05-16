@@ -23,9 +23,9 @@ if(!$mb_id){
 if($set_type!=2){
     $pd_price_type = '';
 }
-
-$con = number_format($priceFrom) . "원 에서 ".number_format($priceTo)."원 사이선에서 구매 원합니다.";
-
+if($priceFrom && $priceTo) {
+    $con = number_format($priceFrom) . "원 에서 " . number_format($priceTo) . "원 사이선에서 구매 원합니다.";
+}
 if(!$pd_id || $pd_id == ""){
 
     //등록

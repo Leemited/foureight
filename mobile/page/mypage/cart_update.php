@@ -11,6 +11,15 @@ $cart_ids = explode(",", $_REQUEST["cart_ids"]);
 $prices = explode(",", $_REQUEST["prices"]);
 
 if($type=="insert") {
+    //물건일경우 승인상태 확인
+    $sql = "select c.*,p.*,c.pd_id as pd_id from `cart` as c left join `product` as p on c.pd_id = p.pd_id where c.cid in ({$_REQUEST['cart_ids']}) and p.pd_type = 1";
+    $res = sql_query($sql);
+    while($row = sql_fetch_array($res)){
+        if($row["c_status"]==0){
+            alert("승인된지 않은 상품이 있습니다.");
+        }
+    }
+
     $groupid = "od_" . strtotime(date("Ymdhis"));
     $step = 0;
 
@@ -24,8 +33,8 @@ if($type=="insert") {
         $sql = "insert into `order_temp` set cid = '{$cart_ids[$i]}', pd_id = '{$pd_ids[$i]}', mb_id = '{$member["mb_id"]}', pd_price = '{$pro["pd_price"]}',od_price = '{$prices[$i]}', od_status = 0, od_date = now() , od_pd_type = {$pd_type}, od_step=0, group_id = '{$groupid}'";
 
         if (sql_query($sql)) {
-            $sql = "update `cart` set c_status = 2 where cid = {$cart_ids[$i]}";
-            sql_query($sql);
+            //$sql = "update `cart` set c_status = 2 where cid = {$cart_ids[$i]}";
+            //sql_query($sql);
         } else {
             $flag = false;
         }

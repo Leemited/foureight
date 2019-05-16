@@ -1,9 +1,11 @@
 <?php
 include_once ("../../common.php");
 
-if(!$pd_id){
-    alert("신고할 게시물이 없거나 삭제되었습니다.");
-    return false;
+if(!$user) {
+    if (!$pd_id) {
+        alert("신고할 게시물이 없거나 삭제되었습니다.");
+        return false;
+    }
 }
 
 if($member["mb_id"]=="" || !$is_member){
@@ -14,7 +16,7 @@ if($type != "modal") {
     include_once (G5_MOBILE_PATH."/head.login.php");
 }
 ?>
-<div class="sub_head">
+<div class="sub_head" style="background-color: #fff;">
     <div class="sub_back" onclick="<?php if($type!="modal"){?>location.href='<?php echo $backurl;?>'<?php }else{?>blindClose()<?php }?>"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2>신고유형 선택</h2>
 </div>

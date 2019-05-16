@@ -20,7 +20,7 @@ while($row = sql_fetch_array($res)){
 	<h2>휴지통</h2>
     <div class="all_clear" onclick="fnTrashClear();"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash_all.svg" alt=""></div>
 </div>
-<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 30vw);overflow-y:scroll" >
+<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 28vw);overflow-y:scroll" >
 	<!--<p class="trash_info">해당 기간이 지나면 항목이 영구적으로 삭제됩니다. 최대 40일이 소요 될 수 있습니다.</p>-->
 	<section class="wish_list">
 		<article class="post">
@@ -132,7 +132,7 @@ function initpkgd(){
 	$grid = $('.grid').masonry({
 	  itemSelector: 'none', // select none at first
 	  columnWidth: '.grid__item',
-	  gutter: 10,
+	  gutter: 5,
 	  //percentPosition: true,
 	  //stagger: 30,
 	  // nicer reveal transition

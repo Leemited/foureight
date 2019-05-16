@@ -5,6 +5,9 @@ $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
 
 if($set_type){
     $search .= " and p.pd_type = {$set_type}";
+}else{
+    $search .= " and p.pd_type = 2";
+    $set_type=2;
 }
 if($type2){
     $search .= " and p.pd_type2 = {$type2}";
@@ -113,7 +116,7 @@ include_once(G5_MOBILE_PATH."/head.map.php");
 
 ?>
 <style>
-    #map{margin-top: 20vw;height: calc(100vh - 20vw);}
+    #map{margin-top: 17vw;height: calc(100vh - 17vw);}
     #map .wrap{width:26vw;background: #fff;padding: 10px;border-radius: 10px;top:0;left: -16vw;-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);}
     #map .wrap .close{position:absolute;top:1vw;right:1vw;width:4vw;height:4vw;}
     #map .wrap .info{width:100%;font-size: 3vw;word-break: keep-all;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;padding: 3vw 0 0 0;}
@@ -214,14 +217,11 @@ include_once(G5_MOBILE_PATH."/head.map.php");
                                     case "4":
                                         $pt2 = "[삽니다]";
                                         break;
-                                    case "8":
-                                        $pt2 = "[팝니다]";
-                                        break;
                                 }
                             }
                             ?>
                             <div class="top">
-                                <h2><?php echo ($pro[$i]["mb_level"]==4)?"전":"　";?></h2>
+                                <h2><?php echo ($pro[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
                                 <div>
                                     <ul>
                                         <?php if($app && $app2 || $pro[$i]["distance"]){?>

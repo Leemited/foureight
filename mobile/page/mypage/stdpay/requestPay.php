@@ -11,7 +11,8 @@ $timestamp = date('YmdHis');
 // 버전 정보 수정 금지
 $version = "3.1";
 // 가맹점 번호
-$mbrId = "103108";
+//$mbrId = "103108";
+$mbrId = "100011";
 // 결제 금액
 $salesPrice = $od_price;
 // 가맹점 주문번호(가맹점에서 실제 관리하는 주문번호를 사용)
@@ -40,7 +41,6 @@ $CPCODE = "";
 $pd_ids = explode(",",$pd_id);
 for($i=0;$i<count($pd_ids);$i++) {
     $sql = "update `order_temp` set od_status = '1', od_name = '{$od_name}', od_tel = '{$od_tel}', od_zipcode = '{$od_zipcode}', od_addr1 = '{$od_address1}', od_addr2 = '{$od_address2}', od_content = '{$od_content}', od_pay_type = '{$od_type}', od_pay_status = '0', od_date = '', od_pd_type = '{$od_pd_type}', od_step = '{$od_step}',pay_oid='{$oid}' where  group_id = '{$group_id}' and pd_id = '{$pd_ids[$i]}'";
-
     sql_query($sql);
 }
 
@@ -93,15 +93,15 @@ function GenerateString($length)
     </style>
     <title>표준결제창 테스트 페이지</title>
     <!-- 테스트용 -->
-    <!--<script type="text/javascript" src="https://testpg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js"></script>-->
+    <script type="text/javascript" src="https://testpg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js"></script>
     <!-- 운영환경용 -->
-    <script type="text/javascript" src="https://pg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js" ></script>
+    <!--<script type="text/javascript" src="https://pg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js" ></script>-->
 </head>
-<body bgcolor="#FFFFFF" text="#242424" leftmargin=0 topmargin=15 marginwidth=0 marginheight=0 bottommargin=0 rightmargin=0>
+<body bgcolor="#FFFFFF" text="#242424" leftmargin="0" topmargin="15" marginwidth="0" marginheight="0" bottommargin="0" rightmargin="0" onload="C2StdPay.pay()">
 <div style="padding:10px;width:100%;font-size:13px;color: #000000;background-color: #efefef;text-align: center">
     <strong>C`SQUARE 표준결제 결제요청 샘플  </strong>
 </div>
-<table width="650" border="0" cellspacing="0" cellpadding="0" style="padding:10px" align="center">
+<table width="650" border="0" cellspacing="0" cellpadding="0" style="padding:10px;display:none" align="center">
     <tr>
         <td bgcolor="6095BC" align="center" >
             <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF" style="padding:20px">
@@ -116,7 +116,7 @@ function GenerateString($length)
                 </tr>
                 <tr>
                     <td >
-                        <button id="btn_pay" onclick="C2StdPay.pay()" style="padding:10px">결제요청</button>
+                        <!--<button id="btn_pay" onclick="C2StdPay.pay()" style="padding:10px">결제요청</button>-->
                     </td>
                 </tr>
                 <tr>
@@ -137,7 +137,7 @@ function GenerateString($length)
 
                                             <br/><b>server</b> :
                                             [  0 : Test 서버, 1 : Real 서버]
-                                            <br/><input  style="width:100%;" name="server" value="1" >
+                                            <br/><input  style="width:100%;" name="server" value="0" >
 
                                             <br/><b>mbrId</b> :
                                             <br/><input  style="width:100%;" name="mbrId" value="<?php echo $mbrId?>">
@@ -146,7 +146,7 @@ function GenerateString($length)
                                             <br/><input  style="width:100%;" name="mbrName" value="<?php echo $mbrName?>">
 
                                             <br/><b>payKind</b> : 결제수단 [  1 : 카드, 2 : 가상계좌, 3 : 계좌이체, 4 : 휴대폰결제]
-                                            <br/><input  style="width:100%;" name="payKind" value="1" >
+                                            <br/><input  style="width:100%;" name="payKind" value="<?php echo $od_type?>" >
 
                                             <br/><b>buyerName</b> :
                                             <br/><input  style="width:100%;" name="buyerName" value="<?php echo $buyerName?>" >

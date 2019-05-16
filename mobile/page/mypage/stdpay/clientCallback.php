@@ -4,16 +4,18 @@ include_once ("../../../../common.php");
 include_once (G5_MOBILE_PATH."/head.login.php");
 
 if($_REQUEST["rstCode"]=='00') {
+
     $sql = "select * from `order_temp` where pay_oid = '{$_REQUEST["oid"]}'";
     $res = sql_query($sql);
-
     while ($row = sql_fetch_array($res)) {
-        if ($payKind == 2) {
+        /*if ($payKind == 2) {
             $od_pay_status = 2;
             $set = ", vAccountTradeNo = '{$_REQUEST["vAccountTradeNo"]}', vAccount = '{$_REQUEST["vAccount"]}', vAccountBankName = '{$_REQUEST['vAccountBankName']}' , vAccountDate = '{$_REQUEST['vCriticalDate']}'";
         } else {
             $od_pay_status = 1;
-        }
+        }*/
+        
+        //주문상태 업데이트
         $sql = "insert into `order` set 
                       cid='{$row["cid"]}',
                       pd_id='{$row["pd_id"]}',
@@ -28,9 +30,9 @@ if($_REQUEST["rstCode"]=='00') {
                       od_addr2='{$row["od_addr2"]}',
                       od_content='{$row["od_content"]}',
                       od_pay_type='{$row["od_pay_type"]}',
-                      od_pay_status='2', 
+                      od_pay_status='1', 
                       od_date=now(),
-                      od_pd_type='{$row[""]}',
+                      od_pd_type='{$row["od_pd_type"]}',
                       od_step='{$row["od_step"]}',
                       group_id='{$row["group_id"]}',
                       pay_oid = '{$row["pay_oid"]}'
@@ -39,12 +41,46 @@ if($_REQUEST["rstCode"]=='00') {
 
         sql_query($sql);
 
-        $sql = "update `cart` set c_status = 2 where cid = '{$row['cid']}' ";
-        sql_query($sql);
+        $od_id = sql_insert_id();
 
-        $sql = "update `cart` set pd_status =  where cid = '{$row['cid']}' ";
-        sql_query($sql);
+        $sql = "select * from `product` where pd_id = '{$row["pd_id"]}'";
+        $pds = sql_fetch($sql);
+
+        if($row["od_pd_type"]==1) {
+            //물건일 경우 판매 완료 처리
+            $sql = "update `product` set pd_status = 4 where pd_id = '{$row["pd_id"]}'";
+            sql_query($sql);
+
+            //카트 상태 업데이트
+            $sql = "update `cart` set c_status = 10 where cid = '{$row['cid']}' ";
+            sql_query($sql);
+        }else{
+            //카트 상태 업데이트
+            $sql = "update `cart` set c_status = 3 where cid = '{$row['cid']}' ";
+            sql_query($sql);
+            if($pds["pd_price2"]) {
+                //주문 상태 스텝 업
+                $sql = "update `order` set od_step = 1 where od_id = '{$od_id}'";
+                sql_query($sql);
+            }else{
+                //계약완료 상태
+                $sql = "update `order` set od_step = 2 where od_id = '{$od_id}'";
+                sql_query($sql);
+            }
+        }
+        $pd_mb = get_member($pds["mb_id"]);
+        //판매자에게 알림
+        if($pd_mb["regid"]) {
+            $img = "";
+            if($pds["pd_images"]) {
+                $imgs = explode(",",$pds["pd_images"]);
+                $img = G5_DATA_URL."/product/".$imgs[0];
+            }
+            send_FCM($pd_mb["regid"],"48 결제 완료 알림", $pds["pd_tag"]."의 결제가 완료 되었습니다.", G5_MOBILE_URL.'/page/mypage/order_history.php','fcm_buy_channel','구매일림',$pd_mb["mb_id"],$pds['pd_id'],$img);
+        }
     }
+}else{
+    echo "<script>location.replace('".G5_MOBILE_URL."/page/mypage/mypage.php?type=2')</script>";
 }
 // 공통
 $mbrId=$_REQUEST["mbrId"];                                      // 가맹점아이디
@@ -55,15 +91,16 @@ $payKind= $_REQUEST["payKind"];                                 // 결제종류[
 $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
 ?>
 <style>
-    table th{padding:2vw;text-align: center;font-size:1em;background-color: #eee;font-weight:normal}
-    table th{padding:2vw;text-align: left;font-size:1em;background-color:#fff;}
+    table{width:calc(100% - 4vw);padding:2vw;}
+    table th{padding:2vw;text-align: center;font-size:1em;background-color: #fff;font-weight:normal;width:20%}
+    table td{padding:2vw;text-align: left;font-size:1em;background-color:#fff;width:80%}
 </style>
 <div class="sub_head">
     <!--<div class="sub_back" onclick="location.href='<?php /*echo $back_url;*/?>'"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_back.svg" alt=""></div>-->
-    <h2>결제 완료</h2>
+    <h2><?php if($_REQUEST["rstCode"]=='00') {?>결제 완료 정보<?php }else{?>결제 취소 정보<?php }?></h2>
 </div>
-
-<div class="alert_list">
+<?php if($_REQUEST["rstCode"]=='00') { ?>
+<div class="alert_list" >
     <table>
         <colgroup>
             <col width="40%">
@@ -71,19 +108,19 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
         </colgroup>
         <tr>
             <th>결과 메세지</th>
-            <td><?php echo $rstMsg;?></td>
+            <td><?php echo $rstMsg; ?></td>
         </tr>
         <tr>
             <th>가맹점아이디</th>
-            <td><?php echo $mbrId;?></td>
+            <td><?php echo $mbrId; ?></td>
         </tr>
         <tr>
             <th>결제금액</th>
-            <td><?php echo $salesPrice;?></td>
+            <td><?php echo $salesPrice; ?></td>
         </tr>
         <tr>
             <th>주문번호</th>
-            <td><?php echo $oid;?></td>
+            <td><?php echo $oid; ?></td>
         </tr>
     </table>
     <table>
@@ -94,117 +131,119 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
         <tr>
             <th colspan="2">결제정보</th>
         </tr>
-        <?php if($payKind == "1"){
-            $payType= $_REQUEST["payType"];                         // 결제 타입
-            $authType= $_REQUEST["authType"];                       // 인증 타입
-            $cardTradeNo= $_REQUEST["cardTradeNo"];                 // 카드 거래번호
-            $cardApprovDate= $_REQUEST["cardApprovDate"];           // 카드 승인일
-            $cardApprovTime= $_REQUEST["cardApprovTime"];           // 카드 승인시각
-            $cardName= $_REQUEST["cardName"];                       // 카드명
-            $cardCode= $_REQUEST["cardCode"];                       // 카드코드
-            $installNo= $_REQUEST["installNo"];                     // 할부개월
-        ?>
-        <tr>
-            <th>결제 타입</th>
-            <td><?php echo $payType;?></td>
-        </tr>
-        <tr>
-            <th>카드 거래번호</th>
-            <td><?php echo $cardTradeNo;?></td>
-        </tr>
-        <tr>
-            <th>카드 승인일</th>
-            <td><?php echo $cardApprovDate;?></td>
-        </tr>
-        <tr>
-            <th>카드 승인시각</th>
-            <td><?php echo $cardApprovTime;?></td>
-        </tr>
-        <tr>
-            <th>카드명</th>
-            <td><?php echo $cardName;?></td>
-        </tr>
-        <tr>
-            <th>카드코드</th>
-            <td><?php echo $cardCode;?></td>
-        </tr>
-        <tr>
-            <th>할부개월</th>
-            <td><?php echo $installNo;?></td>
-        </tr>
-        <?php }else if($payKind == "2"){
-                $vAccountTradeNo= $_REQUEST["vAccountTradeNo"];         // 가상계좌 거래번호
-                $vAccount= $_REQUEST["vAccount"];                       // 가상계좌번호
-                $vCriticalDate= $_REQUEST["vCriticalDate"];             // 입금마감일
-                $vAccountBankName= $_REQUEST["vAccountBankName"];       // 거래은행명
-                $vAccountBankCode= $_REQUEST["vAccountBankCode"];       // 거래은행코드
-        ?>
+        <?php if ($payKind == "1") {
+            $payType = $_REQUEST["payType"];                         // 결제 타입
+            $authType = $_REQUEST["authType"];                       // 인증 타입
+            $cardTradeNo = $_REQUEST["cardTradeNo"];                 // 카드 거래번호
+            $cardApprovDate = $_REQUEST["cardApprovDate"];           // 카드 승인일
+            $cardApprovTime = $_REQUEST["cardApprovTime"];           // 카드 승인시각
+            $cardName = $_REQUEST["cardName"];                       // 카드명
+            $cardCode = $_REQUEST["cardCode"];                       // 카드코드
+            $installNo = $_REQUEST["installNo"];                     // 할부개월
+            ?>
+            <tr>
+                <th>결제 타입</th>
+                <td><?php echo $payType; ?></td>
+            </tr>
+            <tr>
+                <th>카드 거래번호</th>
+                <td><?php echo $cardTradeNo; ?></td>
+            </tr>
+            <tr>
+                <th>카드 승인일</th>
+                <td><?php echo $cardApprovDate; ?></td>
+            </tr>
+            <tr>
+                <th>카드 승인시각</th>
+                <td><?php echo $cardApprovTime; ?></td>
+            </tr>
+            <tr>
+                <th>카드명</th>
+                <td><?php echo $cardName; ?></td>
+            </tr>
+            <tr>
+                <th>카드코드</th>
+                <td><?php echo $cardCode; ?></td>
+            </tr>
+            <tr>
+                <th>할부개월</th>
+                <td><?php echo $installNo; ?></td>
+            </tr>
+        <?php } else if ($payKind == "2") {
+            $vAccountTradeNo = $_REQUEST["vAccountTradeNo"];         // 가상계좌 거래번호
+            $vAccount = $_REQUEST["vAccount"];                       // 가상계좌번호
+            $vCriticalDate = $_REQUEST["vCriticalDate"];             // 입금마감일
+            $vAccountBankName = $_REQUEST["vAccountBankName"];       // 거래은행명
+            $vAccountBankCode = $_REQUEST["vAccountBankCode"];       // 거래은행코드
+            ?>
             <tr>
                 <th>가상계좌 거래번호</th>
-                <td><?php echo $vAccountTradeNo;?></td>
+                <td><?php echo $vAccountTradeNo; ?></td>
             </tr>
             <tr>
                 <th>가상계좌번호</th>
-                <td><?php echo $vAccount;?></td>
+                <td><?php echo $vAccount; ?></td>
             </tr>
             <tr>
                 <th>입금마감일</th>
-                <td><?php echo $vCriticalDate;?></td>
+                <td><?php echo $vCriticalDate; ?></td>
             </tr>
             <tr>
                 <th>거래은행명</th>
-                <td><?php echo $vAccountBankName;?></td>
+                <td><?php echo $vAccountBankName; ?></td>
             </tr>
-        <?php }else if($payKind == "3"){
-                $accountTradeNo= $_REQUEST["accountTradeNo"];           // 계좌이체 거래번호
-                $accountApprov= $_REQUEST["accountApprov"];             // 계좌이체 승인번호
-                $accountApprovDate= $_REQUEST["accountApprovDate"];     // 계좌이체 승인일
-                $accountApprovTime= $_REQUEST["accountApprovTime"];     // 계좌이체 승인시각
-                $accountBankName= $_REQUEST["accountBankName"];         // 거래은행명
-                $accountBankCode= $_REQUEST["accountBankCode"];         // 거래은행코드
+        <?php } else if ($payKind == "3") {
+            $accountTradeNo = $_REQUEST["accountTradeNo"];           // 계좌이체 거래번호
+            $accountApprov = $_REQUEST["accountApprov"];             // 계좌이체 승인번호
+            $accountApprovDate = $_REQUEST["accountApprovDate"];     // 계좌이체 승인일
+            $accountApprovTime = $_REQUEST["accountApprovTime"];     // 계좌이체 승인시각
+            $accountBankName = $_REQUEST["accountBankName"];         // 거래은행명
+            $accountBankCode = $_REQUEST["accountBankCode"];         // 거래은행코드
             ?>
             <tr>
                 <th>계좌이체 거래번호</th>
-                <td><?php echo $accountTradeNo;?></td>
+                <td><?php echo $accountTradeNo; ?></td>
             </tr>
             <tr>
                 <th>계좌이체 승인번호</th>
-                <td><?php echo $accountApprov;?></td>
+                <td><?php echo $accountApprov; ?></td>
             </tr>
             <tr>
                 <th>계좌이체 승인일</th>
-                <td><?php echo $accountApprovDate;?></td>
+                <td><?php echo $accountApprovDate; ?></td>
             </tr>
             <tr>
                 <th>계좌이체 승인시각</th>
-                <td><?php echo $accountApprovTime;?></td>
+                <td><?php echo $accountApprovTime; ?></td>
             </tr>
             <tr>
                 <th>거래은행명</th>
-                <td><?php echo $accountBankName;?></td>
+                <td><?php echo $accountBankName; ?></td>
             </tr>
-        <?php }else if($payKind == "4"){
-                $mobileTradeNo= $_REQUEST["mobileTradeNo"];             // 휴대폰 거래번호
-                $mobileApprovDate= $_REQUEST["mobileApprovDate"];       // 휴대폰 승인일
-                $mobileApprovTime= $_REQUEST["mobileApprovTime"];       // 휴대폰 승인시각
-                $BILLTYPE= $_REQUEST["BILLTYPE"];                       // 월자동결제 여부
+        <?php } else if ($payKind == "4") {
+            $mobileTradeNo = $_REQUEST["mobileTradeNo"];             // 휴대폰 거래번호
+            $mobileApprovDate = $_REQUEST["mobileApprovDate"];       // 휴대폰 승인일
+            $mobileApprovTime = $_REQUEST["mobileApprovTime"];       // 휴대폰 승인시각
+            $BILLTYPE = $_REQUEST["BILLTYPE"];                       // 월자동결제 여부
 
-        ?>
+            ?>
             <tr>
                 <th>휴대폰 거래번호</th>
-                <td><?php echo $mobileTradeNo;?></td>
+                <td><?php echo $mobileTradeNo; ?></td>
             </tr>
             <tr>
                 <th>휴대폰 승인일</th>
-                <td><?php echo $mobileApprovDate;?></td>
+                <td><?php echo $mobileApprovDate; ?></td>
             </tr>
             <tr>
                 <th>휴대폰 승인시각</th>
-                <td><?php echo $mobileApprovTime;?></td>
+                <td><?php echo $mobileApprovTime; ?></td>
             </tr>
-        <?php }?>
+        <?php } ?>
     </table>
-<?php
+<?php }else{?>
+
+<?php }
 	//echo("<pre>");
 	/*echo("<table width='565' style='width:100%;' align = 'center' border='0' cellspacing='0' cellpadding='0' bgcolor='#FFFFFF'>");
 	echo "<colgroup><col width='30%'><col width='*'></colgroup>";
@@ -341,7 +380,8 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
 
 
     <div class="btns" style="width:100%;padding:6vw 0;background-color:#fff;text-align: center;position: absolute;bottom:0;left:0;">
-        <input type="button" value="결제 확인" class="input_btn" onclick="location.reload();" style="width:50%;background-color:#595959;color:#fff;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;font-size:3.5vw;padding:2.2vw 0;border:none;font-family: 'nsr', sans-serif;">
+        <!--<input type="button" value="결제 확인" class="input_btn" onclick="location.reload();" style="width:50%;background-color:#595959;color:#fff;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;font-size:3.5vw;padding:2.2vw 0;border:none;font-family: 'nsr', sans-serif;">-->
+        <input type="button" value="결제 확인" class="input_btn" onclick="location.href=g5_url+'/mobile/page/mypage/order_view.php?od_id=<?php echo $od_id;?>'" style="width:50%;background-color:#595959;color:#fff;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;font-size:3.5vw;padding:2.2vw 0;border:none;font-family: 'nsr', sans-serif;">
     </div>
 </div>
 <?php

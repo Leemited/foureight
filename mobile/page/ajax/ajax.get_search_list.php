@@ -26,8 +26,7 @@ if(count($result["popular"])==0){
     $result['popular'] = null;
 }
 //최근검색어
-$sql = "select * from g5_popular where mb_id = '{$mebmer["mb_id"]}' order by pp_date desc limit 0, 10";
-$result["other"] = $sql;
+$sql = "select * from g5_popular where mb_id = '{$member["mb_id"]}' order by pp_date desc limit 0, 10";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $result["recent"][] = $row;

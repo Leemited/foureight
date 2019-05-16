@@ -44,54 +44,37 @@ if($comment_re != "1") {
         }
         ?>
         <li class="<?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} } ?>" id="cmt<?php echo $cm[cm_id];?>">
-            <!--<div class="profile" <?php /*if($cm["member_id"] != $mb_id){ echo "onclick=fnRecom('".$cm["cm_id"]."','".$mb_id."','".$member["mb_name"]."','".$cm["comment_status"]."')";} */?> >
-                <?php /*if($pd_mb_id!=$mb_id){
-                    if($cm["comment_status"]=="3"  || $secret == "3"){ */?>
-                    <img src="<?php /*echo G5_IMG_URL*/?>/profile_lock.svg" alt="" id="profile">
-                <?php /*}else if($cm["mb_profile"]){*/?>
-                    <img src="<?php /*echo $cm["mb_profile"];*/?>" alt="" id="profile">
-                <?php /*}else if($cm["mb_profile"] ==""){ */?>
-                    <img src="<?php /*echo G5_IMG_URL*/?>/no-profile.svg" alt="">
-                <?php /*}
-                }else {
-                    if ($cm["mb_profile"]) { */?>
-                    <img src="<?php /*echo $cm["mb_profile"]; */?>" alt="" id="profile">
-                <?php /*} else if ($cm["mb_profile"] == "") { */?>
-                    <img src="<?php /*echo G5_IMG_URL */?>/no-profile.svg" alt="">
-                <?php /*}
-                }*/?>
-            </div>-->
             <div class="coms">
                 <?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3"  || $secret == "3" ){?>
                     <p>비공개 / <?php echo $cm["comment_datetime"];?></p>
                     <h2 class="loctitle">비공개</h2>
                     <ul><li>비공개</li></ul>
                 <?php }else{ ?>
-                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
-                    <h2><?php echo $cm["comment_content"];?></h2>
+                    <p><?php echo $cm["mb_nick"];?> <span>/ <?php echo display_datetime($cm["comment_datetime"]);?></span></p>
+                    <h2><?php echo nl2br($cm["comment_content"]);?></h2>
                     <ul>
-                        <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
-                        <?php if($cm["comment_re"]== 0){?>
-                            <li>댓글 <span><?php echo number_format($cm["re_comment_cnt"]);?></span></li>
-                        <?php }?>
-                        <?php if($cm["mb_id"]!=$mb_id){?>
-                            <li onclick="fnLike('no','<?php echo $cm["cm_id"];?>')">반대 <span class="unlike<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["unlike"]);?></span></li>
-                            <li onclick="fnLike('yes','<?php echo $cm["cm_id"];?>')">추천 <span class="like<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["like"]);?></span></li>
-                        <?php }  ?>
+                        <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $pd_mb_id;*/?>','<?php /*echo $cm["cm_id"];*/?>');">신고</li>
+                        <?php /*if($cm["comment_re"]== 0){*/?>
+                            <li>댓글 <span><?php /*echo number_format($cm["re_comment_cnt"]);*/?></span></li>
+                        <?php /*}*/?>
+                        <?php /*if($cm["mb_id"]!=$mb_id){*/?>
+                            <li onclick="fnLike('no','<?php /*echo $cm["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["unlike"]);*/?></span></li>
+                            <li onclick="fnLike('yes','<?php /*echo $cm["cm_id"];*/?>')">추천 <span class="like<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["like"]);*/?></span></li>
+                        --><?php /*}  */?>
                     </ul>
                 <?php }
                 }else{ ?>
-                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
-                    <h2><?php echo $cm["comment_content"];?></h2>
+                    <p><?php echo $cm["mb_nick"];?> <span>/ <?php echo display_datetime($cm["comment_datetime"]);?></span></p>
+                    <h2><?php echo nl2br($cm["comment_content"]);?></h2>
                     <ul>
-                        <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
-                        <?php if($cm["comment_re"]== 0){?>
-                            <li>댓글 <span><?php echo number_format($cm["re_comment_cnt"]);?></span></li>
-                        <?php }?>
-                        <?php if($cm["mb_id"]!=$mb_id){?>
-                            <li onclick="fnLike('no','<?php echo $cm["cm_id"];?>')">반대 <span class="unlike<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["unlike"]);?></span></li>
-                            <li onclick="fnLike('yes','<?php echo $cm["cm_id"];?>')">추천 <span class="like<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["like"]);?></span></li>
-                        <?php }?>
+                        <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $pd_mb_id;*/?>','<?php /*echo $cm["cm_id"];*/?>');">신고</li>
+                        <?php /*if($cm["comment_re"]== 0){*/?>
+                            <li>댓글 <span><?php /*echo number_format($cm["re_comment_cnt"]);*/?></span></li>
+                        <?php /*}*/?>
+                        <?php /*if($cm["mb_id"]!=$mb_id){*/?>
+                            <li onclick="fnLike('no','<?php /*echo $cm["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["unlike"]);*/?></span></li>
+                            <li onclick="fnLike('yes','<?php /*echo $cm["cm_id"];*/?>')">추천 <span class="like<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["like"]);*/?></span></li>
+                        --><?php /*}*/?>
                     </ul>
                 <?php }?>
             </div>
@@ -128,34 +111,34 @@ if($comment_re != "1") {
             </div>-->
             <div class="coms">
                 <?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id ){if($cm["comment_status"]=="3"  || $secret == "3" ){?>
-                    <p>비공개 / <?php echo $cm["comment_datetime"];?></p>
+                    <p>비공개 <span>/ <?php echo display_datetime($cm["comment_datetime"]);?></span></p>
                     <h2 class="loctitle">비공개</h2>
                     <ul><li>비공개</li></ul>
                 <?php }else{ ?>
-                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
-                    <h2><?php echo $cm["comment_content"];?></h2>
+                    <p><?php echo $cm["mb_nick"];?> <span>/ <?php echo $cm["comment_datetime"];?></span></p>
+                    <h2><?php echo nl2br($cm["comment_content"]);?></h2>
                     <ul>
-                        <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
-                        <?php if($cm["comment_re"]== 0){?>
-                            <li>댓글 <span><?php echo number_format($cm["re_comment_cnt"]);?></span></li>
-                        <?php }?>
-                        <?php if($cm["mb_id"]!=$mb_id){?>
-                            <li onclick="fnLike('no','<?php echo $cm["cm_id"];?>')">반대 <span class="unlike<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["unlike"]);?></span></li>
-                            <li onclick="fnLike('yes','<?php echo $cm["cm_id"];?>')">추천 <span class="like<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["like"]);?></span></li>
-                        <?php }  ?>
+                        <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $pd_mb_id;*/?>','<?php /*echo $cm["cm_id"];*/?>');">신고</li>
+                        <?php /*if($cm["comment_re"]== 0){*/?>
+                            <li>댓글 <span><?php /*echo number_format($cm["re_comment_cnt"]);*/?></span></li>
+                        <?php /*}*/?>
+                        <?php /*if($cm["mb_id"]!=$mb_id){*/?>
+                            <li onclick="fnLike('no','<?php /*echo $cm["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["unlike"]);*/?></span></li>
+                            <li onclick="fnLike('yes','<?php /*echo $cm["cm_id"];*/?>')">추천 <span class="like<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["like"]);*/?></span></li>
+                        --><?php /*}  */?>
                     </ul>
                 <?php }}else{ ?>
-                    <p><?php echo $cm["mb_nick"];?> / <?php echo $cm["comment_datetime"];?></p>
-                    <h2><?php echo $cm["comment_content"];?></h2>
+                    <p><?php echo $cm["mb_nick"];?> <span>/ <?php echo display_datetime($cm["comment_datetime"]);?></span></p>
+                    <h2><?php echo nl2br($cm["comment_content"]);?></h2>
                     <ul>
-                        <li><img src="<?php echo G5_IMG_URL?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php echo $pd_mb_id;?>','<?php echo $cm["cm_id"];?>');">신고</li>
-                        <?php if($cm["comment_re"]== 0){?>
-                            <li>댓글 <span><?php echo number_format($cm["re_comment_cnt"]);?></span></li>
-                        <?php }?>
-                        <?php if($cm["mb_id"]!=$mb_id){?>
-                            <li onclick="fnLike('no','<?php echo $cm["cm_id"];?>')">반대 <span class="unlike<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["unlike"]);?></span></li>
-                            <li onclick="fnLike('yes','<?php echo $cm["cm_id"];?>')">추천 <span class="like<?php echo $cm["cm_id"];?>"><?php echo number_format($cm["like"]);?></span></li>
-                        <?php }?>
+                        <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $pd_mb_id;*/?>','<?php /*echo $cm["cm_id"];*/?>');">신고</li>
+                        <?php /*if($cm["comment_re"]== 0){*/?>
+                            <li>댓글 <span><?php /*echo number_format($cm["re_comment_cnt"]);*/?></span></li>
+                        <?php /*}*/?>
+                        <?php /*if($cm["mb_id"]!=$mb_id){*/?>
+                            <li onclick="fnLike('no','<?php /*echo $cm["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["unlike"]);*/?></span></li>
+                            <li onclick="fnLike('yes','<?php /*echo $cm["cm_id"];*/?>')">추천 <span class="like<?php /*echo $cm["cm_id"];*/?>"><?php /*echo number_format($cm["like"]);*/?></span></li>
+                        --><?php /*}*/?>
                     </ul>
                 <?php }?>
             </div>

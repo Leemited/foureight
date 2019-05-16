@@ -748,3 +748,288 @@ $(function() {
         return true;
     });
 });
+
+function removeDebug(){
+    $("#debug").removeClass("active");
+    $(".trash-ani").removeClass("active");
+    $(".trash-ani2").removeClass("active");
+    $(".trash-icon").removeClass("active");
+    $("#mobile_header #mobile_menu_btn").removeClass("active");
+}
+
+
+function fn_viewer(id){
+
+    if(id==""){
+        alert("잘못된 요청입니다.");
+        return false;
+    }
+    if($("#list_"+id).hasClass("blinds")){
+        return false;
+    }
+
+    var width = $("#dWidth").val();
+    var height = $("#dHeight").val();
+    var url = g5_url+"/mobile/page/view.php";
+    window.oriScroll = $(document).scrollTop();
+    $.ajax({
+        url : url,
+        method:"POST",
+        data:{pd_id:id,dWidth:width,dHeight:height}
+    }).done(function(data){
+        //console.log(data);
+        location.hash = "#view";
+        $("#id0s div.con").html('');
+        $("#id0s div.con").append(data);
+        $("#id0s").css("display","block");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+    });
+    //location.href=g5_url+"/mobile/page/view.php?pd_id="+id+"&dWidth="+width+"&dHeight="+height;
+}
+
+function fn_viewer2(id){
+    modalCloseThis();
+    if(id==""){
+        alert("잘못된 요청입니다.");
+        return false;
+    }
+    if($("#list_"+id).hasClass("blinds")){
+        return false;
+    }
+
+    var width = $("#dWidth").val();
+    var height = $("#dHeight").val();
+    var url = g5_url+"/mobile/page/view.php";
+    window.oriScroll = $(document).scrollTop();
+    $.ajax({
+        url : url,
+        method:"POST",
+        data:{pd_id:id,dWidth:width,dHeight:height}
+    }).done(function(data){
+        location.hash = "#view";
+        $("#id0s div.con").html('');
+        $("#id0s div.con").append(data);
+        $("#id0s").css("display","block");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+    });
+    //location.href=g5_url+"/mobile/page/view.php?pd_id="+id+"&dWidth="+width+"&dHeight="+height;
+}
+
+
+function fnStatus(pd_id,status,pd_type){
+    $("#up_pd_id").val(pd_id);
+    if(pd_type=="2"){
+        $("#status_buy").css("display","none");
+    }
+    switch (status){
+        case "0":
+            $("#status1").addClass("active");
+            $("#status2").removeClass("active");
+            $("#status3").removeClass("active");
+            $("#status4").removeClass("active");
+            break;
+        case "1":
+            $("#status1").removeClass("active");
+            $("#status2").addClass("active");
+            $("#status3").removeClass("active");
+            $("#status4").removeClass("active");
+            break;
+        case "2":
+            $("#status1").removeClass("active");
+            $("#status2").removeClass("active");
+            $("#status3").addClass("active");
+            $("#status4").removeClass("active");
+            break;
+        case "3":
+            $("#status1").removeClass("active");
+            $("#status2").removeClass("active");
+            $("#status3").removeClass("active");
+            $("#status4").addClass("active");
+            break;
+    }
+
+    $("#id03").css({"display":"block","z-index":"9999999"});
+    $("#id03 .w3-modal-content").css({"height":"62vw","margin-top":"-32vw"});
+    $("html, body").css("overflow","hidden");
+    $("html, body").css("height","100vh");
+    location.hash="#modal";
+}
+
+function fnStatusUpdate(){
+    var status = $("#id03 ul.modal_sel li.active").text();
+    var pd_id = $("#up_pd_id").val();
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.product_status_update.php",
+        method:"POST",
+        data:{status:status,pd_id:pd_id}
+    }).done(function(data){
+        if(data=="3"){
+            alert("해당 물품은 거래중인 상품으로 상태 변경할 수 없습니다.");
+            modalClose();
+        }else if(data=="4"){
+            alert("해당 물품은 판매완료된 상품으로 판매완료 상태이외는 변경할 수 없습니다.");
+            modalClose();
+        }else if(data=="1"){
+            alert("상태변경이 완료 되었습니다.");
+            modalClose();
+        }else{
+            alert("상태변경 오류 입니다. 다시 시도해 주세요.");
+            modalClose();
+        }
+    });
+}
+
+function fnCardSel(cardinfo){
+    var cardinfo = cardinfo.split("|");
+    var expd = cardinfo[1];
+    var cardnum = cardinfo[2].split("-");
+    $("#od_card_num").val(cardnum);
+    $("#od_expd").val(expd);
+    $("#card_name").val(cardinfo[0]);
+    $("#card_year").val(expd.substr(0,2));
+    $("#card_month").val(expd.substr(2,4));
+    $("#card_month").val();
+}
+
+function fnCardOrder(){
+
+}
+
+
+
+function fnBlindView(pd_id){
+
+    //window.oriScroll = $(document).scrollTop();
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.blind_view.php",
+        method:"POST",
+        data:{pd_id:pd_id}
+    }).done(function(data){
+        console.log(data);
+        if($("#id06").css("display")=="none"){
+            $("#blind_view_btn").attr("onclick","location.href='"+g5_url+"/mobile/page/mypage/blind_view.php?pd_id="+pd_id+"'");
+            $("#admin_qa").attr("onclick","fnAdminWrite('"+pd_id+"')");
+            $("#id06").css("display","block");
+            $("html, body").css("overflow","hidden");
+            $("html, body").css("height","100vh");
+            location.hash = "#modal";
+        }
+        $("#id06 .con p").html(data);
+    });
+}
+
+
+function fnOrderConfirm(cid,pd_id){
+    if(confirm("구매 승인시 해당 물품은 거래중으로 변경되며,\n동일 제품의 구매요청은 삭제 됩니다.")) {
+        $.ajax({
+            url: g5_url + "/mobile/page/ajax/ajax.order_reser_confirm.php",
+            mothod: "POST",
+            dataType: "json",
+            data: {cid: cid, pd_id: pd_id}
+        }).done(function (data) {
+            console.log(data);
+            if (data.msg == "1") {
+                alert("해당 구매요청을 찾을 수 없습니다.");
+            }
+            if (data.msg == "3") {
+                alert("처리 오류입니다.\r다시 시도해 주세요.");
+            }
+            if (data.msg == "2") {
+                console.log("A");
+                $("#item_" + cid + " .controls").remove();
+                $(".pd_id_"+pd_id).remove();
+                for (var i = 0; i < data.cid.length; i++) {
+                    $("#item_" + data.cid[i]).remove();
+                }
+                if(data.pd_type==1) {//물건
+                    $("#item_" + cid).prepend('<div class="ordering"><span>결제대기중</span></div>');
+                    $(".orders_pd_id_" + pd_id).remove();
+                }else{//능력
+
+                }
+
+            }
+        });
+    }
+}
+
+function fnShow2(mb_id,pd_id,roomid){
+    // 연락자 정보 가져오기
+    $.ajax({
+        url:g5_url+"/mobile/page/ajax/ajax.get_member2.php",
+        method:"post",
+        data:{mb_id:mb_id,pd_id:pd_id,roomid:roomid},
+        dataType:"json"
+    }).done(function(data){
+        $("#id08 .contacts ul").html('');
+        $("#id08 .contacts ul").append(data.obj);
+        //$("#mb_"+id).toggleClass("active");
+        $("#id08").css({"display":"block","z-index":"9002"});
+        $("#id08").css("display","block");
+        location.hash = "#modal";
+    });
+
+}
+function fnOrderCancel(cid){
+    var type = 1;
+    if($(".sub_ul li.active").attr("id") == "avil"){
+        type = 2;
+    }
+    if(confirm("해당 유저의 요청을 취소 하시겠습니까?")){
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.order_reser_cancel.php",
+            method:"POST",
+            data:{cid:cid}
+        }).done(function(data){
+            console.log(data);
+            if(data=="1"){
+                alert("해당 구매요청을 찾을 수 없습니다.");
+            }
+            if(data == "3"){
+                alert("처리 오류입니다.\r다시 시도해 주세요.");
+            }
+            if(data == "2"){
+                $("#item_"+cid).remove();
+                if(type == 1 ){
+                    var count = $("#mul label").text();
+                    count = count.replace(",","");
+                    count = Number(count) - 1;
+                    count = count.numberFormat();
+                    $("#mul label").html(count);
+                    var topcount = $(".order_tab span").text();
+                    topcount = topcount.replace(",","");
+                    topcount = Number(topcount) -1;
+                    topcount = topcount.numberFormat();
+                    $(".order_tab span").html(topcount);
+                }else{
+                    var count = $("#avil label").text();
+                    count = count.replace(",","");
+                    count = Number(count) - 1;
+                    count = count.numberFormat();
+                    $("#avil label").html(count);
+                    var topcount = $(".order_tab span").text();
+                    topcount = topcount.replace(",","");
+                    topcount = Number(topcount) -1;
+                    topcount = topcount.numberFormat();
+                    $(".order_tab span").html(topcount);
+                }
+            }
+        });
+    }else{
+        return false;
+    }
+}
+
+// 숫자 타입에서 쓸 수 있도록 format() 함수 추가
+Number.prototype.numberFormat = function(){
+    if(this==0) return 0;
+
+    var reg = /(^[+-]?\d+)(\d{3})/;
+    var n = (this + '');
+
+    while (reg.test(n)) n = n.replace(reg, '$1' + ',' + '$2');
+
+    return n;
+};

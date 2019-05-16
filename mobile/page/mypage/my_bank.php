@@ -37,7 +37,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
                 <ul>
                     <li>계좌명<span><?php echo $basic["account_name"];?></span></li>
                     <li>은행명 <span><?php echo $basic["bank_name"];?></span></li>
-                    <li>계좌번호 <span><?php echo $basic["bank_number"];?></span></li>
+                    <li>계좌번호 <span><?php echo base64_decode($basic["bank_number"]);?></span></li>
                 </ul>
             </div>
         <?php }?>

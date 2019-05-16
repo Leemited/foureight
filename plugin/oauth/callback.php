@@ -145,7 +145,11 @@ if($g5['social_member_table']) {
                 echo "<script>".PHP_EOL;
                 echo "location.href='http://mave01.cafe24.com/'".PHP_EOL;
                 echo "</script>".PHP_EOL;
-            }else {
+            }else if(strpos($_SERVER["HTTP_USER_AGENT"],"foureight")!==false){
+                echo "<script>".PHP_EOL;
+                echo "location.href='http://mave01.cafe24.com/'".PHP_EOL;
+                echo "</script>".PHP_EOL;
+            }else{
                 // 정보수정에서 연동일 때 처리
                 echo '<script>' . PHP_EOL;
                 echo 'var $opener = window.opener;' . PHP_EOL;

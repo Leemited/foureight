@@ -147,16 +147,15 @@ header .left .lnb{position:relative;top:0;z-index:2}
 
 .model_list {width:100%;position:relative;}
 .model_list table{width:100%}
-.model_list table tr{border-bottom:1px solid #e5e5e5;background-color:#fff;border-left:5px solid #ddd;}
+.model_list table tr{border-bottom:1px solid #e5e5e5;background-color:#fff;}
 .model_list table tr:first-child{border-left:none;}
 .model_list table tr.sec{background-color:#eee}
 .model_list table tr.qa_blind{border-left:5px solid red;}
 .model_list table tr.qa_price{border-left:5px solid dodgerblue;}
 .model_list table th{padding:18px;font-size:18px;border-top:2px solid #6e6e6e;border-right:1px solid #e5e5e5}
 .model_list table th:last-child{border-right:none;}
-.model_list table th.link{cursor: pointer;
-	background-image: url("../img/ic_menu_btn.svg"); background-size: 15px auto;background-position: calc(100% - 20px) center;background-repeat: no-repeat; }
-.model_list table td{border-right:1px solid #e5e5e5;font-size:16px;padding:14px;text-align:center;cursor:pointer;}
+.model_list table th.link{cursor: pointer;background-image: url("../img/ic_menu_btn.svg"); background-size: 15px auto;background-position: calc(100% - 20px) center;background-repeat: no-repeat; }
+.model_list table td{border-right:1px solid #e5e5e5;font-size:16px;padding:14px;text-align:center;}
 .model_list table td:first-child{border-left:none}
 .model_list table td:last-child{border-right:none}
 .model_list table td.img img:first-child{margin-right:20px}
@@ -189,6 +188,8 @@ header .left .lnb{position:relative;top:0;z-index:2}
 .model_list table.view_tb th{background-color:#eee;border-top:1px solid #ddd}
 .model_list table.view_tb td{cursor:auto}
 .model_list table.view_tb tr:first-child{border-top:3px solid #333;}
+
+.model_list h2{font-size:26px;font-family:"nsr",Sans-serif;}
 
 .write_input01{padding:10px;font-size:16px;border:1px solid #ddd;color:#000}
 .write_input02{padding:10px;font-size:16px;border:1px solid #ddd;color:#000}
@@ -286,7 +287,7 @@ header .left .lnb{position:relative;top:0;z-index:2}
 
 .adm_btn01{padding:5px 10px;background-color:#000;border-radius:3px;color:#FFF !important;}
 .adm_btn01.delete{background-color:#e21c24;color:#FFF}
-.mb_btn{;border: 0;position: relative;text-align: center;display: inline-block; vertical-align: middle;font-size:16px;padding:}
+.mb_btn{;border: 0;position: relative;text-align: center;display: inline-block; vertical-align: middle;font-size:16px;}
 
 .adm_btn{border:none;padding:10px 30px;font-size:18px;color:#fff;background-color:#000;}
 

@@ -1,5 +1,10 @@
 <?php
 include_once ("./_common.php");
 
-$sql = "update `category` set cate_status = 1 where ca_id = '{$ca_id}'";
-echo $sql;
+$sql = "update `categorys` set cate_status = '{$status}' where ca_id = '{$ca_id}'";
+
+if(sql_query($sql)){
+    alert("수정되었습니다.");
+}else{
+    alert("잘못된 요청입니다.");
+}

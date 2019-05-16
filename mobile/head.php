@@ -130,6 +130,7 @@ $my_pro2 = sql_fetch($sql);
         <div class="w3-container">
             <input type="hidden" name="like_id" id="like_id" value="">
             <input type="hidden" name="view_pd_type" id="view_pd_type" value="">
+            <input type="hidden" name="pd_mb_id" id="pd_mb_id" value="">
             <h2>평가하기</h2>
             <div class="likes">
                 좋아요 <img src="<?php echo G5_IMG_URL?>/view_like.svg" alt="" class="likeimg" >
@@ -228,7 +229,7 @@ $my_pro2 = sql_fetch($sql);
 <!-- 모바일 헤더 시작 -->
 <div id="head">
 	<!--<div class="top_header <?php /*if($_SESSION["type1"]==2){*/?>bg2<?php /*}*/?>" onclick="location.href='<?php /*echo G5_URL*/?>';" <?php /*if($set_type==2){*/?>style="background-color: rgb(255, 61, 0);"<?php /*}*/?>>-->
-	<div class="top_header" onclick="location.href='<?php echo G5_URL?>';" <?php if($set_type==2){?>style="background-color: rgb(255, 61, 0);"<?php }?>>
+	<div class="top_header <?php if($set_type==2 || $set_type == ""){?>bg2<?php }?>" onclick="location.href='<?php echo G5_URL?>';">
 		<div class="owl-carousel" id="helps">
 			<?php for($i=0;$i<count($help);$i++){?>
 			<div class="item"><a href="<?php echo G5_BBS_URL?>/board.php?bo_table=help&wr_id=<?php echo $help[$i]["wr_id"];?>"><?php echo $help[$i]["wr_subject"];?></a></div>
@@ -254,20 +255,20 @@ $my_pro2 = sql_fetch($sql);
             <img src="<?php echo G5_IMG_URL?>/ic_index_trash2.svg" alt="">
         </div>
         <!--<header id="mobile_header" <?php /*if($_SESSION["type1"]==2){*/?>class="bg2"<?php /*}*/?>>-->
-        <header id="mobile_header" >
+        <header id="mobile_header" <?php if($set_type==2 || $set_type == ""){?>class="bg2"<?php }?> >
             <!-- <h1><a href="<?php echo G5_URL; ?>" title="HOME" class="logos"><i></i></a></h1> -->
             <div class="search">
                 <input type="text" style="display:none;">
                 <input type="hidden" name="formtype" id="formtype" value="">
-                <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 1;}?>">
+                <input type="hidden" name="set_type" id="set_type" value="<?php if($set_type){echo $set_type;}else{echo 2;}?>">
                 <input type="hidden" name="set_type2" id="set_type2" value="<?php if($type2){echo $type2;}?>">
-                <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSimpleSearch();">
+                <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="fnSetting2();">
                 <?php //print_r2($member);?>
                 <input type="text" name="stx" id="stx" value="<?php echo $stx;?>" placeholder="원하는 물건이 있으신가요?" onkeyup="fnKeyword();" />
                 <label class="switch schtype" >
-                    <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2"){?>checked<?php }?> >
-                    <span class="slider round" <?php if($set_type=="2"){?>style="text-align:left"<?php }?>>
-                    <?php if($set_type=="2"){?>능력<?php }else{ ?>물건<?php }?>
+                    <input type="checkbox" id="type1" name="type1" value="1" <?php if($set_type=="2" || $set_type==""){?>checked<?php }?> >
+                    <span class="slider round" <?php if($set_type=="2"  || $set_type==""){?>style="text-align:left"<?php }?>>
+                    <?php if($set_type=="2"  || $set_type==""){?>능력<?php }else{ ?>물건<?php }?>
                 </span>
                 </label>
             </div>
@@ -275,6 +276,9 @@ $my_pro2 = sql_fetch($sql);
             <a href="javascript:fnSetting();" id="mobile_setting_btn" title="SETTING"><i></i></a>
         </header>
         <div class="keyword">
+            <div class="close" onclick="$('.keyword').removeClass('active');">
+                <img src="<?php echo G5_IMG_URL;?>/view_close.svg" alt="">
+            </div>
             <div class="search_re">
                 <span>연관검색어 :</span>
             </div>
@@ -296,7 +300,7 @@ $my_pro2 = sql_fetch($sql);
 
             </div>
         </div>
-        <div class="search_setting">
+        <div class="search_setting <?php if($set_type==2||$set_type==""){?>bg2<?php }?>">
             <input type="hidden" value="<?php echo $searchActive;?>" name="searchActive" id="searchActive" >
             <input type="hidden" value="" name="set_status" id="set_status" >
             <input type="hidden" value="<?php echo $priceFrom?>" id="sc_priceFrom" name="priceFrom">
@@ -306,108 +310,110 @@ $my_pro2 = sql_fetch($sql);
             <input type="hidden" value="<?php echo $cate;?>" name="cate" id="cate">
             <input type="hidden" value="<?php echo $cate2;?>" name="cate2" id="cate2">
             <input type="hidden" value="<?php echo $pd_price_type;?>" name="pd_price_type" id="pd_price_type">
-            <div class="sch_top">
-                <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
-                <a href="javascript:fnsuggestion('1');">제안하기</a>
-            </div>
-            <div class="types sch_mid">
-                <label class="radio_tag" for="four">
-                    <input type="radio" name="type2" id="four" value="8" <?php if($type2=="8" || $type2 == ""){?>checked<?php  }?>>
-                    <span class="slider2 round">팝니다</span>
-                </label>
-                <label class="radio_tag" for="eight">
-                    <input type="radio" name="type2" id="eight" value="4" <?php if($type2=="4"){?>checked<?php } ?>>
-                    <span class="slider2 round">삽니다</span>
-                </label>
-                <label class="radio_tag" for="mb_level">
-                    <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($mb_level=="4"){?>checked<?php } ?>>
-                    <span class="slider2 round">전문가</span>
-                </label>
-            </div>
-            <div class="sch_ord" id="sc_sorts">
-                <?php if(count($order_item)==0){?>
-                    <label class="align" id="sortable" for="pd_loc" >
-                        <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" <?php if($app || $app2){?>checked <?php } ?> >
-                        <span class="round">거리순</span>
+            <div style="background-color:#f4f4f4 ">
+                <div class="sch_top">
+                    <input type="button" value="<?php if($cate && $cate2){echo $cate." > ".$cate2; }else{ ?>카테고리선택<?php }?>" class="sch_btn" onclick="fnwrite2();">
+                    <a href="javascript:fnsuggestion('1');">제안하기</a>
+                </div>
+                <div class="types sch_mid">
+                    <label class="radio_tag" for="four">
+                        <input type="radio" name="type2" id="four" value="8" <?php if($type2=="8" || $type2 == ""){?>checked<?php  }?>>
+                        <span class="slider2 round">팝니다</span>
                     </label>
-                    <label class="align" id="sortable" for="pd_price">
-                        <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked >
-                        <span class="round">가격순</span>
+                    <label class="radio_tag" for="eight">
+                        <input type="radio" name="type2" id="eight" value="4" <?php if($type2=="4"){?>checked<?php } ?>>
+                        <span class="slider2 round">삽니다</span>
                     </label>
-                    <label class="align" id="sortable" for="pd_date">
-                        <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" >
-                        <span class="round">최신순</span>
+                    <label class="radio_tag" for="mb_level">
+                        <input type="checkbox" name="mb_level" id="mb_level" value="4" <?php if($mb_level=="4"){?>checked<?php } ?>>
+                        <span class="slider2 round">전문업체</span>
                     </label>
-                    <label class="align" id="sortable" for="pd_recom">
-                        <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" >
-                        <span class="round">추천순</span>
-                    </label>
-                    <label class="align" id="sortable" for="pd_hits">
-                        <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" >
-                        <span class="round">인기순</span>
-                    </label>
+                </div>
+                <div class="sch_ord" id="sc_sorts">
+                    <?php if(count($order_item)==0){?>
+                        <label class="align first" id="sortable" for="pd_loc" >
+                            <input type="checkbox" name="orders[]" value="pd_loc" id="pd_loc" <?php if($app || $app2){?>checked <?php } ?> >
+                            <span class="round">거리순</span>
+                        </label>
+                        <label class="align" id="sortable" for="pd_price">
+                            <input type="checkbox" name="orders[]" value="pd_price" id="pd_price" checked >
+                            <span class="round">가격순</span>
+                        </label>
+                        <label class="align" id="sortable" for="pd_date" >
+                            <input type="checkbox" name="orders[]" value="pd_date" id="pd_date" >
+                            <span class="round">최신순</span>
+                        </label>
+                        <label class="align" id="sortable" for="pd_recom" >
+                            <input type="checkbox" name="orders[]" value="pd_recom" id="pd_recom" >
+                            <span class="round">추천순</span>
+                        </label>
+                        <label class="align last" id="sortable" for="pd_hits" >
+                            <input type="checkbox" name="orders[]" value="pd_hits" id="pd_hits" >
+                            <span class="round">인기순</span>
+                        </label>
 
-                <?php }else{
-                    for($i=0;$i<count($order_item);$i++){
-                        echo $order_item[$i];
-                    } }?>
-            </div>
-            <div class="clear"></div>
+                    <?php }else{
+                        for($i=0;$i<count($order_item);$i++){
+                            echo $order_item[$i];
+                        } }?>
+                </div>
+                <div class="clear"></div>
 
-            <div class="sch_price">
-                <div class="pr">
-                    <h2>금액설정</h2>
-                    <p class="price" id="schp"></p>
+                <div class="sch_price">
+                    <div class="pr">
+                        <h2>금액설정</h2>
+                        <p class="price" id="schp"></p>
+                    </div>
+                    <div id="slider-range"></div>
                 </div>
-                <div id="slider-range"></div>
-            </div>
-            <div class="types sch_mid timesel" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
-                <label class="radio_tag" for="workcnt">
-                    <input type="radio" name="pd_price_type" id="workcnt" value="0" <?php if($pd_price_type ==0 || $pd_price_type==""){?>checked<?php }?>>
-                    <span class="slider2 round">회당</span>
-                </label>
-                <label class="radio_tag" for="worktime">
-                    <input type="radio" name="pd_price_type" id="worktime" value="1" <?php if($pd_price_type ==1){?>checked<?php }?>>
-                    <span class="slider2 round">시간당</span>
-                </label>
-                <label class="radio_tag" for="workday">
-                    <input type="radio" name="pd_price_type" id="workday" value="2" <?php if($pd_price_type ==2){?>checked<?php }?>>
-                    <span class="slider2 round">하루당</span>
-                </label>
-            </div>
-            <div class="sch_btn_group meettime" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
-                <div>
-                    <h2>거래가능시간</h2>
+                <div class="types sch_mid timesel" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
+                    <label class="radio_tag" for="workcnt">
+                        <input type="radio" name="pd_price_type" id="workcnt" value="0" <?php if($pd_price_type ==0 || $pd_price_type==""){?>checked<?php }?>>
+                        <span class="slider2 round">회당</span>
+                    </label>
+                    <label class="radio_tag" for="worktime">
+                        <input type="radio" name="pd_price_type" id="worktime" value="1" <?php if($pd_price_type ==1){?>checked<?php }?>>
+                        <span class="slider2 round">시간당</span>
+                    </label>
+                    <label class="radio_tag" for="workday">
+                        <input type="radio" name="pd_price_type" id="workday" value="2" <?php if($pd_price_type ==2){?>checked<?php }?>>
+                        <span class="slider2 round">하루당</span>
+                    </label>
                 </div>
-                <div class="pd_times">
-                    <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:17vw">
-                        <option value="">시간선택</option>
-                        <?php for($i = 1; $i< 25; $i++){
-                            $time = str_pad($i,"2","0",STR_PAD_LEFT);
-                            ?>
-                            <option value="<?php echo $time;?>" <?php if($pd_timeFrom == $time){?>selected<?php }?>><?php echo $time;?></option>
-                        <?php }?>
-                    </select> 시부터
-                    ~
-                    <input type="checkbox" name="pd_timeType" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?> style="display: none"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
-                    <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:17vw;margin-left:1vw;">
-                        <option value="">시간선택</option>
-                        <?php for($i = 1; $i< 25; $i++){
-                            $time = str_pad($i,"2","0",STR_PAD_LEFT);
-                            ?>
-                            <option value="<?php echo $time;?>" <?php if($pd_timeTo == $time){?>selected<?php }?>><?php echo $time;?></option>
-                        <?php }?>
-                    </select> 시사이
+                <div class="sch_btn_group meettime" style="<?php if($set_type==2){?>display:block<?php }else{ ?>display:none;<?php }?>">
+                    <div>
+                        <h2>거래가능시간</h2>
+                    </div>
+                    <div class="pd_times">
+                        <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3" style="width:17vw">
+                            <option value="">시간선택</option>
+                            <?php for($i = 1; $i< 25; $i++){
+                                $time = str_pad($i,"2","0",STR_PAD_LEFT);
+                                ?>
+                                <option value="<?php echo $time;?>" <?php if($pd_timeFrom == $time){?>selected<?php }?>><?php echo $time;?></option>
+                            <?php }?>
+                        </select> 시부터
+                        ~
+                        <input type="checkbox" name="pd_timeType" id="pd_timetype" value="1" <?php if($pd_timeType==1){?>checked<?php }?> style="display: none"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일</label>
+                        <select name="pd_timeTo" id="pd_timeTo" class="write_input3" style="width:17vw;margin-left:1vw;">
+                            <option value="">시간선택</option>
+                            <?php for($i = 1; $i< 25; $i++){
+                                $time = str_pad($i,"2","0",STR_PAD_LEFT);
+                                ?>
+                                <option value="<?php echo $time;?>" <?php if($pd_timeTo == $time){?>selected<?php }?>><?php echo $time;?></option>
+                            <?php }?>
+                        </select> 시사이
+                    </div>
                 </div>
-            </div>
-			<div class="sch_btn_group">
-				<!--<input type="button" value="제안하기" class="sch_btn btn_light" onclick="fnsuggestion();">	-->
-				<input type="button" value="현검색저장" class="sch_btn" onclick="fnSaveSch()">
-				<input type="button" value="검색" class="sch_btn" onclick="fnSetting2()">
-				<input type="button" value="삽니다 간편등록" class="sch_btn sch_save_write" onClick="fnWrite();">
-			</div>
-            <div class="search_close" onclick="fnSetting2()">
-                <img src="<?php echo G5_IMG_URL?>/search_close.png" alt="">
+                <div class="sch_btn_group">
+                    <!--<input type="button" value="제안하기" class="sch_btn btn_light" onclick="fnsuggestion();">	-->
+                    <input type="button" value="현 검색저장" class="sch_btn" onclick="fnSaveSch()">
+                    <input type="button" value="검색" class="sch_btn point" onclick="fnSetting2()">
+                    <input type="button" value="삽니다 간편등록" class="sch_btn sch_save_write" onClick="fnWrite();">
+                </div>
+                <div class="search_close" onclick="fnSetting2()">
+                    <img src="<?php echo G5_IMG_URL?>/search_close.svg" alt="">
+                </div>
             </div>
             <div class="header_bg"></div>
             <?php if(count($list)==0){?>
@@ -417,19 +423,19 @@ $my_pro2 = sql_fetch($sql);
             <?php } ?>
 	    </div>
     </form>
-	<div class="mobile_menu">
+	<div class="mobile_menu" id="mobile_menu">
 		<span></span>
 		<div class="menu">
 			<!--<div class="user_box <?php /*if($_SESSION["type1"]==2){*/?>bg2<?php /*}*/?>">-->
-            <div class="user_box">
+            <div class="user_box <?php if($set_type==2 || $set_type==""){?>bg2<?php }?>">
                 <div class="close">
                     <img src="<?php echo G5_IMG_URL?>/ic_close.png" alt="">
                 </div>
-				<?php if(!$member["mb_id"]){?>
-				<p><a href="<?php echo G5_URL?>/mobile/page/login_intro.php">로그인</a></p>
-				<?php }else{?>
-				<p><a href="<?php echo G5_BBS_URL?>/logout.php?url=../index.php?device=mobile">로그아웃</a></p>
-				<?php } ?>
+				<?php /*if(!$member["mb_id"]){*/?><!--
+				<p><a href="<?php /*echo G5_URL*/?>/mobile/page/login_intro.php">로그인</a></p>
+				<?php /*}else{*/?>
+				<p><a href="<?php /*echo G5_BBS_URL*/?>/logout.php?url=../index.php?device=mobile">로그아웃</a></p>
+				--><?php /*} */?>
 				<div class="profiles" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
 					<?php if($member["mb_id"] && $member["mb_profile"]){?>
 					<img src="<?php echo $member["mb_profile"];?>" alt="" class="user_profile">
@@ -438,7 +444,7 @@ $my_pro2 = sql_fetch($sql);
 					<?php }?>
 				</div>
 				<?php if(!$member["mb_id"]){?>
-				<h4>지금 로그인하세요</h4>
+				<h4><a href="<?php echo G5_URL?>/mobile/page/login_intro.php">로그인</a></h4>
 				<?php }else{?>
 				<h4 onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'"><?php echo $member["mb_nick"];?></h4>
                 <div class="mylist" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'">
@@ -464,7 +470,7 @@ $my_pro2 = sql_fetch($sql);
 				<li class="menu1" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_profile.svg" alt="">내프로필</a></li>
 				<li class="menu2" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/talk/talk.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_chat.svg" alt="">대화목록</a></li>
 				<!--<li class="menu2"><a href="<?php /*echo G5_MOBILE_URL*/?>/page/wish/wish.list.php"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_wish.svg" alt="">위시리스트</a></li>-->
-				<li class="menu3" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/cart.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">장바구니</a></li>
+                <li class="menu3" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php?type=2'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_cart.svg" alt="">거래상태보기</a></li>
 				<li class="menu4" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/order_history.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_order.svg" alt="">거래내역</a></li>
 				<li class="menu6" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/trash/trash_list.php'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash.svg" alt="">휴지통</a></li>
                 <li class="menu6" onclick="location.href='<?php echo G5_BBS_URL?>/board.php?bo_table=notice'"><a href="#"><img src="<?php echo G5_IMG_URL?>/ic_menu_customer.svg" alt="">고객센터</a></li>
@@ -591,8 +597,7 @@ function fnKeyword(){
     fnfilter(text,"stx");
     $("#searchActive").val("search");
     var search_id = $(".search_setting").attr("id");
-
-    if(search_id != "menu_on"){
+    if(search_id != "menuon"){
         if(chksearch!=null){
             clearTimeout(chksearch);
         }
@@ -608,7 +613,6 @@ function fnKeyword(){
                     var popular = '';
                     var recent = '';
                     var searchs = '';
-                    console.log(data);
                     if(data.searchs != null){
                         if(data.searchs.length > 0){
                             for(var i = 0 ; i < data.searchs.length; i++){
@@ -619,7 +623,7 @@ function fnKeyword(){
                         $(".search_re append").append(popular);
                     }else{
                         $(".search_re").html("<span>연관검색어 : </span>");
-                        $(".search_re").append('인기 검색어가 없습니다.');
+                        $(".search_re").append('연관 검색어가 없습니다.');
                     }
 
                     if(data.popular != null){
@@ -660,12 +664,11 @@ function fnKeyword(){
             setTimeout(fnkeywordon, 1500);
         }
     }else {//엔터 일때
-
         if ($("#set").val() == "2") {
             // 설정에서 검색어 체크
             $("#sch_text").val($("#stx").val());
             //설정된 검색어 저장후 검색
-            list_search();
+            fnSetting2();
             return false;
         } else {
             //바로 간단검색
@@ -694,6 +697,18 @@ function fnkeywordon(){
 }
 
 $(function(){
+
+    var hmenus = document.getElementById("mobile_menu");
+    var hammer_menu = new Hammer(hmenus);
+
+    hammer_menu.on("swipeleft",function(e){
+        $(".mobile_menu").fadeOut(300,function(){
+            $(".mobile_menu").removeClass("active");
+        });
+        $("html").css("overflow","auto");
+        $("body").css("overflow","unset");
+    });
+
     $(".tab li").click(function(){
         if(!$(this).hasClass("active")){
             $(this).addClass("active");
@@ -777,6 +792,7 @@ $(function(){
             $("#mobile_header").removeClass("bg2");
             $(".user_box").removeClass("bg2");
             $(".wished").removeClass("bg2");
+            $(".search_setting").removeClass("bg2");
             $(".copyright").removeClass("bg2");
             $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03.svg");
 			$(this).html("물건");
@@ -826,6 +842,7 @@ $(function(){
             $("#mobile_header").addClass("bg2");
             $(".wished").addClass("bg2");
             $(".user_box").addClass("bg2");
+            $(".search_setting").addClass("bg2");
             $(".copyright").addClass("bg2");
             $(".ft_menu_04 img").attr("src","<?php echo G5_IMG_URL;?>/bottom_icon_03_2.svg");
 			$(this).html("능력");
@@ -990,6 +1007,303 @@ $(function(){
 
 	var change = false;
 
+    var moveleft = false;
+    var moveright = false;
+    var leftcnt = 0;
+    var rightcnt = 1;
+    var itemclone = null;
+
+    var startLeft = 0;
+    var leftstart = 0;
+    var startRight = 0;
+    var rightstart = 0;
+    var lefts = new Array();
+    var rights = new Array();
+    var order_sort_active = "";
+    var order_sort = "";
+
+    $(".align").each(function(e){
+        var item = $(this);
+        var order = this;
+        var orderhammer = new Hammer(order);
+        var width = $(this).width();
+        item.css("left",(width*e)+"px");
+
+        orderhammer.get('pan').set({direction:Hammer.DIRECTION_HORIZONTAL});
+
+        orderhammer.on("pan",function(ev){
+           console.log(ev);
+        });
+
+        orderhammer.on("panleft panright panup pandown", function(ev){
+            console.log(ev.type);
+            if(ev.type == "panleft" && moveright!=true && ev.type != "panup" && ev.type != "pandown"){
+                if(change ==false) {
+                    var text = ev.target.innerText;
+                    $(".align").each(function(ee){
+                        if($(this).context.innerText == text){
+                            leftstart = ee;
+                            startLeft = Number($(this).css("left").replace("px",""));
+                            item = $(this);
+                        }
+                        lefts[ee] = Number($(this).css("left").replace("px",""));
+                    });
+                    itemclone = item.clone();
+                    itemclone.css("opacity",".5");
+                    itemclone.insertBefore(item);
+                    change=true;
+                }
+                var x = Math.abs(ev.deltaX);
+                var left = startLeft - x;
+                item.css({"position": "absolute"});
+                if(left > 0) {
+                    item.css({"position": "absolute", "left": left + "px","z-index":"999"});
+                }
+                if(lefts[leftstart-leftcnt] > left) {
+                    leftcnt++;
+                    var i = item.prev().prev();
+                    itemclone.insertBefore(i);
+                    i.insertAfter(item);
+                }
+
+                moveleft = true;
+            }
+            if(ev.type == "panright" && moveleft!=true && ev.type != "panup" && ev.type != "pandown"){
+                if(change == false) {
+                    var text = ev.target.innerText;
+                    $(".align").each(function(ee){
+                        if($(this).context.innerText == text){
+                            rightstart = ee;
+                            startRight = Number($(this).css("left").replace("px",""));
+                            item = $(this);
+                        }
+                        rights[ee] = Number($(this).css("left").replace("px",""));
+                    });
+                    itemclone = item.clone();
+                    itemclone.css("opacity",".5");
+                    itemclone.insertBefore(item);
+                    change=true;
+                }
+                var x = Math.abs(ev.deltaX);
+                var right = startRight + x;
+                item.css({"position": "absolute"});
+                if(right <= rights[4] + 20) {
+                    item.css({"position": "absolute", "left": right + "px","z-index":"999"});
+                }
+                if(rights[rightstart+rightcnt] <= right && rightstart < 4) {
+                    rightcnt++;
+                    var i = item.next();
+                    console.log(i);
+                    itemclone.insertBefore(i);
+                    i.insertBefore(item);
+                }
+
+                moveright = true;
+            }
+        });
+
+        orderhammer.on("panend pancancel",function(ev){
+            order_sort_active = "";
+            order_sort = "";
+            //이동확인
+            itemclone.remove();
+            $(".align").css("position","");
+            $(".align").each(function(e){
+                var width = $(this).width();
+                $(this).css("left",(width*e)+"px");
+                $(this).eq(e);
+                if($(this).find("input").prop("checked")==true){
+                    if(order_sort_active == ""){
+                        order_sort_active = "1";
+                    }else{
+                        order_sort_active = order_sort_active + ",1";
+                    }
+                }else{
+                    console.log(order_sort_active);
+                    if(order_sort_active == ""){
+                        order_sort_active = "0";
+                    }else{
+                        order_sort_active = order_sort_active + ",0";
+                    }
+                }
+                if(order_sort=="") {
+                    order_sort = $(this).find("input").attr("id");
+                }else{
+                    order_sort = order_sort + ","+$(this).find("input").attr("id");
+                }
+
+                $("#order_sort_active").val(order_sort_active);
+                $("#order_sort").val(order_sort);
+
+            });
+            lefts = new Array();
+            rights = new Array();
+            change=false;
+            // 햇지만 차이가 없을때 원상 복구
+            if(moveleft == true){
+                leftcnt = 0;
+                moveleft = false;
+                $(".align").each(function(){
+
+                });
+            }else{
+                rightcnt = 0;
+                moveright = false;
+            }
+        });
+    });
+
+    $(".align").click(function(){
+        var chk = $(".align").length;
+        var chkchk = $(".align input:checked").length;
+        if(chkchk==0){
+            alert("하나 이상은 선택해야 합니다.");
+            $(this).prop("checked",true);
+            return false;
+        }
+        order_sort_active = "";
+        order_sort = "";
+        $(".align").each(function(e){
+            if($(this).find("input").prop("checked")==true){
+                if(order_sort_active == ""){
+                    order_sort_active = "1";
+                }else{
+                    order_sort_active = order_sort_active + ",1";
+                }
+            }else{
+                console.log(order_sort_active);
+                if(order_sort_active == ""){
+                    order_sort_active = "0";
+                }else{
+                    order_sort_active = order_sort_active + ",0";
+                }
+            }
+            if(order_sort=="") {
+                order_sort = $(this).find("input").attr("id");
+            }else{
+                order_sort = order_sort + ","+$(this).find("input").attr("id");
+            }
+
+            $("#order_sort_active").val(order_sort_active);
+            $("#order_sort").val(order_sort);
+
+        });
+    });
+
+    $(".sch_ord").mouseout(function(){
+        //이동확인
+        if(itemclone != null){
+            itemclone.remove();
+        }
+
+        $(".align").css("position","");
+        $(".align").each(function(e){
+            var width = $(this).width();
+            $(this).css("left",(width*e)+"px");
+            $(this).eq(e);
+        });
+        lefts = new Array();
+        rights = new Array();
+        change=false;
+        // 햇지만 차이가 없을때 원상 복구
+        if(moveleft == true){
+            leftcnt = 0;
+            moveleft = false;
+        }else{
+            rightcnt = 0;
+            moveright = false;
+        }
+    });
+
+    /*$(document).on("click",".align",function(){
+        console.log("A");
+        var id = $(this).prev().attr("id");
+        var chk = false;
+        $("input[name^=orders]").each(function(e){
+            if($(this).prop("checked") == true){
+                chk = true;
+            }
+        });
+        //alert("Afeaea");
+        var active = '';
+        if(chk==true) {
+            $("input[name^=orders]").each(function (e) {
+
+                if (e == 0) {
+                    $("#order_sort").val($(this).val());
+                } else {
+                    var align = $("#order_sort").val();
+                    var data = align + "," + $(this).val();
+                    $("#order_sort").val(data);
+                }
+
+                if ($(this).is(":checked") == true) {
+                    if (active == '') {
+                        active = "1";
+                    } else {
+                        active = active + ",1";
+                    }
+
+                } else {
+                    if (active == '') {
+                        active = "0";
+                    } else {
+                        active = active + ",0";
+                    }
+                }
+                $("#order_sort_active").val(active);
+            });
+        }else{
+            alert("하나 이상의 조건이 필요합니다.");
+            $(id).attr("checked",true);
+            return false;
+        }
+    });*/
+
+    /*$(".align").bind("tab",function(){
+        var id = $(this).prev().attr("id");
+        var chk = false;
+        $("input[name^=orders]").each(function(e){
+            if($(this).prop("checked") == true){
+                chk = true;
+            }
+        });
+        //alert("Afeaea");
+        var active = '';
+        if(chk==true) {
+            $("input[name^=orders]").each(function (e) {
+
+                if (e == 0) {
+                    $("#order_sort").val($(this).val());
+                } else {
+                    var align = $("#order_sort").val();
+                    var data = align + "," + $(this).val();
+                    $("#order_sort").val(data);
+                }
+
+                if ($(this).is(":checked") == true) {
+                    if (active == '') {
+                        active = "1";
+                    } else {
+                        active = active + ",1";
+                    }
+
+                } else {
+                    if (active == '') {
+                        active = "0";
+                    } else {
+                        active = active + ",0";
+                    }
+                }
+                $("#order_sort_active").val(active);
+            });
+        }else{
+            alert("하나 이상의 조건이 필요합니다.");
+            $(id).attr("checked",true);
+            return false;
+        }
+    });
+
     $(".sch_ord").sortable({
         axis:"x",
         forcePlaceholderSize:false,
@@ -999,46 +1313,46 @@ $(function(){
         }
         ,
         stop:function(event,ui){
-            var chk = false;
-            $("input[name^=orders]").each(function(e){
-                if($(this).prop("checked") == true){
-                    chk = true;
-                }
-            });
-            var id = ui.item.context.firstElementChild;
-            var active = '';
+            /*var chk = false;
+             $("input[name^=orders]").each(function(e){
+             if($(this).prop("checked") == true){
+             chk = true;
+             }
+             });
+             var id = ui.item.context.firstElementChild;
+             var active = '';
 
-            if(chk==true) {
-                $("input[name^=orders]").each(function (e) {
-                    if (e == 0) {
-                        $("#order_sort").val($(this).val());
-                    } else {
-                        var align = $("#order_sort").val();
-                        var data = align + "," + $(this).val();
-                        $("#order_sort").val(data);
-                    }
+             if(chk==true) {
+             $("input[name^=orders]").each(function (e) {
+             if (e == 0) {
+             $("#order_sort").val($(this).val());
+             } else {
+             var align = $("#order_sort").val();
+             var data = align + "," + $(this).val();
+             $("#order_sort").val(data);
+             }
 
-                    if ($(this).is(":checked") == true) {
-                        if (active == '') {
-                            active = "1";
-                        } else {
-                            active = active + ",1";
-                        }
+             if ($(this).is(":checked") == true) {
+             if (active == '') {
+             active = "1";
+             } else {
+             active = active + ",1";
+             }
 
-                    } else {
-                        if (active == '') {
-                            active = "0";
-                        } else {
-                            active = active + ",0";
-                        }
-                    }
-                    $("#order_sort_active").val(active);
-                });
-            }else{
-                alert("하나 이상의 조건이 필요합니다.");
-                $(id).attr("checked",true);
-                return false;
-            }
+             } else {
+             if (active == '') {
+             active = "0";
+             } else {
+             active = active + ",0";
+             }
+             }
+             $("#order_sort_active").val(active);
+             });
+             }else{
+             alert("하나 이상의 조건이 필요합니다.");
+             $(id).attr("checked",true);
+             return false;
+             }
         },
         change:function(event,ui){
             change = true;
@@ -1047,50 +1361,7 @@ $(function(){
         }
 
     }).disableSelection();
-});
-
-$(document).on("click",".sch_ord label",function(){
-    var id = $(this).prev().attr("id");
-    var chk = false;
-    $("input[name^=orders]").each(function(e){
-        if($(this).prop("checked") == true){
-            chk = true;
-        }
-    });
-    //alert("Afeaea");
-    var active = '';
-    if(chk==true) {
-        $("input[name^=orders]").each(function (e) {
-
-            if (e == 0) {
-                $("#order_sort").val($(this).val());
-            } else {
-                var align = $("#order_sort").val();
-                var data = align + "," + $(this).val();
-                $("#order_sort").val(data);
-            }
-
-            if ($(this).is(":checked") == true) {
-                if (active == '') {
-                    active = "1";
-                } else {
-                    active = active + ",1";
-                }
-
-            } else {
-                if (active == '') {
-                    active = "0";
-                } else {
-                    active = active + ",0";
-                }
-            }
-            $("#order_sort_active").val(active);
-        });
-    }else{
-        alert("하나 이상의 조건이 필요합니다.");
-        $(id).attr("checked",true);
-        return false;
-    }
+*/
 });
 
 function priceSet(){
@@ -1220,10 +1491,6 @@ function fnWrite(){
     document.simplesearch.submit();
 
 }
-//검색조건 정렬
-function fnSort(index) {
-    console.log(index);
-}
 
 function fnwrite2(){
     var type = $("#set_type").val();
@@ -1244,8 +1511,6 @@ function fnwrite2(){
         return false;
     }
 }
-
-
 
 function fnAlertView(){
     location.href=g5_url+'/mobile/page/mypage/alarm.php';

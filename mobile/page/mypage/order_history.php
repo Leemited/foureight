@@ -11,7 +11,7 @@ if(!$pd_type){
     $pd_type = 1;
 }
 
-$sql = "select *,p.mb_id as pd_mb_id from `order` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' and c.od_status = 1 and pd_type = {$pd_type} order by od_date desc";
+$sql = "select *,p.mb_id as pd_mb_id from `order` as c left join `product` as p on c.pd_id = p.pd_id where c.mb_id = '{$mb_id}' || p.mb_id = '{$mb_id}' and c.od_status = 1 and pd_type = {$pd_type} order by od_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $cart[] = $row;
