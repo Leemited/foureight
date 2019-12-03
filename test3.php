@@ -2,7 +2,7 @@
 include_once ("../../../../common.php");
 
 // 가맹점 웹서버 호스트
-$host = "http://mave01.cafe24.com/mobile/page/mypage/stdpay/";
+$host = "http://484848.co.kr/mobile/page/mypage/stdpay/";
 $od_tel = $tel1."-".$tel2."-".$tel3;
 
 // ****************************************** 필수 파리미터 셋팅[가맹점 상황에 맞게 수정해서 사용하세요]******************************************

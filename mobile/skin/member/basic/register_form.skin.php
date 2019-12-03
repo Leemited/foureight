@@ -13,6 +13,15 @@ if(strpos($agent,"foureight")!==false){
 }else{
 	$check = false;
 }
+
+if($w==""){
+    if($_SESSION["mb_id"]){
+        $member["mb_id"]=$_SESSION["mb_id"];
+    }
+    if($_SESSION["mb_name"]){
+        $member["mb_name"]=$_SESSION["mb_name"];
+    }
+}
 ?>
 <style>
     .tbl_wrap{padding:2vw}
@@ -49,11 +58,11 @@ if(strpos($agent,"foureight")!==false){
 		<input type="hidden" name="mb_nick_default" value="<?php echo isset($member['mb_nick'])?get_text($member['mb_nick']):''; ?>">
 		<input type="hidden" name="mb_nick" value="" id="reg_mb_nick" required class="frm_input required nospace" maxlength="20">
 		<div class="tbl_frm01 tbl_wrap">
-			<input type="text" name="mb_id" value="<?php echo $member['mb_id'] ?>" id="reg_mb_id" class="frm_input <?php echo $readonly ?>" minlength="3" maxlength="20" <?php echo $required ?> <?php echo $readonly ?> placeholder="이메일[ID]" />
+			<input type="text" name="mb_id" value="<?php echo $member['mb_id'] ?>" id="reg_mb_id" class="frm_input <?php echo $readonly ?>" minlength="3" maxlength="20" <?php echo $required ?> <?php echo $readonly ?> placeholder="이메일[ID]을 입력해주세요." />
 			<input type="password" name="mb_password" id="reg_mb_password" class="frm_input" minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호" style="font-family:sans-serif"/>
 			<input type="password" name="mb_password_re" id="reg_mb_password_re" class="frm_input " minlength="3" maxlength="20" <?php echo $required ?> placeholder="비밀번호 확인" style="font-family:Sans-serif">
-			<select name="mb_sex" id="reg_mb_sex"  <?php echo $required ?> ><option value="">성별</option><option value="남" <?php if($member['mb_sex']=="남"){?>selected<?php } ?>>남</option><option value="여" <?php if($member['mb_sex']=="여"){?>selected<?php } ?>>여</option>
-			</select>	
+			<!--<select name="mb_sex" id="reg_mb_sex"  <?php /*echo $required */?> ><option value="">성별</option><option value="남" <?php /*if($member['mb_sex']=="남"){*/?>selected<?php /*} */?>>남</option><option value="여" <?php /*if($member['mb_sex']=="여"){*/?>selected<?php /*} */?>>여</option>
+			</select>	-->
 			<input type="text" id="reg_mb_name" name="mb_name" value="<?php echo get_text($member['mb_name']) ?>" <?php echo $required ?> <?php echo $readonly; ?> class="frm_input  <?php echo $readonly ?>" placeholder="이름" />
 		</div>
 
@@ -279,9 +288,20 @@ if(strpos($agent,"foureight")!==false){
 
 		<script>
 		$(function() {
-			$("#reg_mb_id").focus();
+		    $("input[type=text]").keyup(function(){
+		        var key = $(this).attr("name");
+		        var value = $(this).val();
+		        $.ajax({
+                    url:g5_url+'/mobile/page/ajax/ajax.set_session.php',
+                    method:"post",
+                    data:{key:key,value:value}
+                }).done(function(data){
+                    console.log(data);
+                });
+            });
+			//$("#reg_mb_id").focus();
 			<?php if($check){?>
-			window.android.Onkeyboard();
+			//window.android.Onkeyboard();
 			<?php }?>
 
 			$("#reg_mb_id").keyup(function(){
@@ -481,9 +501,5 @@ if(strpos($agent,"foureight")!==false){
 			return true;
 		}
 
-		function fnSMS(){
-			//인증 메세지 보내기 임시
-			alert("테스트용입니다.");			
-		}
 		</script>
 	</div>

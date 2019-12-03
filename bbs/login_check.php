@@ -61,7 +61,7 @@ if($config['cf_use_point']) {
 
 // 3.26
 // 아이디 쿠키에 한달간 저장
-if ($auto_login) {
+//if ($auto_login) {
     // 3.27
     // 자동로그인 ---------------------------
     // 쿠키 한달간 저장
@@ -69,10 +69,10 @@ if ($auto_login) {
     set_cookie('ck_mb_id', $mb['mb_id'], 86400 * 365);
     set_cookie('ck_auto', $key, 86400 * 365);
     // 자동로그인 end ---------------------------
-} else {
+/*} else {
     set_cookie('ck_mb_id', '', 0);
     set_cookie('ck_auto', '', 0);
-}
+}*/
 
 if ($url) {
     // url 체크
@@ -105,15 +105,21 @@ $app2 = false;
 if(stripos($_SERVER["HTTP_USER_AGENT"],"iosApp")){
     $app2 = true;
 }
+
+unset($_SESSION["mb_id"]);
+unset($_SESSION["mb_name"]);
 ?>
 <script>
+    var chk = false;
     <?php if($app){?>
     window.android.setLogin('<?php echo $mb['mb_id'];?>');
     <?php }?>
     <?php if($app2){?>
     webkit.messageHandlers.onLogin.postMessage('<?php echo $mb['mb_id'];?>');
     <?php }?>
+
+    location.replace('<?php echo str_replace("&amp;","&",$link);?>&app_mb_id=<?php echo $mb_id;?>');
 </script>
 <?php
-goto_url($link);
+//goto_url($link);
 ?>

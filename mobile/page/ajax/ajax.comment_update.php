@@ -40,7 +40,7 @@ if($comment_re != "1") {
         //알림 보내기
         if($pd["mb_id"]!=$mb_id) {
             //send_FCM('fcmid','타이틀','내용','유알엘','체널','체널명','받는아이디','게시글번호','이미지');
-            send_FCM($pd["regid"], $pd["pd_tag"], "등록하신 상품에 새 댓글이 등록되었습니다.", G5_URL . "/index.php?pd_id=" . $pd_id, "comment_alarm_set", "댓글알림", $pd["mb_id"], $pd_id, $img);
+            send_FCM($pd["regid"], $pd["pd_tag"], "등록하신 상품에 새 댓글이 등록되었습니다.", G5_URL . "/index.php?pd_id=" . $pd_id.'&detail=true', "comment_alarm_set", "댓글알림", $pd["mb_id"], $pd_id, $img);
         }
         ?>
         <li class="<?php if($pd_mb_id!=$mb_id && $cm["mb_id"] != $mb_id){if($cm["comment_status"]=="3" || $secret == "3"){echo "cm_lock ";} } ?>" id="cmt<?php echo $cm[cm_id];?>">

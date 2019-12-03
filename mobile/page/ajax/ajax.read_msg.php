@@ -34,7 +34,7 @@ for($i=0;$i<count($talk);$i++){
             "<div class='msg_box my_msg'>" .
                 "<div class='in_box'>" .
                     "<div class='date'>".$date."</div>" .
-                    "<div class='msg'>bb".nl2br(stripslashes($talk[$i]["message"]))."</div>" .
+                    "<div class='msg'>".nl2br(stripslashes($talk[$i]["message"]))."</div>" .
                     "<div class='arrow'><img src='".G5_IMG_URL."/ic_chat.png' alt=''></div>".
                 "</div>" .
             "</div>";

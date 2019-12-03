@@ -28,6 +28,8 @@ if(strpos($agent,"foureight")!==false){
 		<input type="hidden" name="url" value="<?php echo $login_url ?>">
             <input type="hidden" name="regid" id="regid" value="<?php echo $_SESSION["regid"];?>">
             <input type="hidden" name="sdkVersion" id="sdkVersion" value="<?php echo $_SESSION["sdkVersion"];?>">
+            <input type="hidden" name="device" id="device" value="<?php echo $_SESSION["device"];?>">
+            <input type="hidden" name="mac" id="mac" value="<?php echo $_SESSION["mac"];?>">
 
 		<div id="login_frm">
             <?php
@@ -75,8 +77,12 @@ $(function(){
     try{
         var regId = window.android.getRegid();
         var sdkVesion = window.android.getSdkVersion();
+        var device = "android";
+        var mac = window.android.getMacId();
         $("#regid").val(regId);
         $("#sdkVertion").val(sdkVesion);
+        $("#device").val(device);
+        $("#mac").val(mac);
     }catch(err){
         var regId = undefined;
         console.log(err);

@@ -1,10 +1,13 @@
 <?php
 include_once ("../../../common.php");
 include_once (G5_PATH."/head.sub.php");
-$back_url = G5_MOBILE_URL."/page/talk/talk.php";
+if($return_url=="mypage") {
+    $back_url = G5_MOBILE_URL . "/page/mypage/mypage_order.php?od_cate=1";
+}else{
+    $back_url = G5_MOBILE_URL . "/page/talk/talk.php";
+}
 
 $sql = "select *,c.id as id,p.mb_id as mb_id from `product_chat` as c left join `product` as p on p.pd_id = c.pd_id where (c.pd_id = {$pd_id} or p.pd_id ='{$pd_id}' ) and room_id = '{$roomid}' order by msg_datetime asc";
-echo $sql;
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $talk_list[] = $row;
@@ -18,6 +21,14 @@ while($row = sql_fetch_array($res)){
     }else if($member["mb_id"] != $row["read_mb_id"]){
         $sell_mb_id = $row["read_mb_id"];
         $read_mb_id = $row["read_mb_id"];
+    }
+    if($row["mb_id"]==$member["mb_id"]){
+        $chat_pd_id = $member["mb_id"];
+        $chat_mb_id = $row["read_mb_id"];
+    }
+    if($row["mb_id"]!=$member["mb_id"]){
+        $chat_pd_id = $row["mb_id"];
+        $chat_mb_id = $member["mb_id"];
     }
 }
 
@@ -55,6 +66,8 @@ while($row = sql_fetch_array($res)){
 
 $bg = array('#acc7dc','#ff9681','#eeebdc','#e2d4d4','#d9d1cf','#f0e0a2','#bfb1d5','#ddf1e8','#bfe2ca','#fed88f','#d0e2ec','#f4858e','#f48b52');
 $rand = rand(1,13);
+
+
 ?>
 <div id="id01" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
     <div class="w3-modal-content w3-card-4">
@@ -79,7 +92,7 @@ $rand = rand(1,13);
     <div class="price">
         <h1><?php echo $talk_list[0]["pd_tag"];?></h1>
         <h2><!-- <span><?php /*if($talk_list[0]['pd_type']==1){ if($talk_list[0]['pd_type2']==4){*/?>구매예상금액<?php /*}else{*/?>판매금액<?php /*} }else{if($talk_list[0]['pd_type2']==4){*/?>구매예상금액<?php /*}else{*/?>계약금<?php /*} }*/?></span>-->
-            <?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]+$talk_list[0]["pd_price2"]);}else{echo "0원";}?></h2>
+            <?php if($talk_list[0]["pd_price"]>0){echo "￦ ".number_format($talk_list[0]["pd_price"]+$talk_list[0]["pd_price2"]);}else{echo "무료나눔";}?></h2>
         <?php if($talk_list[0]["pd_type"]==1 && $talk_list[0]["pd_type2"]==8 && $talk_list[0]["mb_id"] == $member["mb_id"]){?>
             <div class="sell_btn">
                 <?php if($btn==true){?>
@@ -221,8 +234,6 @@ $rand = rand(1,13);
             //누적 메시지 체크
             var read_id = $("#talk_ids").val();
 
-            console.log("read : " + read_id);
-
             $.ajax({
                 url:g5_url+"/mobile/page/ajax/ajax.read_msg2.php",
                 method:"post",
@@ -331,7 +342,6 @@ $rand = rand(1,13);
             data:{pd_id:pd_id,mb_id:mb_id,read_mb_id:read_mb_id,message:message,read_id:read_id,roomid:roomid},
             dataType:"json"
         }).done(function(data){
-            console.log(data);
             if(data.status=="success"){
                 if(roomid=="") {
                     $(".msg_container").append(data.msg);
@@ -361,7 +371,6 @@ $rand = rand(1,13);
                 method: "POST",
                 data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1}
             }).done(function (data) {
-                console.log(data);
                 if(data=="3"){
                     fnSendMsSimple("결제요청을 보냈습니다. <br>장바구니에서 확인해 주세요.");
                     $(".sell_btn .btn").attr("disabled","disabled");

@@ -5,26 +5,39 @@ if($pd_id=="" || !$pd_id){
     alert("잘못된 요청입니다.");
     return false;
 }
-//file
-$sql = "select pd_images, pd_video from `product` where pd_id = '{$pd_id}'";
 
+$sql = "select * from `product` where pd_id = '{$pd_id}'";
+//file
 $file = sql_fetch($sql);
 $path = G5_DATA_URL."/product/";
+if($file["pd_type"]==1){
+    $sql = "select * from `orders` where pd_id = '{$pd_id}'";
+    $orders = sql_fetch($sql);
+    if(($orders!=null && $orders["od_fin_status"]==0) || $file["pd_status"]==1){
+        alert("해당 게시글은 거래중으로 삭제할 수 없습니다.");
+    }
+}else{
+    $sql = "select * from `cart` where pd_id = '{$pd_id}'";
+    $res = sql_query($sql);
+    while($row=sql_fetch_array($res)) {
+        $orders[] = $row;
+    }
+    if(count($orders)!=0){
+        alert("해당 게시글은 거래중으로 삭제할 수 없습니다.");
+    }
+}
+
 
 $sql = "update `product` set pd_status = 10 where pd_id = '{$pd_id}'";
 
-if(sql_query($sql)){
-    /*if($file["pd_images"] != ""){
-        $images = explode(",",$file["pd_images"]);
-        for($i=0;$i<count($images);$i++) {
-            @unlink($path.$images[$i]);
-        }
-    }
-    if($file["pd_video"]!=""){
-        @unlink($path.$file["pd_video"]);
-    }*/
+if($return_url){
+    $link = $return_url;
+}else{
+    $link = G5_URL;
+}
 
-    alert("삭제되었습니다.",G5_URL);
+if(sql_query($sql)){
+    alert("삭제되었습니다.",$link);
 }else {
     alert("잘못된 요청입니다.");
 }

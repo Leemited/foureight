@@ -15,15 +15,8 @@ switch ($status){
         $st = 3;
         break;
 }
-//거래중/판매완료 인지 체크
-$sql = "select count(*)as cnt from `cart` where pd_id='{$pd_id}' and c_status = 1";
-$chkCart = sql_fetch($sql);
-if($chkCart["cnt"] > 0){
-    echo "3";
-    return false;
-}
 
-$sql = "select count(*)as cnt from `order` where pd_id='{$pd_id}' and od_status = 1";
+$sql = "select count(*)as cnt from `order` where pd_id='{$pd_id}' and od_status = 1 and od_cancel_status = 0";
 $chkOrder = sql_fetch($sql);
 if($chkOrder["cnt"] > 0){
     //판매완료로 변경

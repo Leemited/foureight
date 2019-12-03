@@ -2,7 +2,7 @@
 include_once("../common.php");
 include_once(G5_PATH."/admin/admin.head.php");
 
-$view = sql_fetch("select * from `order` as o left join `product` as p on o.pd_id = p.pd_id where od_id = '{$od_id}'");
+$view = sql_fetch("select *,o.mb_id as mb_id,p.mb_id as pd_mb_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where od_id = '{$od_id}'");
 
 if($view["pd_images"]) {
     $imgs = explode(",",$view["pd_images"]);
@@ -33,7 +33,6 @@ switch ($view["od_pay_status"]){
 $mb = get_member($view["mb_id"]);
 
 $subject="거래내역 상세보기";
-
 ?>
 <!-- 본문 start -->
 <div id="wrap">
@@ -72,7 +71,7 @@ $subject="거래내역 상세보기";
                         <th>배송지</th>
                         <td ><?php echo "[".$view["od_zipcode"]."] ".$view["od_addr1"]." ".$view["od_addr2"];?></td>
                         <th>주문시 요청사항</th>
-                        <td ><?php echo ($view["od_content"])?nl2br($view["od_content"]):"없음";?></td>
+                        <td ><?php echo (trim($view["od_content"]))?nl2br($view["od_content"]):"없음";?></td>
                     </tr>
                     </tbody>
                 </table>

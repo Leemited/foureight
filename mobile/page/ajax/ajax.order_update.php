@@ -3,10 +3,10 @@ include_once ("../../../common.php");
 
 $sql = "update `order` set od_step = 2, od_fin_datetime = now() where od_id = '{$od_id}'";
 if(sql_query($sql)){
-    $sql = "select *,p.pd_id as pd_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where o.od_id = '{$od_id}'";
+    $sql = "select *,p.pd_id as pd_id,o.mb_id,p.mb_id as sell_mb_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where o.od_id = '{$od_id}'";
     $pd = sql_fetch($sql);
 
-    $mb = get_member($mb_id);
+    $mb = get_member($pd["sell_mb_id"]);
     if($mb["regid"]) {
         $img = "";
         if($pd["pd_images"]) {

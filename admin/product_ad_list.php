@@ -67,8 +67,9 @@ while($data=sql_fetch_array($query)){
                 </div>
                 <table>
                     <colgroup class="">
-                        <col width="8%" class="">
-                        <col width="10%">
+                        <col width="5%" class="">
+                        <col width="8%">
+                        <col width="8%">
                         <col width="10%" class="">
                         <col width="20%" class="">
                         <col width="*" class="">
@@ -79,6 +80,7 @@ while($data=sql_fetch_array($query)){
                     <tr>
                         <th class="">번호</th>
                         <th >구분</th>
+                        <th >키워드</th>
                         <th class="link" onclick="fnOrder('<?php echo G5_URL."/admin/product_ad_list.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx;?>','<?php echo "&order=pd_cate,pd_cate2"; ?>','desc');">카테고리</th>
                         <th class="link" onclick="fnOrder('<?php echo G5_URL."/admin/product_ad_list.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx;?>','<?php echo "&order=mb_id"; ?>','desc');">제목</th>
                         <th class="" >설명</th>
@@ -107,6 +109,7 @@ while($data=sql_fetch_array($query)){
                         <tr <?php if($list[$i]["pd_blind"]>=10){ ?>class="blind"<?php } ?>>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo $list[$i]['num']; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo ($list[$i]["ad_type"]==1)?"물건":"능력";?></td>
+                            <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo $list[$i]["ad_keyword"];?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'" ><?php echo $cate." > ".$cate2; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'" ><?php echo $list[$i]["ad_subject"]; ?></td>
                             <td class="" onclick="location.href='<?php echo G5_URL."/admin/product_ad_view.php?page=".$page."&ad_id=".$list[$i]["ad_id"]."&sfl=".$sfl."&stx=".$stx."&order=".$order."&desc=".$desc; ?>'"><?php echo $list[$i]["ad_con"]; ?></td>

@@ -2,29 +2,39 @@
 include_once ("../../../common.php");
 include_once(G5_MOBILE_PATH."/head.login.php");
 
-$sql = "select *,o.mb_id as mb_id, p.mb_id as pd_mb_id,p.pd_id as pd_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where od_id = '{$od_id}' ";
+$sql = "select *,o.mb_id as mb_id,p.pd_id as pd_id,p.mb_id as pd_mb_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where od_status != -1 and o.od_id = '{$od_id}'";
 $order = sql_fetch($sql);
-
-switch ($order["od_pay_status"]){
-    case "1":
-        $paystatus = "결제완료";
-        break;
-    case "0":
-        $paystatus = "입금대기중";
-        break;
-    case "2":
-        $paystatus = "결제취소";
-        break;
+$mb = get_member($order["mb_id"]);
+if($order["od_direct_status"]!=1) {
+    switch ($order["od_pay_status"]) {
+        case "1":
+            $paystatus = "결제완료";
+            break;
+        case "0":
+            $paystatus = "입금대기중";
+            break;
+        case "2":
+            $paystatus = "결제취소";
+            break;
+    }
+    switch ($order["od_pay_type"]){
+        case "1":
+            $paytype = "카드결제";
+            break;
+        case "3":
+            $paytype = "계좌이체";
+            break;
+    }
 }
 
-switch ($order["od_pay_type"]){
-    case "1":
-        $paytype = "카드결제";
-        break;
-    case "3":
-        $paytype = "계좌이체";
-        break;
+if($order["od_direct_status"]==2){
+    $order["od_name"] = $mb["mb_name"];
+    $order["od_addr1"] = "직거래";
+    $order["od_tel"] = $mb["mb_hp"];
+    $paytype = "직거래";
 }
+/*$sql = "select * from order_payment_card_info where pay_oid = '{$order["pay_oid"]}'";
+$cardinfo = sql_fetch($sql);*/
 
 $back_url = G5_URL;
 
@@ -38,64 +48,12 @@ $back_url = G5_URL;
             </div>
         </div>
     </div>
-    <div id="id02" class="w3-modal w3-animate-opacity no-view">
+    <div id="id01s" class="w3-modal w3-animate-opacity">
         <div class="w3-modal-content w3-card-4">
             <div class="w3-container">
-                <input type="text" name="like_id" id="like_id" value="<?php echo $order["pd_id"];?>">
-                <input type="hidden" name="view_pd_type" id="view_pd_type" value="">
-                <h2>평가하기</h2>
-                <div class="likes">
-                    좋아요 <!--<img src="<?php /*echo G5_IMG_URL*/?>/view_like.svg" alt="" class="likeimg" >-->
-                </div>
-                <div>
-                    <input type="text" name="like_content" id="like_content" placeholder="평가 내용을 입력해주세요." required>
-                </div>
-                <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="fnLikeUpdate();" >
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="id00" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
-                <input type="hidden" value="<?php echo $order["od_id"];?>" name="od_id" id="od_id">
-                <h2>배송정보 입력</h2>
-                <div>
-                    <input type="text" name="delivery_name" id="delivery_name" required style="width:50%">
-                    <select name="deli_sel" id="deli_sel" onchange="$('#delivery_name').val(this.value)" style="width:calc(50% - 8vw);text-align: center;background-color: #FFF;color: #000;position: relative;    margin: 4vw auto;padding: 2vw;font-size: 3.6vw;border-radius: 20vw;border: none;font-family: 'nsr', sans-serif;">
-                        <option value="">택배사선택</option>
-                        <option value="한진택배">한진택배</option>
-                        <option value="우체국택배">우체국택배</option>
-                        <option value="옐로우캡">옐로우캡</option>
-                        <option value="로젠택배">로젠택배</option>
-                        <option value="대한통운">대한통운</option>
-                        <option value="경동택배">경동택배</option>
-                        <option value="">직접입력</option>
-                    </select>
-                    <!--<input type="text" value="" name="delivery_name" id="delivery_name" placeholder="택배사" required >-->
-                    <input type="text" value="" name="delivery_number" id="delivery_number" placeholder="운송장번호" required style="margin-top:0;">
-                </div>
-                <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="배송정보 등록" onclick="fnConfirmDelivery();" style="width:auto;margin-left:1vw" >
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="id08" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
-                <form name="write_from" id="write_from" method="post" action="">
-                    <h2>연락하기</h2>
-                    <div class="contacts">
-                        <ul>
+                <div class="con">
 
-                        </ul>
-                    </div>
-                    <div>
-                        <input type="button" value="닫기" onclick="modalClose2()">
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -122,7 +80,7 @@ $back_url = G5_URL;
                 <?php if($pro_img){?>
                 <div style="background-image:url('<?php echo $pro_img;?>');width:40vw;height:40vw;margin:3vw auto;background-size:cover;background-position: center;background-repeat:no-repeat;display:block;position: relative;border:2px solid #fff;"></div>
                 <?php }?>
-                <h2 style="text-align: center;font-size:4vw;"><?php echo $order["pd_tag"];?></h2>
+                <h2 style="text-align: center;font-size:4vw;margin:3vw auto;"><?php echo $order["pd_tag"];?></h2>
             </div>
             <div class="product_info" style="background-color:#fff;width: calc(100% - 8vw);padding: 2vw;margin: 2vw;">
                 <h2>주문정보</h2>
@@ -130,23 +88,25 @@ $back_url = G5_URL;
                     <li>주문자명 <span><?php echo $order["od_name"];?></span></li>
                     <li>배송지 <span><?php echo $order["od_zipcode"]." ".$order["od_addr1"]. " ".$order["od_addr2"];?></span></li>
                     <li>연락처 <span><?php echo hyphen_hp_number($order["od_tel"]);?></span></li>
-                    <li>주문시 요청사항 <span><?php echo $order["od_content"];?></span></li>
+                    <li>주문시 요청사항 <span><?php echo ($order["od_content"])?$order["od_content"]:"없음";?></span></li>
                 </ul>
             </div>
             <div class="product_info" style="background-color:#fff;width: calc(100% - 8vw);padding: 2vw;margin: 2vw;">
                 <h2>결제정보</h2>
                 <ul>
                     <li>결제 방식 <span><?php echo $paytype;?></span></li>
-                    <li>결제 상태 <span><?php echo $paystatus;?></span></li>
-                    <li>결제 금액 <span><?php echo number_format($order["od_price"]);?> 원</span></li>
-                    <?php if($order["od_pay_type"]==2){?>
-                    <li>가상계좌번호 <span><?php echo $order["vAccount"];?></span></li>
-                    <li>은행 <span><?php echo $order["vAccountBankName"];?></span></li>
-                    <li>입금 기간 <span><?php echo $order["vAccountDate"];?></span></li>
+                    <?php if($order["od_direct_status"]!=2){?>
+                        <li>결제 상태 <span><?php echo $paystatus;?></span></li>
+                        <li>결제 금액 <span><?php echo number_format($order["od_price"]);?> 원</span></li>
+                        <?php if($order["od_pay_type"]==2){?>
+                        <li>가상계좌번호 <span><?php echo $order["vAccount"];?></span></li>
+                        <li>은행 <span><?php echo $order["vAccountBankName"];?></span></li>
+                        <li>입금 기간 <span><?php echo $order["vAccountDate"];?></span></li>
+                        <?php }?>
                     <?php }?>
                 </ul>
             </div>
-            <?php if($order["od_pay_status"]==1 && $order["od_pd_type"] == 1 && $order["od_status"] == 1){?>
+            <?php if($order["od_pay_status"]==1 && $order["od_pd_type"] == 1 && $order["od_status"] == 1 && $order["od_direct_status"]!=2){?>
             <div class="product_info" style="background-color:#fff;width: calc(100% - 8vw);padding: 2vw;margin: 2vw;">
                 <h2>배송 정보</h2>
                 <ul>
@@ -156,34 +116,9 @@ $back_url = G5_URL;
                 </ul>
             </div>
             <?php }?>
-            <?php if($order["od_step"]!=2){?>
             <div class="order_view_btns">
-                <?php if($order["od_status"]==1 && $order["od_pay_status"]==1 && $member["mb_id"]==$order["pd_mb_id"] ){?>
-                    <?php if($order["delivery_name"]==""){?>
-                        <input type="button" value="배송정보 입력" onclick="fnDeli()">
-                    <?php }?>
-                    <?php if($order["od_pd_type"]==1 && $order["delivery_name"]!=""){?>
-                        <input type="button" value="배송/거래완료 요청" onclick="sendPush('<?php echo $order["mb_id"];?>','배송상태 및 거래완료 확인 요청입니다.','<?php echo $od_id;?>','<?php echo $order["pd_id"];?>')">
-                    <?php }?>
-                    <?php if($order["od_pd_type"]==2 && $order["od_step"] == 1){?>
-                        <input type="button" value="능력 완료금 요청" onclick="sendPush('<?php echo $order["mb_id"];?>','능력 이행 완료금 처리 요청입니다.','<?php echo $od_id;?>','<?php echo $order["pd_id"];?>')">
-                    <?php }?>
-                <?php }else if($order["od_status"]==1 && $order["od_pay_status"]==1 && $member["mb_id"]!=$order["pd_mb_id"]){?>
-                    <?php if($order["od_pd_type"]==2 && $order["od_step"] == 1){?>
-                        <input type="button" value="능력 완료금 결제" onclick="fnPayment2('<?php echo $od_id;?>')">
-                    <?php }?>
-                    <?php if($order["delivery_name"]==""){?>
-                        <input type="button" value="연락하기" onclick="fnShow('<?php echo $order["pd_mb_id"];?>')">
-                        <input type="button" value="한번 더 배송 요청" onclick="sendPush('<?php echo $order["pd_mb_id"];?>','배송 요청입니다.','<?php echo $od_id;?>','<?php echo $order["pd_id"];?>')">
-                        <input type="button" value="확인" onclick="location.href=g5_url">
-                        <!--<input type="button" value="결제 취소 요청" onclick="orderCancel('<?php /*echo $od_id;*/?>');">-->
-                    <?php }else{?>
-                        <!--<input type="button" value="배송 추적" onclick="fnDelivery()">-->
-                        <input type="button" value="거래 완료" class="fin_btn" onclick="fnOrderFin('<?php echo $od_id;?>','<?php echo $order["pd_mb_id"];?>')">
-                    <?php }?>
-                <?php }?>
+                <input type="button" value="확인" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/mypage.php?type=2'">
             </div>
-            <?php }?>
         </div>
     </div>
 <script>
@@ -237,14 +172,6 @@ $back_url = G5_URL;
         });
     }
 
-    /*function fnTalk(mb_id,pd_id){
-        location.href=g5_url+"/mobile/page/talk/talk_view.php?type=payment&pd_id="+pd_id+"&mb_id="+mb_id;
-    }*/
-
-    function fnPayment2(){
-
-    }
-
     function sendPush(mb_id,title,od_id,pd_id) {
         $.ajax({
             url:g5_url+"/mobile/page/ajax/ajax.send_push.php",
@@ -265,7 +192,6 @@ $back_url = G5_URL;
             dataType:"json",
             data:{pd_id:id,mb_id:mb_id,like_content:text}
         }).done(function(data){
-            console.log(data);
             if(data.result=="1"){
                 alert('이미 평가한 글입니다.');
             }else if(data.result=="2"){
@@ -281,20 +207,59 @@ $back_url = G5_URL;
     function fnShow(mb_id){
         // 연락자 정보 가져오기
         $.ajax({
-            url:g5_url+"/mobile/page/ajax/ajax.get_member.php",
+           url:g5_url+'/mobile/page/modal/modal.contact.php',
             method:"post",
-            data:{mb_id:mb_id},
-            dataType:"json"
+            data:{},
+            async:false
+        }).done(function(data){
+            $(".modal").html(data).addClass("active");
+            $.ajax({
+                url:g5_url+"/mobile/page/ajax/ajax.get_member.php",
+                method:"post",
+                data:{mb_id:mb_id},
+                dataType:"json"
+            }).done(function(data){
+                console.log(data);
+                $("#id08 .contacts ul").html('');
+                $("#id08 .contacts ul").append(data.obj);
+                //$("#mb_"+id).toggleClass("active");
+                $("#id08").css({"display":"block","z-index":"9002"});
+                $("#id08").css("display","block");
+                location.hash = "#modal";
+            });
+        });
+
+    }
+
+    function fnBlind(pd_id,cm_id){
+        $.ajax({
+            url:g5_url+"/mobile/page/blind_write.php",
+            method:"post",
+            data:{pd_id:pd_id,type:"modal",cm_id:cm_id}
+        }).done(function(data){
+            $("#id01s").css({"display":"block","z-index":"9002"});
+            $("#id01s .con").html('');
+            $("#id01s .con").append(data);
+            $("html, body").css("overflow","hidden");
+            $("html, body").css("height","100vh");
+            location.hash = "#blind";
+        });
+        /*$.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.blind_view.php",
+            method:"post",
+            data:{pd_id:pd_id}
         }).done(function(data){
             console.log(data);
-            $("#id08 .contacts ul").html('');
-            $("#id08 .contacts ul").append(data.obj);
-            //$("#mb_"+id).toggleClass("active");
-            $("#id08").css({"display":"block","z-index":"9002"});
-            $("#id08").css("display","block");
-            location.hash = "#modal";
         });
+        $("#id06").css("display","block");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");*/
     }
+    <?php if($alert=="true"){?>
+    $(function(){
+        alert("판매자가 배송정보를 입력하였습니다. 해당 거래는 5일 후 정오에 자동구매확정 됩니다. 문제가 있을 시에는 그 전에 판매자와 상의하시기 바랍니다.");
+    });
+    <?php }?>
 </script>
 <?php
 include_once (G5_PATH."/tail.php");

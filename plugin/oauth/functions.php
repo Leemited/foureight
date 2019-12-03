@@ -70,7 +70,7 @@ function opener_url_reload()
     echo '    popup.location.reload();'.PHP_EOL;
     echo '}'.PHP_EOL;
     echo 'window.close();'.PHP_EOL;
-    echo 'location.href=\'http://mave01.cafe24.com/\''.PHP_EOL;
+    echo 'location.href=\'http://484848.co.kr/\''.PHP_EOL;
     echo '</script>';
     exit;
 }

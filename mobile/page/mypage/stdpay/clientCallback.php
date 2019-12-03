@@ -1,86 +1,84 @@
 ﻿<?php
 include_once ("../../../../common.php");
-
 include_once (G5_MOBILE_PATH."/head.login.php");
-
 if($_REQUEST["rstCode"]=='00') {
+    $od_id = array_pop(explode("_",$_REQUEST["oid"]));
+    $sql = "select *,o.mb_id as mb_id,p.mb_id as pd_mb_id,p.pd_id as pd_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where o.od_id = '{$od_id}'";
+    $pro = sql_fetch($sql);
+    $app_mb_id = $pro["pd_mb_id"];
 
-    $sql = "select * from `order_temp` where pay_oid = '{$_REQUEST["oid"]}'";
-    $res = sql_query($sql);
-    while ($row = sql_fetch_array($res)) {
-        /*if ($payKind == 2) {
-            $od_pay_status = 2;
-            $set = ", vAccountTradeNo = '{$_REQUEST["vAccountTradeNo"]}', vAccount = '{$_REQUEST["vAccount"]}', vAccountBankName = '{$_REQUEST['vAccountBankName']}' , vAccountDate = '{$_REQUEST['vCriticalDate']}'";
-        } else {
-            $od_pay_status = 1;
-        }*/
-        
+    if($pro["pay_oid"] && $pro["pd_type"]==2 && $pro["od_step"]==1){ //2차결제
+        $sql = "update `order` set 
+                  pay_oid2 = '{$_REQUEST["pay_oid"]}',
+                  od_step = 2,
+                  od_step2_price = '{$salesPrice}'
+                  /*od_fin_status = 1,
+                  od_fin_datetime = now()*
+                  where od_id = '{$od_id}'
+                ";
+        sql_query($sql);
+
+        $pd_mb = get_member($pro["pd_mb_id"]);
+        //판매자에게 알림
+        if ($pd_mb["regid"]) {
+            $img = "";
+            if ($pro["pd_images"]) {
+                $imgs = explode(",", $pro["pd_images"]);
+                $img = G5_DATA_URL . "/product/" . $imgs[0];
+            }
+            send_FCM($pd_mb["regid"], "48 결제 완료 알림", $pro["pd_tag"] . "의 잔금결제가 완료 되었습니다.", G5_MOBILE_URL . '/page/mypage/mypage_order.php?type=2&od_cate=1&pd_type=' . $pro["pd_type"], 'fcm_buy_channel', '구매일림', $pd_mb["mb_id"], $pro['pd_id'], $img);
+        }
+    }
+    if($pro["pay_oid"]=="" && $pro["od_step"]==0){ //1차결제
         //주문상태 업데이트
-        $sql = "insert into `order` set 
-                      cid='{$row["cid"]}',
-                      pd_id='{$row["pd_id"]}',
-                      mb_id='{$row["mb_id"]}',
-                      pd_price='{$row["pd_price"]}',
-                      od_price='{$row["od_price"]}',
-                      od_status='{$row["od_status"]}',
-                      od_name='{$row["od_name"]}',
-                      od_tel='{$row["od_tel"]}',
-                      od_zipcode='{$row["od_zipcode"]}',
-                      od_addr1='{$row["od_addr1"]}',
-                      od_addr2='{$row["od_addr2"]}',
-                      od_content='{$row["od_content"]}',
-                      od_pay_type='{$row["od_pay_type"]}',
-                      od_pay_status='1', 
-                      od_date=now(),
-                      od_pd_type='{$row["od_pd_type"]}',
-                      od_step='{$row["od_step"]}',
-                      group_id='{$row["group_id"]}',
-                      pay_oid = '{$row["pay_oid"]}'
-                      {$set}
-                    ";
+        $sql = "update `order` set 
+                  od_pay_type='{$_REQUEST["payKind"]}',
+                  od_pay_status='1', 
+                  od_date=now(),
+                  od_step=1,
+                  pay_oid = '{$_REQUEST["oid"]}'
+                  where od_id = '{$od_id}'
+                ";
 
         sql_query($sql);
 
-        $od_id = sql_insert_id();
-
-        $sql = "select * from `product` where pd_id = '{$row["pd_id"]}'";
-        $pds = sql_fetch($sql);
-
-        if($row["od_pd_type"]==1) {
+        if ($pro["od_pd_type"] == 1) {
             //물건일 경우 판매 완료 처리
-            $sql = "update `product` set pd_status = 4 where pd_id = '{$row["pd_id"]}'";
+            $sql = "update `product` set pd_status = 10 where pd_id = '{$pro["pd_id"]}'";
             sql_query($sql);
 
+        } else {
+            //능력일경우
             //카트 상태 업데이트
-            $sql = "update `cart` set c_status = 10 where cid = '{$row['cid']}' ";
-            sql_query($sql);
-        }else{
-            //카트 상태 업데이트
-            $sql = "update `cart` set c_status = 3 where cid = '{$row['cid']}' ";
-            sql_query($sql);
-            if($pds["pd_price2"]) {
-                //주문 상태 스텝 업
-                $sql = "update `order` set od_step = 1 where od_id = '{$od_id}'";
+            /*$sql = "update `cart` set c_status = 1 where cid = '{$row['cid']}' ";
+            sql_query($sql);*/
+            if ($pro["pd_price2"]) {//계약금이 있는 경우
+                $sql = "update `order` set od_step = 1, od_step1_price = '{$od["od_price"]}' where od_id = '{$od_id}'";
                 sql_query($sql);
-            }else{
-                //계약완료 상태
+            } else {//계약금이 없는 경우
                 $sql = "update `order` set od_step = 2 where od_id = '{$od_id}'";
                 sql_query($sql);
             }
         }
-        $pd_mb = get_member($pds["mb_id"]);
+        $pd_mb = get_member($pro["pd_mb_id"]);
         //판매자에게 알림
-        if($pd_mb["regid"]) {
+        if ($pd_mb["regid"]) {
             $img = "";
-            if($pds["pd_images"]) {
-                $imgs = explode(",",$pds["pd_images"]);
-                $img = G5_DATA_URL."/product/".$imgs[0];
+            if ($pro["pd_images"]) {
+                $imgs = explode(",", $pro["pd_images"]);
+                $img = G5_DATA_URL . "/product/" . $imgs[0];
             }
-            send_FCM($pd_mb["regid"],"48 결제 완료 알림", $pds["pd_tag"]."의 결제가 완료 되었습니다.", G5_MOBILE_URL.'/page/mypage/order_history.php','fcm_buy_channel','구매일림',$pd_mb["mb_id"],$pds['pd_id'],$img);
+            send_FCM($pd_mb["regid"], "48 결제 완료 알림", $pro["pd_tag"] . "의 결제가 완료 되었습니다.", G5_MOBILE_URL . '/page/mypage/mypage_order.php?type=2&od_cate=1&pd_type=' . $pro["pd_type"], 'fcm_buy_channel', '구매일림', $pd_mb["mb_id"], $pro['pd_id'], $img);
         }
+        //}
     }
 }else{
-    echo "<script>location.replace('".G5_MOBILE_URL."/page/mypage/mypage.php?type=2')</script>";
+    $od_id = array_pop(explode("_",$_SESSION["oid"]));
+    $sql = "select *,o.mb_id as mb_id,p.mb_id as pd_mb_id,p.pd_id as pd_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where o.od_id = '{$od_id}'";
+    $pro = sql_fetch($sql);
+    //set_session('od_temp_id','');
+    //echo G5_MOBILE_URL."/page/mypage/orders.php?od_id={$od_id}&app_mb_id={$pro["mb_id"]}";
+    echo "<script>location.replace('".G5_MOBILE_URL."/page/mypage/orders.php?od_id={$od_id}&app_mb_id={$pro["mb_id"]}')</script>";
 }
 // 공통
 $mbrId=$_REQUEST["mbrId"];                                      // 가맹점아이디
@@ -91,7 +89,7 @@ $payKind= $_REQUEST["payKind"];                                 // 결제종류[
 $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
 ?>
 <style>
-    table{width:calc(100% - 4vw);padding:2vw;}
+    table{width:100%;padding:2vw;}
     table th{padding:2vw;text-align: center;font-size:1em;background-color: #fff;font-weight:normal;width:20%}
     table td{padding:2vw;text-align: left;font-size:1em;background-color:#fff;width:80%}
 </style>
@@ -99,21 +97,46 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
     <!--<div class="sub_back" onclick="location.href='<?php /*echo $back_url;*/?>'"><img src="<?php /*echo G5_IMG_URL*/?>/ic_menu_back.svg" alt=""></div>-->
     <h2><?php if($_REQUEST["rstCode"]=='00') {?>결제 완료 정보<?php }else{?>결제 취소 정보<?php }?></h2>
 </div>
-<?php if($_REQUEST["rstCode"]=='00') { ?>
+<?php if($_REQUEST["rstCode"]=='00') {
+$sql = "insert into `order_payment_info` set pay_oid = '{$oid}', pay_kind = '{$payKind}'";
+sql_query($sql);
+?>
 <div class="alert_list" >
+    <div class="list_con" style="height:auto;padding:0">
+        <div class="product_img">
+            <?php
+            if($pro["pd_images"]!="") {
+                $img = explode(",", $pro["pd_images"]);
+                $img1 = get_images(G5_DATA_PATH . "/product/" . $img[0], '', '');
+                if (is_file(G5_DATA_PATH . "/product/" . $img1)) {
+                    $pro_img = G5_DATA_URL . "/product/" . $img1;
+                } else {
+                    $pro_img = '';
+                }
+            }else{
+                $pro_img = '';
+            }
+            ?>
+            <?php if($pro_img){?>
+                <div style="background-image:url('<?php echo $pro_img;?>');width:40vw;height:40vw;margin:3vw auto;background-size:cover;background-position: center;background-repeat:no-repeat;display:block;position: relative;border:2px solid #fff;"></div>
+            <?php }?>
+            <h2 style="text-align: center;font-size:4vw;margin:3vw auto;"><?php echo $pro["pd_name"];?></h2>
+        </div>
+    </div>
     <table>
         <colgroup>
             <col width="40%">
             <col width="*">
         </colgroup>
-        <tr>
+
+        <!--<tr>
             <th>결과 메세지</th>
-            <td><?php echo $rstMsg; ?></td>
+            <td><?php /*echo $rstMsg; */?></td>
         </tr>
         <tr>
             <th>가맹점아이디</th>
-            <td><?php echo $mbrId; ?></td>
-        </tr>
+            <td><?php /*echo $mbrId; */?></td>
+        </tr>-->
         <tr>
             <th>결제금액</th>
             <td><?php echo $salesPrice; ?></td>
@@ -140,6 +163,9 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
             $cardName = $_REQUEST["cardName"];                       // 카드명
             $cardCode = $_REQUEST["cardCode"];                       // 카드코드
             $installNo = $_REQUEST["installNo"];                     // 할부개월
+
+            $sql = "insert into `order_payment_card_info` set pay_oid = '{$oid}', payType = '{$payType}', authType = '{$authType}', cardTradeNo = '{$cardTradeNo}', cardApprovDate = '{$cardApprovDate}', cardApprovTime = '{$cardApprovTime}', cardName = '{$cardName}', cardCode = '{$cardCode}', installNo = '{$installNo}'";
+            sql_query($sql);
             ?>
             <tr>
                 <th>결제 타입</th>
@@ -193,21 +219,24 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
                 <td><?php echo $vAccountBankName; ?></td>
             </tr>
         <?php } else if ($payKind == "3") {
-            $accountTradeNo = $_REQUEST["accountTradeNo"];           // 계좌이체 거래번호
-            $accountApprov = $_REQUEST["accountApprov"];             // 계좌이체 승인번호
-            $accountApprovDate = $_REQUEST["accountApprovDate"];     // 계좌이체 승인일
-            $accountApprovTime = $_REQUEST["accountApprovTime"];     // 계좌이체 승인시각
-            $accountBankName = $_REQUEST["accountBankName"];         // 거래은행명
-            $accountBankCode = $_REQUEST["accountBankCode"];         // 거래은행코드
+
+            $accountTradeNo = $_GET["accountTradeNo"];           // 계좌이체 거래번호
+            //$accountApprov = $_REQUEST["accountApprov"];             // 계좌이체 승인번호
+            $accountApprovDate = $_GET["ApprovDate"];     // 계좌이체 승인일
+            $accountApprovTime = $_GET["accountApprovTime"];     // 계좌이체 승인시각
+            $accountBankName = urldecode($_GET["accountBankName"]);         // 거래은행명
+            $accountBankCode = $_GET["accountBankCode"];         // 거래은행코드
+            $sql = "insert into `order_payment_account_info` set pay_oid = '{$oid}', accountTradeNo = '{$accountTradeNo}', accountApprov = '{$accountApprov}', accountApprovDate = '{$accountApprovDate}', accountApprovTime = '{$accountApprovTime}', accountBankName = '{$accountBankName}', accountBankCode = '{$accountBankCode}'";
+            sql_query($sql);
             ?>
             <tr>
                 <th>계좌이체 거래번호</th>
                 <td><?php echo $accountTradeNo; ?></td>
             </tr>
-            <tr>
+            <!--<tr>
                 <th>계좌이체 승인번호</th>
-                <td><?php echo $accountApprov; ?></td>
-            </tr>
+                <td><?php /*echo $accountApprov; */?></td>
+            </tr>-->
             <tr>
                 <th>계좌이체 승인일</th>
                 <td><?php echo $accountApprovDate; ?></td>
@@ -244,8 +273,8 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
 <?php }else{?>
 
 <?php }
-	//echo("<pre>");
-	/*echo("<table width='565' style='width:100%;' align = 'center' border='0' cellspacing='0' cellpadding='0' bgcolor='#FFFFFF'>");
+	/*echo("<pre>");
+	echo("<table width='565' style='width:100%;' align = 'center' border='0' cellspacing='0' cellpadding='0' bgcolor='#FFFFFF'>");
 	echo "<colgroup><col width='30%'><col width='*'></colgroup>";
 	echo("<tr><th class='td01'><p>결과코드</p></th>");
 	echo("<td class='td02'><p>" . $rstCode . "</p></td></tr>");
@@ -380,8 +409,7 @@ $salesPrice=$_REQUEST["salesPrice"];                            // 결제 금액
 
 
     <div class="btns" style="width:100%;padding:6vw 0;background-color:#fff;text-align: center;position: absolute;bottom:0;left:0;">
-        <!--<input type="button" value="결제 확인" class="input_btn" onclick="location.reload();" style="width:50%;background-color:#595959;color:#fff;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;font-size:3.5vw;padding:2.2vw 0;border:none;font-family: 'nsr', sans-serif;">-->
-        <input type="button" value="결제 확인" class="input_btn" onclick="location.href=g5_url+'/mobile/page/mypage/order_view.php?od_id=<?php echo $od_id;?>'" style="width:50%;background-color:#595959;color:#fff;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;font-size:3.5vw;padding:2.2vw 0;border:none;font-family: 'nsr', sans-serif;">
+        <input type="button" value="결제 확인" class="input_btn" onclick="location.replace(g5_url+'/mobile/page/mypage/mypage_order.php?od_cate=2&pd_type=<?php echo $pro["pd_type"];?>&od_id=<?php echo $od_id;?>&app_mb_id=<?php echo $pro["mb_id"];?>')" style="width:50%;background-color:#595959;color:#fff;-webkit-border-radius: 10vw;-moz-border-radius: 10vw;border-radius: 10vw;font-size:3.5vw;padding:2.2vw 0;border:none;font-family: 'nsr', sans-serif;">
     </div>
 </div>
 <?php

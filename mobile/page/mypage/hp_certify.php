@@ -57,7 +57,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
        },1000);
     });
     // 휴대폰인증
-    $("#win_hp_cert").click(function() {
+    $("#win_hp_cert , #showhp").click(function() {
         if(!cert_confirm())
             return false;
 

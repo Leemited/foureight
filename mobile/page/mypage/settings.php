@@ -18,6 +18,10 @@ if(strpos($agent,"foureight")!==false){
 }
 
 $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member[mb_id]}'");
+$passwdAuth = true;
+if($sns_login!=null){
+    $passwdAuth = false;
+}
 
 ?>
 <div class="sub_head">
@@ -26,6 +30,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 </div>
 <div id="settings" class="main">
 	<div class="setting_wrap_top">
+		<div class="profile">
 		<div class="profile">
             <form action="<?php echo G5_MOBILE_URL;?>/page/ajax/ajax.profile_upload.php" enctype="multipart/form-data" method="post" id="profile_form">
                 <input type="hidden" name="mb_no" id="mb_no" value="<?php echo $member["mb_no"];?>">
@@ -67,8 +72,10 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
 			<li onclick="fnEditNick();">닉네임 <span><?php echo ($member["mb_nick"])?$member["mb_nick"]:"닉네임이 설정되지 않았습니다.";?></span></li>
 			<li onclick="fnEditTel('<?php echo $member["mb_hp"];?>');">전화번호 <span><?php if($member["mb_certify"]!="hp"){echo "미인증"; }else{echo "인증완료";}?>&nbsp;&nbsp;<?php echo ($member["mb_hp"])?$member["mb_hp"]:"연락처를 표시 할 수 없습니다.";?></span></li>
 			<!--<li class="set_sex">성별설정 <span><input type="radio" value="" name="mb_sex" id="no-sex" <?php /*if($member["mb_sex"]==""){*/?>checked<?php /*}*/?>><label for="no-sex">비공개</label><input type="radio" value="F" name="mb_sex" id="woman" <?php /*if($member["mb_sex"]=="F"){*/?>checked<?php /*}*/?>><label for="woman">여성</label> <input type="radio" value="M" name="mb_sex" id="man" <?php /*if($member["mb_sex"]=="M"){*/?>checked<?php /*}*/?>><label for="man">남성</label></span></li>-->
+            <?php if($passwdAuth==true){?>
 			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/password_settings.php?id=<?php echo $settings['id'];?>'">비밀번호 변경</li>
-			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/address_settings.php?id=<?php echo $settings['id'];?>'">주소변경</li>
+            <?php }?>
+			<li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/address_settings.php?id=<?php echo $settings['id'];?>'">주소변경 <span>배송시 필요</span></li>
 		</ul>
 	</div>
 	<div class="setting_wrap">
@@ -78,7 +85,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
             <li>전화가능 <label class="switch2"><input type="checkbox" id="hp_set" name="hp_set" <?php if($settings["hp_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
 			<li>문자가능 <label class="switch2"><input type="checkbox" id="sms_set" name="sms_set" <?php if($settings["sms_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
 			<li>대화가능 <label class="switch2"><input type="checkbox" id="chat_set" name="chat_set" <?php if($settings["chat_set"]==1){echo "checked";}?> class="set_contact"><span class="set_slider round"></span></label></li>
-			<li>댓글가능 <label class="switch2"><input type="checkbox" id="comment_set" name="comment_set" <?php /*if($settings["comment_set"]==1){echo "checked";}*/?> ><span class="set_slider round"></span></label></li>
+			<li>댓글가능 <label class="switch2"><input type="checkbox" id="comment_set" name="comment_set" <?php if($settings["comment_set"]==1){echo "checked";}?> ><span class="set_slider round"></span></label></li>
 		</ul>
 	</div>
 	<div class="setting_wrap">
@@ -104,7 +111,7 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
         <h2>정산설정</h2>
         <ul>
             <!--<li onclick="location.href='<?php /*echo G5_MOBILE_URL*/?>/page/mypage/my_card.php?id=<?php /*echo $settings['id'];*/?>'">카드등록</li>-->
-            <li onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_bank.php?id=<?php echo $settings['id'];?>'">정산계좌등록</li>
+            <li class="single" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/my_bank.php?id=<?php echo $settings['id'];?>'">정산계좌등록</li>
         </ul>
     </div>
 	<div class="setting_wrap">
@@ -121,6 +128,14 @@ $sns_login = sql_fetch("select * from `g5_social_member` where mb_id = '{$member
             <li class="single" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/member_block_list.php?id=<?php echo $settings['id'];?>'">차단회원 목록</li>
         </ul>
     </div>
+    <?php if($check){?>
+    <div class="setting_wrap ">
+        <h2>기기등록</h2>
+        <ul>
+            <li class="single" onclick="location.href='<?php echo G5_MOBILE_URL?>/page/mypage/device_add.php?id=<?php echo $settings['id'];?>'">연결기기등록</li>
+        </ul>
+    </div>
+    <?php }?>
     <?php if($is_member){?>
     <div class="setting_wrap ">
         <h2>로그아웃</h2>

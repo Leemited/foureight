@@ -47,7 +47,7 @@ while($row = sql_fetch_array($res)){
 </div>
 <script>
 function fnTalkView(pd_id,send_mb_id,read_mb_id,back,roomid){
-    location.href= g5_url+"/mobile/page/talk/talk_view.php?pd_id="+pd_id+"&send_mb_id="+send_mb_id+"&back="+back+"&roomid="+roomid;
+    location.href= g5_url+"/mobile/page/talk/talk_view.php?pd_id="+pd_id+"&send_mb_id="+send_mb_id+"&roomid="+roomid;
 }
 </script>
 <?php

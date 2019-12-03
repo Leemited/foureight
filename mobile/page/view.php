@@ -76,11 +76,16 @@ if($mb_id == ""){
 
 //해당 제품의 판매 여부
 if($view["pd_type"]==1) {
-    $sql = "select count(*)as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_step = 2 and pd_id = '{$pd_id}'";
+    //제품 구매완료 확인
+    $sql = "select count(*)as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_fin_status = 1 and pd_id = '{$pd_id}'";
 }else{
-    $sql = "select count(*)as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_step = 2 and pd_id = '{$pd_id}'";
+    //능력 거래중 확인
+    $sql = "select count(*)as cnt from `order` where od_status = 1 and od_pay_status = 1 and od_fin_status = 0 and pd_id = '{$pd_id}' and mb_id = '{$mb_id}'";
 }
 $pdorder = sql_fetch($sql);
+
+
+
 //해당 제품의 대화목록
 $sql = "select  * from `product_chat` where pd_id = {$pd_id} and (send_mb_id = '{$mb_id}' or read_mb_id = '{$mb_id}') order by msg_datetime asc";
 $res = sql_query($sql);
@@ -154,8 +159,9 @@ $likeper = false; // 구매자 파악
 $likewrite = true;
 if($view["pd_type"]==1) {
     //좋아요 카운트
-    $sql = "select count(*) as cnt from `product_like` where pd_type = 1";
-    $viewlikecnt = sql_fetch($sql);
+    //$sql = "select count(*) as cnt from `product_like` where pd_type = 1 and pd_mb_id = '{$view["mb_id"]}'";
+    //$viewlikecnt = sql_fetch($sql);
+    $viewlikecnt = $member["mb_4"];
     //좋아요 권한, 구매 확인
     $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1 and od_pay_status = 1 and od_step = 2";
     $chkLike = sql_fetch($sql);
@@ -175,7 +181,8 @@ if($view["pd_type"]==1) {
 }else {
     //좋아요 카운트
     $sql = "select count(*) as cnt from `product_like` where pd_id = {$view["pd_id"]}";
-    $viewlikecnt = sql_fetch($sql);
+    $viewlike = sql_fetch($sql);
+    $viewlikecnt = $viewlike["cnt"];
     //좋아요 권한, 구매 확인
     $sql = "select count(*) as cnt from `order` where pd_id = '{$view["pd_id"]}' and mb_id = '{$member["mb_id"]}' and od_status = 1 and od_pay_status = 1 ";
     $chkLike = sql_fetch($sql);
@@ -192,21 +199,27 @@ if($view["pd_type"]==1) {
         // 구매하지 않음
         $likeper = false;
     }
+
+    $sql = "select * from `product_like` where pd_id='{$view["pd_id"]}'";
+    $likeres = sql_query($sql);
+    while($row = sql_fetch_array($likeres)){
+        $likelist[] = $row;
+    }
 }
 
 switch ($view["pd_price_type"]){
     case 0:
-        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_01.svg' alt=''></span>";
+        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_02.png' alt=''></span>";
         break;
     case 1:
-        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_02.svg' alt=''></span>";
+        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_01.png' alt=''></span>";
         break;
     case 2:
-        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_03.svg' alt=''></span>";
+        $pd_price_type = "<span class='pd_price_type'><img src='".G5_IMG_URL."/ic_product_time_03.png' alt=''></span>";
         break;
 }
+ include_once(G5_PATH .'/' . G5_PLUGIN_DIR . '/nodejs_connect/simple_view.php');
 ?>
-<?php include_once(G5_PATH .'/' . G5_PLUGIN_DIR . '/nodejs_connect/simple_view.php');?>
 <style>
     .DetailImage{width:100%;height:100%;background-color:#000;position:absolute;z-index:90000;top:0;left:0;overflow: hidden;transform:translate(0, 0)}
     .DetailImage #imgs{width:100%;height:100%;display:inline-block;vertical-align: middle}
@@ -215,15 +228,20 @@ switch ($view["pd_price_type"]){
     .DetailImage .list2{white-space: nowrap;position: relative;font-size: 0;width: 100%;height: 100%;;-webkit-transition: all 500ms;-moz-transition: all 500ms;-ms-transition: all 500ms;-o-transition: all 500ms;transition: all 500ms;}
     .DetailImage .list2 .item2{width:100%;height:100%;display:inline-block;}
 </style>
+
 <div class="DetailImage" id="DetailImage">
     <div id="imgs">
         <ul class="list2">
             <?php if(count($photo)>0 || $view["pd_images"]!=""){?>
             <?php for($i=0;$i<count($photo);$i++){
-                $imgs = get_images(G5_DATA_PATH."/product/".$photo[$i],'','');
+                if(strpos($photo[$i],"gif")!==false){
                 ?>
-                <li class="item2" id="item2" style="background-image:url('<?php echo G5_DATA_URL;?>/product/<?php echo $imgs?>');background-size:contain;background-repeat:no-repeat;background-position:center">
-                </li>
+                    <li class="item2" id="item2" style="background-image:url('<?php echo G5_DATA_URL;?>/product/<?php echo $photo[$i]?>');background-size:contain;background-repeat:no-repeat;background-position:center"></li>
+            <?php }else{
+                    $imgs = get_images(G5_DATA_PATH."/product/".$photo[$i],720,'');
+                    ?>
+                    <li class="item2" id="item2" style="background-image:url('<?php echo G5_DATA_URL;?>/product/<?php echo $imgs?>');background-size:contain;background-repeat:no-repeat;background-position:center"></li>
+            <?php }?>
             <?php }?>
             <?php }
             if ($view["pd_video"]!=""){?>
@@ -246,15 +264,17 @@ switch ($view["pd_price_type"]){
     <div class="price">
         <h1><?php echo $view["pd_tag"];?></h1>
         <h2> <!--<span><?php /*if($view['pd_type']==1){ if($view['pd_type2']==4){ */?>구매예상금액<?php /*}else{*/?>판매금액<?php /*} }else{ if($view['pd_type2']==4){*/?>구매예상금액<?php /*}else{*/?>계약금<?php /*} }*/?></span>-->
-            <?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]+$view["pd_price2"]);}else{echo "0원";}?></h2>
-            <?php if($view["pd_type"]==1 && $view["pd_type2"]== 8 && $view["mb_id"] != $member["mb_id"]){?>
-            <div class="sell_btn">
-                <input type="button" value="구매예약" class="btn" onclick="fnSell()">
-            </div>
-            <?php }else{?>
-            <div class="sell_btn">
-                <input type="button" value="구매요청하기" class="btn" onclick="fnSell()">
-            </div>
+            <?php if($view["pd_price"]>0){echo "￦ ".number_format($view["pd_price"]+$view["pd_price2"]);}else{echo "무료나눔";}?></h2>
+            <?php if($pdorder["cnt"]==0){?>
+                <?php if($view["pd_type"]==1 && $view["pd_type2"]== 8 && $view["mb_id"] != $member["mb_id"]){?>
+                    <div class="sell_btn">
+                        <input type="button" value="구매예약" class="btn" onclick="fnSell()">
+                    </div>
+                <?php }else{?>
+                    <div class="sell_btn">
+                        <input type="button" value="제시하기" class="btn" onclick="fnPricing('<?php echo $view["pd_id"];?>',2)">
+                    </div>
+                <?php }?>
             <?php }?>
         <div class="price_bg"></div>
     </div>
@@ -379,7 +399,7 @@ switch ($view["pd_price_type"]){
             <input type="text" value="<?php if($view["pd_price"]>0){echo $view["pd_price"];}?>" name="price" id="price" placeholder="판매가격" required>
         </div>
         <div>
-            <input type="button" value="취소" onclick="modalClose()"><input type="button" value="구매하기" onclick="addSell();" style="width:auto;background-color:" >
+            <input type="button" value="취소" onclick="modalClose()"><input type="button" value="구매하기" onclick="addSell('');" style="width:auto;background-color:" >
         </div>
     </div>
 </div>
@@ -408,7 +428,7 @@ switch ($view["pd_price_type"]){
     <div class="view_bottom">
         <div class="profile">
             <?php if($profile["mb_id"]!=$member["mb_id"]){?>
-            <div class="profile_menu active">
+            <div class="profile_menu <?php if($is_member){?>active<?php }?>">
                 <div class="menu1" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/mypage/mypage.php?mode=profile&pro_id=<?php echo $view["mb_id"];?>'"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_profile.svg" alt=""></div><div class="text_box">프로필</div></div>
                 <?php if($profile["chat_set"]==1){?>
                 <div class="menu2" onclick="fnTalk();"><div class="icon_box"><img src="<?php echo G5_IMG_URL?>/view_menu_talk.svg" alt=""></div><div class="text_box">간편대화</div></div>
@@ -441,35 +461,58 @@ switch ($view["pd_price_type"]){
 
             </div>
             <?php }?>
-            <div class="img" onclick="fnProfileMenu();">
-                <?php if($profile["mb_profile"]){
-                    ?>
-                    <img src="<?php echo $profile["mb_profile"];?>" alt="" class="proimg">
-                <?php }else{ ?>
-                    <img src="<?php echo G5_IMG_URL?>/no-profile.svg" alt="">
-                <?php } ?>
+            <?php
+            if($profile["mb_profile"]) {
+                $img = array_pop(explode("/", $profile["mb_profile"]));
+                $img1 = get_images(G5_DATA_PATH . "/profile/" . $profile["mb_no"] . "/" . $img, 500, '');
+            }
+            ?>
+            <div class="img" onclick="<?php if($is_member){?>fnProfileMenu();<?php }else{?>location.href=g5_bbs_url+'/login.php'<?php }?>" style="<?php if(is_file(G5_DATA_PATH."/profile/".$profile["mb_no"]."/".$img)){?>background-image:url('<?php echo G5_DATA_URL."/profile/".$profile["mb_no"]."/".$img1;?>');<?php }else{?>background-image:url('<?php echo G5_IMG_URL?>/no-profile.svg');<?php }?>background-size:cover;background-position:center;background-repeat:no-repeat;">
+                <?php /*if(is_file(G5_DATA_PATH."/profile/".$profile["mb_no"]."/".$img)){*/?><!--
+                    <img src="<?php /*echo G5_DATA_URL."/profile/".$profile["mb_no"]."/".$img1;*/?>" alt="" class="proimg" style="display:none;">
+                <?php /*}else{ */?>
+                    <img src="<?php /*echo G5_IMG_URL*/?>/no-profile.svg" alt="" style="display:none;">
+                --><?php /*} */?>
             </div>
             <span class="txt">
-                <div><?php echo $profile[mb_nick];?></div>
+                <div><?php echo $profile['mb_nick'];?></div>
             </span>
-            <?php if($profile["like_set"]== 1 && $view["pd_type2"] == 8){?>
+            <?php //if($profile["like_set"]== 1 && $view["pd_type2"] == 8){?>
             <div class="pd_like" id="<?php echo $view["pd_id"];?>">
                 <img src="<?php echo G5_IMG_URL?>/view_like.svg" alt="" class="likeimg" >
-                <span><?php echo $viewlikecnt["cnt"];?></span>
+                <span><?php echo number_format($viewlikecnt);?></span>
             </div>
-            <?php }?>
+            <?php //}?>
         </div>
         <div class="content <?php if($view["pd_type"]==2 && $view["pd_price"] && $view["pd_price2"]){?>content_height<?php }?>">
             <h2><?php echo $view["pd_tag"];?></h2>
-            <?php if($view["pd_price"]==0){?>
-                <h1><?php echo "제시요망";?></h1>
+            <?php if($view["pd_price"]+$view["pd_price2"]==0){?>
+                <h1><?php echo ($view["pd_type2"]=="8")?"무료나눔":"제시요망";?></h1>
             <?php }else{
+                $pp = $view["pd_price"]+$view["pd_price2"];
                 ?>
-                <h1><?php if($view["pd_type"]==1){echo "￦ ".number_format($view["pd_price"]); }else{ if($view["pd_price"] && $view["pd_price2"]){echo  "<span class='price_span'>".$pd_price_type."계약금 : ￦ ".number_format($view["pd_price2"]). "</span><span class='price_span'>거래완료금 : ￦ " .number_format($view["pd_price"])."</span>"; }else if($view["pd_price"] && $view["pd_price2"] == 0){ echo $pd_price_type."￦ ".number_format($view["pd_price"]); } }?></h1>
+                <h1>
+                    <?php if($view["pd_type"]==1){
+                        echo "￦ ".number_format($view["pd_price"]); 
+                    }else{ 
+                        if($view["pd_price"] && $view["pd_price2"]){
+                            echo  "<span class='price_span tops'>".$pd_price_type."계약금 : ￦ ".number_format($view["pd_price2"]). "</span><span class='price_span'>거래완료금 : ￦ " .number_format($view["pd_price"])."</span>"; 
+                        }else if($view["pd_price"] > 0 && $view["pd_price2"] == 0){ 
+                            echo $pd_price_type."￦ ".number_format($view["pd_price"]);
+                        }else if($view["pd_price"]==0 && $view["pd_price2"] > 0){
+                            echo "<span class='price_span tops'>".$pd_price_type."계약금 : ￦ ".number_format($view["pd_price2"])."</span><span class='price_span'>거래완료금 없음</span>";
+                        }
+                    }?>
+                </h1>
             <?php }?>
         </div>
         <div class="view_btns">
-            <?php if($member["mb_id"] == $view["mb_id"]){
+            <?php
+            if($view["mb_id"]=="admin"){
+                $width = 1;
+                ?>
+                <input type="button" disabled value="광고">
+            <?php }else if($is_member && $member["mb_id"] == $view["mb_id"]){
                 $width = 3;
                 ?>
                 <?php if($pdorder["cnt"]==0){?>
@@ -479,26 +522,28 @@ switch ($view["pd_price_type"]){
                 <input type="button" value="상단UP" onclick="fnProductUp();" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>">
                 <?php } ?>
                 <input type="button" value="상태변경" onclick="fnStatus('<?php echo $view["pd_id"];?>','<?php echo $view["pd_status"];?>','<?php echo $view["pd_type"];?>');" >
-                <input type="button" value="수정" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/write.php?pd_id=<?php echo $pd_id;?>'">
+                <input type="button" value="수정" onclick="location.href='<?php echo G5_MOBILE_URL;?>/page/write.php?pd_id=<?php echo $pd_id;?>&return_url=<?php echo $_SERVER["HTTP_REFERER"];?>'">
                 <?php } ?>
-                <input type="button" value="삭제" onclick="fnDelete('<?php echo $view[pd_id];?>')">
+                <input type="button" value="삭제" onclick="fnDelete('<?php echo $view["pd_id"];?>','<?php echo $_SERVER["HTTP_REFERER"];?>')">
             <?php }else{
                 $width = 1;
                 ?>
-                <?php if($pdorder["cnt"]==0){?>
                 <?php if($view["pd_type2"] == 8){?>
                     <?php if($view["pd_type"]==1){?>
+                    <?php if($view["pd_status"]==9){?>
+                        <input type="button" disabled value="판매완료">
+                    <?php }else{?>
                     <?php if($view["pd_discount"]==1){
                         $width = 2; ?>
                     <input type="button" value="딜하기" onclick="fnPricing('<?php echo $view["pd_id"];?>',1)">
                     <?php }?>
-                        <input type="button" value="구매예약" class="point <?php if ($view["pd_type"] == 2) { ?> bg2 <?php } ?>" onclick="fnSell()">
-                    <?php
+                        <input type="button" value="구매예약" class="point <?php if ($view["pd_type"] == 2) { ?> bg2 <?php } ?>" onclick="fnSell('<?php echo $view["pd_price"];?>')">
+                    <?php }
                     }else{
                         $width = 2;
                         ?>
                     <input type="button" value="대화하기" onclick="fnTalk();">
-                    <input type="button" value="계약하기" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>" onclick="fnSell2()">
+                    <input type="button" value="예약하기" class="point <?php if($view["pd_type"]==2){?> bg2 <?php }?>" onclick="fnSell2('<?php echo $view["pd_price"];?>','<?php echo $view["pd_price2"];?>')">
                     <?php }?>
                 <?php }else if($view["pd_type2"] == 4){
                     $width = 2;
@@ -507,7 +552,6 @@ switch ($view["pd_price_type"]){
                     <input type="button" value="대화하기" onclick="fnTalk();">
                 <?php }?>
                 <?php }?>
-            <?php }?>
         </div>
         <div class="view_bottom_bg"></div>
     </div>
@@ -529,7 +573,7 @@ switch ($view["pd_price_type"]){
                              현재 <span class="count_<?php echo $pd_id;?>"></span>명이 이글을 보고 있습니다.
                          </div>
                      </div>
-                    <div class="view_blind_cnt" <?php if($view["mb_id"]!= $member["mb_id"] && $blind_cnt['cnt'] <= 0 ){?>onclick="fnBlind('<?php echo $pd_id;?>','')"<?php }?>>
+                    <div class="view_blind_cnt" <?php if($is_member){ if($view["mb_id"] != $member["mb_id"] && $blind_cnt['cnt'] == 0 ){?>onclick="fnBlind('<?php echo $pd_id;?>','')"<?php } }?>>
                         <?php
                         switch ($view["pd_blind"]){
                             case 0:
@@ -585,7 +629,7 @@ switch ($view["pd_price_type"]){
                     <p><?php echo ($view["pd_infos"])? nl2br($view["pd_infos"]) :"등록된 거래 조건 및 유의 사항이 없습니다.";?></p>
                     <?php }?>
                     <h2>상세설명</h2>
-                    <p><?php echo ($view["pd_content"]!=" ")? str_replace("<br>","\n",$view["pd_content"]) :"등록된 상세 설명이 없습니다.";?></p>
+                    <p><?php echo ($view["pd_content"]!=" ")? nl2br($view["pd_content"]) :"등록된 상세 설명이 없습니다.";?></p>
                 </div>
                 <?php if($view["pd_timeTo"] && $view["pd_timeFrom"] && $view["pd_type"] == 2 && $view["pd_type2"] == 8){?>
                 <div class="pd_times">
@@ -598,7 +642,7 @@ switch ($view["pd_price_type"]){
                     for($i=0;$i<count($links);$i++){?>
                     <div class="jetpack-video-wrapper">
                         <span class="embed-youtube" style="text-align:center; display: block;">
-                            <iframe class="youtube-player" type="text/html" src="https://www.youtube.com/embed/<?php echo $links[$i];?>?version=3&rel=1&fs=1&autohide=2&showsearch=0&showinfo=1&iv_load_policy=1&wmode=transparent" allowfullscreen="true" style="border: 0px; display: block; margin: 0px; height: 55vw;" data-ratio="0.5625" data-width="560" data-height="315"></iframe>
+                            <iframe class="youtube-player" type="text/html" src="https://www.youtube.com/embed/<?php echo $links[$i];?>?version=3&rel=1&fs=1&autohide=2&showsearch=0&showinfo=1&iv_load_policy=1&wmode=transparent&enablejsapi=1&version=3&playerapiid=ytplayer" allowfullscreen="true" style="border: 0px; display: block; margin: 0px; height: 55vw;" data-ratio="0.5625" data-width="560" data-height="315"></iframe>
                         </span>
                     </div>
                     <?php } ?>
@@ -676,7 +720,7 @@ switch ($view["pd_price_type"]){
 <!--                        메시지를 입력하세요 <input type='text' id='txtChat' name="txtChat">-->
 <!--                    </div>-->
 <!--                </div>-->
-                <?php if(count($pricing)>0 && $is_member && $view["mb_id"]==$member["mb_id"]){?>
+                <?php if(count($pricing)>0 && $is_member ){?>
                 <div class="comment">
                     <h2><?php if($view["pd_type2"]=="4"){?>제시목록<?php }else if($view["pd_type2"]=="8"){?>딜목록<?php }?></h2>
                     <div class="pricing cm_box">
@@ -699,7 +743,9 @@ switch ($view["pd_price_type"]){
                                     </div>
                                     <?php if($member["mb_id"] == $view["mb_id"]){ ?>
                                     <div style="position:relative;text-align: right">
+                                        <?php if($pricing[$i]["pricing_pd_id"]){?>
                                         <input type="button" value="상품보기" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;margin-right:1vw' onclick="fn_viewer('<?php echo $pricing[$i]["pricing_pd_id"];?>')">
+                                        <?php }?>
                                         <input type="button" value="구매요청" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;' onclick="fnPricing3('<?php echo $pricing[$i]["pricing_pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing[$i]["id"];?>')">
                                     </div>
                                     <?php }?>
@@ -782,15 +828,6 @@ switch ($view["pd_price_type"]){
                                             <?php if($comment[$i]["mb_id"]!=$member["mb_id"]){?>
                                             <li onclick="fnRecom('<?php echo $comment[$i]["cm_id"];?>','<?php echo $comment[$i]["member_id"]; ?>','<?php echo $comment[$i]["mb_name"];?>','<?php echo $comment[$i]["comment_status"];?>')" >답글</li>
                                             <?php }?>
-
-                                            <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $view["pd_id"];*/?>','<?php /*echo $comment[$i]["cm_id"];*/?>');">신고</li>
-                                            <?php /*if($comment[$i]["comment_re"]== 0){*/?>
-                                            <li>댓글 <span><?php /*echo number_format($comment[$i]["re_comment_cnt"]);*/?></span></li>
-                                            <?php /*}*/?>
-                                            <?php /*if($comment[$i]["mb_id"]!=$member["mb_id"] ){*/?>
-                                            <li onclick="fnLike('no','<?php /*echo $comment[$i]["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["unlike"]);*/?></span></li>
-                                            <li onclick="fnLike('yes','<?php /*echo $comment[$i]["cm_id"];*/?>')">추천 <span class="like<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["like"]);*/?></span></li>
-                                            --><?php /*}  */?>
                                         </ul>
                                         <?php }
                                         }else{ ?>
@@ -800,14 +837,6 @@ switch ($view["pd_price_type"]){
                                                 <?php if($comment[$i]["mb_id"]!=$member["mb_id"]){?>
                                                     <li onclick="fnRecom('<?php echo $comment[$i]["cm_id"];?>','<?php echo $comment[$i]["member_id"]; ?>','<?php echo $comment[$i]["mb_name"];?>','<?php echo $comment[$i]["comment_status"];?>')" >답글</li>
                                                 <?php }?>
-                                                <!--<li><img src="<?php /*echo G5_IMG_URL*/?>/ic_comment_blind.png" alt="" onclick="fnBlind('<?php /*echo $view["pd_id"];*/?>','<?php /*echo $comment[$i]["cm_id"];*/?>');">신고</li>
-                                                <?php /*if($comment[$i]["comment_re"]== 0){*/?>
-                                                    <li>댓글 <span><?php /*echo number_format($comment[$i]["re_comment_cnt"]);*/?></span></li>
-                                                <?php /*}*/?>
-                                                <?php /*if($comment[$i]["mb_id"]!=$member["mb_id"]){*/?>
-                                                <li onclick="fnLike('no','<?php /*echo $comment[$i]["cm_id"];*/?>')">반대 <span class="unlike<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["unlike"]);*/?></span></li>
-                                                <li onclick="fnLike('yes','<?php /*echo $comment[$i]["cm_id"];*/?>')">추천 <span class="like<?php /*echo $comment[$i]["cm_id"];*/?>"><?php /*echo number_format($comment[$i]["like"]);*/?></span></li>
-                                                --><?php /*}*/?>
                                             </ul>
                                         <?php }?>
                                     </div>
@@ -861,6 +890,38 @@ switch ($view["pd_price_type"]){
                     </div>
                 </div>
                 <?php }?>
+                <?php if(count($likelist)>0){?>
+                    <div class="comment">
+                        <h2>이용 후기</h2>
+                        <div class="pricing cm_box">
+                            <ul class="pri_container <?php if($view["pd_type"]==2){?>bg2<?php }?>">
+                                <?php
+                                for($i=0;$i<count($likelist);$i++){
+
+                                        ?>
+                                        <!--<li onclick="fn_viewer2('<?php /*echo $pricing[$i]["pricing_pd_id"];*/?>')">-->
+                                        <li>
+                                            <div style="position: relative">
+                                                <div class="coms" style="padding:0;position:relative;left:0;margin:0;">
+                                                    <p style="margin:0;font-weight:normal;color:#898989;font-size:3vw"><span <?php if($member["mb_id"] == $view["mb_id"]){ ?>onclick="fnShow('<?php echo $pricing[$i]["id"];?>')" <?php }?> style="text-decoration: underline;font-size:3.2vw;color:#101010"><strong><?php echo $mb["mb_nick"];?></strong></span> / <?php echo display_datetime($pricing[$i]["sign_date"]);?>  / <span style="font-size:3vw;">거리 : <?php echo distTran($pricing[$i]["distance"]);?></span></p>
+                                                    <h2 style="margin-top:2vw;margin-bottom:2.5vw;width:100%;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;word-break: keep-all;"><?php echo $pricing[$i]["pricing_content"];?></h2>
+                                                </div>
+                                                <span style="position:absolute;top:0;right:0;color:#101010"><?php echo "딜가격 : ￦ ".number_format($pricing[$i]["pricing_price"]);?></span>
+                                            </div>
+                                            <?php if($member["mb_id"] == $view["mb_id"]){ ?>
+                                                <div style="position:relative;text-align: right">
+                                                    <?php if($pricing[$i]["pricing_pd_id"]){?>
+                                                        <input type="button" value="상품보기" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;margin-right:1vw' onclick="fn_viewer('<?php echo $pricing[$i]["pricing_pd_id"];?>')">
+                                                    <?php }?>
+                                                    <input type="button" value="구매요청" style='background-color:transparent;border:1px solid #acacac;color: #7a7a7a;padding: 1vw 2vw;border-radius: 10vw;font-weight: bold;font-family:"nsr",Sans-serif;font-weight:normal;font-size:3vw;' onclick="fnPricing3('<?php echo $pricing[$i]["pricing_pd_id"];?>','<?php echo $pricing[$i]["pricing_price"];?>','<?php echo $pricing[$i]["id"];?>')">
+                                                </div>
+                                            <?php }?>
+                                        </li>
+                                <?php }?>
+                            </ul>
+                        </div>
+                    </div>
+                <?php }?>
                 <div class="detail_arrow_close">
                     <img src="<?php echo G5_IMG_URL?>/ic_view_arrow_close.png" alt="">
                 </div>
@@ -887,7 +948,14 @@ switch ($view["pd_price_type"]){
         <?php }else{?>
         <ul class="list">
             <?php for($i=0;$i<count($photo);$i++){
-
+            if(strpos($photo[$i],"gif")!==false){
+            ?>
+                <li class="item" style="background-image:url('<?php echo G5_DATA_URL;?>/product/<?php echo $photo[$i]?>');background-size:contain;background-repeat:no-repeat;background-position:center center;height:100%;">
+                    <!--<img src="<?php /*echo G5_DATA_URL."/product/".$photo[$i];*/?>" alt="" style="width:100%;">-->
+                    <input type="hidden" value="<?php echo G5_DATA_URL;?>/product/<?php echo $img?>" id="imagePath">
+                </li>
+            <?php
+            }else{
                 $oriSize = getimagesize(G5_DATA_PATH."/product/".$photo[$i]);
                 $img = get_images(G5_DATA_PATH."/product/".$photo[$i],$dWidth,$dHeight);
                 $size = getimagesize(G5_DATA_PATH."/product/".$img);
@@ -923,6 +991,7 @@ switch ($view["pd_price_type"]){
                 <input type="hidden" value="<?php echo G5_DATA_URL;?>/product/<?php echo $img?>" id="imagePath">
             </li>
             <?php }?>
+            <?php }?>
             <?php if($view["pd_video"] != ""){
 
             ?>
@@ -939,7 +1008,7 @@ switch ($view["pd_price_type"]){
         <?php }?>
 </div>
 
-<a style="display:none;" id="copylink" href="http://mave01.cafe24.com/index.php?pd_id=<?php echo $pd_id;?>">http://mave01.cafe24.com/index.php?pd_id=<?php echo $pd_id;?></a>
+<a style="display:none;" id="copylink" href="http://484848.co.kr/index.php?pd_id=<?php echo $pd_id;?>">http://484848.co.kr/index.php?pd_id=<?php echo $pd_id;?></a>
 
 <script>
 
@@ -971,7 +1040,9 @@ $(function(){
         $(".view_opt_menu").toggleClass("active");
     });
 
+    <?php if($is_member){?>
     setTimeout(function(){$(".profile_menu").removeClass("active");},1300);
+    <?php }?>
 
     $(".comment_input").bind("focus",function(){
         $(".view_bottom").css({"position":"absolute","bottom":"-100vh"});
@@ -1162,20 +1233,56 @@ $(function(){
         $(".view_detail").css("top","0");
         $(".detail_arrow").stop(true).animate({top:'0vw',opacity:0},30);
         setTimeout(function(){$(".count_msg").removeClass("active")},1500);
-        location.hash = "#detailview";
+        location.hash = '';
+        var url = location.href;
+        url = url.replace("#","");
+        history.pushState(null, null, url+"&detail=true#detailview");
+        //location.hash = "#detailview";
     });
     $(".detail_close, .detail_arrow_close").click(function(){
         var count = Number($("#top_count.count_<?php echo $pd_id;?>").text());
         $(".view_top").css("display","block");
         $(".view_detail").css("top","100vh");
+
+        <?php if($view["pd_video_link"]){?>
+        $(".youtube-player").each(function(e){
+           $('.youtube-player')[e].contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');
+        });
+        <?php }?>
+
+        var url = location.href;
+        url = url.replace("&detail=true#detailview","#view");
+        history.pushState(null, null, url);
         if(count > 1) {
-            $(".count_msg").addClass("active");
+           $(".count_msg").addClass("active");
         }else{
             $(".count_msg").removeClass("active");
         }
         $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
     });
 });
+
+function fnDetailClose(){
+    var count = Number($("#top_count.count_<?php echo $pd_id;?>").text());
+    $(".view_top").css("display","block");
+    $(".view_detail").css("top","100vh");
+
+    <?php if($view["pd_video_link"]){?>
+    $(".youtube-player").each(function(e){
+        $('.youtube-player')[e].contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');
+    });
+    <?php }?>
+
+    var url = location.href;
+    url = url.replace("&detail=true#detailview","#view");
+    history.pushState(null, null, url);
+    if(count > 1) {
+        $(".count_msg").addClass("active");
+    }else{
+        $(".count_msg").removeClass("active");
+    }
+    $(".detail_arrow").stop(true).animate({top:'-60vw',opacity:1},500);
+}
 
 function slide2 (index) {
     $(".s_nav").each(function(e){
@@ -1190,40 +1297,49 @@ function gotolist(){
 }
 
 function fnPricing(pd_id,type){
-    $("#p_pd_id").val(pd_id);
-    $("#p_type").val(type);
+    //$("#p_pd_id").val(pd_id);
+    //$("#p_type").val(type);
     $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.my_product.php",
         method:"POST",
         data:{type:type}
     }).done(function(data){
-        console.log(data);
         if(data=="1"){
             alert("로그인이 필요합니다.");
             location.href=g5_bbs_url+"/login.php";
             return false;
         }
+
         if(data == "2"){
             alert("등록한 게시물이 없습니다.");
             return false;
         }
-        if(type==1){
-            $("#id07 select").css("display","none");
-            $("#id07 h2").text("딜하기");
-            $("#id07 #up_btn").val("딜등록");
-            $("#id07 #pricing_price").val("<?php echo $view["pd_price"];?>");
-            $("#id07 #pricing_price").attr("readonly",false);
-            $("#id07 #pricing_content").attr("placeholder","딜내용을 입력해주세요.");
-        }else {
-            $("#id07 select").append(data);
-            $("#id07 h2").text("제시하기");
-            $("#id07 #up_btn").val("제시등록");
-            $("#id07 #pricing_content").attr("placeholder","제시내용을 입력해주세요.");
-        }
-        $("#id07").css("display","block");
-        $("html, body").css("overflow","hidden");
-        $("html, body").css("height","100vh");
-        location.hash = "#modal";
+        $.ajax({
+            url:g5_url+'/mobile/page/modal/modal.dealpopup.php',
+            method:"post",
+            data:{p_pd_id:pd_id,p_type:type}
+        }).done(function(data2){
+            $(".modal").html(data2).addClass("active").css("z-index","99999");
+            $("html, body").css("overflow","hidden");
+            $("html, body").css("height","100vh");
+            location.hash = "#modal";
+            if(type==1){
+                $("#id07 select").css("display","none");
+                $("#id07 h2").text("딜하기");
+                $("#id07 #up_btn").val("딜등록");
+                $("#id07 #pricing_price").val("<?php echo $view["pd_price"];?>");
+                $("#id07 #pricing_price").attr("readonly",false);
+                $("#id07 #pricing_content").attr("placeholder","딜내용을 입력해주세요.");
+            }else {
+                $("#id07 select").append(data);
+                $("#id07 h2").text("제시하기");
+                $("#id07 #up_btn").val("제시등록");
+                $("#id07 #pricing_content").attr("placeholder","제시내용을 입력해주세요.");
+            }
+            //$("#id07").css("display","block");
+
+        })
+
     });
 }
 
@@ -1289,15 +1405,15 @@ function fnwished(pd_id){
     }
 }
 
-function fnDelete(pd_id){
+function fnDelete(pd_id,url){
     <?php if($view["pd_type"]==2){?>
-    var msg = "해당 게시물을 연구 삭제하시겠습니까?\r능력의 경우 해당 게시물의 평가도 모두 삭제 됩니다.";
+    var msg = "해당 게시물을 영구 삭제하시겠습니까?\r능력의 경우 해당 게시물의 평가도 모두 삭제 됩니다.";
     <?php }else{?>
     var msg = "해당 게시물을 영구 삭제하겠습니까?";
     <?php }?>
 
     if(confirm(msg)){
-        location.href=g5_url+'/mobile/page/product_delete.php?pd_id='+pd_id;
+        location.href=g5_url+'/mobile/page/product_delete.php?pd_id='+pd_id+"&return_url="+url;
     }else{
         return false;
     }
@@ -1446,15 +1562,6 @@ $(function(){
     });
 //]]>
 
-    $("#id03 ul.modal_sel li").each(function(){
-        $(this).click(function(){
-            if(!$(this).hasClass("active")){
-                $(this).addClass("active");
-                $("#id03 ul.modal_sel li").not($(this)).removeClass("active");
-            }
-        })
-    })
-
     var clipboardSupport = true;
 
     try {
@@ -1503,23 +1610,23 @@ $(function(){
 
     <?php if($view["mb_id"]!=$member["mb_id"]){?>
     $(".pd_like").click(function(){
-        <?php if($likeper==false){?>
-            alert("구매자만 평가 할 수 있습니다.");
-            return false;
-        <?php }?>
-        <?php if($likewrite==false){?>
-            alert("이미 평가한 게시글입니다.");
-            return false;
-        <?php }?>
-        var pd_id = $(this).attr("id");
-        var pd_mb_id = "<?php echo $view["mb_id"];?>";
-        $("#like_id").val(pd_id)
-        $("#pd_mb_id").val(pd_mb_id)
-        $("#id02").css({"display":"block","z-index":"9000000"});
-        $("html, body").css("overflow","hidden");
-        $("html, body").css("height","100vh");
-        location.hash="#modal";
-    })
+        var mb_id = "<?php echo $view["mb_id"];?>";
+        var pd_type = "<?php echo $view["pd_type"];?>";
+        $.ajax({
+            //url:g5_url+"/mobile/page/mypage/mypage_like_list.php",
+            url:g5_url+'/mobile/page/modal/modal.like_list.php',
+            method:"post",
+            data:{mb_id:mb_id,pd_type:pd_type}
+        }).done(function(data){
+            $(".modal").html(data).addClass("active").css("z-index","9002");
+            //$("#id11").css({"display":"block","z-index":"9002"});
+            //$("#id11 .con").html('');
+            //$("#id11 .con").append(data);
+            $("html, body").css("overflow","hidden");
+            $("html, body").css("height","100vh");
+            location.hash = "#blind";
+        });
+    });
     <?php }?>
 
     //채팅옵션
@@ -1568,7 +1675,6 @@ function fnLike(t,id){
         method:"POST",
         data:{type:t,pd_id:pd_id,cm_id:cm_id,mb_id:mb_id}
     }).done(function(data){
-        console.log(data);
         if(data.indexOf('추천') != -1 || data.indexOf("반대") != -1){
             alert(data);
         }else{
@@ -1580,15 +1686,6 @@ function fnLike(t,id){
         }
     });
 }
-/*
-function fnProLike(){
-    $.ajax({
-        url:g5_url+"/mobile/page/ajax"
-    }).done(function(data){
-
-    })
-}*/
-
 function fnBlind(pd_id,cm_id){
     $.ajax({
         url:g5_url+"/mobile/page/blind_write.php",
@@ -1601,7 +1698,7 @@ function fnBlind(pd_id,cm_id){
         $("html, body").css("overflow","hidden");
         $("html, body").css("height","100vh");
         location.hash = "#blind";
-    })
+    });
 }
 
 function fnMapView(pd_id,location,lat,lng){
@@ -1615,7 +1712,7 @@ function fnMapView(pd_id,location,lat,lng){
         $("html, body").css("height","100vh");
         $("#id01s .con").html('');
         $("#id01s .con").append(data);
-        location.hash = "#blind";
+        location.hash = "#mapView";
     })
 }
 
@@ -1625,18 +1722,6 @@ function fnRecom(cm_id,mb_id,mb_name,cm_status){
     $("#comment_re").val(1);
     $(".comment_input").attr("placeholder",mb_name+"에게 답변");
     $(".comment_input").focus();
-    /*$(".recm_cancel").css("display","block");*/
-    //if(cm_status==3){
-    //    $(".secret").css("display","none");
-    //    $("#secret").attr("checked","true");
-    //}
-   /* $.ajax({
-        url:g5_url+"/mobile/page/ajax/ajax.comment_reply.php",
-        method:"POST",
-        data:{cm_id:cm_id,pd_id:pd_id,mb_id:mb_id}
-    }).done(function(data){
-        console.log(data);
-    });*/
 }
 
 //간편대화 시작
@@ -1695,6 +1780,8 @@ function fnTalk(){
             }
         });
     },1000);
+
+    location.hash = "#talkView";
 }
 
 function fnTalk2(mb_id){
@@ -1827,10 +1914,8 @@ function fnSendMsSimple(msg){
         }
     });
 }
-function fnSell(){
-    //$("#sell").css({"display":"block","z-index":"91"});
-    //location.hash = "modal";
-    addSell();
+function fnSell(price){
+    addSell(price);
 }
 
 function fnSellConfirm(buy_mb_id,pd_id,pricing_id,price){
@@ -1840,8 +1925,11 @@ function fnSellConfirm(buy_mb_id,pd_id,pricing_id,price){
     }
 }
 
-function addSell(){
-    var price = $("#price").val();
+function addSell(price){
+    var price = price;
+    if(price==""||price==0) {
+        price = $("#price").val();
+    }
     var pd_id = $("#pd_id").val();
     var sell_mb_id = $("#sell_mb_id").val();
 
@@ -1851,9 +1939,8 @@ function addSell(){
             method: "POST",
             data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 0}
         }).done(function (data) {
-            console.log(data);
             if(data=="3") {
-                location.href = g5_url + '/mobile/page/mypage/cart.php';
+                location.href = g5_url + '/mobile/page/mypage/mypage_order.php?od_cate=2';
             }
         });
     }else{
@@ -1861,18 +1948,20 @@ function addSell(){
     }
 }
 
-function fnSell2(){
-    var price = $("#price").val();
+function fnSell2(price,price2){
+    //var price = $("#price").val();
     var pd_id = $("#pd_id").val();
     var sell_mb_id = $("#sell_mb_id").val();
 
     $.ajax({
         url: g5_url + "/mobile/page/ajax/ajax.insert_cart.php",
         method: "POST",
-        data: {price: price, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 1,pd_type:2 }
+        data: {price: price,price2:price2, pd_id: pd_id, sell_mb_id: sell_mb_id, status: 0,pd_type:2 }
     }).done(function (data) {
         if(data=="3") {
-            location.href=g5_url+'/mobile/page/mypage/cart.php?pd_type=2';
+            location.href=g5_url+'/mobile/page/mypage/mypage_order.php?type=2&pd_type=2&od_cate=2';
+        }else if(data=="7"){
+            alert("이미 계약중인 능력입니다.");
         }
     });
 }
@@ -1880,17 +1969,25 @@ function fnSell2(){
 function fnShow(id){
     // 연락자 정보 가져오기
     $.ajax({
-        url:g5_url+"/mobile/page/ajax/ajax.get_member.php",
+        url:g5_url+'/mobile/page/modal/modal.contact.php',
         method:"post",
-        data:{id:id},
-        dataType:"json"
+        data:{}
     }).done(function(data){
-        $("#id08 .contacts ul").html('');
-        $("#id08 .contacts ul").append(data.obj);
-        //$("#mb_"+id).toggleClass("active");
-        $("#id08").css({"display":"block","z-index":"9002"});
-        $("#id08").css("display","block");
-        location.hash = "#modal";
+        $(".modal").html(data).addClass("active").css("z-index","90000");
+        $(".modal > div").addClass("no-view");
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.get_member.php",
+            method:"post",
+            data:{id:id},
+            dataType:"json"
+        }).done(function(data){
+            $("#id08 .contacts ul").html('');
+            $("#id08 .contacts ul").append(data.obj);
+            //$("#mb_"+id).toggleClass("active");
+            /*$("#id08").css({"display":"block","z-index":"9002"});
+            $("#id08").css("display","block");*/
+            location.hash = "#modal";
+        });
     });
 }
 
@@ -1931,8 +2028,7 @@ function fnDetailHide(){
         video2.pause();
     }
     $('.DetailImage').hide();
+    location.hash="#view";
 }
 </script>
-<?php
-//include_once(G5_MOBILE_PATH."/tail.view.php");
-?>
+

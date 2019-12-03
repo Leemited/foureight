@@ -1,6 +1,7 @@
 // 본인확인 인증창 호출
 function certify_win_open(type, url)
 {
+    $("#mb_login h1").html('휴대폰 본인인증');
     if(type == 'kcb-ipin')
     {
         var popupWindow = window.open( url, "kcbPop", "left=200, top=100, status=0, width=450, height=550" );
@@ -29,6 +30,7 @@ function certify_win_open(type, url)
 
             $("#cert_info")
                 .after('<iframe id="kcp_cert" name="kcp_cert" width="100%" height="700" frameborder="0" scrolling="no" style="display:none"></iframe>');
+            $(".top_h .left").attr("onclick","location.href='"+g5_bbs_url+"/register_form.php'");
 
             var temp_form = document.form_temp;
             temp_form.target = "kcp_cert";
@@ -38,6 +40,8 @@ function certify_win_open(type, url)
             document.getElementById( "kcp_cert"  ).style.display = "";
 
             temp_form.submit();
+            /*var return_gubun;
+            var AUTH_POP = window.open(url,'auth_popup');*/
         }
         else
         {

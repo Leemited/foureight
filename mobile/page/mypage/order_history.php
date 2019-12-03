@@ -73,6 +73,7 @@ $back_url = G5_URL;
                         <div class="bg rand_bg<?php echo $rand;?> item_images" >
                             <div class="tags">
                                 <?php for($k=0;$k<count($tags);$k++){
+                                    if($tags[$k]==""){continue;}
                                     $rand_font = rand(3,6);
                                     ?>
                                     <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
@@ -88,6 +89,7 @@ $back_url = G5_URL;
                     <div class="bg rand_bg<?php echo $rand;?> item_images" >
                         <div class="tags">
                             <?php for($k=0;$k<count($tags);$k++){
+                                if($tags[$k]==""){continue;}
                                 $rand_font = rand(3,6);
                                 ?>
                                 <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>

@@ -14,7 +14,6 @@
 	function payment() {		
 		var request = mainpay_ready(READY_API_URL);
 		request.done(function(response) {
-		    alert("A");
 		    console.log(response);
 			if (response.resultCode == '200') {
 				/* 결제창 호출 */

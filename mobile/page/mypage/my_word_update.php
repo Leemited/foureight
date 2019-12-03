@@ -19,7 +19,6 @@ $myword = $words . ":@!" . $words2 . ":@!" . $words3;
 
 $sql = "update `mysetting` set `my_word` = '{$myword}' where id = {$id} and mb_id='{$mb_id}' ";
 
-
 if(sql_query($sql)){
 	alert("등록완료");
 }else{

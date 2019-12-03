@@ -143,6 +143,11 @@ function get_images($srcfile, $dWidth="", $dHeight=""){
     $filename = basename($srcfile);
     $filepath = dirname($srcfile);
 
+    if($dWidth > 1300 || $dHeight > 1300){
+        $dWidth = $dWidth / 3;
+        $dHeight = $dHeight / 3;
+    }
+
     // 썸네일 생성
     $thumb_file = thumbnails($filename, $filepath, $filepath, $dWidth, $dHeight, false);
 
@@ -221,10 +226,10 @@ function thumbnails($filename, $source_path, $target_path, $thumb_width, $thumb_
     if(!(is_dir($target_path) && is_writable($target_path)))
         return '';
     // Animated GIF는 썸네일 생성하지 않음
-    if($size[2] == 1) {
+    /*if($size[2] == 1) {
         if(is_animated_gif($source_file))
             return basename($source_file);
-    }
+    }*/
     $ext = array(1 => 'gif', 2 => 'jpg', 3 => 'png');
 
     $thumb_filename = preg_replace("/\.[^\.]+$/i", "", $filename); // 확장자제거

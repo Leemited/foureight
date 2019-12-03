@@ -1,7 +1,7 @@
 <?php
 include_once ("../../../common.php");
-include_once (G5_MOBILE_PATH."/head.login.php");
 $back_url = G5_URL;
+include_once (G5_MOBILE_PATH."/head.login.php");
 
 if(!$is_member){
     alert("로그인이 필요합니다.", G5_MOBILE_URL."/page/login_intro.php");
@@ -10,19 +10,23 @@ if(!$is_member){
 $now = date("Y-m-d");
 $month = date("Y-m-d", strtotime("-3 month"));
 
-$sql = "select *,m.pd_id as pd_id from `my_alarms` as m left join `product` as p on m.pd_id = p.pd_id where m.mb_id = '{$member["mb_id"]}' and m.alarm_date between '{$month}' and '{$now}' and m.alarm_status != 3 order by m.alarm_date desc, m.alarm_time desc";
+$sql = "select *,m.pd_id as pd_id from `my_alarms` as m left join `product` as p on m.pd_id = p.pd_id where m.mb_id = '{$member["mb_id"]}' and m.alarm_date between '{$month}' and '{$now}' and m.alarm_status != 3 order by m.alarm_date desc, m.alarm_time desc limit 0, 15";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
     $alarm[] = $row;
 }
 $today = date("Y-m-d H:i:s");
 ?>
-<div class="sub_head">
+<style>
+    #head{position:fixed;}
+    .jscroll-inner{padding-bottom: 13vw;}
+</style>
+<div class="sub_head" style="position:fixed;top:6vw;background-color:#fff;">
     <div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2>알림목록</h2>
     <!-- <div class="sub_add">추가</div> -->
 </div>
-<div class="alert_list">
+<div class="alert_list" style="margin-top:16vw;padding-top:1vw;overflow-y: inherit;height:auto;background-color:#fff;">
     <div class="infos">
         <p>* 알람은 최대 3개월까지 보관됩니다.</p>
     </div>
@@ -110,14 +114,23 @@ $today = date("Y-m-d H:i:s");
             $sql = "update `my_alarms` set alarm_status = 1 where id = '{$alarm[$i]["id"]}'";
             sql_query($sql);
         }?>
+        <div class="next"><a href="<?php echo G5_MOBILE_URL;?>/page//mypage/alarm_list_get.php?page=2" class="nextPage"></a></div>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jscroll/2.4.1/jquery.jscroll.min.js"></script>
+
 <script>
 function alarmRead(pd_id,type,id,link){
     location.href=link;
 }
 
 $(function() {
+    $(".list_con").jscroll({
+        autoTrigger:true,
+        loadingHtml:'<div class="next"></div>',
+        nextSelector:"a.nextPage:last"
+    });
+
     <?php if($app){?>
     window.android.resetBadge();
     <?php } ?>

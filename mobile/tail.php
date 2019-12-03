@@ -19,8 +19,6 @@ if($member["mb_id"]) {
 <div id="debug" style="">삭제상태</div>
 
 <div id="ft">
-    <!-- <?php echo popular('basic'); // 인기검색어 ?>
-    <?php echo visit('basic'); // 방문자수 ?> -->
     <div id="ft_copy">
         <ul>
 			<li onclick="location.href=g5_url+'/mobile/page/mypage/mypage.php'">
@@ -36,7 +34,7 @@ if($member["mb_id"]) {
 			<?php if($p == "index"){?>
 			<li id="home" onclick="fnHome()"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="최상위로"></li>
 			<?php }else{?>
-			<li onclick="fnHome()"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="홈"></li>
+			<li onclick="location.href=g5_url"><img src="<?php echo G5_IMG_URL?>/bottom_icon_home.svg" alt="홈"></li>
 			<?php }?>
 			<li onclick="fnRecent()" class="ft_menu_04"><img src="<?php echo G5_IMG_URL?>/bottom_icon_03.svg" alt="검색항목"></li>
 			<li onclick="location.href=g5_url+'/mobile/page/productmap/'"><img src="<?php echo G5_IMG_URL?>/bottom_icon_04.svg" alt="지도보기"></li>
@@ -62,17 +60,43 @@ if ($config['cf_analytics']) {
 ?>
 
 
+<script src="<?php echo G5_JS_URL ?>/jquery.ui.touch-punch.js"></script>
+<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.js"></script>
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js"></script>
+<script src="<?php echo G5_JS_URL?>/hammer.js"></script>
+<script src="<?php echo G5_URL?>/node_modules/clipboard/dist/clipboard.min.js"></script>
+
+<!-- iamport.payment.js -->
+<script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
 <script>
 
 function fnHome(){
-    $.ajax({
+    /*$.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
         method:"post",
-        data:{key:"type1",value:"1"}
+        data:{key:"type1",value:"2"}
     }).done(function(data){
-    });
 
-    location.href=g5_url;
+    });*/
+    // 이거 누르면 초기화?
+    var chk = false;
+    $.ajax({
+        url:g5_url+'/mobile/page/ajax/ajax.search_reset.php',
+        method:"post",
+        async:false
+    }).done(function(data){
+        if(data=="" || data==null){
+            chk = true;
+        }else{
+            fnHome();
+        }
+    });
+    if(chk==true) {
+        location.href = g5_url;
+    }
 }
 function fnPricingUpdate(){
     var pd_id = $("#p_pd_id").val();
@@ -132,23 +156,10 @@ function fnPricingUpdate(){
 }
 
 function fnRecent(){
-	location.href=g5_url+'/mobile/page/recent/recent.list.php';
-	/*$.ajax({
-		url:g5_url+"/mobile/page/ajax/ajax.recent.list.php",
-		method:"POST"
-	}).done(function(data){
-		//새리스트
-		$(".grid").remove();
-		var item = '<div class="list_item grid are-images-unloaded"></div>';
-		$(".post").append(item);
-		$(".grid").append(data);
-		initpkgd();
-		page=1;	
-	});*/
+    location.href = g5_url + '/mobile/page/recent/recent.list.php';
 }
 
 function fnAdminWrite(pd_id){
-    //TODO : 관리자에게 문의 남기기;
     location.href= g5_bbs_url+"/qawrite.php?pd_id="+pd_id;
 }
 
@@ -156,7 +167,7 @@ $(function() {
     $(document).scroll(function(){
         if($(this).scrollTop() <= 0){
             var home = "<?php echo G5_IMG_URL;?>/bottom_icon_home.svg";
-            $("#home").attr("onclick","fnHome");
+            $("#home").attr("onclick","fnHome()");
             $("#home img").attr("src",home);
         }else{
             var home = "<?php echo G5_IMG_URL;?>/bottom_icon_05.svg";

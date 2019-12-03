@@ -30,7 +30,7 @@ if(!$pd_id || $pd_id == ""){
 
     //등록
     $sql = "insert into `product` set
-			pd_name = '{$stx}',
+			pd_name = '#{$stx}',
 			pd_type = '{$set_type}',
 			pd_type2 = '4',
 			pd_cate = '{$cate}',
@@ -38,7 +38,7 @@ if(!$pd_id || $pd_id == ""){
 			pd_images = '',
 			pd_video = '',
 			pd_content = '{$con}',
-			pd_tag = '{$stx}',
+			pd_tag = '#{$stx}',
 			pd_location = '',
 			pd_location_name = '',
 			pd_price = '{$priceFrom}',
@@ -58,6 +58,17 @@ if(!$pd_id || $pd_id == ""){
 			pd_update_cnt = 0";
     if(!sql_query($sql)){
         alert("입력 오류 입니다.다시 요청해 주세요");
+    }else{
+        $pd_id = sql_insert_id();
+        //글등록시 검색 등록된 것과 비교해서 조건에 맞는 회원 불러오기
+        //$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where ('{$sub_title}' like CONCAT('%', sc_tag ,'%') or '{$sub_title}' like CONCAT('%', sc_cate1 ,'%') or '{$sub_title}' like CONCAT('%', sc_cate2 ,'%')) {$where} and ({$price} between sc_priceFrom and sc_priceTo) and set_alarm = 1 and sc_type = {$type} and sc_type2 = {$type2} {$search} ";
+        $sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where INSTR('{$stx}',s.sc_tag) > 0 or INSTR('{$stx}',if(s.sc_cate1 != '', s.sc_cate1, 'null')) > 0 or INSTR('{$stx}',if(s.sc_cate2 != '', s.sc_cate2, 'null')) > 0  and set_alarm = 1 and s.sc_type = {$set_type} and s.sc_type2 = 4 and sc_priceFrom <= {$priceFrom} and sc_priceTo >= {$priceFrom}";
+        $res = sql_query($sql);
+        while($row = sql_fetch_array($res)){
+            if($row["regid"]!="" && $row["mb_id"] != $member["mb_id"]) {
+                send_FCM($row["regid"],"검색알림","[삽니다]".$row["sc_tag"]."의 게시물이 등록되었습니다.", G5_URL."/?sc_id=".$row["sc_id"]."&sctype=research","search_alarm_set","검색알림",$row["mb_id"],$pd_id,$img);
+            }
+        }
     }
 }
 

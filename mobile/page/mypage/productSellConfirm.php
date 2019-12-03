@@ -19,9 +19,15 @@ if ($mb['mb_leave_date'] && $mb['mb_leave_date'] <= date("Ymd", G5_SERVER_TIME))
 }
 
 $pro = sql_fetch("select * from `product` where pd_id = '{$pd_id}'");
-
+$total = $pro["pd_price"] + $pro["pd_price2"];
 if($pro["pd_status"]!=0 && $pro["pd_type"]==1){
     alert("해당 상품은 판매중이 아닙니다.");
+}
+
+if($pro["pd_delivery_use"]==1){
+    $od_delivery_type =1;
+}else{
+    $od_delivery_type =0;
 }
 
 if($pro["pd_status"]==10 || $pro["pd_blind_status"] == 1){
@@ -33,23 +39,27 @@ if($pricingcnt["cnt"] > 0){
     alert("이미 딜완료 된 상품입니다.");
 }
 
-// 해당 게시글 판매중으로 업데이트 (물건일경우)
-if($pro["pd_type"]==1) {
-    $sql = "update `product` set pd_status = 1 where pd_id = '{$pd_id}'";
-    sql_query($sql);
-}
+/*$sql = "insert into `cart` set pd_id = '{$pd_id}', mb_id = '{$mb_id}', c_price='{$price}',c_date = now(), c_status = 1 ";*/
+$sql = "insert into `order` set pd_id='{$pd_id}',mb_id = '{$mb["mb_id"]}', pd_price = '{$total}',od_price='{$price}',od_delivery_type = '{$od_delivery_type}',od_pd_type='{$pro["pd_type"]}', od_status = 1, od_reser_date = now(), od_reser_time = now()";
 
-$sql = "update `product_pricing` set status = 1 where id = '{$pricing_id}'";
-
-$sql = "insert into `cart` set pd_id = '{$pd_id}', mb_id = '{$mb_id}', c_price='{$price}',c_date = now(), c_status = 1 ";
 if(sql_query($sql)){
+    // 해당 게시글 판매중으로 업데이트 (물건일경우)
+    if($pro["pd_type"]==1) {
+        $sql = "update `product` set pd_status = 1 where pd_id = '{$pd_id}'";
+        sql_query($sql);
+    }
+
+    $sql = "update `product_pricing` set status = 1 where id = '{$pricing_id}'";
+    sql_query($sql);
+
     if ($pro["pd_images"]) {
         $imgs = explode(",", $pro["pd_images"]);
         $img = G5_DATA_URL . "/product/" . $imgs[0];
     }
-    send_FCM($mb["regid"], $pro["pd_tag"], $pro["pd_tag"] . "의 구매가 확정되었습니다.", G5_MOBILE_URL . "/page/mypage/cart.php", 'pricing_set', '제시/딜 알림', $mb["mb_id"], $pd_id, $img);
 
-    alert("구매가 수락되었습니다.",G5_MOBILE_URL."/page/mypage/mypage.php");
+    send_FCM($mb["regid"], $pro["pd_tag"], $pro["pd_tag"] . "의 구매가 확정되었습니다.", G5_MOBILE_URL . "/page/mypage/mypage_order.php?type=2&od_cate=2&pd_type=".$pro["pd_type"], 'pricing_set', '제시/딜 알림', $mb["mb_id"], $pd_id, $img);
+
+    alert("구매가 수락되었습니다.",G5_MOBILE_URL."/page/mypage/mypage_order.php?type=2&od_cate=1&pd_type=".$pro["pd_type"]);
 }else{
     alert("잘못된 정보 입니다.");
 }

@@ -4,7 +4,7 @@ include_once("../../../common.php");
 $page = $_REQUEST["page"];
 
 //검색 
-$search = " p.pd_status < 10 ";
+$search = " p.pd_status < 10";
 
 //구분[구분 없음]
 $type1 = $_REQUEST["type1"];
@@ -64,8 +64,8 @@ for($i=0;$i<count($list);$i++){
 	}
 ?>
 
-<div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" <?php if($list[$i]["pd_blind"]<10){?>onclick="fn_viewer('<?php echo $list[$i]["pd_id"];?>')"<?php }?>>
-    <?php if($list[$i]["pd_blind"]>=10){?>
+<div class="grid__item <?php if($list[$i]["pd_blind"]>=10 || $list[$i]["pd_blind_status"]==1){?>blinds<?php }?>" <?php if($list[$i]["pd_blind"]<10 && $list[$i]["pd_blind_status"]==0){?>onclick="fn_viewer('<?php echo $list[$i]["pd_id"];?>')"<?php }?>>
+    <?php if($list[$i]["pd_blind"]>=10 || $list[$i]["pd_blind_status"]==1){?>
         <div class="blind_bg">
             <div>
                 <input type="button" value="사유보기" class="list_btn"  onclick="fnBlindView('<?php echo $list[$i]["pd_id"];?>')">
@@ -118,7 +118,7 @@ for($i=0;$i<count($list);$i++){
         <?php }?>
 		<div class="top">
 			<div>
-                <h2 style="font-weight:normal"><?php if($list[$i]["pd_status"]==0){echo "판";}else if($list[$i]["pd_status"]==1){echo "거";}?></h2>
+                <h2 style="font-weight:normal"></h2>
 				<div>
 					<ul>
 						<li><img src="<?php echo G5_IMG_URL?>/ic_hit<?php if($list_type == "true"){echo "_list";}?>.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -130,11 +130,18 @@ for($i=0;$i<count($list);$i++){
 			</div>
 		</div>
 		<div class="bottom">
-            <?php if($list[$i]["pd_name"]){?>
-                <h2><?php echo $list[$i]["pd_name"];?></h2>
+            <?php if($list[$i]["pd_name"]){
+                $pt2="";
+                switch($list[$i]["pd_type2"]){
+                    case "4":
+                        $pt2 = "[삽니다]";
+                        break;
+                }
+                ?>
+                <h2><?php echo $pt2." ";?><?php echo $list[$i]["pd_name"];?></h2>
             <?php }?>
             <div>
-                <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
+                <h1><?php if($list[$i]["pd_price"]+$list[$i]["pd_price2"]==0 && $list[$i]["pd_type2"]=="8"){echo "무료나눔";}else if($list[$i]["pd_price"]+$list[$i]["pd_price2"]==0 && $list[$i]["pd_type2"]=="4"){echo "가격제시";}else{ echo "￦ ".number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);}?></h1>
             </div>
 		</div>
 		

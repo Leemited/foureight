@@ -3,6 +3,7 @@ include_once ("../../../common.php");
 include_once (G5_MOBILE_PATH."/head.login.php");
 
 $sql = "select * from `member_block` as b left join `g5_member` as m on b.target_id = m.mb_id where b.mb_id = '{$member["mb_id"]}'";
+//echo $sql;
 $res = sql_query($sql);
 $i=0;
 while($row = sql_fetch_array($res)){

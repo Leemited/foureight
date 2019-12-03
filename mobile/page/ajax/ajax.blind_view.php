@@ -17,8 +17,8 @@ $sql = "select * from `product` where pd_id = {$pd_id}";
 $product = sql_fetch($sql);
 
 //상태 업데이트
-$sql = "update `product` set pd_blind_status = 2 where pd_id = {$pd_id}";
-sql_query($sql);
+/*$sql = "update `product` set pd_blind_status = 2 where pd_id = {$pd_id}";
+sql_query($sql);*/
 ?>
 <div>
     <h3><?php echo "[".$product["pd_cate"]." | ".$product["pd_cate2"]."] ". $product["pd_name"];?></h3>

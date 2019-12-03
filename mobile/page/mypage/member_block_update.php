@@ -2,7 +2,7 @@
 include_once ("../../../common.php");
 
 if($type=="cancel"){
-    $sql = "delete from `member_block`  where id = '{$id}'";
+    $sql = "delete from `member_block` where id = '{$id}'";
     if(sql_query($sql)){
         alert("차단이 해제 되었습니다.");
     }else{

@@ -4,15 +4,17 @@ include_once(G5_PATH."/admin/admin.head.php");
 
 $subject = "카테고리[보기]";
 $view = sql_fetch("select * from `categorys` where `ca_id` = '{$ca_id}'");
-
 $total=sql_fetch("select count(*) as cnt from `categorys` where  parent_ca_id = {$ca_id} and cate_depth = 2");
-if(!$page)
-	$page=1;
-$total=$total['cnt'];
+
+if(!$page2)
+	$page2=1;
+
+$total = $total['cnt'];
 $rows=10;
-$start=($page-1)*$rows;
+$start=($page2-1)*$rows;
 $total_page=ceil($total/$rows);
-$sql="select * from `categorys` where  parent_ca_id = {$ca_id} and cate_depth = 2 order by cate_order desc limit {$start},{$rows}";
+
+$sql="select * from `categorys` where parent_ca_id = {$ca_id} and cate_depth = 2 order by cate_order desc limit {$start},{$rows}";
 $query=sql_query($sql);
 $j=0;
 while($data=sql_fetch_array($query)){
@@ -141,12 +143,12 @@ while($data=sql_fetch_array($query)){
 						$start_page=1;
 						$end_page=$total_page;
 						if($total_page>5){
-							if($total_page<($page+2)){
+							if($total_page<($page2+2)){
 								$start_page=$total_page-4;
 								$end_page=$total_page;
-							}else if($page>3){
-								$start_page=$page-2;
-								$end_page=$page+2;
+							}else if($page2>3){
+								$start_page=$page2-2;
+								$end_page=$page2+2;
 							}else{
 								$start_page=1;
 								$end_page=5;
@@ -155,14 +157,14 @@ while($data=sql_fetch_array($query)){
 				?>
 				<div class="num_list01">
 					<ul>
-					<?php if($page!=1){?>
-						<li class="prev"><a href="<?php echo G5_URL."/admin/category_view.php?page=".($page-1)."&cate_type=".$cate_type."&ca_id=".$ca_id; ?>">&lt;</a></li>
+					<?php if($page2!=1){?>
+						<li class="prev"><a href="<?php echo G5_URL."/admin/category_view.php?page=".$page."&page2=".($page2-1)."&cate_type=".$cate_type."&ca_id=".$ca_id; ?>">&lt;</a></li>
 					<?php } ?>
 					<?php for($i=$start_page;$i<=$end_page;$i++){ ?>
-						<li class="<?php echo $page==$i?"active":""; ?>"><a href="<?php echo G5_URL."/admin/category_view.php?page=".$i."&cate_type=".$cate_type."&ca_id=".$ca_id; ?>"><?php echo $i; ?></a></li>
+						<li class="<?php echo $page2==$i?"active":""; ?>"><a href="<?php echo G5_URL."/admin/category_view.php?page=".$page."&page2=".$i."&cate_type=".$cate_type."&ca_id=".$ca_id; ?>"><?php echo $i; ?></a></li>
 					<?php } ?>
-					<?php if($page<$total_page){?>
-						<li class="next"><a href="<?php echo G5_URL."/admin/category_view.php?page=".($page+1)."&cate_type=".$cate_type."&ca_id=".$ca_id; ?>">&gt;</a></li>
+					<?php if($page2<$total_page){?>
+						<li class="next"><a href="<?php echo G5_URL."/admin/category_view.php?page=".$page."&page2=".($page2+1)."&cate_type=".$cate_type."&ca_id=".$ca_id; ?>">&gt;</a></li>
 					<?php } ?>
 					</ul>
 				</div>

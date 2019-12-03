@@ -9,7 +9,8 @@ if(!$ad_id){
 
 $sql = "select * from `product_ad` where ad_id = '{$ad_id}'";
 $write = sql_fetch($sql);
-
+$ad_cate1 = sql_fetch("select * from `categorys` where ca_id = '{$write["ad_cate"]}'");
+$ad_cate2 = sql_fetch("select * from `categorys` where ca_id = '{$write["ad_cate2"]}'");
 ?>
 <!-- 본문 start -->
 <div id="wrap">
@@ -34,7 +35,13 @@ $write = sql_fetch($sql);
                     <tr>
                         <th>타입/카테고리</th>
                         <td class="con">
-                            <?php echo ($ad_type == "1")? "물건" : "능력";?> / <?php echo $ad_cate;?>
+                            <?php echo ($write["ad_type"] == "1")? "물건" : "능력";?> / <?php echo $ad_cate1["cate_name"]."|".$ad_cate2["cate_name"];?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>키워드</th>
+                        <td class="con">
+                            <?php echo $write["ad_keyword"];?>
                         </td>
                     </tr>
                     <tr>
@@ -60,10 +67,17 @@ $write = sql_fetch($sql);
                         <td class="con">
                             <?php echo $write["ad_link"];?>
                         </td>
-                    </tr><tr class="content">
-                        <th>노출 순서</th>
+                    </tr>
+                    <tr class="content">
+                        <th>노출 순서 [판매글]</th>
                         <td class="con">
                             <?php echo $write["ad_sort"];?>
+                        </td>
+                    </tr>
+                    <tr class="content">
+                        <th>노출 순서 [구매글]</th>
+                        <td class="con">
+                            <?php echo $write["ad_sort2"];?>
                         </td>
                     </tr>
                     <tr class="content">
@@ -73,7 +87,7 @@ $write = sql_fetch($sql);
                         </td>
                     </tr>
                     <tr class="content">
-                        <th>싱태</th>
+                        <th>상태</th>
                         <td class="con"><?php if($ad_status == 0){echo "활성";}else{echo "비활성";}?></td>
                     </tr>
                     </tbody>

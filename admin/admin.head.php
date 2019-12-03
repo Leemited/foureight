@@ -86,6 +86,7 @@ if (preg_match('/chrome/', $userAgent)) {
 					<div data-content class="list-item">
 						<div><a href="<?php echo G5_URL."/admin/order_list.php"; ?>">거래내역</a></div>
 						<!--<div><a href="<?php /*echo G5_URL."/admin/order_delivery.php"; */?>">배송상태</a></div>-->
+						<div><a href="<?php echo G5_URL."/admin/order_refund.php"; ?>">환불내역</a></div>
 						<div><a href="<?php echo G5_URL."/admin/order_confirm.php"; ?>">정산</a></div>
 					</div>
 				</li>

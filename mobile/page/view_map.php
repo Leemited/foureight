@@ -3,8 +3,8 @@ include_once ("../../common.php");
 
 //include_once (G5_MOBILE_PATH."/head.login.php");
 ?>
-<div class="sub_head">
-    <div class="sub_back" onclick="blindClose()"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
+<div class="sub_head" style="background-color:#fff">
+    <div class="sub_back" onclick="mapViewClose()"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2><img src="<?php echo G5_IMG_URL?>/view_pin_black.svg" alt=""><?php echo $location;?></h2>
 </div>
 <div id="container" style="height:100%;">
@@ -107,7 +107,7 @@ include_once ("../../common.php");
             }
         });
 
-
+        location.hash = "#mapView";
     });
 </script>
 <?php

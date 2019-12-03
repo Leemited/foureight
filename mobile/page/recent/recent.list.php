@@ -44,11 +44,11 @@ while($row = sql_fetch_array($res)){
                     <?php for($i=0;$i<count($list2);$i++){?>
                         <li class="sc_item <?php if($list2[$i]["set_alarm"]== 1){?>save_item<?php }?>" >
                             <div class="types" onclick="fnSearch('<?php echo $list2[$i]["sc_id"];?>')">
-                                <?php if($list2[$i]["sc_priceFrom"] != 0){?>
+                                <?php //if($list2[$i]["sc_priceFrom"] != 0){?>
                                     <h2><?php echo $list2[$i]["sc_type2"];?></h2>
-                                <?php }else{?>
+                                <?php //}else{?>
 
-                                <?php }?>
+                                <?php //}?>
                             </div>
                             <div class="cont" onclick="fnSearch('<?php echo $list2[$i]["sc_id"];?>')">
                                 <p><?php echo $list2[$i]["sc_datetime"];?></p>

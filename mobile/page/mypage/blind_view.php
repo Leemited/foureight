@@ -6,6 +6,9 @@ if(!$pd_id){
     return false;
 }
 
+$sql = "update `product` set pd_blind_userchk = 1 where pd_id = '{$pd_id}'";
+sql_query($sql);
+
 $sql = "select * from `product_blind` where pd_id = '{$pd_id}' order by blind_date desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){

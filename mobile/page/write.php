@@ -3,19 +3,19 @@ include_once("../../common.php");
 if(!$is_member){
     alert("로그인이 필요합니다.",G5_MOBILE_URL."/page/login_intro.php?url=".G5_MOBILE_URL."/page/write.php");
 }
-?>
-<!--<div class="loader">
-    <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
-    <div style="background-color:#000;opacity: 0.4;width:100%;height:100%;position:absolute;top:0;left:0;"></div>
-</div> -->
-<?php
-include_once(G5_MOBILE_PATH."/head.login.php");
 
 $mySetting = sql_fetch("select * from `mysetting` where mb_id = '{$member[mb_id]}'");
-
 $mywords = explode(":@!",$mySetting["my_word"]);
-for($i=0;$i<count($mywords);$i++){
-    $mywordss[] = explode("!@~",$mywords[$i]);
+if(count($mywords)<3){
+
+}else if(count($mywords)==3) {
+    for ($i = 0; $i < count($mywords); $i++) {
+        //0 = 판매시
+        //1 = 구매시
+        //2 = 대화하기
+        $mywordss[] = explode("!@~", $mywords[$i]);
+    }
+    $mywordss = array_filter($mywordss);
 }
 if($mySetting["my_locations"]) {
     $mylocations = explode(",", $mySetting["my_locations"]);
@@ -23,7 +23,7 @@ if($mySetting["my_locations"]) {
     $mylng = explode(",", $mySetting["location_lng"]);
 }
 
-$cateholder = sql_fetch("select info_text from `categorys` where cate_depth = 2 and cate_name = '{$sc}'");
+$cateholder = sql_fetch("select info_text1,info_text2 from `categorys` where cate_depth = 2 and cate_name = '{$sc}'");
 if($pd_id){
     $sql = "select * from `product` where pd_id = '{$pd_id}'";
     $write = sql_fetch($sql);
@@ -43,7 +43,6 @@ if($pd_id){
         }
     }
 }
-
 if(!$pd_id) {
     $type1 = $_REQUEST["wr_type1"];
     $pd_type2 = $_REQUEST["pd_type2"];
@@ -55,7 +54,13 @@ if(!$pd_id) {
     $pd_price = str_replace(",","",$_REQUEST["wr_price"]);
     $pd_price2 = str_replace(",","",$_REQUEST["wr_price2"]);
     $pd_timeFrom = $mySetting["pd_timeFrom"];
+    if($pd_timeFrom==""){
+        $pd_timeFrom = "09";
+    }
     $pd_timeTo = $mySetting["pd_timeTo"];
+    if($pd_timeTo==""){
+        $pd_timeTo="21";
+    }
     $pd_timeType = $mySetting["pd_timeType"];
     $pd_video_link = $_REQUEST["pd_video_link"];
     $pd_discount = $_REQUEST["pd_discount"];
@@ -70,6 +75,7 @@ if(!$pd_id) {
     $pd_infos = $_REQUEST["pd_infos"];
     $pd_lat = $mylat[0];
     $pd_lng = $mylng[0];
+    $pd_delivery_use = $_REQUEST["pd_delivery_use"];
 }else{
     $type1 = $write["pd_type"];
     $pd_type2 = $write["pd_type2"];
@@ -92,7 +98,10 @@ if(!$pd_id) {
     $pd_infos = $write["pd_infos"];
     $pd_lat = $write["pd_lat"];
     $pd_lng = $write["pd_lng"];
+    $pd_delivery_use = $write["pd_delivery_use"];
 }
+$set_type = $type1;
+include_once(G5_MOBILE_PATH."/head.login.php");
 ?>
 <style>
     #head {
@@ -106,110 +115,11 @@ if(!$pd_id) {
         background-color: #fff;
         z-index: 900;
         top: 5vw;}
-    .write_form{position: relative;overflow-y: auto;height:auto;margin-top: 19vw;margin-bottom: 17vw;}
+    .write_form{position: relative;overflow-y: auto;height:auto;margin-top: 15vw;margin-bottom: 15vw;}
 </style>
-<div id="id01" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
-	<div class="w3-modal-content w3-card-4">
-		<div class="w3-container">
-			<h2>개인 문구 등록</h2>
-			<div>
-				<input type="text" value="" name="words" id="words" placeholder="문구입력" required>
-			</div>
-			<div>
-				<input type="button" value="취소" onclick="modalClose()"><input type="button" value="확인" onclick="addWords();" >
-			</div>
-		</div>
-	</div>
-</div>
-<div id="id02" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
-    <div class="w3-modal-content w3-card-4">
-        <div class="w3-container">
-            <h2>간편 거래 위치</h2>
-            <div>
-                <ul class="modal_sel">
-                    <?php for($i=0;$i<count($mylocations);$i++){?>
-                        <li class="locSel<?php echo $i;?>" onclick="setLocation('','','');" ><?php echo $mylocations[$i];?></li>
-                    <?php }?>
-                </ul>
-            </div>
-            <div>
-                <input type="button" value="취소" onclick="modalClose()">
-            </div>
-        </div>
-    </div>
-</div>
-<div id="id03" class="w3-modal w3-animate-opacity no-view" style="padding-top:0;">
-    <div class="w3-modal-content w3-card-4" >
-        <div class="w3-container">
-            <h2>거래위치 입력</h2>
 
-            <div>
-                <div class="map_set">
-                    <input type="text" value="" name="locs1" id="locs1" value="" placeholder="예)신림역 2번 출구" required onkeyup="fnfilter(this.value,'locs1')">
-                    <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect()">
-                </div>
-
-            </div>
-            <div>
-                <input type="button" value="취소" onclick="modalClose()"><!--<input type="button" value="확인" onclick="fnLocs();">-->
-            </div>
-            <br>
-            <h2>간편 거래위치 선택</h2>
-            <div>
-                <?php if(count($mylocations)>0 || $mylocations){?>
-                    <ul class="modal_sel">
-                        <?php for($i=0;$i<count($mylocations);$i++){
-                            if($mylocations[$i]!=""){?>
-                                <li class="locSel<?php echo $i;?>"  onclick="fnLocation('<?php echo $mylocations[$i];?>','<?php echo $mylat[$i];?>','<?php echo $mylng[$i];?>');">
-                                    <?php echo $mylocations[$i]?>
-                                </li>
-                            <?php }?>
-                        <?php }?>
-                    </ul>
-                <?php }else{?>
-                    <p>MYPAGE -> 설정 -> 거래위치설정에서 등록가능합니다.</p>
-                <?php }?>
-            </div>
-        </div>
-    </div>
-</div>
-<div id="id04" class="w3-modal w3-animate-opacity no-view" >
-    <div class="w3-modal-content w3-card-4" >
-        <div class="w3-container">
-            <h2>상품 등록 주의사항</h2>
-            <div class="info" style="text-align:left;">
-                <h3>국내법 상 온라인 판매불가 품목</h3>
-                <p>의약품, 주류 및 담배, 안경 및 콘택트렌즈, 총포·도검·화약류, 마약, 혈액(헌혈증서), 군복 및 군용장구, 야생 동·식물, 음란물, 장물, 분실물, 부동산 등</p>
-
-                <h3>약관 및 내부 정책상 판매불가 품목</h3>
-                <p>초소형(몰래)카메라, 유해화학물질, 새총 및 관련 악세서리, 척추동물, 양도 및 매매불가 상품권, 해킹관련 자료, 폭력 우려 및 정치/경제적 분쟁야기 물품 등</p>
-
-                <h3>식품/화장품/의료기기/의약외품 외</h3>
-                <p class="se">품목에 따라 제조/판매 영업신고 또는 품목허가/신고가 필요한 품목이 있습니다.</p>
-
-                <h3>해외직구 상품 재판매 금지</h3>
-                <p>개인 사용 목적으로 면세를 받아 구매한 해외직구 물품을 다른 사람에게 되파는 경우, 관세법상 밀수에 해당되어 벌금 등 형사처벌을 받을 수 있습니다. (단, 중고(Used)제품은 해당되지 않음)</p>
-
-                <h3>KC인증 대상 상품</h3>
-                <p>[어린이제품 안전 특별법] 및 [전기용품 및 생활용품 안전관리법] 에 의거하여 KC인증 대상어린이제품/전기용품/생활용품을 판매하고자 하는 경우, 반드시 인증 받은 상품만을 판매하여야 하며,
-소비자가 제품 인증정보를 확인할 수 있도록 화면의 잘 보이는 곳에 정보를 게시하여야 합니다.
-관련 상품을 판매 시, 인증 대상 품목별로 안전인증 등의 표시를 “상품설명”란에 필수로 기재하여 주시기 바랍니다.
--KC마크, 안전인증번호(또는 안전확인신고번호), 제품명, 제조업자명, 수입업자명(수입제품에 한함), 모델명
-※ 공급자적합성확인대상 생활용품의 안전인증 정보 게시 의무 및 생활용품 구매대행업자의 안전인증,
-안전확인 또는 공급자적합성확인 관련 정보의 해당 인터넷 홈페이지 게시와 인증표시 등이 없는
-생활제품의 구매대행금지에 관한 현행 규정은 2017년 12월 31일까지 유예됨
-현행 법령상 의무사항 및 금지규정을 준수하지 않는 경우,
-관리자에 의해 판매중지(판매불가) 및 사이트 이용제한 조치가 취해질 수 있으며
-관계기관에 적발되어 처벌을 받을 수 있으니 유의하여 주시기 바랍니다.</p>
-            </div>
-            <div>
-                <input type="button" value="확인" onclick="modalClose()"><!--<input type="button" value="확인" onclick="fnLocs();">-->
-            </div>
-        </div>
-    </div>
-</div>
 <div class="sub_head">
-	<div class="sub_back" onclick="fnBack();">
+	<div class="sub_back" onclick="fnBack('<?php echo $return_url;?>');">
 		<img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt="">
 	</div>
     <?php if($pd_id){?>
@@ -219,16 +129,17 @@ if(!$pd_id) {
     <?php }?>
 </div>
 <div class="write_form">
-	<form action="<?php echo G5_MOBILE_URL?>/page/write_update.php" method="post" name="writefrm" enctype="multipart/form-data">
-		<input type="hidden" value="<?php echo $pd_id;?>" name="pd_id">
+	<form action="<?php echo G5_MOBILE_URL?>/page/write_update.php" method="post" name="writefrm" enctype="multipart/form-data" >
+        <input type="hidden" value="<?php echo $return_url;?>" name="return_url">
+        <input type="hidden" value="<?php echo $pd_id;?>" name="pd_id">
 		<input type="hidden" value="<?php echo $member["mb_id"];?>" name="mb_id">
 		<input type="hidden" value="<?php echo $title;?>" name="title" id="title">
 		<input type="hidden" value="<?php echo $type1;?>" name="type" id="type">
 		<input type="hidden" value="<?php echo $pd_type2;?>" name="type2" id="type2">
 		<input type="hidden" value="<?php echo $c;?>" name="cate1" id="cate1">
 		<input type="hidden" value="<?php echo $sc;?>" name="cate2" id="cate2">
-		<input type="hidden" value="<?php echo $filename;?>" name="filename" id="filename" style="width:100%">
-        <input type="hidden" value="<?php echo $videoname;?>" name="videoname" id="videoname" style="width:100%">
+		<input type="hidden" value="<?php echo $filename;?>" name="filename" id="filename" style="width:100%" onchange="setCookie('filename',this.value,1)">
+        <input type="hidden" value="<?php echo $videoname;?>" name="videoname" id="videoname" style="width:100%" onchange="setCookie('videoname',this.value,1)">
         <!--<input type="text" value="" name="addr" id="addr">-->
         <!--<input type="hidden" value="<?php /*echo $write["pd_lat"];*/?>" name="pd_lat" id="pd_lat">
         <input type="hidden" value="<?php /*echo $write["pd_lng"];*/?>" name="pd_lng" id="pd_lng">-->
@@ -241,7 +152,7 @@ if(!$pd_id) {
                         <div class="videoArea sc avility">
                             <h2 style="position: relative;">거래 조건 및 유의 사항</h2><br>
                             <p style="font-size:2.8vw;">거래시 유의사항을 적어주세요. 대화하기에서 구매 안내에 사용됩니다.</p>
-                            <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" style="margin-top:5vw" required onkeyup="fnfilter(this.value,'pd_infos')"><?php echo str_replace("<br/>","\r", $pd_infos);?></textarea>
+                            <textarea name="pd_infos" id="pd_infos" cols="30" rows="10" style="margin-top:5vw" required onkeyup="fnfilter(this.value,'pd_infos')" onchange="setCookie('pd_infos',this.value,1)"><?php echo str_replace("<br/>","\r", $pd_infos);?></textarea>
                         </div>
                     </div>
                 </article>
@@ -253,13 +164,13 @@ if(!$pd_id) {
                     <?php if($pd_id){
                         ?>
                     <div class="sch_top">
-                        <select name="cate_up" id="cate_up" class="sel_cate input01s" required >
+                        <select name="cate_up" id="cate_up" class="sel_cate input01s" required onchange="setCookie('cate1',this.value,1)">
                             <option value="">1차 카테고리</option>
                             <?php for($i=0;$i<count($ca1);$i++){ ?>
                                 <option value="<?php echo $ca1[$i]["ca_id"];?>" <?php if($write["pd_cate"]==$ca1[$i]["cate_name"]){echo "selected";}?>><?php echo $ca1[$i]["cate_name"];?></option>
                             <?php } ?>
                         </select>
-                        <select name="cate2_up" id="cate2_up" class="sel_cate input01s" required >
+                        <select name="cate2_up" id="cate2_up" class="sel_cate input01s" required onchange="setCookie('cate2',this.value,1)">
                             <option value="">2차 카테고리</option>
                             <?php for($i=0;$i<count($ca2);$i++){ ?>
                                 <option value="<?php echo $ca2[$i]["ca_id"];?>" <?php if($write["pd_cate2"]==$ca2[$i]["cate_name"]){echo "selected";}?>><?php echo $ca2[$i]["cate_name"];?></option>
@@ -275,26 +186,32 @@ if(!$pd_id) {
 					</div>-->
 					<div class="write_con">
 						<div class="my">
-                            <?php if($write['pd_type']==1 || $type1 == 1){?>
-							<?php for($i=0;$i<count($mywordss[0]);$i++){
-								if($mywordss[0][$i]!=""){
+                            <?php if($write['pd_type2']==8 || $pd_type2 == 8){//판매시
+                                $work1count = 0;
+                                ?>
+							<?php for($i=0;$i<count($mywordss[1]);$i++){
+								if($mywordss[1][$i]!=""){
+                                    $work1count++;
 							?>
-								<div class="myword"><?php echo $mywordss[0][$i];?><!--<span class="delBtn">X</span><input type="hidden" name="words[]" value="<?php /*echo $mywordss[0][$i];*/?>" id="words" class="words">--></div>
+								<div class="myword"><?php echo $mywordss[1][$i];?><!--<span class="delBtn">X</span><input type="hidden" name="words[]" value="<?php /*echo $mywordss[0][$i];*/?>" id="words" class="words">--></div>
 							<?php }
-							}	?>
-                            <?php }else {?>
-                            <?php for($i=0;$i<count($mywordss[1]);$i++){
-                                if($mywordss[1][$i]!=""){
+                            } if($work1count==0){?> <div class="myword">등록된 간편문구가 없습니다.</div><?php }?>
+                            <?php }else if($write['pd_type2']==4 || $pd_type2 == 4){//구매시
+                                $work2count = 0;
+                                ?>
+                            <?php for($i=0;$i<count($mywordss[0]);$i++){
+                                if($mywordss[0][$i]!=""){
+                                    $work2count++;
                                     ?>
-                                    <div class="myword"><?php echo $mywordss[1][$i];?><!--<span class="delBtn">X</span><input type="hidden" name="words[]" value="<?php /*echo $mywords[$i];*/?>" id="words" class="words">--></div>
+                                    <div class="myword"><?php echo $mywordss[0][$i];?><!--<span class="delBtn">X</span><input type="hidden" name="words[]" value="<?php /*echo $mywords[$i];*/?>" id="words" class="words">--></div>
                                 <?php }
-                            }	?>
+                            }	if($work2count==0){?> <div class="myword">등록된 간편문구가 없습니다.</div><?php }?>
                             <?php } ?>
 							<!--<input type="button" value="+ 개인문구 추가하기" class="word_add" onclick="addMyword();">-->
 						</div>
 						<div class="content">
                             <div class="in_content" style="padding:0;"></div>
-							<textarea name="wr_content" id="wr_content" class="autosize" placeholder="상세 설명" onkeyup="fnfilter(this.value,'wr_content')"><?php echo str_replace("<br/>","\r", $pd_content);?></textarea>
+							<textarea name="wr_content" id="wr_content" class="autosize" placeholder="상세 설명" onkeyup="fnfilter(this.value,'wr_content')" onchange="setCookie('wr_content',this.value,1)"><?php echo str_replace("<br/>","\r", $pd_content);?></textarea>
 						</div>
 					</div>
 				</div>
@@ -306,7 +223,7 @@ if(!$pd_id) {
                     <div class="videoArea sc">
                         <h2>거래가능 시간</h2>
                         <div class="pd_times">
-                            <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3 sel_cate" style="width:12vw">
+                            <select name="pd_timeFrom" id="pd_timeFrom" class="write_input3 sel_cate" style="width:12vw" onchange="setCookie('pd_timeFrom',this.value,1)">
                                 <?php for($i = 1; $i< 25; $i++){
                                     $time = str_pad($i,"2","0",STR_PAD_LEFT);
                                     ?>
@@ -314,8 +231,8 @@ if(!$pd_id) {
                                 <?php }?>
                             </select> 시부터
                              ~
-                            <input type="checkbox" value="1" name="pd_timeType" id="pd_timetype" <?php if($pd_timeType==1){?>checked<?php }?> style="display:none"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일 </label>
-                            <select name="pd_timeTo" id="pd_timeTo" class="write_input3 sel_cate" style="width:12vw;margin-left:1vw">
+                            <input type="checkbox" value="1" name="pd_timeType" id="pd_timetype" <?php if($pd_timeType==1){?>checked<?php }?> style="display:none" onchange="setCookie('pd_timeType',$(this).prop('checked'),1)"><label for="pd_timetype"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 익일 </label>
+                            <select name="pd_timeTo" id="pd_timeTo" class="write_input3 sel_cate" style="width:12vw;margin-left:1vw" onchange="setCookie('pd_timeTo',this.value,1)">
                                 <?php for($i = 1; $i< 25; $i++){
                                     $time = str_pad($i,"2","0",STR_PAD_LEFT);
                                     ?>
@@ -340,8 +257,8 @@ if(!$pd_id) {
                         <?php for($i=0;$i<count($images);$i++){
                                 $img = get_images(G5_DATA_PATH."/product/".$images[$i],500,500);
                             ?>
-                                <div class="image_box app" id="box<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');background-position:center;background-size:cover;background-repeat:no-repeat;">
-                                    <label for="images<?php echo $i;?>">
+                                <div class="image_box app" id="box<?php echo $i;?>"  style="background-image: url('<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>');">
+                                    <label for="images<?php echo $i;?>" <?php if($app){?>onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?> >
                                         <img src="<?php echo G5_DATA_URL;?>/product/<?php echo $img;?>" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
                                         <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
@@ -353,8 +270,8 @@ if(!$pd_id) {
                         if($image_cnt > 0){
                         for($i=$image_cnt;$i<5;$i++){
                             ?>
-                            <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;"  <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  >
-                                <label for="images<?php echo $i;?>">
+                            <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');"    >
+                                <label for="images<?php echo $i;?>" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>>
                                     <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                     <?php if(!$app){?>
                                     <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
@@ -366,8 +283,8 @@ if(!$pd_id) {
                         <?php }else{
                             for($i=0;$i<5;$i++){
                                 ?>
-                                <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');background-position:center;background-size:cover;background-repeat:no-repeat;" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?>  >
-                                    <label for="images<?php echo $i;?>">
+                                <div class="image_box" id="box<?php echo $i;?>" style="background-image: url('<?php echo G5_IMG_URL;?>/no_images.svg');" >
+                                    <label for="images<?php echo $i;?>" <?php if($app){?> onclick="window.android.camereOn2('<?php echo $member["mb_id"];?>','<?php echo $i;?>');" <?php }else if($app2){?>onclick="fnEditIos('<?php echo $member["mb_id"];?>','<?php echo $i;?>')"<?php }?> >
                                         <img src="<?php echo G5_IMG_URL;?>/no_images.svg" alt="image<?php echo $i;?>" style="opacity: 0" class="img_<?php echo $i;?>">
                                         <?php if(!$app){?>
                                         <input type="file" id="images<?php echo $i;?>" name="files[]" style="display:none;" accept="image/jpg, image/png, image/gif, image/jpeg">
@@ -451,6 +368,9 @@ if(!$pd_id) {
 							<input type="button" id="add" class="addLink" value="">
 						</div>
 					</div>
+                    <div class="infor" style="margin-top:3vw;">
+                        <p>붙여넣기 하신 후 꼭 +버튼을 눌러주세요.</p>
+                    </div>
 					<div class="videolinks">
                         <?php if($pd_video_link!=""){ ?>
                         <?php $linkVideos = explode(",",$pd_video_link); $linkCount = count($linkVideos); ?>
@@ -465,13 +385,27 @@ if(!$pd_id) {
 				</div>
 			</article>
 		</section>
+        <?php if($type1==2){?>
+        <section class="write_sec">
+            <article>
+                <div>
+                    <div class="videoArea">
+                        <h2>배송여부</h2>
+                        <div class="deliverys">
+                            <input type="checkbox" name="pd_delivery_use" id="delivery_type" <?php if($pd_delivery_use==1){?>checked<?php }?> style="display:none"><label for="delivery_type"><img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""> 배송필요 </label>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+        <?php }?>
 		<section class="write_sec">
 			<article>
 				<div>
 					<div class="videoArea sc">
 						<h2>검색어</h2>
 						<div>
-							<input type="text" value="<?php if($title){echo $title;}?>" name="sub_title" id="sub_title" class="write_input3" onkeyup="fnfilter(this.value,'sub_title')" />
+							<input type="text" value="<?php if($title){echo $title;}?>" name="sub_title" id="sub_title" class="write_input3" onkeyup="fnfilter(this.value,'sub_title')" onchange="setCookie('pd_tag',this.value,1)"/>
 						</div>
 					</div>
 					<div class="infor">
@@ -483,11 +417,11 @@ if(!$pd_id) {
 		<section class="write_sec pri">
 			<article>
 				<div>
-                    <?php if($type1==2 && $pd_type2 == 8){?>
+                    <?php if($type1==2){?>
                         <div class="videoArea sc" style="margin-bottom:3vw;border-bottom:1px solid #ddd">
                             <h2>거래가격 단위</h2>
                             <div>
-                                <select name="pd_price_type" id="pd_price_type" class="write_input3 sel_cate" style="width:25vw">
+                                <select name="pd_price_type" id="pd_price_type" class="write_input3 sel_cate" style="width:25vw" onchange="setCookie('pd_price_type',this.value,1)">
                                     <option value="0" <?php if($pd_price_type == 0){?>selected<?php }?>>회당</option>
                                     <option value="1" <?php if($pd_price_type == 1){?>selected<?php }?>>시간당</option>
                                     <option value="2" <?php if($pd_price_type == 2){?>selected<?php }?>>하루당</option>
@@ -497,11 +431,11 @@ if(!$pd_id) {
                     <?php }?>
                     <?php if($type1==2){?>
                     <div class="prices ">
-                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price2){echo number_format($pd_price2);}?>" placeholder="" name="price2" id="price2"  class="write_input2 width_80" onkeyup="number_only(this)"/> 계약금
+                        <img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price2){echo number_format($pd_price2);}?>" placeholder="" name="price2" id="price2"  class="write_input2 width_80" onkeyup="number_only(this)" onchange="setCookie('pd_price2',this.value,1);"/> 계약금
 					</div>
                     <?php }?>
 					<div class="prices <?php if($type1==2){?>step2<?php }?>">
-						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price){echo number_format($pd_price);}?>" placeholder="<?php if($pd_type2== 4){?>구매예상금액<?php }else{?>판매가격<?php }?>" name="price" id="price" required class="write_input2" onkeyup="number_only(this)"/>
+						<img src="<?php echo G5_IMG_URL?>/ic_won.svg" alt="" > <input type="tel" value="<?php if($pd_price){echo number_format($pd_price);}?>" placeholder="<?php if($pd_type2== 4){?>구매예상금액<?php }else{?>판매가격<?php }?>" name="price" id="price" required class="write_input2" onkeyup="number_only(this)" onchange="setCookie('pd_price',this.value,1)"/>
                         <?php if($type1==1 && $pd_type2 == 8){?><input type="checkbox" name="discount_use" style="display:none;" id="discount_use" value="1" <?php if($pd_discount==1){?>checked<?php }?>><label for="discount_use">흥정가능<img src="<?php echo G5_IMG_URL?>/ic_write_check.svg" alt=""></label><?php }?>
                         <?php if($type1==2){?>거래완료금<?php }?>
                     </div>
@@ -534,7 +468,7 @@ if(!$pd_id) {
 		</section>
 
 		<div class="submit_btns">
-			<input type="submit" value="확인" class="submit_btn" onclick="fnSubmit();">
+			<input type="button" value="확인" class="submit_btn" onclick="fnSubmit();">
 		</div>
 	</form>
     <div id="map_sel" style="">
@@ -587,6 +521,8 @@ function setImages(img,index){
     }).done(function(data){
         var imgs = "url('"+g5_url+"/data/product/"+data+"')";
         $("#box"+index).css("background-image",imgs);
+        var item = "<span onclick=\"fnDelImg('"+data+"','"+index+"','')\"><img src=\"<?php echo G5_IMG_URL;?>/ic_close_write.svg\" style=\"width:5vw;height:5vw;top:0.5vw;right:0.5vw;position:absolute;\"></span>";
+        $("#box"+index).append(item);
         if($("#filename").val()=="") {
             $("#filename").val(img);
         }else{
@@ -594,6 +530,7 @@ function setImages(img,index){
         }
     });
 }
+
 
 function setVideo(video){
     $("#videoname").val(video);
@@ -631,7 +568,6 @@ $(document).on("change","#pd_timeFrom",function(){
                 $(this).attr("disabled", false);
             }
             if (Number(time) + 1 == e) {
-                console.log(e + 1);
                 $(this).attr("selected", true);
             }
         })
@@ -680,14 +616,18 @@ $(".round").click(function(){
 	}
 });
 
-function fnBack(){
+function fnBack(return_url){
+    var url = g5_url;
+    if(return_url) {
+        url = return_url;
+    }
     <?php if($pd_id){?>
 	if(confirm("상품/능력 등록을 취소하시겠습니까?")){
-		location.href=g5_url;
+		location.href=url;
 	}
 	<?php }else{ ?>
     if(confirm("상품/능력 수정을 취소하시겠습니까?")){
-        location.href=g5_url;
+        location.href=url;
     }
     <?php }?>
 }
@@ -713,30 +653,37 @@ $(document).on("click",".delBtn",function(){
 //거래선호위치관련
 function addLoc(){
     <?php if($locChk==true){?>
-    var cnt = Number("<?php echo $cnts;?>");
-	$("[class^=myloc]").each(function(e){
-		for(var i = 0;i < cnt;i++){
-			if( $(this).text() == $(".locSel"+i).text() ){
-				$(".locSel"+i).addClass("active");
-			}
-		}
-	});
-	$("#id02").css("display","block");
-    $("html, body").css("overflow","hidden");
-    $("html, body").css("height","100vh");
-	var height = $("#id02 .w3-container").height();
-	$(".w3-modal-content").css({"height":height+"px","margin-top":"-"+(height/2)+"px"});
+
+	$.ajax({
+        url:g5_url+'/mobile/page/modal/modal.locations.php',
+        method:"post"
+    }).done(function(data){
+        //$("#id02").css("display","block");
+        $(".modal").html(data).addClass("active");
+        //$(".modal > div").css({"transform":"translate(0,-50)","-webkit-transform":"translate(0,-50)","-ms-transform":"translate(0,-50)","-o-transform":"translate(0,-50)","-moz-transform":"translate(0,-50)"});
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+        //var height = $("#id02 .w3-container").height();
+        //$(".w3-modal-content").css({"height":height+"px","margin-top":"-"+(height/2)+"px"});
+    });
 	<?php }else{?>
-    $("#id03").css("display","block");
-    $("html, body").css("overflow","hidden");
-    $("html, body").css("height","100vh");
+        $.ajax({
+        url:g5_url+'/mobile/page/modal/modal.addlocations.php',
+        method:"post",
+        data:{}
+    }).done(function(data){
+        $(".modal").html(data).addClass("active");
+        //$(".modal > div").css({"transform":"translate(-50%,0)","-webkit-transform":"translate(-50%,0)","-ms-transform":"translate(-50%,0)","-o-transform":"translate(-50%,0)","-moz-transform":"translate(-50%,0)"});
+        //$("#id03").css("display","block");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+    });
     <?php }?>
     location.hash="#modal";
 }
 //안씀?
 $(".modal_sel li").click(function(){
 	var text = $(this).text();
-	//$(this).toggleClass("active");
 	if($(this).hasClass("active")){
 		$(this).removeClass("active");
 		$("[class^=myloc]").each(function(e){
@@ -767,8 +714,7 @@ $(".addLink").click(function(){
 		alert("링크주소를 입력해주세요");
 		return false;
 	}
-
-    if(link.indexOf("youtu.be")==-1){
+    if(link.indexOf("youtu.be")==-1 && link.indexOf('youtube')==-1){
 	    alert("Youtube 링크만 가능합니다.");
 	    return false;
     }
@@ -833,17 +779,40 @@ function addWords(){
 }
 
 function fnSubmit(){
-    setCookie("<?php echo $member["mb_id"];?>","done","1");
-    //window.android.write_complete();
-    //$('.loader').show();
+    var cnt = 0;
+    $(".myloc").each(function(){
+        cnt++;
+    });
+    if(cnt == 0){
+        addLoc();
+        return false;
+    }
+    var formData = $("form[name=writefrm]").serialize();
+
+    $.ajax({
+        method:"post",
+        url:g5_url+"/mobile/page/write_update.php",
+        data:formData
+    }).done(function(data){
+        alert("등록되었습니다.");
+        location.replace(data);
+    });
+    //console.log(formData);
+    //return true;
+    //setCookie("<?php echo $member["mb_id"];?>","done","1");
 }
 
 var mapon = false;
 function mapSelect(num){
-    if($("#locs1").val()==""){
-        alert("거래위치를 입력해주세요");
+    if(typeof($(".modal #id03"))=="undefined" || $(".modal #id03").length == 0){
+        console.log(typeof($(".modal #id03")));
         return false;
     }
+    /*if($("#locs1").val()==""){
+        alert("거래위치를 입력해주세요");
+        return false;
+    }*/
+
     var loc = $("#locs1").val();
 
     if(mapon==false) {
@@ -852,6 +821,7 @@ function mapSelect(num){
         $("#map_sel").css({"bottom": "0","top":"6vw"});
         $("html, body").css("overflow","hidden");
         $("html, body").css("height","100vh");
+        $(".modal > div").addClass("no-view");
         mapon = true;
     }else if(mapon==true || num == ''){
         locitem = '';
@@ -928,7 +898,12 @@ function nowLoc(num){
         }
     });
 }
-
+$(document).on("focus","#locs1",function(){
+    $(".modal > div").css({"transform":"translate(-50%,-20%)","-webkit-transform":"translate(-50%,-20%)","-ms-transform":"translate(-50%,-20%)","-o-transform":"translate(-50%,-20%)","-moz-transform":"translate(-50%,-20%)"});
+});
+$(document).on("blur","#locs1",function(){
+    $(".modal > div").css({"transform":"translate(-50%,-50%)","-webkit-transform":"translate(-50%,-50%)","-ms-transform":"translate(-50%,-50%)","-o-transform":"translate(-50%,-50%)","-moz-transform":"translate(-50%,-50%)"});
+});
 $(document).on("click",".loc_ul_list li",function(){
    if(!$(this).hasClass("active")){
        $(this).addClass("active");
@@ -951,19 +926,27 @@ $(function(){
         $(".view_video").attr("height",height+"px");
     },3000);
     <?php }?>
-    $("#locs1").keyup(function(key){
+    /*$("#locs1").keyup(function(key){
         if(key.keyCode == 13){
             mapSelect();
         }
-    });
+    });*/
     var flag = false;
     <?php if($type1 == 1 && $pd_type2 == 8){?>
         if(flag == false) {
             setTimeout(function () {
-                $("#id04").css({"display":"block","z-index":"90000"});
-                $("html, body").css("overflow","hidden");
-                $("html, body").css("height","100vh");
-                flag = true;
+                $.ajax({
+                    url:g5_url+'/mobile/page/modal/modal.writeinfo.php',
+                    method:"post"
+                }).done(function(data){
+                    console.log(data);
+                    //$("#id04").css({"display":"block","z-index":"90000"});
+                    $(".modal").html(data);
+                    $(".modal").addClass("active");
+                    $("html, body").css("overflow","hidden");
+                    $("html, body").css("height","100vh");
+                    flag = true;
+                });
             }, 1000);
         }
     <?php  }?>
@@ -977,18 +960,20 @@ $(function(){
     $(".myword").click(function(){
         $("#wr_content").focus();
         var text = $(this).text();
-        var leng = text.length;
-        var start = document.getElementById("wr_content").selectionStart;
-        var content = $("#wr_content").val();
-        var orileng = content.slice(0,start).length;
-        var addcontent = content.slice(0,start)+text+"\r\n"+content.slice(start);
-        $("#wr_content").val(addcontent);
-        setCookie("pd_content", addcontent, '1');
-        //setTimeout(function(){
+        if(text != "등록된 간편문구가 없습니다.") {
+            var leng = text.length;
+            var start = document.getElementById("wr_content").selectionStart;
+            var content = $("#wr_content").val();
+            var orileng = content.slice(0, start).length;
+            var addcontent = content.slice(0, start) + text + "\r\n" + content.slice(start);
+            $("#wr_content").val(addcontent);
+            setCookie("pd_content", addcontent, '1');
+            //setTimeout(function(){
             var cusor = orileng + leng + 1;
-            $("#wr_content").selectRange(cusor,cusor);
-            $("#wr_content").height(1).height( $("#wr_content").prop('scrollHeight')+12 );
-        //},100);
+            $("#wr_content").selectRange(cusor, cusor);
+            $("#wr_content").height(1).height($("#wr_content").prop('scrollHeight') + 12);
+            //},100);
+        }
     });
 
 
@@ -1002,7 +987,6 @@ $(function(){
             method:"POST",
             data:{ca_id:ca_id}
         }).done(function(data){
-            console.log(data);
             $("#cate1").val(name);
             $("#cate2_up option").remove();
             $("#cate2_up").append(data);
@@ -1018,9 +1002,7 @@ $(function(){
 
 
     $("input[id^=image]").each(function(e){
-        console.log(e);
         $(this).on("change",function(){
-            console.log("aaa : "+this);
             readUrl(this,e);
         })
     });
@@ -1039,26 +1021,7 @@ $(function(){
         text = text.replace(" ","#");
         $(this).val(text);
         <?php }?>
-        /*if(e.keyCode==8 && text == "#" || e.keyCode==46 && text == "#"){
-            $(this).val('');
-            return false;
-        }
-        if(text.length == 1 && e.keyCode != 32){
-            console.log("A");
-            $(this).val("#"+text);
-        }
-        if(text.length == 1 && e.keyCode == 32){
-            console.log("B");
-            $(this).val("#");
-        }
-        if (text.length >= 2 && e.keyCode == 32) {
-            console.log("C");
-            $(this).val(text + "#");
-        }
-        var chk = text.substr(0,1);
-        if(chk != "#"){
-            $(this).val("#"+text);
-        }*/
+
         var cnt = text.split("#");
         if (cnt.length > 10) {
             alert("검색어는 최대 10개까지 등록가능합니다.");
@@ -1072,9 +1035,8 @@ $(function(){
         $.ajax({
             url:g5_url+"/mobile/page/write_photoload.php",
             method:"post",
-            data:{filename:'<?php echo $filename;?>',app:'<?php echo $app;?>',app2:"<?php echo $app2;?>"}
+            data:{filename:'<?php echo $filename;?>',app:'<?php echo $app;?>',app2:"<?php echo $app2;?>",pd_id:"<?php echo $write["pd_id"];?>"}
         }).done(function(data){
-            console.log(data);
              $(".filelist").html('<h2>사진수정</h2>');
              $(".filelist").append(data);
              $(".photo_msg").html('');
@@ -1101,6 +1063,7 @@ Number.prototype.numberFormat = function(){
 
 function readUrl(file,cnt){
     if(file.files && file.files[0]){
+
         var reader = new FileReader();
 
         reader.onload = function(e){
@@ -1345,11 +1308,10 @@ $(function(){
         $("#pd_infos").change(function () {
             setCookie("pd_infos", $(this).val(), '1');
         });
-        $("#pd_infos").change(function () {
+        /*$("#pd_infos").change(function () {
             setCookie("pd_infos", $(this).val(), '1');
-        });
+        });*/
         $("#price").change(function () {
-
             setCookie("pd_price", $(this).val(), '1');
         });
         $("#price2").change(function () {
@@ -1364,7 +1326,6 @@ $(function(){
     }
 
     setTimeout(function(){
-
     },1000);
 });
 

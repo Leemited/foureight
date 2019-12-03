@@ -1,28 +1,49 @@
 <?php
 include_once ("../../../common.php");
-include_once (G5_MOBILE_PATH."/head.login.php");
 
-if(!$group_id){
+if(!$od_id){
     alert("주문 상품이 없거나 잘못된 요청입니다.");
     return false;
 }
 
-$sql = "select *,p.pd_id from `order_temp` as o left join `product` as p on o.pd_id = p.pd_id where group_id = '{$group_id}'  ";
+if($od_id){
+    $sql = "select *,p.pd_id,p.mb_id as mb_id from `order` as o left join `product` as p on o.pd_id = p.pd_id where o.od_id = '{$od_id}'";
+}
+$order = sql_fetch($sql);
+$total = $order["od_price"];
+$od_pd_type = $order["od_pd_type"];
+$od_delivery_type = $order["od_delivery_type"];
+//print_r2($order);
+/*
 $res = sql_query($sql);
 while($row=sql_fetch_array($res)){
+    //print_r2($row);
     $order_list[] = $row;
     $total += (int)$row["od_price"];
     $cart_ids[] = $row["cid"];
     $pd_ids[] = $row["pd_id"];
     $od_pd_type = $row["od_pd_type"];
-}
-$cart_idss = implode(",",$cart_ids);
-$pd_idss = implode(",",$pd_ids);
-$order_item_name = $order_list[0]["pd_name"];
-if(count($order_list)>1){
-    $order_item_name .= " 외 ".(count($order_list)-1)."개";
+    $carts = sql_fetch("select * from `cart` where cid = '{$row['cid']}'");
+    if($row["od_step"]>1){
+        $total = $carts["c_price2"];
+    }
+    if($od_id=="") {
+        $od_temp_id = $row["od_id"];
+    }
+    $od_delivery_type = $row["od_delivery_type"];
 }
 
+$cart_idss = implode(",",$cart_ids);
+$pd_idss = implode(",",$pd_ids);
+$order_item_name = $order["pd_name"];
+if(count($order_list)>1){
+    $order_item_name .= " 외 ".(count($order_list)-1)."개";
+}*/
+$order_item_name = $order["pd_tag"];
+$set_type = $od_pd_type;
+$back_url = G5_MOBILE_URL."/page/mypage/mypage_order.php?type=2&od_cate=2&pd_type={$set_type}";
+
+include_once (G5_MOBILE_PATH."/head.login.php");
 $sql = "select * from `my_address` where mb_id = '{$member["mb_id"]}' order by addr_default desc";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
@@ -33,12 +54,13 @@ $my_addres_li = count($my_addres);
 
 $mb_hp = explode("-",$member["mb_hp"]);
 
-$back_url = G5_MOBILE_URL."/page/mypage/mypage.php?type=2";
 
 $sql = "select * from `my_card` where mb_id='{$member["mb_id"]}' and card_status = 1 ";
 $mycard = sql_fetch($sql);
 
 $mycard_num = base64_decode($mycard["card_number"]);
+
+$mbs = get_member($order["mb_id"]);
 
 ?>
 <div id="id00" class="w3-modal w3-animate-opacity no-view">
@@ -55,20 +77,28 @@ $mycard_num = base64_decode($mycard["card_number"]);
         </div>
     </div>
 </div>
-    <div id="idcard" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
+<div id="idcard" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4">
+        <div class="w3-container">
 
+        </div>
+    </div>
+</div>
+<div id="id01" class="w3-modal w3-animate-opacity no-view">
+    <div class="w3-modal-content w3-card-4" style="height:auto;-webkit-transform: translateY(-50%);-moz-transform: translateY(-50%);-ms-transform: translateY(-50%);-o-transform: translateY(-50%);transform: translateY(-50%);margin-top:0">
+        <div class="w3-container" style="text-align: center">
+            <div>
+                <ul class="modal_sel">
+                    <li style="font-size:3vw;width:60%">판매자 정보 : <span class="cheat_info"><?php echo $mbs["mb_hp"];?></span></li>
+                </ul>
+            </div>
+            <iframe src="https://api.thecheat.co.kr/web/widget.php?url=http://484848.co.kr" width="281" height="118" frameborder="0" border="0" framespacing="0" marginheight="0" marginwidth="0" scrolling="no" noresize></iframe>
+            <div style="margin-top:2vw;">
+                <input type="button" value="닫기" onclick="modalClose(this)" style="font-size:3vw">
             </div>
         </div>
     </div>
-    <div id="id01" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4" style="height:auto;-webkit-transform: translateY(-50%);-moz-transform: translateY(-50%);-ms-transform: translateY(-50%);-o-transform: translateY(-50%);transform: translateY(-50%);margin-top:0">
-            <div class="w3-container" style="text-align: center">
-                <iframe src="https://api.thecheat.co.kr/web/widget.php?url=http://mave01.cafe24.com" width="281" height="118" frameborder="0" border="0" framespacing="0" marginheight="0" marginwidth="0" scrolling="no" noresize></iframe>
-            </div>
-        </div>
-    </div>
+</div>
 <div class="sub_head">
     <div class="sub_back" onclick="location.href='<?php echo $back_url;?>'"><img src="<?php echo G5_IMG_URL?>/ic_menu_back.svg" alt=""></div>
     <h2>주문/결제하기</h2>
@@ -76,8 +106,8 @@ $mycard_num = base64_decode($mycard["card_number"]);
 <div class="orders">
     <div class="order_items">
         <div class="item_top">
-            <?php if($order_list[0]["pd_images"]!=""){
-                $img = explode(",",$order_list[0]["pd_images"]);
+            <?php if($order["pd_images"]!=""){
+                $img = explode(",",$order["pd_images"]);
                 $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
                 if(is_file(G5_DATA_PATH."/product/".$img1)){
                     ?>
@@ -89,7 +119,7 @@ $mycard_num = base64_decode($mycard["card_number"]);
                         <?php }?>
                     </div>
                 <?php }else{
-                    $tags = explode("/",$order_list[0]["pd_tag"]);
+                    $tags = explode("/",$order["pd_tag"]);
                     $rand = rand(1,13);
                     ?>
                     <div class="bg rand_bg<?php echo $rand;?> item_images" >
@@ -97,14 +127,14 @@ $mycard_num = base64_decode($mycard["card_number"]);
                             <?php //for($k=0;$k<count($tags);$k++){
                                 $rand_font = rand(3,6);
                                 ?>
-                                <div class="rand_size<?php echo $rand_font;?>" style="display:table-cell;vertical-align: middle;text-align: center"><?php echo $order_list[0]["pd_tag"];?></div>
+                                <div class="rand_size<?php echo $rand_font;?>" style="display:table-cell;vertical-align: middle;text-align: center"><?php echo iconv_substr($order["pd_tag"],0,20,'UTF-8');?></div>
                             <?php //}?>
                         </div>
                         <div class="clear"></div>
                     </div>
                 <?php }?>
             <?php }else{
-                $tags = explode("#",$order_list[0]["pd_tag"]);
+                $tags = explode("#",$order["pd_tag"]);
                 $rand = rand(1,13);
                 ?>
                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
@@ -112,25 +142,39 @@ $mycard_num = base64_decode($mycard["card_number"]);
                         <?php //for($k=0;$k<count($tags);$k++){
                             $rand_font = rand(3,6);
                             ?>
-                            <div class="rand_size<?php echo $rand_font;?>" style="display:table-cell;vertical-align: middle;text-align: center"><?php echo $order_list[0]["pd_tag"];?></div>
+                            <div class="rand_size<?php echo $rand_font;?>" style="display:table-cell;vertical-align: middle;text-align: center"><?php echo iconv_substr($order["pd_tag"],0,20,'UTF-8');?></div>
                         <?php //}?>
                     </div>
                     <div class="clear"></div>
                 </div>
             <?php }?>
             <div class="item_info">
-                <h2><?php echo $order_item_name;?></h2>
-                <div>주문 금액 <?php echo number_format($total);?> 원</div>
+                <h2><?php echo $order["pd_tag"];?></h2>
+                <div>
+                    <?php
+                    if((int)$total > 0){
+                        if((int)$order["od_step"]==0 && (int)$order["od_pd_type"]==2){?>
+                            계약 금액 <?php echo number_format($total)." 원"; ?>
+                        <?php }else if((int)$order["od_step"]==1 && (int)$order["od_pd_type"]==2){?>
+                            최종결제액 <?php echo number_format($total)." 원"; ?>
+                        <?php }else if((int)$order["od_step"]==0 && (int)$order["od_pd_type"]==1){?>
+                            주문 금액 <?php echo number_format($total);?> 원
+                        <?php }?>
+                    <?php }if((int)$total == 0){?>
+                        무료 나눔
+                    <?php }?>
+                </div>
             </div>
             <div class="clear"></div>
         </div>
         <div class="item_bottom">
             <div>
-                <h2>총금액 <span><?php echo number_format($total);?> 원</span></h2>
+                <h2>총금액 <span><?php if((int)$total > 0){ echo number_format($total);?> 원 <?php } else { echo "무료나눔";}?></span></h2>
             </div>
         </div>
     </div>
-    <div class="address_tab">
+    <?php if($order["pd_delivery_use"]==0 || $order["pd_delivery_use"]==""){?>
+    <div class="address_tab" <?php if($od_id){?>style="display:none"<?php }?>>
         <ul>
             <?php if(count($my_addres) == 0){?>
             <li class="active" style="width:20%;">기본배송지</li>
@@ -143,9 +187,11 @@ $mycard_num = base64_decode($mycard["card_number"]);
         </ul>
         <div class="clear"></div>
     </div>
+    <?php }?>
     <!--form action="<?php echo G5_MOBILE_URL?>/page/mypage/order_update.php" name="order_form_update"-->
-    <form action="<?php echo G5_MOBILE_URL?>/page/mypage/payment/payment.php" name="order_form_update" method="post" onsubmit="fnPayment();">
+    <form action="<?php echo G5_MOBILE_URL?>/page/mypage/stdpay/requestPay.php" name="order_form_update" method="post" >
     <div class="order_write">
+        <input type="hidden" name="od_id" id="od_id" value="<?php echo $od_id;?>">
         <input type="hidden" name="od_item_name" id="od_item_name" value="<?php echo $order_item_name;?>">
         <input type="hidden" name="od_total" id="od_total" value="<?php echo $total;?>">
         <input type="hidden" name="od_price" id="od_price" value="<?php echo $total;?>">
@@ -156,8 +202,14 @@ $mycard_num = base64_decode($mycard["card_number"]);
         <input type="hidden" name="od_expd" id="od_expd" value="<?php echo str_pad($mycard["card_year"],"0",STR_PAD_LEFT).$mycard["card_month"];?>">
         <input type="hidden" name="od_card_num" id="od_card_num" value="<?php echo str_replace("-","",$mycard_num);?>">
         <input type="hidden" name="card_name" id="card_name" value="<?php echo $mycard["card_name"];?>">
+        <input type="hidden" name="od_delivery_type" id="od_delivery_type" value="<?php echo "";?>">
         <input type="hidden" name="card_add" id="card_add" value="">
-        <div class="write_form">
+        <input type="hidden" name="od_temp_id" id="od_temp_id" value="<?php echo $od_temp_id;?>">
+        <input type="hidden" name="app_mb_id" id="app_mb_id" value="<?php echo $member["mb_id"];?>">
+        <input type="hidden" name="pay_oid" id="pay_oid" value="<?php echo $order["pay_oid"];?>"> <!-- 2번째 결제인지 파악하기위함 -->
+        <input type="hidden" name="od_step" id="od_step" value="<?php echo $order["od_step"];?>"> <!-- 2번째 결제인지 파악하기위함 -->
+        <?php if($order["od_delivery_type"]==1){?>
+        <div class="write_form" >
             <div class="row">
                 <div class="cell title"><?php if($od_pd_type==2){?>요청자<?php }else{?>받는분<?php }?></div>
                 <div class="cell inputs">
@@ -218,13 +270,15 @@ $mycard_num = base64_decode($mycard["card_number"]);
                 </div>
             </div>
         </div>
-        <div class="msgs">
+        <?php }?>
+        <div class="msgs" >
             <div class="cell full">
                 <div>
                     <input type="text" name="od_content" id="od_content" class="order_input" placeholder="판매자에게 남기는 말(50자 이내);">
                 </div>
             </div>
         </div>
+        <?php if($total > 0){?>
         <div class="write_form">
             <input type="hidden" name="od_type" value="1" id="od_type">
             <div class="row">
@@ -238,25 +292,28 @@ $mycard_num = base64_decode($mycard["card_number"]);
                 </div>
             </div>
         </div>
+        <?php }?>
     </div>
     <div class="order_info">
         <h2>사기조회 / 안전개래 안내</h2>
         <div>
             <!--48에서는 직접적인 거래 사기와 피해를 보장해 주지 않습니다.<br>
             따라서 결제전 신중하게 판단 하시기 바랍니다.-->
-            <div class="order_info_link" style="position: relative;width:100%;text-align: center;margin:4vw 0 6vw;display: inline-block">
-            <div style="background-color:#0c0c94;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-right:1vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="fnTheCheat()">
-                <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 사기조회 하기
-            </div>
-            <div style="background-color:#2584c6;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-left:1vw;color:#FFF;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://www.unicro.co.kr/index.jsp'">
-                <img src="<?php echo G5_IMG_URL;?>/unicro_logo.jpg" alt="" style="width:36%;margin-top: -1vw;"> 안전거래 하기
-            </div>
+            <div class="order_info_link" style="position: relative;width:100%;text-align: center;margin:0 0 6vw;display: inline-block">
+                <div style="background-color:#0c0c94;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-right:1vw;color:#fff;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="fnTheCheat()">
+                    <img src="<?php echo G5_IMG_URL;?>/logo1.png" alt="" style="width:36%"> 사기조회 하기
+                </div>
+                <div style="background-color:#2584c6;width:calc(50% - 7vw);padding:2vw 3vw;font-size:3vw;margin-left:1vw;color:#FFF;margin-top:2vw;text-align: center;-webkit-border-radius: 4vw;-moz-border-radius: 4vw;border-radius: 4vw;float:left" onclick="location.href='https://www.unicro.co.kr/index.jsp'">
+                    <img src="<?php echo G5_IMG_URL;?>/unicro_logo.jpg" alt="" style="width:36%;margin-top: -1vw;"> 안전거래 하기
+                </div>
             </div>
             <div class="clear"></div>
         </div>
     </div>
     <div class="order_btns">
-        <!-- <input type="button" value="직거래" class="order_btn" onclick="orderDirect()"> -->
+        <?php if($order["od_direct_status"]==0){?>
+        <input type="button" value="직거래" class="order_btn" onclick="orderDirect('<?php echo $od_id;?>')">
+        <?php }?>
         <input type="button" value="즉시결재" class="order_btn2" onclick="orderUpdate()">
     </div>
     </form>
@@ -274,10 +331,12 @@ function fnOderType(type) {
 }
 
 function orderUpdate(){
+    <?php if($od_id==""){?>
     if($("#od_name").val() == ""){
         alert("받는분 성함을 입력해주세요.");
         return false;
     }
+    <?php }?>
     if(confirm("해당 주문건에 대한 결제를 하시겠습니까?")){
         /*var od_name = $("#od_name").val();
         var od_tel = $("#tel1").val()+"-"+$("#tel2").val()+"-"+$("#tel3").val();
@@ -307,22 +366,32 @@ function orderUpdate(){
                 }
             });
         }else{*/
-            document.order_form_update.action = g5_url+"/mobile/page/mypage/stdpay/requestPay.php";
+            //document.order_form_update.action = g5_url+"/mobile/page/mypage/stdpay/requestPay.php";
+        if($("#od_price").val()>0) {
             document.order_form_update.submit();
+        }else{
+            //무료는 바로 결제 완료 상태로 변경
+            document.order_form_update.action = g5_url+"/mobile/page/mypage/order_update.php";
+            document.order_form_update.submit();
+        }
         //}
     }else{
         return false;
     }
 }
-function orderDirect(){
-    if(confirm("직거래 이용시 판매자의 동의가 필요합니다.")){
+function orderDirect(od_id){
+    if(confirm("직거래 이용시 판매자의 동의가 필요하며, 장소와 시간은 반드시 협의후 진행 바랍니다.")){
         //판매자에게 동의 확인 알림 확인 후 처리
         $.ajax({
             url:g5_url+"/mobile/page/mypage/ajax.pay_direct.php",
             method:"post",
-            data:{pd_ids:pd_ids}
+            data:{od_id:od_id}
         }).done(function(data){
-
+            console.log(data);
+            if(data=="1") {
+                alert("직거래 요청을 보냈습니다.\r좀더 빠른대응을 위해 판매자와 1:1을 대화를 해보세요.");
+                $(".order_btn").remove();
+            }
         });
     }else{
         return false;

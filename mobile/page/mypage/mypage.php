@@ -7,6 +7,10 @@ if(!$is_member){
     return false;
 }
 
+/*if($_SESSION["type1"]==""){
+    $type = 1;
+}*/
+
 //유저 차단 목록
 $block_time = date("Y-m-d H:i:s");
 $sql = "select target_id from `member_block` where mb_id = '{$member["mb_id"]}' and '{$block_time}' BETWEEN block_dateFrom and block_dateTo";
@@ -72,8 +76,8 @@ if(count($all_pd_ids)>0) {
 }
 
 
-$count1 = sql_fetch("select count(*) as cnt from `order` as o left join `product` as p on o.pd_id = p.pd_id where p.mb_id = '{$mb["mb_id"]}' and o.od_status = 1 and o.od_pay_status = 1 and od_step = 2 and p.pd_type = 1");
-$count2 = sql_fetch("select count(*) as cnt from `order` as o left join `product` as p on o.pd_id = p.pd_id where p.mb_id = '{$mb["mb_id"]}' and o.od_status = 1 and o.od_pay_status = 1 and od_step = 2 and p.pd_type = 2");
+$count1 = sql_fetch("select count(*) as cnt from `order` as o left join `product` as p on o.pd_id = p.pd_id where p.mb_id = '{$mb["mb_id"]}' and o.od_status = 1 and o.od_pay_status = 1 and od_fin_status = 1 and p.pd_type = 1");
+$count2 = sql_fetch("select count(*) as cnt from `order` as o left join `product` as p on o.pd_id = p.pd_id where p.mb_id = '{$mb["mb_id"]}' and o.od_status = 1 and o.od_pay_status = 1 and od_fin_status = 1 and od_step = 2 and p.pd_type = 2");
 
 $like = sql_fetch("select count(*) as cnt from `product_like` where pd_type = 1 and pd_mb_id = '".$mb["mb_id"]."' ");
 
@@ -91,188 +95,9 @@ while($row = sql_fetch_array($res)){
 
 $addr = explode(" ",$mb["mb_addr1"]);
 $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
+include_once (G5_PATH."/mobile/page/mypage/mypage.popup.php");
+
 ?>
-    <div id="id03" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
-                <form name="write_from" id="write_from" method="post" action="">
-                    <input type="hidden" name="up_pd_id" id="up_pd_id" value="">
-                    <h2>상태변경</h2>
-                    <div>
-                        <ul class="modal_sel">
-                            <li id="status1" class="active" >판매중</li>
-                            <li id="status2" class="" >거래중</li>
-                            <li id="status3" class="" >판매보류</li>
-                            <li id="status4" class="" >판매완료</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="fnStatusUpdate();" >
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div id="id01s" class="w3-modal w3-animate-opacity">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
-                <div class="con">
-
-                </div>
-            </div>
-        </div>
-    </div>
-<div id="id0s" class="w3-modal w3-animate-opacity">
-    <div class="w3-modal-content w3-card-4">
-        <div class="w3-container">
-            <div class="con">
-
-            </div>
-        </div>
-    </div>
-</div>
-    <div id="id02" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
-                <input type="hidden" name="like_id" id="like_id" value="">
-                <input type="hidden" name="view_pd_type" id="view_pd_type" value="">
-                <h2>평가하기</h2>
-                <div class="likes">
-                    좋아요 <img src="<?php echo G5_IMG_URL?>/view_like.svg" alt="" class="likeimg" >
-                </div>
-                <div>
-                    <input type="text" name="like_content" id="like_content" placeholder="평가 내용을 입력해주세요." required>
-                </div>
-                <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="확인" onclick="fnLikeUpdate();" >
-                </div>
-            </div>
-        </div>
-    </div>
-<div id="id06" class="w3-modal w3-animate-opacity no-view">
-    <div class="w3-modal-content w3-card-4">
-        <div class="w3-container">
-            <h2>사유보기</h2>
-            <div class="con">
-                <p></p>
-            </div>
-            <div>
-                <input type="button" value="확인" onclick="modalClose(this)">
-                <input type="button" value="상세보기" id="blind_view_btn" style="width:auto" onclick="">
-                <input type="button" value="관리자문의" id="admin_qa" style="width:auto"  onclick="">
-            </div>
-        </div>
-    </div>
-</div>
-<div id="id04" class="w3-modal w3-animate-opacity no-view">
-    <div class="w3-modal-content w3-card-4">
-        <div class="w3-container">
-            <form name="write_from" id="write_from" method="post" action="">
-                <h2>블라인드 사유</h2>
-                <div>
-                    <input type="text" name="like_content" id="like_content" placeholder="평가 내용을 입력해주세요." required>
-                </div>
-                <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="제시하기" onclick="fnPricingUpdate();" >
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div id="id07" class="w3-modal w3-animate-opacity no-view">
-    <div class="w3-modal-content w3-card-4">
-        <div class="w3-container">
-            <form name="write_from" id="write_from" method="post" action="">
-                <input type="hidden" name="p_pd_id" id="p_pd_id" value="">
-                <input type="hidden" name="p_type" id="p_type" value="">
-                <h2>제시하기</h2>
-                <div>
-                    <select name="prcing_pd_id" id="prcing_pd_id" required>
-                        <option value="">게시물 선택</option>
-                    </select>
-                    <ul class="blind_ul">
-                        <li>
-                            <input type="text" placeholder="제시내용을 입력하세요." name="pricing_content" id="pricing_content" required>
-                        </li>
-                        <li>
-                            <input type="text" placeholder="가격을 입력해주세요." name="pricing_price" id="pricing_price" style="margin-top:0;" onkeyup="number_only(this)">
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="제시등록" style="width:auto;padding:2vw 3vw" id="up_btn" onclick="fnPricingUpdate();" >
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div id="id09" class="w3-modal w3-animate-opacity no-view">
-    <div class="w3-modal-content w3-card-4">
-        <div class="w3-container">
-            <form action="<?php echo G5_MOBILE_URL?>/page/mypage/member_block_update.php" method="post" name="blockform">
-                <input type="hidden" name="target_id" id="target_id" value="<?php echo $mb["mb_id"];?>">
-                <input type="hidden" name="mb_id"  id="mb_id" value="<?php echo $member["mb_id"];?>">
-                <input type="hidden" name="block_date" id="block_date" value="1">
-            <h2>유저차단</h2>
-            <div class="con">
-                <ul class="modal_sel">
-                    <li id="status1" class="active" >1개월 차단</li>
-                    <li id="status2" class="" >6개월 차단</li>
-                    <li id="status3" class="" >영구차단</li>
-                </ul>
-            </div>
-            <div>
-                <input type="button" value="취소" onclick="modalClose(this)">
-                <input type="button" value="차단하기" onclick="fn_block();" style="width:auto">
-            </div>
-            </form>
-        </div>
-    </div>
-</div>
-    <div id="id08" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
-                <form name="write_from" id="write_from" method="post" action="">
-                    <h2>연락하기</h2>
-                    <div class="contacts">
-                        <ul>
-
-                        </ul>
-                    </div>
-                    <div>
-                        <input type="button" value="닫기" onclick="modalClose2()">
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div id="id00" class="w3-modal w3-animate-opacity no-view">
-        <div class="w3-modal-content w3-card-4">
-            <div class="w3-container">
-                <input type="hidden" value="<?php echo $order["od_id"];?>" name="od_id" id="od_id">
-                <h2>배송정보 입력</h2>
-                <div>
-                    <input type="hidden" id="deli_od_id" value="">
-                    <input type="text" name="delivery_name" id="delivery_name" required style="width:50%">
-                    <select name="deli_sel" id="deli_sel" onchange="$('#delivery_name').val(this.value)" style="width:calc(50% - 8vw);text-align: center;background-color: #FFF;color: #000;position: relative;    margin: 4vw auto;padding: 2vw;font-size: 3.6vw;border-radius: 20vw;border: none;font-family: 'nsr', sans-serif;">
-                        <option value="">택배사선택</option>
-                        <option value="한진택배">한진택배</option>
-                        <option value="우체국택배">우체국택배</option>
-                        <option value="옐로우캡">옐로우캡</option>
-                        <option value="로젠택배">로젠택배</option>
-                        <option value="대한통운">대한통운</option>
-                        <option value="경동택배">경동택배</option>
-                        <option value="">직접입력</option>
-                    </select>
-                    <!--<input type="text" value="" name="delivery_name" id="delivery_name" placeholder="택배사" required >-->
-                    <input type="text" value="" name="delivery_number" id="delivery_number" placeholder="운송장번호" required style="margin-top:0;">
-                </div>
-                <div>
-                    <input type="button" value="취소" onclick="modalClose(this)"><input type="button" value="배송정보 등록" onclick="fnConfirmDelivery();" style="width:auto;margin-left:1vw" >
-                </div>
-            </div>
-        </div>
-    </div>
 <div class="loader" >
     <img src="<?php echo G5_IMG_URL?>/loader.svg" alt="" style="width:100%;position:relative;z-index:1">
     <!--<div style="background-color:#000;opacity: 0.4;width:100%;height:100%;position:absolute;top:0;left:0;"></div>-->
@@ -342,19 +167,24 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
 	<section class="user_tab">
         <?php if($mode=="profile"){?>
         <ul id="my_ul">
-            <li class="myprofile myboard <?php if($type==1){echo 'active';}?>">
+            <li class="myprofile myboard active">
                 <div>My List</div>
                 <!--<h2><img src="<?php /*echo G5_IMG_URL*/?>/ic_mypage_mylist.svg" alt=""><span><?php /*echo number_format($total);*/?></span></h2>-->
             </li>
-            <li class="myprofile order_tab <?php if($type==2){echo 'active';}?>">
+            <li class="myprofile order_tab" onclick="location.href=g5_url+'/mobile/page/mypage/mypage_order.php'">
                 <div>거래진행중</div>
                 <!--<h2><img src="<?php /*echo G5_IMG_URL*/?>/ic_mypage_orders.svg" alt=""><span><?php /*echo number_format($total3);*/?></span></h2>-->
             </li>
-            <li class="myprofile wishes <?php if($type==3){echo 'active';}?>">
+            <li class="myprofile wishes" onclick="location.href=g5_url+'/mobile/page/mypage/mypage_order_complete.php'">
                 <div>거래완료</div>
                 <!--<h2><img src="<?php /*echo G5_IMG_URL*/?>/ic_mypage_wish.svg" alt=""><span><?php /*echo number_format($wishtotal);*/?></span></h2>-->
             </li>
         </ul>
+
+        <!--<ul class="order_cate">
+            <li onclick="fnlist2(1,'','','<?php /*echo $mb_id;*/?>','','1')" <?php /*if($od_cate==""||$od_cate==1){*/?>class="active"<?php /*}*/?>>판매</li>
+            <li onclick="fnlist2(1,'','','<?php /*echo $mb_id;*/?>','','2')" <?php /*if($od_cate==2){*/?>class="active"<?php /*}*/?>>구매</li>
+        </ul>-->
         <!--<ul class="sub_ul">
             <li class="<?php /*if($type==1){echo 'active';}*/?>" id="mul">
                 <div>물품 <label><?php /*echo number_format($total1);*/?></label></div>
@@ -390,9 +220,8 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                         }
                     }
                     ?>
-                    <!-- <div class="grid__item" onclick="fn_viewer('<?php echo $list[$i]['pd_id'];?>')"> -->
-                    <div class="grid__item <?php if($list[$i]["pd_blind"]>=10){?>blinds<?php }?>" onclick="<?php if($list[$i]["pd_blind"]<10){?>fn_viewer('<?php echo $list[$i]["pd_id"];?>')<?php }?>">
-                        <?php if($list[$i]["pd_blind"]>=10){?>
+                    <div class="grid__item <?php if($list[$i]["pd_blind"]>=10 || $list[$i]["pd_blind_status"]==1){?>blinds<?php }?>" onclick="<?php if($list[$i]["pd_blind"]<10 && $list[$i]["pd_blind_status"]==0){?>fn_viewer('<?php echo $list[$i]["pd_id"];?>')<?php }?>">
+                        <?php if($list[$i]["pd_blind"]>=10 || $list[$i]["pd_blind_status"]==1){?>
                             <div class="blind_bg">
                                 <div>
                                     <input type="button" value="사유보기" class="list_btn"  onclick="fnBlindView('<?php echo $list[$i]["pd_id"];?>')">
@@ -445,7 +274,7 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                             <?php }?>
                             <div class="top">
                                 <div>
-                                    <h2><?php if($list[$i]["pd_status"]==0){echo "판";}else if($list[$i]["pd_status"]==1){echo "거";}?></h2>
+                                    <h2><?php /*if($list[$i]["pd_status"]==0){echo "판";}else if($list[$i]["pd_status"]==1){echo "거";}*/?></h2>
                                     <div>
                                         <ul>
                                             <li><img src="<?php echo G5_IMG_URL?>/ic_hit.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
@@ -455,11 +284,18 @@ $mb_address = $addr[0]." ".$addr[1]." ".$addr[2]." ".$addr[3];
                                 </div>
                             </div>
                             <div class="bottom">
-                                <?php if($list[$i]["pd_name"]){?>
-                                    <h2><?php echo $list[$i]["pd_name"];?></h2>
+                                <?php if($list[$i]["pd_name"]){
+                                    $pt2="";
+                                    switch($list[$i]["pd_type2"]){
+                                        case "4":
+                                            $pt2 = "[삽니다]";
+                                            break;
+                                    }
+                                    ?>
+                                    <h2><?php echo $pt2." ";?><?php echo $list[$i]["pd_name"];?></h2>
                                 <?php }?>
                                 <div>
-                                    <h1>￦ <?php echo number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);?></h1>
+                                    <h1><?php if($list[$i]["pd_price"]+$list[$i]["pd_price2"]==0 && $list[$i]["pd_type2"]=="8"){echo "무료나눔";}else if($list[$i]["pd_price"]+$list[$i]["pd_price2"]==0 && $list[$i]["pd_type2"]=="4"){echo "가격제시";}else{ echo "￦ ".number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"]);}?></h1>
                                 </div>
                             </div>
 
@@ -487,6 +323,7 @@ var scrollchk = true;
 var finish = false;
 var timer = null;
 $(document).ready(function(){
+    $(".order_cate").hide();
     $("#id09 ul li").click(function(){
         $(this).addClass("active");
         $("#id09 ul li").not($(this)).removeClass("active");
@@ -504,59 +341,19 @@ $(document).ready(function(){
        }
     });
 
-    $("#pro_ul li").click(function(){
-        var stx = $("#stx").val();
-        if(!$(this).hasClass("active")){
-            $("#pro_ul li").not($(this)).removeClass("active");
-            $(this).addClass("active");
-            type1 = $(this).find("div").text();
-            switch (type1){
-                case "물품":
-                    type1 = 1;
-                    break;
-                case "능력":
-                    type1 = 2;
-                    break;
-            }
-            fnlist(1,type1,"<?php echo $mb_id;?>",stx);
-        }
-    });
-
-    $("#my_ul li").click(function(){
-        var stx = $("#stx").val();
-        if(!$(this).hasClass("active")){
-            $("#my_ul li").not($(this)).removeClass("active");
-            $(this).addClass("active");
-            type1 = $(this).find("div").text();
-            switch (type1){
-                case "My List":
-                    type1 = 1;
-                    break;
-                case "거래진행중":
-                    type1 = 2;
-                    break;
-                case "거래완료":
-                    type1 = 3;
-                    break;
-            }
-            if($(".mypage_pd_type").prop("checked") != true) {
-                fnlist2(1, type1, 1, "<?php echo $mb_id;?>",stx);
-            }else{
-                fnlist2(1, type1, 2, "<?php echo $mb_id;?>",stx);
-            }
-        }
-    });
-
     $(".mypage_pd_type").click(function(){
         var stx = $("#stx").val();
         switch (type1){
             case "My List":
+                $(".order_cate").hide();
                 type1 = 1;
                 break;
             case "거래진행중":
+                $(".order_cate").show();
                 type1 = 2;
                 break;
             case "거래완료":
+                $(".order_cate").show();
                 type1 = 3;
                 break;
         }
@@ -566,22 +363,22 @@ $(document).ready(function(){
                 method:"post",
                 data:{key:"type1",value:"1"}
             }).done(function(data){
-                console.log(data);
+                //console.log(data);
             });
             //물건
             $("#mypage").removeClass("bg2");
-            fnlist2(1,type1,1,"<?php echo $mb_id;?>",stx);
+            fnlist2(1,type1,1,"<?php echo $mb_id;?>",stx,'');
         }else{
             $.ajax({
                 url:g5_url+"/mobile/page/ajax/ajax.set_session.php",
                 method:"post",
                 data:{key:"type1",value:"2"}
             }).done(function(data){
-                console.log(data);
+                //console.log(data);
             });
             //능력
             $("#mypage").addClass("bg2");
-            fnlist2(1,type1,2,"<?php echo $mb_id;?>",stx);
+            fnlist2(1,type1,2,"<?php echo $mb_id;?>",stx,'');
         }
     });
 
@@ -593,9 +390,9 @@ $(document).ready(function(){
         }
         timer = setTimeout(function(){
             if($(".mypage_pd_type").prop("checked") != true) {
-                fnlist2(1, type1, 1, "<?php echo $mb_id;?>",stx);
+                fnlist2(1, type1, 1, "<?php echo $mb_id;?>",stx,'');
             }else{
-                fnlist2(1, type1, 2, "<?php echo $mb_id;?>",stx);
+                fnlist2(1, type1, 2, "<?php echo $mb_id;?>",stx,'');
             }
         },1000);
     });
@@ -606,22 +403,12 @@ $(document).ready(function(){
         }
     });
 
-	<?php if($mb['mb_profile']){?>
-	//$(".user_info").css({"background-image":"url('<?php echo $mb[mb_profile];?>')","background-size":"cover","background-position":"center","background-repeat":"no-repeat","backgroud-color":"#000"});
-	<?php }else{ ?>
-	//$(".user_info").css({"background-color":"#ddd"});
-	<?php } ?>
-
-    <?php if($_REQUEST["type"]){?>
-    <?php if($type==1){?>
-        fnlist2(1, 1, 1, "<?php echo $mb_id;?>",'');
-    <?php }else if($type==2){?>
-        fnlist2(1, 2, 1, "<?php echo $mb_id;?>",'');
-    <?php }else if($type==3){?>
-        fnlist2(1, 3, 1, "<?php echo $mb_id;?>",'');
-    <?php }?>
-    <?php }?>
-
+    var pd_type = '';
+    if($(".mypage_pd_type").prop("checked") != true) {
+        pd_type = 1;
+    }else{
+        pd_type = 2;
+    }
 
     $(".settings.menus").click(function(){
         $(".menu_list").toggleClass("active");
@@ -636,7 +423,7 @@ function initpkgd(){
     $grid = $('.grid').masonry({
         itemSelector: 'none', // select none at first
         columnWidth: '.grid__item',
-        gutter: 5,
+        gutter: 8,
         //percentPosition: true,
         //stagger: 30,
         // nicer reveal transition
@@ -651,7 +438,7 @@ function initpkgd(){
     // initial items reveal
     $grid.imagesLoaded( function() {
         $grid.removeClass('are-images-unloaded');
-        $grid.masonry( 'option', { itemSelector: '.grid__item' ,columnWidth: '.grid__item', percentPosition:true,gutter: 10,});
+        $grid.masonry( 'option', { itemSelector: '.grid__item' ,columnWidth: '.grid__item', percentPosition:true,gutter: 8,});
         var $items = $grid.find('.grid__item');
         $grid.masonry( 'appended', $items );
     });
@@ -720,10 +507,30 @@ function fnlist(num,type1,mb_id,stx){
     });
 }
 
-function fnlist2(num,type1,type,mb_id,stx){
+function fnlist2(num,type1,type,mb_id,stx,od_cate){
+    if(od_cate==1 || od_cate==""){
+        $(".order_cate li:first-child").addClass("active");
+        $(".order_cate li:last-child").removeClass("active");
+    }else{
+        $(".order_cate li:first-child").removeClass("active");
+        $(".order_cate li:last-child").addClass("active");
+    }
+
+    if(type==''){
+        if($(".mypage_pd_type").prop("checked") != true) {
+            type = 1;
+        }else{
+            type = 2;
+        }
+        if(type1==''){
+            type1 = this.type1;
+        }
+    }
+
     if(type1==""){
         type1 = 1;
     }
+
     var url = g5_url+"/mobile/page/ajax/ajax.mypage.list.php";
     switch(type1){
         case 1:
@@ -739,9 +546,8 @@ function fnlist2(num,type1,type,mb_id,stx){
     $.ajax({
         url:url,
         method:"POST",
-        data:{mb_id:mb_id,page:page,type1:type,stx:stx}
+        data:{mb_id:mb_id,page:page,type1:type,stx:stx,od_cate:od_cate}
     }).done(function(data){
-        console.log(data);
         if(data.indexOf("no-member")>0){
             alert("회원정보가 없습니다.");
             return false;
@@ -767,40 +573,7 @@ function fnlist2(num,type1,type,mb_id,stx){
 
                 page++;
             }
-
-            /*if(type1 == 1 || type1 == 2){
-                var cnt1 = $("#listCount1").val();
-                var ncnt1 = Number(cnt1);
-                var incnt1 = ncnt1.numberFormat();
-                var cnt2 = $("#listCount2").val();
-                var ncnt2 = Number(cnt2);
-                var incnt2 = ncnt2.numberFormat();
-                var total = ncnt1 + ncnt2;
-                total = total.numberFormat();
-                $("#mul label").html(incnt1);
-                $("#avil label").html(incnt2);
-                if(type1 == 1){
-                    $(".myboard span").html(total);
-                }else{
-                    $(".order_tab span").html(total);
-                }
-            }*/
-            //if(type1 == 2){
-
-            //}
-            /*if(type1 == 3){
-                var total = $("#listCount").val();
-                total = Number(total);
-                total = total.numberFormat();
-                $("#wishes span").html(total);
-            }*/
         }else{
-            //data = data.split("//");
-
-           /* if(type1 == 1 || type1 == 2) {
-                $("#mul label").html(data[1]);
-                $("#avil label").html(data[2]);
-            }*/
             if(num==1){
                 $(".grid").html('');
             }
@@ -814,9 +587,16 @@ function fnlist2(num,type1,type,mb_id,stx){
 }
 
 function fnUserHidden(mb_id){
-    $("#id09").css("display","block");
-    $("html, body").css("overflow","hidden");
-    $("html, body").css("height","100vh");
+    $.ajax({
+        url:g5_url+'/mobile/page/modal/modal.blockuser.php',
+        mtehod:"post",
+        data:{mb_id:mb_id}
+    }).done(function(data){
+        $(".modal").html(data).addClass("active");
+        //$("#id09").css("display","block");
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+    });
 }
 function fn_block(){
     if($("#target_id").val()==""){
@@ -842,7 +622,7 @@ function fnBlinds(user){
     $.ajax({
         url:g5_url+"/mobile/page/blind_write.php",
         method:"post",
-        data:{pd_id:'',type:"modal",cm_id:'',user:user}
+        data:{pd_id:'',type:"",cm_id:'',user:user,backurl:g5_url+'/mobile/page/mypage/mypage.php?mode=profile&pro_id=<?php echo $pro_id;?>'}
     }).done(function(data){
         $("#id01s").css({"display":"block","z-index":"9002"});
         $("#id01s .con").html('');
@@ -880,23 +660,7 @@ function fnReview(mb_id,pd_type){
 }
 
 function fnReview2(){
-    $('.mypage_pd_type').attr('checked',true);
-    var stx = $("#stx").val();
-    switch (type1){
-        case "My List":
-            type1 = 1;
-            break;
-        case "거래진행중":
-            type1 = 2;
-            break;
-        case "거래완료":
-            type1 = 3;
-            break;
-    }
-    //능력
-    $("#mypage").addClass("bg2");
-    fnlist2(1,type1,2,"<?php echo $mb_id;?>",stx);
-
+    alert("능력 후기는 각 상세페이지에서 확인 가능합니다.");
 }
 
 //간편대화 시작
@@ -934,6 +698,25 @@ function fnConfirmDelivery(){
     });
 }
 
+<?php if($pd_id){ ?>
+setTimeout(function(){
+    //if($("#id0s").attr("style")=="display: block;") {
+    fn_viewer("<?php echo $pd_id;?>")
+    //}
+},300);
+<?php if($detail==true){?>
+setTimeout(function(){
+    $(".view_top").css("display","none");
+    $(".view_detail").css("top","0");
+    $(".detail_arrow").stop(true).animate({top:'0vw',opacity:0},30);
+    setTimeout(function(){$(".count_msg").removeClass("active")},1500);
+    setTimeout(function(){
+        $(".view_detail .detail_content").scrollTop($(".view_detail .detail_content").height());
+    },1000);
+    location.hash = "#detailview";
+},1000);
+<?php }?>
+<?php } ?>
 </script>
 
 <?php 

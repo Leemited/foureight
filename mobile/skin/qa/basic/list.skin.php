@@ -30,8 +30,8 @@ add_stylesheet('<link rel="stylesheet" href="'.$qa_skin_url.'/style.css">', 0);
     <div class="customer_info">
         <h2>고객센터 지원안내</h2>
         <p>09:00~18:00 (주말, 공휴일 휴무)</p>
-        <p>이메일:@.com</p>
-        <p>업무시간 외 장애상담 (000-0000-0000)</p>
+        <p>이메일:mave01@naver.com</p>
+        <p>업무시간 외 장애상담 (070-4090-4811)</p>
     </div>
 
 

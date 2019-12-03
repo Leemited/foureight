@@ -9,7 +9,7 @@ for($i=0;$i<count($sort);$i++){
     if($sort[$i]=="pd_date") {
         $sorts .= " , sc_od_date = '{$alignActive[$i]}'";
     }
-    if($sort[$i]=="pd_hit") {
+    if($sort[$i]=="pd_hits") {
         $sorts .= " , sc_od_hit = '{$alignActive[$i]}'";
     }
     if($sort[$i]=="pd_recom") {
@@ -65,7 +65,7 @@ if($formtype == "write"){
         }
     }
 
-    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$sch_text}', sc_priceFrom = '{$priceFrom}',sc_priceTo = '{$priceTo}', sc_align = '{$align}', sc_align_disabled = '{$un_order_sort}' , mb_id = '{$mb_id}',sc_level = '{$mb_level}', sc_datetime = now() {$save} {$sorts}";
+    $sql = "insert into `my_search_list` set sc_type = '{$set_type}', sc_type2='{$type2}', sc_cate1 = '{$cate}', sc_cate2 = '{$cate2}', sc_tag = '{$sch_text}', sc_priceFrom = '{$priceFrom}',sc_priceTo = '{$priceTo}', sc_align = '{$align}',sc_price_type1 = '{$sc_price_type1}',sc_price_type2 = '{$sc_price_type2}',sc_price_type3 = '{$sc_price_type3}', sc_align_disabled = '{$un_order_sort}' , mb_id = '{$mb_id}',sc_level = '{$mb_level}', sc_datetime = now() {$save} {$sorts}";
     if (sql_query($sql)) {
         $sql = "select * from `my_search_list` where mb_id = '{$mb_id}' order by sc_datetime desc limit 0, 1";
         $sch = sql_fetch($sql);

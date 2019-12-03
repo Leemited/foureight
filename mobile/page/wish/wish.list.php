@@ -72,7 +72,7 @@ while($row = sql_fetch_array($res)){
 	<h2>찜 목록</h2>
     <div class="all_clear" onclick="fnwishedDelete();"><img src="<?php echo G5_IMG_URL?>/ic_menu_trash_all.svg" alt=""></div>
 </div>
-<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 30vw);overflow-y:scroll">
+<div id="container" style="background-color:#e7e7e7;height:calc(100vh - 28vw);overflow-y:scroll">
 	<section class="wish_list">
 		<article class="post">
 			<div class="list_item grid are-images-unloaded ">
@@ -175,8 +175,8 @@ function initpkgd(){
 	$grid = $('.grid').masonry({
 	  itemSelector: 'none', // select none at first
 	  columnWidth: '.grid__item',
-	  gutter: 10,
-	  //percentPosition: true,
+	  gutter: 8,
+	  percentPosition: true,
 	  //stagger: 30,
 	  // nicer reveal transition
 	  visibleStyle: { transform: 'translateY(0)', opacity: 1 },

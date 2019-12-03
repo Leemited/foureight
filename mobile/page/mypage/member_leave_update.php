@@ -23,6 +23,10 @@ $date = date("Ymd");
 $sql = " update {$g5['member_table']} set mb_leave_date = '{$date}' where mb_id = '{$member['mb_id']}' ";
 sql_query($sql);
 
+//회원 게시물 삭제처리
+$sql = "update `product` set pd_status = 10 where mb_id = '{$member["mb_id"]}'";
+sql_query($sql);
+
 // 3.09 수정 (로그아웃)
 unset($_SESSION['ss_mb_id']);
 

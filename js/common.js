@@ -759,7 +759,6 @@ function removeDebug(){
 
 
 function fn_viewer(id){
-
     if(id==""){
         alert("잘못된 요청입니다.");
         return false;
@@ -767,17 +766,26 @@ function fn_viewer(id){
     if($("#list_"+id).hasClass("blinds")){
         return false;
     }
-
     var width = $("#dWidth").val();
     var height = $("#dHeight").val();
     var url = g5_url+"/mobile/page/view.php";
     window.oriScroll = $(document).scrollTop();
     $.ajax({
         url : url,
+        type:"POST",
         method:"POST",
-        data:{pd_id:id,dWidth:width,dHeight:height}
+        data:{pd_id:id,dWidth:width,dHeight:height},
+        async:false
     }).done(function(data){
-        //console.log(data);
+        var reurl = location.href;
+        if(reurl.indexOf("pd_id")==-1) {
+            if (reurl.indexOf("?") > -1) {
+                reurl = reurl + "&pd_id=" + id
+            } else {
+                reurl = reurl + "?pd_id=" + id
+            }
+        }
+        history.pushState(null, null, reurl);
         location.hash = "#view";
         $("#id0s div.con").html('');
         $("#id0s div.con").append(data);
@@ -807,6 +815,13 @@ function fn_viewer2(id){
         method:"POST",
         data:{pd_id:id,dWidth:width,dHeight:height}
     }).done(function(data){
+        var reurl = location.href;
+        if(reurl.indexOf("?")>-1){
+            reurl = reurl+"&pd_id="+id
+        }else{
+            reurl = reurl+"?pd_id="+id
+        }
+        history.pushState(null, null, reurl);
         location.hash = "#view";
         $("#id0s div.con").html('');
         $("#id0s div.con").append(data);
@@ -849,17 +864,24 @@ function fnStatus(pd_id,status,pd_type){
             $("#status4").addClass("active");
             break;
     }
-
-    $("#id03").css({"display":"block","z-index":"9999999"});
-    $("#id03 .w3-modal-content").css({"height":"62vw","margin-top":"-32vw"});
-    $("html, body").css("overflow","hidden");
-    $("html, body").css("height","100vh");
-    location.hash="#modal";
+    $.ajax({
+        url:g5_url+'/mobile/page/modal/modal.productstatus.php',
+        method:"post",
+        data:{pd_id:pd_id}
+    }).done(function(data){
+        console.log(data);
+        $(".modal").html(data).addClass("active").css("z-index","999999");
+        //$("#id03").css({"display":"block","z-index":"9999999"});
+        //$("#id03 .w3-modal-content").css({"height":"62vw","margin-top":"-32vw"});
+        $("html, body").css("overflow","hidden");
+        $("html, body").css("height","100vh");
+        location.hash="#modal";
+    });
 }
 
-function fnStatusUpdate(){
-    var status = $("#id03 ul.modal_sel li.active").text();
-    var pd_id = $("#up_pd_id").val();
+function fnStatusUpdate(pd_id){
+    var status = $("ul.status_ul li.active").text();
+    //var pd_id = $("#up_pd_id").val();
     $.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.product_status_update.php",
         method:"POST",
@@ -893,43 +915,40 @@ function fnCardSel(cardinfo){
     $("#card_month").val();
 }
 
-function fnCardOrder(){
-
-}
-
-
-
 function fnBlindView(pd_id){
-
     //window.oriScroll = $(document).scrollTop();
+
     $.ajax({
-        url:g5_url+"/mobile/page/ajax/ajax.blind_view.php",
+        url:g5_url+"/mobile/page/modal/modal.mypageblindView.php",
         method:"POST",
         data:{pd_id:pd_id}
     }).done(function(data){
-        console.log(data);
-        if($("#id06").css("display")=="none"){
-            $("#blind_view_btn").attr("onclick","location.href='"+g5_url+"/mobile/page/mypage/blind_view.php?pd_id="+pd_id+"'");
+        $(".modal").html(data).addClass("active");
+        //if($("#id06").css("display")=="none"){
+            /*$("#blind_view_btn").attr("onclick","location.href='"+g5_url+"/mobile/page/mypage/blind_view.php?pd_id="+pd_id+"'");
             $("#admin_qa").attr("onclick","fnAdminWrite('"+pd_id+"')");
-            $("#id06").css("display","block");
+            $("#id06").css("display","block");*/
             $("html, body").css("overflow","hidden");
             $("html, body").css("height","100vh");
             location.hash = "#modal";
-        }
-        $("#id06 .con p").html(data);
+        //}
+        //$("#id06 .con p").html(data);
     });
 }
 
 
-function fnOrderConfirm(cid,pd_id){
-    if(confirm("구매 승인시 해당 물품은 거래중으로 변경되며,\n동일 제품의 구매요청은 삭제 됩니다.")) {
+function fnOrderConfirm(od_id,pd_type) {
+    var msg = "구매 승인시 해당 물품은 거래중으로 변경되며,\n동일 제품의 구매요청은 삭제 됩니다.";
+    if(pd_type==2){
+        msg = "구매 승인시 계약금이 있는경우 계약금 선 결제 진행됩니다.";
+    }
+    if(confirm(msg)) {
         $.ajax({
             url: g5_url + "/mobile/page/ajax/ajax.order_reser_confirm.php",
             mothod: "POST",
             dataType: "json",
-            data: {cid: cid, pd_id: pd_id}
+            data: {od_id: od_id}
         }).done(function (data) {
-            console.log(data);
             if (data.msg == "1") {
                 alert("해당 구매요청을 찾을 수 없습니다.");
             }
@@ -937,30 +956,54 @@ function fnOrderConfirm(cid,pd_id){
                 alert("처리 오류입니다.\r다시 시도해 주세요.");
             }
             if (data.msg == "2") {
-                console.log("A");
-                $("#item_" + cid + " .controls").remove();
-                $(".pd_id_"+pd_id).remove();
-                for (var i = 0; i < data.cid.length; i++) {
-                    $("#item_" + data.cid[i]).remove();
-                }
-                if(data.pd_type==1) {//물건
-                    $("#item_" + cid).prepend('<div class="ordering"><span>결제대기중</span></div>');
-                    $(".orders_pd_id_" + pd_id).remove();
+                //$("#item_" + cid + " .controls").remove();
+                $(".pd_id_"+od_id+" > div input").not($(".pd_id_"+od_id+" > div input:first-child")).remove();
+                $(".pd_id_"+od_id+" .btn_controls").append("<input type='button' value='판매취소' class='confirm' onclick='fnOrderCancel("+od_id+",1)'>");
+                if(pd_type==1) {//물건
+                    if(data.od_id) {
+                        for (var i = 0; i < data.od_id.length; i++) {
+                            $("#item_" + data.od_id[i]).remove();
+                        }
+                    }
+                    $("#item_" + od_id).prepend('<div class="ordering"><span>결제대기중</span></div>');
+                    //$(".orders_pd_id_" + pd_id).remove();
                 }else{//능력
-
+                    $("#item_" + od_id).prepend('<div class="ordering"><span>결제대기중</span></div>');
                 }
-
             }
         });
     }
 }
 
-function fnShow2(mb_id,pd_id,roomid){
+function fnShow2(mb_id,pd_id,roomid,type){
     // 연락자 정보 가져오기
     $.ajax({
+        url:g5_url+'/mobile/page/modal/modal.contact.php',
+        method:"post",
+        data:{},
+        async:false
+    }).done(function(data){
+        $(".modal").html(data).addClass("active");
+        $.ajax({
+            url:g5_url+"/mobile/page/ajax/ajax.get_member2.php",
+            method:"post",
+            data:{mb_id:mb_id,pd_id:pd_id,roomid:roomid,type:type},
+            dataType:"json"
+        }).done(function(data){
+            $("#id08 .contacts ul").html('');
+            $("#id08 .contacts ul").append(data.obj);
+            //$("#mb_"+id).toggleClass("active");
+            $("#id08").css({"display":"block","z-index":"9002"});
+            $("#id08").css("display","block");
+            $("body").css({"height":"100vh","overflow":"hidden"})
+            location.hash = "#modal";
+        });
+    });
+    // 연락자 정보 가져오기
+    /*$.ajax({
         url:g5_url+"/mobile/page/ajax/ajax.get_member2.php",
         method:"post",
-        data:{mb_id:mb_id,pd_id:pd_id,roomid:roomid},
+        data:{mb_id:mb_id,pd_id:pd_id,roomid:roomid,type:type},
         dataType:"json"
     }).done(function(data){
         $("#id08 .contacts ul").html('');
@@ -969,21 +1012,20 @@ function fnShow2(mb_id,pd_id,roomid){
         $("#id08").css({"display":"block","z-index":"9002"});
         $("#id08").css("display","block");
         location.hash = "#modal";
-    });
+    });*/
 
 }
-function fnOrderCancel(cid){
-    var type = 1;
-    if($(".sub_ul li.active").attr("id") == "avil"){
-        type = 2;
+function fnOrderCancel(od_id,c_type){
+    var msg = "해당 물건의 판매를 취소 하시겠습니까?";
+    if(c_type==2){
+        msg = "해당 물건의 구매를 취소 하시겠습니까?";
     }
-    if(confirm("해당 유저의 요청을 취소 하시겠습니까?")){
+    if(confirm(msg)){
         $.ajax({
             url:g5_url+"/mobile/page/ajax/ajax.order_reser_cancel.php",
             method:"POST",
-            data:{cid:cid}
+            data:{c_type:c_type,od_id:od_id}
         }).done(function(data){
-            console.log(data);
             if(data=="1"){
                 alert("해당 구매요청을 찾을 수 없습니다.");
             }
@@ -991,8 +1033,8 @@ function fnOrderCancel(cid){
                 alert("처리 오류입니다.\r다시 시도해 주세요.");
             }
             if(data == "2"){
-                $("#item_"+cid).remove();
-                if(type == 1 ){
+                $("#item_"+od_id).remove();
+                if(c_type == 1 ){
                     var count = $("#mul label").text();
                     count = count.replace(",","");
                     count = Number(count) - 1;
@@ -1022,6 +1064,168 @@ function fnOrderCancel(cid){
     }
 }
 
+function fnOrderCancel2(cid,pd_id,od_id){
+    if(od_id=="") {
+        if (confirm("해당 상품의 구매를 취소하시겠습니까?")) {
+            $.ajax({
+                url: g5_url + '/mobile/page/ajax/ajax.order_reser_cancel2.php',
+                mtehod: "post",
+                data: {cid: cid, pd_id: pd_id}
+            }).done(function (data) {
+                if (data == 1) {
+                    alert("구매정보가 없습니다.");
+                } else if (data == 2) {
+                    alert("제품정보가 없습니다.");
+                } else {
+                    alert("취소 되었습니다.");
+                    $("#item_" + cid).remove();
+                }
+            });
+        }
+    }else{
+        if(confirm("해당 계약을 취소하시겠습니까?\r\n해당 환불 금액은 카드사의 사정에따라 3~4일정도 소요 됩니다.")){
+            $.ajax({
+                url:g5_url+'/mobile/page/mypage/stdpay/cancel.php',
+                method:"post",
+                data:{pd_id:pd_id,od_id:od_id}
+            }).done(function(data){
+                console.log(data);
+            });
+        }
+    }
+}
+
+function fnRank(pd_id,pd_type,od_id){
+    $("#like_id").val(pd_id);
+    $("#view_pd_type").val(pd_type);
+    $("#od_id").val(od_id);
+    $("html").css({"overflow":"hidden","height":"100%"});
+    $("body").css({"overflow":"hidden","height":"100%"});
+    location.hash = '#modal';
+    $("#id02").show();
+}
+
+//무조건 마지막 평가시에
+function fnOrderfin(od_id,pd_id,fin_type){
+    $.ajax({
+        url:g5_url+'/mobile/page/modal/modal.likes2.php',
+        method:"post",
+        data:{od_id:od_id,pd_id:pd_id,fin_type:fin_type}
+    }).done(function(data){
+        $(".modal").html(data).addClass("active");
+        $("html").css({"overflow":"hidden","height":"100%"});
+        $("body").css({"overflow":"hidden","height":"100%"});
+        location.hash = '#modal';
+    });
+    //거래평가 모달 띄우기
+    /*$("#fin_od_id").val(od_id);
+    $("#fin_cid").val(cid);
+    $("#fin_pd_id").val(pd_id);
+    $("#id05").show();*/
+}
+function fnOrderRefund(od_id,pay_oid){
+    //환불하기 요청
+    if(confirm('해당 상품의 결제취소요청을 하시겠습니까?')){
+        location.href=g5_url+'/mobile/page/mypage/order_cancel.php?od_id='+od_id+'&pay_oid='+pay_oid+"&type=0";
+    }
+}
+function fnOrderRefundConfirm(od_id,pay_oid,type){
+    //환불하기 승인
+    var msg = '해당 상품의 결제를 취소하시겠습니까?';
+    if(type==1){
+        msg = "해당 상품의 환불을 완료 하시겠습니까?";
+    }
+    if(confirm(msg)){
+        location.href=g5_url+'/mobile/page/mypage/stdpay/cancel.php?od_id='+od_id+'&pay_oid='+pay_oid;
+    }
+}
+
+function fnOrderRefundCancel(od_id,pay_oid){
+    //환불하기 거절
+    if(confirm('해당 상품의 결제취소요청을 거절하시겠습니까?')){
+        location.href=g5_url+'/mobile/page/mypage/order_cancel.php?od_id='+od_id+'&pay_oid='+pay_oid+"&type=1";
+    }
+}
+
+function fnOrderReturn(pd_id,od_id,pd_type){
+    //환불하기
+    if(confirm('해당 상품을 환불하시겠습니까?')){
+        $.ajax({
+            url:g5_url+'/mobile/page/ajax/ajax.order_return.php',
+            method:"post",
+            data:{od_id:od_id,pd_id:pd_id}
+        }).done(function(data){
+            if(data==1){
+                alert("이미 요청한 건입니다.");
+            }else if(data==3){
+                alert("주문상태 업데이트 오류입니다.");
+            }else{
+                alert("요청되었습니다.");
+                location.href=g5_url+'/mobile/page/mypage/mypage_order.php?od_cate=2&pd_type='+pd_type;
+            }
+        });
+        //todo:환불요청만 배송은 환불처리완료후 (우선 판매자의 동의 후)
+        /*$("#return_pd_id").val(pd_id);
+        $("#return_od_id").val(od_id);
+        $("html").css({"overflow":"hidden","height":"100%"});
+        $("body").css({"overflow":"hidden","height":"100%"});
+        location.hash = '#modal';
+        $("#id11").show();*/
+    }
+}
+
+function fnOrderReturnCancel(type,od_id,pd_id){
+    var msg = '해당 환불요청을 거절 하시겠습니까?';
+    if(type==1)
+        msg = "환불 요청을 취소하시겠습니까?";
+
+    if(confirm(msg)){
+        location.href=g5_url+'/mobile/page/mypage/mypage_return_cancel.php?od_id='+od_id+'&type='+type+'&pd_id='+pd_id;
+    }
+}
+
+function fnOrderReturnConfirm(od_id,pd_id,mb_id){
+    $.ajax({
+        url:g5_url+'/mobile/page/ajax/ajax.order_return_confirm.php',
+        method:"post",
+        data:{od_id:od_id,pd_id:pd_id,mb_id:mb_id}
+    }).done(function(data){
+        if(data==1){
+            alert("승인이 완료 되었습니다. 환불배송지는 1:1대화 또는 기타 연락처를 통해 전달 바랍니다.");
+            location.reload();
+        }else{
+            alert("환불 승인이 실패하였습니다.\n다시 시도해 주세요.");
+        }
+    });
+}
+function fnOrderCancelDelivery(od_id,pd_type,pd_id,type){
+    $.ajax({
+        url:g5_url+'/mobile/page/modal/modal.deliveryreturnadd.php',
+        type:"post",
+        data:{od_id:od_id,pd_type:pd_type,pd_id:pd_id,type:type}
+    }).done(function(data){
+        $(".modal").html(data).addClass("active");
+        $("html").css({"overflow":"hidden","height":"100%"});
+        $("body").css({"overflow":"hidden","height":"100%"});
+        location.hash = '#modal';
+    });
+    /*$("#return_deli_od_id").val(od_id);
+    $("#return_deli_pd_type").val(pd_type);
+    $("#return_deli_pd_id").val(pd_id);
+   //$("#return_deli_id").val(od_id);
+    $("html").css({"overflow":"hidden","height":"100%"});
+    $("body").css({"overflow":"hidden","height":"100%"});
+    location.hash = '#modal';
+    $("#id11").show();*/
+}
+function fnFinUpdate(pd_id,od_id){
+    /*var pd_id = $("#fin_pd_id").val();
+    var od_id = $("#fin_od_id").val();*/
+    if(confirm('해당 거래에 평가를 건너뛰시겠습니까?')){
+        location.reload(g5_url+'/mobile/page/mypage/order_complete.php?pd_id='+pd_id+'&od_id='+od_id);
+    }
+}
+
 // 숫자 타입에서 쓸 수 있도록 format() 함수 추가
 Number.prototype.numberFormat = function(){
     if(this==0) return 0;
@@ -1033,3 +1237,133 @@ Number.prototype.numberFormat = function(){
 
     return n;
 };
+
+function fnOrderPayConfirm(od_id,pd_id){
+    if(confirm('관리자에게 정산요청을 하시겠습니까?')){
+        sendPush('admin','빠른 정산요청입니다.',od_id,pd_id);
+    }
+}
+
+function fnDeliveryConfirm(deli_name,deli_num,pd_type,pd_id,od_id,type){
+    var chk = true;
+    var carriers = '';
+    switch (deli_name){
+        case "한진택배":
+            carriers = 'kr.hanjin';
+            break;
+        case "우체국택배":
+            carriers = 'kr.epost';
+            break;
+        case "로젠택배":
+            carriers = 'kr.logen';
+            break;
+        case "대한통운":
+            carriers = 'kr.cjlogistics';
+            break;
+        case "경동택배":
+            carriers = 'kr.kdexp';
+            break;
+        case "DHL":
+            carriers = 'de.dhl';
+            break;
+        case "천일택배":
+            carriers = 'kr.chunilps';
+            break;
+        case "CU편의점택배":
+            carriers = 'kr.cupost';
+            break;
+        case "GSpostbox택배":
+            carriers = 'kr.cvsnet';
+            break;
+        case "대신택배":
+            carriers = 'kr.daesin';
+            break;
+        case "한의사랑택배":
+            carriers = 'kr.hanips';
+            break;
+        case "합동택배":
+            carriers = 'kr.hdexp';
+            break;
+        case "홈픽":
+            carriers = 'kr.homepick';
+            break;
+        case "한서호남택배":
+            carriers = 'kr.honamlogis';
+            break;
+        case "일양로지스":
+            carriers = 'kr.ilyanglogis';
+            break;
+        case "건영택배":
+            carriers = 'kr.kunyoung';
+            break;
+        case "롯데택배":
+            carriers = 'kr.lotte';
+            break;
+        case "SLX":
+            carriers = 'kr.slx';
+            break;
+        case "TNT":
+            carriers = 'nl.tnt';
+            break;
+        case "EMS":
+            carriers = 'un.upu.ems';
+            break;
+        case "Fedex":
+            carriers = 'us.fedex';
+            break;
+        case "UPS":
+            carriers = 'us.ups';
+            break;
+        case "USPS":
+            carriers = 'us.usps';
+            break;
+    }
+    $.ajax({
+        url:g5_url+'/mobile/page/ajax/ajax.carriers.php',
+        method:"post",
+        async:true,
+        data:{carriers:carriers,deli_num:deli_num},
+        dataType:'json'
+    }).done(function(data){
+        console.log(data);
+        /*if(data.carrier=="" || data.carrier==null){
+            alert(data.message);
+            $("#return_delivery_number").val('');
+        }else{*/
+            if(type==0){//보내기
+                $.ajax({
+                    url:g5_url+"/mobile/page/ajax/ajax.order_delivery_update.php",
+                    method:"post",
+                    data:{od_id:od_id,delivery_name:deli_name,delivery_number:deli_num},
+                    dataType:"json"
+                }).done(function(data){
+                    if(data.result==1){
+                        alert("주문정보를 찾지 못했습니다. \n다시 시도해 주세요.")
+                    }else if(data.result == 2){
+                        alert("배송정보 입력 실패");
+                    }else{
+                        $("#deli_name").html(delivery_name);
+                        $("#deli_num").html(delivery_number);
+                        $("#deli_date").html(data.deli_date);
+                        modalClose();
+                        location.reload();
+                    }
+                });
+            }else{//환불
+                location.href=g5_url+'/mobile/page/mypage/mypage_order_return_delivery.php?od_id='+od_id+'&delivery_name='+deli_name+'&delivery_number='+deli_num+"&pd_id="+pd_id+"&pd_type="+pd_type;
+            }
+        //}
+    });
+}
+
+function fn_keyover(screen_px,keyboard_px) {
+    var over_px=0;
+
+    if(parseInt(keyboard_px) > 0) {
+        over_px=parseInt(parseInt(screen.height)*parseInt(keyboard_px))/parseInt(screen_px);
+    } else {
+        over_px=0;
+    }
+    document.getElementById("foot").style.bottom =over_px+"px";
+
+}

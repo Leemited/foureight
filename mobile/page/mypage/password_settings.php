@@ -17,6 +17,7 @@ if($type=="register"){
     $holder = "변경 비밀번호 입력(최소 4자 최대 15자, 영문 숫자 혼합)";
     $btn_title = "변경";
 }
+
 ?>
 <style>
 #settings .setting_wrap ul li{padding:2vw;}
@@ -32,12 +33,14 @@ if($type=="register"){
 	<form action="<?php echo G5_MOBILE_URL?>/page/mypage/password_update.php" method="post" onsubmit="fnsubmit();">
 	<input type="hidden" name="mb_id" value="<?php echo $member["mb_id"];?>">
 	<input type="hidden" name="type" value="<?php echo $type;?>">
-		<!-- <div class="setting_wrap">
+        <?php if($type!="register"){?>
+		 <div class="setting_wrap">
 			<h2>현재 비밀 번호</h2>
 			<ul>
-				<li class="single"><input type="password" class="setting_input" name="ori_password" required placeholder="현재 비밀번호 입력"></li>
+				<li class="single"><input type="password" class="setting_input" name="ori_password" required placeholder="현재 비밀번호 입력" ></li>
 			</ul>
-		</div> -->
+		</div>
+        <?php }?>
 		<div class="setting_wrap">
 			<h2><?php echo $sub_title;?></h2>
 			<ul>

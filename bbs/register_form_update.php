@@ -246,7 +246,7 @@ if ($w == '') {
 
 	//개인 설정 등록
 	$sql = "insert into `mysetting`
-					set mb_id = '$mb_id'";
+					set mb_id = '$mb_id' , my_word = ':@!:@!'";
 	sql_query($sql);
 
     // 회원가입 포인트 부여

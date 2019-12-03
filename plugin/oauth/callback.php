@@ -123,7 +123,6 @@ if($g5['social_member_table']) {
     $row = sql_fetch($sql);
     if($row['mb_id']) {
         $mb = get_member($row['mb_id'], 'mb_id');
-
         if($mb['mb_id']) {
             unset($member);
 
@@ -132,22 +131,25 @@ if($g5['social_member_table']) {
             set_session('ss_oauth_member_no', '');
 
             if($req_mode != 'connect') {
-                //alert_opener_url();
                 if($_SERVER["HTTP_USER_AGENT"]=='iosApp') {
                     echo "<script>" . PHP_EOL;
-                    echo "location.href='http://mave01.cafe24.com/'" . PHP_EOL;
+                    echo "location.href='http://484848.co.kr/'" . PHP_EOL;
                     echo "</script>" . PHP_EOL;
+                }else if(strpos($_SERVER["HTTP_USER_AGENT"],"foureight")!==false){
+                    echo "<script>".PHP_EOL;
+                    echo "location.href='http://484848.co.kr/'".PHP_EOL;
+                    echo "</script>".PHP_EOL;
                 }else {
                     opener_url_reload();
                 }
             }
             if($_SERVER["HTTP_USER_AGENT"]=="iosApp"){
                 echo "<script>".PHP_EOL;
-                echo "location.href='http://mave01.cafe24.com/'".PHP_EOL;
+                echo "location.href='http://484848.co.kr/'".PHP_EOL;
                 echo "</script>".PHP_EOL;
             }else if(strpos($_SERVER["HTTP_USER_AGENT"],"foureight")!==false){
                 echo "<script>".PHP_EOL;
-                echo "location.href='http://mave01.cafe24.com/'".PHP_EOL;
+                echo "location.href='http://484848.co.kr/'".PHP_EOL;
                 echo "</script>".PHP_EOL;
             }else{
                 // 정보수정에서 연동일 때 처리
@@ -199,7 +201,7 @@ if(defined('G5_OAUTH_MEMBER_REGISTER') && G5_OAUTH_MEMBER_REGISTER && $member['m
         alert_opener_url('다른 회원이 사용 중인 이메일로는 회원가입할 수 없습니다.', G5_URL);
     }
 
-    $sql = " select count(*) as cnt from {$g5['member_table']} where mb_id = '{$member['mb_id']}' and mb_id <> '{$member['mb_id']}' ";
+    $sql = " select count(*) as cnt from {$g5['member_table']} where mb_nick = '{$member['mb_nick']}' and mb_nick <> '{$member['mb_nick']}' ";
     $row = sql_fetch($sql);
     if($row['cnt'] > 0) {
         reset_social_info();

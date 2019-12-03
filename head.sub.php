@@ -119,32 +119,16 @@ var g5_cookie_domain = "<?php echo G5_COOKIE_DOMAIN ?>";
 var g5_admin_url = "<?php echo G5_ADMIN_URL; ?>";
 <?php } ?>
 </script>
-<?php /*if($app || $chkMobile){*/?>
-<!--<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>-->
+
 <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="<?php echo G5_JS_URL?>/jquery-ui.js"></script>
-<script src="<?php echo G5_JS_URL ?>/jquery.ui.touch-punch.js"></script>
-<!-- <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script> -->
-<?php /*}else{ */?><!--
-<script src="https://ajax.googleapis.com/ajaxajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="<?php /*echo G5_JS_URL*/?>/jquery-ui.js"></script>
---><?php /*} */?>
 <script src="<?php echo G5_JS_URL ?>/jquery.menu.js?ver=<?php echo G5_JS_VER; ?>"></script>
 <script src="<?php echo G5_JS_URL ?>/common.js?ver=<?php echo G5_JS_VER; ?>"></script>
 <script src="<?php echo G5_JS_URL ?>/wrest.js?ver=<?php echo G5_JS_VER; ?>"></script>
 <script src="<?php echo G5_JS_URL ?>/script.js"></script>
-<script src="<?php echo G5_JS_URL ?>/owl.carousel.js"></script>
-<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.js"></script>
-<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js"></script>
 <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=783007f3286be92823591204b3588de6&libraries=services"></script>
-<script src="<?php echo G5_JS_URL?>/hammer.js"></script>
-<script src="<?php echo G5_URL?>/node_modules/clipboard/dist/clipboard.min.js"></script>
-<!-- iamport.payment.js -->
-<script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
-<!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="<?php echo G5_JS_URL ?>/owl.carousel.js"></script>
 <?php
 include_once(G5_PATH .'/' . G5_PLUGIN_DIR . '/nodejs_connect/init.php');
 
@@ -158,25 +142,30 @@ if(!defined('G5_IS_ADMIN'))
     // // 사용할 앱의 JavaScript 키를 설정해 주세요.
     Kakao.init('783007f3286be92823591204b3588de6');
 
-    <?php if($app){
+    <?php /*if($app){
     if($is_member){
-    ?>
-    window.android.setLogin('<?php echo $member["mb_id"];?>');
-    <?php }
-    } ?>
-    <?php if($app2){
+    */?>/*
+    window.android.setLogin('<?php /*echo $member["mb_id"];*/?>');
+    <?php /*}
+    } */?>
+    <?php /*if($app2){
     if($is_member){
-    ?>
-    webkit.messageHandlers.onLogin.postMessage('<?php echo $member["mb_id"];?>');
-    <?php }
-    } ?>
+    */?>
+    webkit.messageHandlers.onLogin.postMessage('<?php /*echo $member["mb_id"];*/?>');
+    */<?php /*}
+    } */?>
 </script>
 </head>
-<body>
+<body class="hide">
 <!-- <div class="loader_con">
 <div class="loader"></div>
 </div> -->
+<div class="modalup">
 
+</div>
+<div class="modal">
+
+</div>
 <?php
 
 //내 검색저장설정 가져오기

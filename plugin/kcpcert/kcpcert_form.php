@@ -132,6 +132,8 @@ function cert_page()
         {
             window.parent.$("input[name=veri_up_hash]").val(frm.up_hash.value); // up_hash 데이터 검증을 위한 필드
             self.name="auth_popup";
+            /*window.opener.$("input[name=veri_up_hash]").val(frm.up_hash.value); // up_hash 데이터 검증을 위한 필드
+            frm.target = "auth_popup";*/
         }
         else // 스마트폰 아닐때
         {

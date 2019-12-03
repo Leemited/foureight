@@ -28,7 +28,7 @@ if(sql_query($sql)){
         $imgs = explode(",",$pd["pd_images"]);
         $img = G5_DATA_URL."/product/".$imgs[0];
     }
-    $result = send_FCM($mb["regid"], $pd["pd_tag"], $member["mb_id"]."의 대화요청이 등록되었습니다.", G5_MOBILE_URL . "/page/talk/talk_view.php?pd_id=".$pd_id."&send_mb_id=".$member["mb_id"]."&roomid=".$roomid, "chat_alarm_set", "대화알림", $read_mb_id, $pd_id, $img);
+    $result = send_FCM($mb["regid"], $pd["pd_tag"], $member["mb_id"]."의 대화요청이 등록되었습니다.", G5_MOBILE_URL . "/page/talk/talk_view.php?pd_id=".$pd_id."&send_mb_id=".$member["mb_id"]."&roomid=".$roomid, "chat_alarm_set", "대화알림", $read_mb_id, $pd_id, $img,$message,$roomid);
 
     $data["msg"] = '<div class="msg_box my_msg"><div class="in_box"><div class="date">'.$date.'</div><div class="msg">'.$message.'</div></div></div>';
     $sql = "select id from `product_chat` where pd_id = {$pd_id} and room_id = '{$roomid}'";

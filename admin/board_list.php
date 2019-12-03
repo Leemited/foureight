@@ -14,7 +14,7 @@ $bo_table = $_REQUEST["bo_table"];
 
 $total=sql_fetch("select count(*) as cnt from `{$table}` where `wr_is_comment` = 0 {$where} {$search} ");
 if(!$page)
-    $page=1;
+	$page=1;
 $total=$total['cnt'];
 $rows=10;
 $start=($page-1)*$rows;

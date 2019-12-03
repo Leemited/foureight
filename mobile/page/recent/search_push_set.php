@@ -16,7 +16,7 @@ if($setpush=="on"){
 $sql = "update `my_search_list` set set_alarm = {$sc_alarm} where sc_id = '{$sc_id}'";
 
 if(sql_query($sql)){
-    alert("정상 처리되었습니다.");
+    alert("정상 처리되었습니다.",G5_URL."/mobile/page/recent/recent.list.php");
 }else{
     alert("잘못된 요청입니다.");
 }

@@ -45,7 +45,7 @@ if ($url) {
 <script>
     var chk = false;
     <?php if($app){?>
-    var chk = window.android.setLogout();
+    chk = window.android.setLogout();
     <?php }?>
     <?php if($app2){?>
     webkit.messageHandlers.onLogout.postMessage("logout");

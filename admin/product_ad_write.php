@@ -15,13 +15,14 @@ if($ad_id) {
             <h1>광고 등록</h1>
         </header>
         <div class="write_form model_list">
-            <form action="<?php echo G5_URL?>/admin/product_ad_update.php" method="post" name="fwrite" id="fwrite" enctype="multipart/form-data" >
+            <form action="<?php echo G5_URL?>/admin/product_ad_update.php" method="post" name="fwrite" id="fwrite" enctype="multipart/form-data" onsubmit="return fnAdForm()">
                 <input type="hidden" name="page" id="page" value="<?php echo $page;?>">
                 <input type="hidden" name="order" id="order" value="<?php echo $order;?>">
                 <input type="hidden" name="desc" id="desc" value="<?php echo $desc;?>">
                 <input type="hidden" name="sfl" id="sfl" value="<?php echo $sfl;?>">
                 <input type="hidden" name="stx" id="stx" value="<?php echo $stx;?>">
                 <input type="hidden" name="ad_id" id="ad_id" value="<?php echo $ad_id;?>">
+                <input type="hidden" name="mb_id" id="mb_id" value="<?php echo $member["mb_id"];?>">
                 <table class="view_tbl">
                     <colgroup>
                         <col width="10%">
@@ -51,25 +52,37 @@ if($ad_id) {
                         <td class="con" style="position:relative;">
                             <input type="file" name="ad_photo" id="ad_photo" <?php if(!$ad_id){echo "required";}?> onchange="$('#ad_photo_name').val(this.value);" style="display:none;"><label for="ad_photo" style="position:absolute;left:calc(60% - 76px);top:20px;padding:5px 10px;background-color:#000;color:#fff">사진선택</label>
                             <input type="text" value="<?php echo $write["ad_photo"];?>" name="ad_photo_name" id="ad_photo_name" required class="write_input01 grid_60" readonly/>
+
+                            <p> * 사진 적정 사이즈 (4:5비율 또는 4:6비율) 400px * 500px</p>
                         </td>
                     </tr>
-                    <tr>
+                    <!--<tr>
                         <th>제목</th>
-                        <td class="con"><input type="text" value="<?php echo $write["ad_subject"];?>" name="ad_subject" id="ad_subject" required class="write_input01 grid_60"/></td>
+                        <td class="con"><input type="text" value="<?php /*echo $write["ad_subject"];*/?>" name="ad_subject" id="ad_subject" required class="write_input01 grid_60"/></td>
                     </tr>
                     <tr class="content">
                         <th>내용</th>
-                        <td class="con"><input type="text" value="<?php echo $write["ad_con"];?>" name="ad_con" id="ad_con" required class="write_input01 grid_60"/></td>
-                    </tr>
+                        <td class="con"><input type="text" value="<?php /*echo $write["ad_con"];*/?>" name="ad_con" id="ad_con" required class="write_input01 grid_60"/></td>
+                    </tr>-->
                     <tr class="content">
                         <th>링크</th>
                         <td class="con"><input type="text" value="<?php echo $write["ad_link"];?>" name="ad_link" id="ad_link" required class="write_input01 grid_60"/>
                         <p>반드시 http://로 시작해야 하며 외부 링크 등록시 해당 링크가 정확한 링크인지 확인 후 등록 바랍니다.</p>
                         </td>
-                    </tr><tr class="content">
-                        <th>노출 순서</th>
-                        <td class="con"><input type="text" value="<?php echo $write["ad_sort"];?>" name="ad_sort" id="ad_sort" required class="write_input01 grid_60"/>
+                    </tr>
+                    <tr class="content">
+                        <th>노출 순서 [판매글]</th>
+                        <td class="con">
+                            <input type="text" value="<?php echo $write["ad_sort"];?>" name="ad_sort" id="ad_sort" required class="write_input01 grid_60">
                             <span class="product_cnt">0 부터 까지 입력</span>
+                            <p>노출 순서는 등록된 게시물 기준으로 등록 하되, 검색기준에 따라 노출이 안될 수 도 있습니다.</p>
+                        </td>
+                    </tr>
+                    <tr class="content">
+                        <th>노출 순서 [구매글]</th>
+                        <td class="con">
+                            <input type="text" value="<?php echo $write["ad_sort2"];?>" name="ad_sort2" id="ad_sort2" required class="write_input01 grid_60">
+                            <span class="product_cnt2">0 부터 까지 입력</span>
                             <p>노출 순서는 등록된 게시물 기준으로 등록 하되, 검색기준에 따라 노출이 안될 수 도 있습니다.</p>
                         </td>
                     </tr>
@@ -164,14 +177,14 @@ if($ad_id) {
                         </td>
                     </tr>
                     <tr class="content">
-                        <th>싱태</th>
+                        <th>상태</th>
                         <td class="con"><input type="radio" name="ad_status" id="on" value="0" <?php if($write["ad_status"]==0){?>checked<?php }?>><label for="on">활성</label> <input type="radio" name="ad_status" id="off" value="1" <?php if($write["ad_status"]==1){?>checked<?php }?>><label for="off">비활성</label></td>
                     </tr>
                     </tbody>
                 </table>
         </div>
         <div class="write_gr">
-            <input type="button" class="cancel_btn" value="취소" onclick="location.href='<?php echo G5_URL?>/admin/board_list.php?bo_table=<?php echo $bo_table;?>&page=<?php echo $page;?>&sfl=<?php echo $sfl;?>&stx=<?php echo $stx;?>&ca_name=<?php echo $ca_name;?>'">
+            <input type="button" class="cancel_btn" value="취소" onclick="location.href='<?php echo G5_URL?>/admin/product_ad_list.php?bo_table=<?php echo $bo_table;?>&page=<?php echo $page;?>&sfl=<?php echo $sfl;?>&stx=<?php echo $stx;?>&ca_name=<?php echo $ca_name;?>'">
             <input type="submit" value="<?php if($wr_id){?>수정<?php }else{ ?>등록<?php }?>" class="submit_btn" style="border:none"/>
         </div>
         </form>
@@ -240,12 +253,19 @@ if($ad_id) {
                     $.ajax({
                         url:g5_url+"/admin/ajax.category_list_count.php",
                         method:"post",
-                        data:{cate:$("#cate2").val(),type:type}
+                        data:{cate:$("#cate2").val(),type:type},
+                        dataType:"json"
                     }).done(function(data){
-                        if(data==0) {
+                        console.log(data);
+                        if(data.cnt1==0) {
                             $(".product_cnt").html("해당 카테고리에 등록된 제품이 없음, (기본값 0 입력)");
                         }else{
-                            $(".product_cnt").html("0부터 " + data + "사이값 입력");
+                            $(".product_cnt").html("1부터 " + data.cnt1 + "사이값 입력");
+                        }
+                        if(data.cnt2==0) {
+                            $(".product_cnt2").html("해당 카테고리에 등록된 제품이 없음, (기본값 0 입력)");
+                        }else{
+                            $(".product_cnt2").html("1부터 " + data.cnt2 + "사이값 입력");
                         }
                     });
                 });
@@ -272,15 +292,97 @@ if($ad_id) {
         $.ajax({
             url:g5_url+"/admin/ajax.category_list_count.php",
             method:"post",
-            data:{cate:$(this).val(),type:type}
+            data:{cate:$(this).val(),type:type},
+            dataType:"json"
         }).done(function(data){
-            if(data==0) {
+            if(data.cnt1==0) {
                 $(".product_cnt").html("해당 카테고리에 등록된 제품이 없음, (기본값 0 입력)");
             }else{
-                $(".product_cnt").html("0부터 " + data + "사이값 입력");
+                $(".product_cnt").html("1부터 " + data.cnt1 + "사이값 입력");
+            }
+            if(data.cnt2==0) {
+                $(".product_cnt2").html("해당 카테고리에 등록된 제품이 없음, (기본값 0 입력)");
+            }else{
+                $(".product_cnt2").html("1부터 " + data.cnt2 + "사이값 입력");
             }
         });
     });
+
+    function fnAdForm(){
+        if($("#cate1").val()==""){
+            alert("1차 카테고리를 선택해주세요.");
+            $("#cate1").focus();
+            return false;
+        }
+        if($("#cate2").val()==""){
+            alert("2차 카테고리를 선택해주세요.");
+            $("#cate2").focus();
+            return false;
+        }
+        if($("#ad_keyword").val()==""){
+            alert("키워드입력이 필요합니다.");
+            $("#ad_keyword").focus();
+            return false;
+        }
+        if($("#ad_subject").val()==""){
+            alert("제목을 입력해주세요.");
+            $("#ad_subject").focus();
+            return false;
+        }
+        if($("#ad_con").val()==""){
+            alert("내용을 입력해주세요.");
+            $("#ad_con").focus();
+            return false;
+        }
+
+        if($("#ad_link").val()==""){
+            alert("링크를 입력해주세요.");
+            $("#ad_link").focus();
+            return false;
+        }
+        if($("#ad_sort").val()==""){
+            alert("노출순서를 입력해주세요.");
+            $("#ad_sort").focus();
+            return false;
+        }
+        if($("#ad_from").val()==""){
+            alert("시작일을 선택해주세요.");
+            $("#ad_from").focus();
+            return false;
+        }
+        if($("#ad_from_hour").val()==""){
+            alert("시작시간을 선택해주세요.");
+            $("#ad_from_hour").focus();
+            return false;
+        }
+        if($("#ad_from_min").val()==""){
+            alert("시작분을 선택해주세요.");
+            $("#ad_from_min").focus();
+            return false;
+        }
+
+        if($("#ad_to").val()==""){
+            alert("종료일을 선택해주세요.");
+            $("#ad_to").focus();
+            return false;
+        }
+        if($("#ad_to_hour").val()==""){
+            alert("종료시간을 선택해주세요.");
+            $("#ad_to_hour").focus();
+            return false;
+        }
+        if($("#ad_to_min").val()==""){
+            alert("종료분을 선택해주세요.");
+            $("#ad_to_min").focus();
+            return false;
+        }
+        
+        if($("#on").prop("checked")==false && $("#off").prop("checked")==false){
+            alert("활성상태를 선택해주세요.");
+            $("#ad_to_min").focus();
+            return false;
+        }
+    }
 </script>
 <?php
 include_once(G5_PATH."/admin/admin.tail.php");

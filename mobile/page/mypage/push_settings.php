@@ -76,12 +76,15 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 $(function(){
 
     $("#push_set").click(function(){
+        console.log($(this).prop("checked"));
         if($(this).prop("checked")==true){
+            console.log("on");
             //전체 온
-            $("#etiquette_set,#comment_alarm_set,#notice_alarm_set,#pricing_set,#pay_reser_set,#chat_alarm_set,#recomment_alarm_set,#search_alarm_set").attr("checked",true);
+            $("#comment_alarm_set,#notice_alarm_set,#pricing_set,#pay_reser_set,#chat_alarm_set,#recomment_alarm_set,#search_alarm_set").prop("checked",true);
         }else{
+            console.log("off");
             //전체 오프
-            $("#etiquette_set,#comment_alarm_set,#notice_alarm_set,#pricing_set,#pay_reser_set,#chat_alarm_set,#recomment_alarm_set,#search_alarm_set").attr("checked",false);
+            $("#comment_alarm_set,#notice_alarm_set,#pricing_set,#pay_reser_set,#chat_alarm_set,#recomment_alarm_set,#search_alarm_set").removeAttr("checked");
         }
     })
 

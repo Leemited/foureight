@@ -12,7 +12,7 @@ if(sql_query($sql)){
         $img = G5_DATA_URL . "/product/" . $imgs[0];
     }
     //요청알림
-    send_FCM($mb["regid"], $mb["pd_tag"], $mb["pd_tag"] . "의 블라인드가 해제 되었습니다.", G5_MOBILE_URL . "/page/mypage/cart.php", 'pricing_set', '제시/딜 알림', $mb["mb_id"], $pd_id, $img);
+    send_FCM($mb["regid"], $mb["pd_tag"], $mb["pd_tag"] . "의 블라인드가 해제 되었습니다.", G5_MOBILE_URL . "/page/mypage/mypage.php?pd_type=".$mb["pd_type"], 'pricing_set', '제시/딜 알림', $mb["mb_id"], $pd_id, $img);
     
     alert("정상 처리되었습니다.");
 }else{

@@ -7,6 +7,13 @@ if($member["mb_id"]==""){
 $sql = "select * from `mysetting` where id= {$id} and mb_id = '{$member["mb_id"]}'";
 $settings = sql_fetch($sql);
 
+if($settings["pd_timeFrom"]==""){
+    $settings["pd_timeFrom"] = "09";
+}
+if($settings["pd_timeTo"]==""){
+    $settings["pd_timeTo"] = "21";
+}
+
 $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 ?>
     <style>

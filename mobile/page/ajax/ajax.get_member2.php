@@ -29,9 +29,9 @@ if($mb["mb_id"]){
     if($set["chat_set"]=="1"){
         if($pd_id) {
             //$roomid = $pd_id . "_" . mt_rand();;
-            $result["obj"] .= "<li onclick=\"fnTalk2('".$mb["mb_id"]."','".$pd_id."','".$roomid."')\"><img src='" . G5_IMG_URL . "/view_menu_talk.svg' alt=''><span>대화하기</span></li>";
+            $result["obj"] .= "<li onclick=\"fnTalk2('".$mb["mb_id"]."','".$pd_id."','".$roomid."','".$type."')\"><img src='" . G5_IMG_URL . "/view_menu_talk.svg' alt=''><span>대화하기</span></li>";
         }else{
-            $result["obj"] .= "<li onclick=\"fnTalk2('".$mb["mb_id"]."','".$pd_id."','".$roomid."')\"><img src='" . G5_IMG_URL . "/view_menu_talk.svg' alt=''><span>대화하기</span></li>";
+            $result["obj"] .= "<li onclick=\"fnTalk2('".$mb["mb_id"]."','".$pd_id."','".$roomid."','".$type."')\"><img src='" . G5_IMG_URL . "/view_menu_talk.svg' alt=''><span>대화하기</span></li>";
         }
     }
 }

@@ -35,12 +35,12 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 		<div class="setting_wrap">
 			<h2>변경 주소</h2>
 			<ul>
-				<li><input type="text" class="setting_input small" name="mb_zip1" id="sample3_postcode" required readonly placeholder="우편번호"><input type="button" value="검색" id="addr_btn" onclick="sample3_execDaumPostcode()">
+				<li><input type="text" class="setting_input small" name="mb_zip1" id="sample3_postcode" required readonly placeholder="우편번호" onclick="sample3_execDaumPostcode()"><input type="button" value="검색" id="addr_btn" onclick="sample3_execDaumPostcode()">
 				<div id="wrap" style="display:none;border:1px solid;width:100%;height:300px;margin:5px 0;position:relative">
 <img src="//t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼">
 </div>
 				</li>
-				<li><input type="text" class="setting_input" name="mb_addr1" id="sample3_address" required readonly placeholder="기본주소"></li>
+				<li><input type="text" class="setting_input" name="mb_addr1" id="sample3_address" required readonly placeholder="기본주소" onclick="sample3_execDaumPostcode()"></li>
 				<li><input type="text" class="setting_input" name="mb_addr2" id="sample3_address2" required placeholder="상세주소"></li>
 			</ul>
 			<div class="btn_group">

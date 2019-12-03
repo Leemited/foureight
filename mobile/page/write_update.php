@@ -41,8 +41,16 @@ for($i=0;$i<count($filter);$i++){
     }
 }
 
+if($pd_delivery_use=="on"){
+    $pd_delivery_use = 1;
+}
+
 if($type==""){
 	$type = "1";
+}
+
+if($type==1 && $type2 == 8){
+    $pd_delivery_use = 1;
 }
 
 if (count($words) > 1) {
@@ -58,11 +66,18 @@ if (count($words) > 1) {
 if(count($links) > 1) {
     $links = array_filter($links);
     for($i=0;$i<count($links);$i++){
-        $links2[] = array_pop(explode("/",$links[$i]));
+        $links2[] = substr($links[$i],0, -11);
+        /*if(strpos($links[$i],"youtu.be")===false) {
+            $links2[] = array_pop(explode("/", $links[$i]));
+        }else if(strpos($links[$i],"youtube")===false){
+            $links2[] = array_pop(explode("=",$links[$i]));
+        }*/
     }
     $links = implode(",", $links2);
 }else if(count($links) == 1) {
-    $links = array_pop(explode("/",$links[0]));
+    //$links = array_pop(explode("/",$links[0]));
+    $len = strlen($links[0])-11;
+    $links = substr($links[0],$len, 11);
 }else if(count($links) == 0){
     $links = '';
 }
@@ -71,7 +86,6 @@ $price = str_replace(",","",$price);
 $price2 = str_replace(",","",$price2);
 
 if(!$pd_id || $pd_id == ""){
-
 	//등록
 	$sql = "insert into `product` set
 			pd_name = '{$wr_subject}',
@@ -101,18 +115,32 @@ if(!$pd_id || $pd_id == ""){
             pd_timeFrom = '{$pd_timeFrom}',
             pd_timeTo = '{$pd_timeTo}',
             pd_timetype = '{$pd_timeType}',
-            pd_price_type = '{$pd_price_type}'";
+            pd_price_type = '{$pd_price_type}',
+            pd_delivery_use = '{$pd_delivery_use}'";
 	if(!sql_query($sql)){
 	    alert("입력 오류 입니다.다시 요청해 주세요");
     }
 	$pd_id = sql_insert_id();
 
-	if($type == 2 && $type2 == 8){
-        $search = " and sc_price_type = '{$pd_price_type}' and sc_timeFrom >= '{$pd_timeFrom}' and sc_timeTo <= '{$pd_timeTo}'";
+	$total_price = $price + $price2;
+
+	if($type == 2){
+        $search = " and IF(sc_timeFrom!='',sc_timeFrom >= '{$pd_timeFrom}',sc_timeFrom = '') and IF(sc_timeTo!='',sc_timeTo <= '{$pd_timeTo}',sc_timeTo = '')";
     }
+
     if($filename) {
 	    $files = explode(",",$filename);
         $img = G5_DATA_URL . "/product/".$files[0];
+    }
+
+    if($pd_price_type == 0){
+	    $search .= " and sc_price_type1 = 0";
+    }
+    if($pd_price_type == 1){
+        $search .= " and sc_price_type2 = 1";
+    }
+    if($pd_price_type == 2){
+        $search .= " and sc_price_type1 = 2";
     }
 
     //글등록시 검색 등록된 것과 비교해서 조건에 맞는 회원 불러오기
@@ -121,12 +149,16 @@ if(!$pd_id || $pd_id == ""){
 	    $where =  " or (INSTR( '{$wr_content}',s.sc_tag) > 0 or INSTR('{$wr_content}',if(s.sc_cate1 != '', s.sc_cate1, 'null')) > 0 or INSTR('{$wr_content}',if(s.sc_cate2 != '', s.sc_cate2, 'null')) > 0 )";
     }
 	//$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where ('{$sub_title}' like CONCAT('%', sc_tag ,'%') or '{$sub_title}' like CONCAT('%', sc_cate1 ,'%') or '{$sub_title}' like CONCAT('%', sc_cate2 ,'%')) {$where} and ({$price} between sc_priceFrom and sc_priceTo) and set_alarm = 1 and sc_type = {$type} and sc_type2 = {$type2} {$search} ";
-	$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where ((INSTR('{$sub_title}',s.sc_tag) > 0 or INSTR('{$sub_title}',if(s.sc_cate1 != '', s.sc_cate1, 'null')) > 0 or INSTR('{$sub_title}',if(s.sc_cate2 != '', s.sc_cate2, 'null')) > 0 ) {$where}) and set_alarm = 1 and sc_type = {$type} and sc_type2 = {$type2} {$search} and ({$price} between sc_priceFrom and sc_priceTo) ";
-
+	$sql = "select *,m.mb_id as mb_id from `my_search_list` as s left join `g5_member` as m on s.mb_id = m.mb_id where (INSTR('{$sub_title}',s.sc_tag) > 0 or INSTR('{$sub_title}',if(s.sc_cate1 != '', s.sc_cate1, 'null')) > 0 or INSTR('{$sub_title}',if(s.sc_cate2 != '', s.sc_cate2, 'null')) > 0 {$where} ) and set_alarm = 1 and s.sc_type = {$type} and s.sc_type2 = {$type2} {$search} and sc_priceFrom <= {$total_price} and sc_priceTo >= {$total_price}";
     $res = sql_query($sql);
     while($row = sql_fetch_array($res)){
         if($row["regid"]!="" && $row["mb_id"] != $member["mb_id"]) {
-            send_FCM($row["regid"],"검색알림",$row["sc_tag"]."의 게시물이 등록되었습니다.", G5_URL."/index.php?sc_id=".$row["sc_id"],"search_alarm_set","검색알림",$row["mb_id"],$pd_id,$img);
+            if($type2==4){
+                $msg = "[삽니다]".$row["sc_tag"]."의 게시물이 등록되었습니다.";
+            }else if($type2==8){
+                $msg = "[팝니다]".$row["sc_tag"]."의 게시물이 등록되었습니다.";
+            }
+            send_FCM($row["regid"],"검색알림",$msg, G5_URL."/?sc_id=".$row["sc_id"]."&sctype=research","search_alarm_set","검색알림",$row["mb_id"],$pd_id,$img);
         }
     }
 }else{
@@ -155,7 +187,8 @@ if(!$pd_id || $pd_id == ""){
             pd_timeFrom = '{$pd_timeFrom}',
             pd_timeTo = '{$pd_timeTo}',
             pd_timetype = '{$pd_timeType}',
-            pd_price_type = '{$pd_price_type}'
+            pd_price_type = '{$pd_price_type}',
+            pd_delivery_use = '{$pd_delivery_use}'
             where pd_id = {$pd_id}";
     sql_query($sql);
 }
@@ -189,20 +222,6 @@ if(count($_FILES['files']['name']) > 0) {
             $upload[$i]['image'][1] = '';
             $upload[$i]['image'][2] = '';
 
-            // 삭제에 체크가 되어있다면 파일을 삭제합니다.
-            /*if (isset($_POST['files_del'][$i]) && $_POST['files_del'][$i]) {
-                $upload[$i]['del_check'] = true;
-
-                $row = sql_fetch(" select files from {$g5['board_file_table']} where bo_table = '{$bo_table}' and wr_id = '{$wr_id}' and bf_no = '{$i}' ");
-                @unlink(G5_DATA_PATH.'/file/'.$bo_table.'/'.$row['files']);
-                // 썸네일삭제
-                if(preg_match("/\.({$config['cf_image_extension']})$/i", $row['files'])) {
-                    delete_board_thumbnail($bo_table, $row['files']);
-                }
-            }
-            else
-                $upload[$i]['del_check'] = false;*/
-
             //기존파일 삭제
             @unlink(G5_DATA_PATH . "/product/" . $files[$i]);
 
@@ -212,24 +231,8 @@ if(count($_FILES['files']['name']) > 0) {
             $ext = array_pop(explode(".", $_FILES['files']['name'][$i]));
             $filename = date("Ymdhms") . "_" . $mb_id . "_" . $i . "." . $ext;
 
-            // 서버에 설정된 값보다 큰파일을 업로드 한다면
-            /*if ($filename) {
-                if ($_FILES['files']['error'][$i] == 1) {
-                    $file_upload_msg .= '\"'.$filename.'\" 파일의 용량이 서버에 설정('.$upload_max_filesize.')된 값보다 크므로 업로드 할 수 없습니다.\\n';
-                    continue;
-                }
-                else if ($_FILES['files']['error'][$i] != 0) {
-                    $file_upload_msg .= '\"'.$filename.'\" 파일이 정상적으로 업로드 되지 않았습니다.\\n';
-                    continue;
-                }
-            }*/
 
             if (is_uploaded_file($tmp_file)) {
-                // 관리자가 아니면서 설정한 업로드 사이즈보다 크다면 건너뜀
-                /*if (!$is_admin && $filesize > $board['bo_upload_size']) {
-                    $file_upload_msg .= '\"'.$filename.'\" 파일의 용량('.number_format($filesize).' 바이트)이 게시판에 설정('.number_format($board['bo_upload_size']).' 바이트)된 값보다 크므로 업로드 하지 않습니다.\\n';
-                    continue;
-                }*/
 
                 //=================================================================\
                 // 090714
@@ -248,17 +251,6 @@ if(count($_FILES['files']['name']) > 0) {
 
                 $upload[$i]['image'] = $timg;
 
-                // 4.00.11 - 글답변에서 파일 업로드시 원글의 파일이 삭제되는 오류를 수정
-                /*if ($wr_id) {
-                    // 존재하는 파일이 있다면 삭제합니다.
-                    $row = sql_fetch(" select files from {$g5['board_file_table']} where bo_table = '$bo_table' and wr_id = '$wr_id' and bf_no = '$i' ");
-                    @unlink(G5_DATA_PATH.'/file/'.$bo_table.'/'.$row['files']);
-                    // 이미지파일이면 썸네일삭제
-                    if(preg_match("/\.({$config['cf_image_extension']})$/i", $row['files'])) {
-                        delete_board_thumbnail($bo_table, $row['files']);
-                    }
-                }*/
-
                 // 프로그램 원래 파일명
                 $upload[$i]['source'] = $filename;
                 $upload[$i]['file'] = $filename;
@@ -276,36 +268,8 @@ if(count($_FILES['files']['name']) > 0) {
 
                 $dest_file = G5_DATA_PATH . '/product/' . $upload[$i]['file'];
 
-                /*$exif = exif_read_data($dest_file);
-                if($exif["Orientation"] == 6){
-                    $degree = 270;
-                }else if($exif["Orientation"] == 8){
-                    $degree = 90;
-                }else if($exif["Orientation"] == 3){
-                    $degree = 180;
-                }
-                if(!$degree){
-                    $degree = 0;
-                }
-
-                if($exif["FileType"] == 1){
-                    $source = imagecreatefromgif($dest_file);
-                    $source = imagerotate($source , $degree);
-                    imagegif($source,$dest_file);
-                }else if($exif["FileType"] == 2){
-                    $source = imagecreatefromjpeg($dest_file);
-                    $source = imagerotate($source, $degree, 1);
-                    imagejpeg($source,$dest_file);
-                }else if($exif["FileType"] == 3){
-                    $source = imagecreatefrompng($dest_file);
-                    $source = imagerotate($source,$degree);
-                    imagespng($source,$dest_file);
-                }
-                imagedestroy($source);*/
-
                 // 업로드가 안된다면 에러메세지 출력하고 죽어버립니다.
                 $error_code = move_uploaded_file($tmp_file, $dest_file) or die($_FILES['files']['error'][$i]);
-
 
                 // 올라간 파일의 퍼미션을 변경합니다.
                 chmod($dest_file, G5_FILE_PERMISSION);
@@ -316,13 +280,7 @@ if(count($_FILES['files']['name']) > 0) {
 
 // 나중에 테이블에 저장하는 이유는 $wr_id 값을 저장해야 하기 때문입니다.
     if (count($upload) > 0) {
-        /*for($i=0;$i<count($upload);$i++){
-            if($i==0){
-                $filename = $upload[$i]["file"];
-            }else{
-                $filename .= ",".$upload[$i]["file"];
-            }
-        }*/
+        $files = array_filter($files);
         $filenameAll = implode(",", $files);
 
         $sql = "update `product` set pd_images = '{$filenameAll}' where  pd_id = '{$pd_id}'";
@@ -330,5 +288,9 @@ if(count($_FILES['files']['name']) > 0) {
         sql_query($sql);
     }
 }
-alert("정상등록되었습니다.", G5_URL);
-?>
+if($pd_id){
+    echo G5_MOBILE_URL.'/page/write_update_clear.php?pd_id='.$pd_id."&return_url=".$return_url;
+}else{
+    echo G5_MOBILE_URL.'/page/write_update_clear.php?return_url='.$return_url;
+}
+

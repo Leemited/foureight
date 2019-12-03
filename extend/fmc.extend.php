@@ -1,5 +1,5 @@
 <?php
-function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id='',$imgurls=''){
+function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd_id='',$imgurls='',$message='',$roomid=''){
     //대화저장일경우 중복알림 저장이 아니라 업데이트 되어야 함
     //알림 저장
 
@@ -53,12 +53,12 @@ function send_FCM($reg_id,$title,$content,$urls,$chennal,$chennalname,$mb_id,$pd
     if($mbs["sdkVersion"] == "ios"){
         $fields = array(
             'registration_ids' => $regId_array,
-            'notification' => array("title" => $title, "body" => $content, "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls,"content_available" => 'true')
+            'notification' => array("title" => $title, "body" => $content, "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls,"content_available" => 'true',"msg"=>$message, 'groupid'=>$roomid)
         );
     }else {
         $fields = array(
             'registration_ids' => $regId_array,
-            'data' => array("title" => $title, "message" => $content, "content_available" => 'true', "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls),
+            'data' => array("title" => $title, "message" => $content, "content_available" => 'true', "urls" => $urls, "chennal" => $chennal, "channelname" => $chennalname, "imgurlstr" => $imgurls,"msg"=>$message, 'groupid'=>$roomid),
             'sound' => 'default'
         );
     }

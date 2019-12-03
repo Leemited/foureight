@@ -83,11 +83,42 @@ $title = "거래 목록";
                         <th class="md_none">구매자</th>
                         <th class="md_none">판매자</th>
                         <th class="md_none">가격</th>
+                        <th class="md_none">상태</th>
+                        <th class="md_none">관리</th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php
                     for($i=0;$i<count($list);$i++){
+                        if($list[$i]["od_direct_status"]==0 || $list[$i]["od_direct_status"]==""){
+                            if($list[$i]["pd_type"]==1){
+                                $pd_price = number_format($list[$i]["od_price"])." 원";
+                            }else{
+                                $pd_price = number_format($list[$i]["pd_price"]+$list[$i]["pd_price2"])." 원";
+                            }
+                        }else{
+                            $pd_price = "직거래";
+                        }
+                        if($list[$i]["od_status"]==1){
+                            $od_status = "주문완료";
+                            if($list[$i]["od_pay_status"]==1){
+                                $od_status = "결제완료";
+                                if($list[$i]["delivery_name"]!=""){
+                                    $od_status="배송중";
+                                }
+                            }
+                        }
+                        if($list[$i]["od_status"]==1 && $list[$i]["od_step"]==1 && $list[$i]["pd_type"]==2){
+                            $od_status = "계약중";
+                        }
+                        if($list[$i]["od_fin_status"]==1){
+                            $od_status = "거래완료";
+                        }
+                        if($list[$i]["od_status"]==10){
+                            $od_status = "거래취소";
+                        }
+
+
                         ?>
                         <tr>
                             <td class="md_none" onclick="location.href='<?php echo G5_URL."/admin/order_view.php?od_id=".$list[$i]['od_id']."&page=".$page; ?>'"><?php echo $list[$i]['num']; ?></td>
@@ -95,7 +126,11 @@ $title = "거래 목록";
                             <td class="subject" onclick="location.href='<?php echo G5_URL."/admin/order_view.php?od_id=".$list[$i]['od_id']."&page=".$page; ?>'"><?php echo $list[$i]['pd_tag']; ?></td>
                             <td onclick="location.href='<?php echo G5_URL."/admin/order_view.php?od_id=".$list[$i]['od_id']."&page=".$page; ?>'" class="md_none"><?php echo $list[$i]["mb_id"]; ?></td>
                             <td onclick="location.href='<?php echo G5_URL."/admin/order_view.php?od_id=".$list[$i]['od_id']."&page=".$page; ?>'" class="md_none"><?php echo $list[$i]["pd_mb_id"]; ?></td>
-                            <td class="md_none" onclick="location.href='<?php echo G5_URL."/admin/order_view.php?od_id=".$list[$i]['od_id']."&page=".$page; ?>'"><?php echo number_format($list[$i]["od_price"]); ?> 원</td>
+                            <td class="md_none" onclick="location.href='<?php echo G5_URL."/admin/order_view.php?od_id=".$list[$i]['od_id']."&page=".$page; ?>'"><?php echo $pd_price; ?></td>
+                            <td class="md_none" onclick="location.href='<?php echo G5_URL."/admin/order_view.php?od_id=".$list[$i]['od_id']."&page=".$page; ?>'"><?php echo $od_status; ?></td>
+                            <td class="md_none" >
+                                <input type="button" value="상세보기">
+                            </td>
                         </tr>
                         <?php
                         $stat = "";

@@ -1,22 +1,31 @@
 ﻿<?php
 include_once ("../../../../common.php");
-// 가맹점 웹서버 호스트
-$host = "http://mave01.cafe24.com/mobile/page/mypage/stdpay/";
-$od_tel = $tel1.$tel2.$tel3;
 
+$sql = "select * from `order` as o left join `product` as p on p.pd_id = o.pd_id where o.od_id = '{$od_id}'";
+$od = sql_fetch($sql);
+if($od["od_pay_status"]==1 && $od["pd_type"]==1){//일단 상품
+    alert("이미 결제한 주문건입니다.");
+}
+// 가맹점 웹서버 호스트
+$host = "http://484848.co.kr/mobile/page/mypage/stdpay/";
+$od_tel = $tel1.$tel2.$tel3;
 // ****************************************** 필수 파리미터 셋팅[가맹점 상황에 맞게 수정해서 사용하세요]******************************************
 // 현재시간 가져오기(timestamp)
 date_default_timezone_set("Asia/Seoul");
-$timestamp = date('YmdHis');
+$timestamp = date('YmdHmi');
 // 버전 정보 수정 금지
-$version = "3.1";
+$version = "3.3";
 // 가맹점 번호
-//$mbrId = "103108";
-$mbrId = "100011";
+$mbrId = "103108";
+//$mbrId = "100011";
 // 결제 금액
 $salesPrice = $od_price;
 // 가맹점 주문번호(가맹점에서 실제 관리하는 주문번호를 사용)
-$oid = $timestamp.GenerateString(4);
+//if(!$pay_oid) {
+    $oid = $timestamp . "_".$od_id;
+//}else{
+//    $oid = $pay_oid;
+//}
 // hashValue 생성
 $sign = hash("sha256", $mbrId.'|'.$salesPrice.'|'.$oid.'|'.$timestamp,false);
 $hashValue = $timestamp.$sign;
@@ -36,15 +45,15 @@ $productName = $od_item_name;
 // 휴대폰 결제 사용 시 아래 값 사용
 $CPCODE = "";
 
+$_SESSION["oid"] = $oid;
 
 //임시저장
 $pd_ids = explode(",",$pd_id);
 for($i=0;$i<count($pd_ids);$i++) {
-    $sql = "update `order_temp` set od_status = '1', od_name = '{$od_name}', od_tel = '{$od_tel}', od_zipcode = '{$od_zipcode}', od_addr1 = '{$od_address1}', od_addr2 = '{$od_address2}', od_content = '{$od_content}', od_pay_type = '{$od_type}', od_pay_status = '0', od_date = '', od_pd_type = '{$od_pd_type}', od_step = '{$od_step}',pay_oid='{$oid}' where  group_id = '{$group_id}' and pd_id = '{$pd_ids[$i]}'";
+    $sql = "update `order` set od_name = '{$od_name}', od_tel = '{$od_tel}', od_zipcode = '{$od_zipcode}', od_addr1 = '{$od_address1}', od_addr2 = '{$od_address2}', od_content = '{$od_content}', od_pay_type = '{$od_type}', od_pd_type = '{$od_pd_type}', od_step = '{$od_step}' where od_id = '{$od_id}'";
     sql_query($sql);
+    //set_session($group_id);
 }
-
-
 
 // ****************************************** 필수 파리미터 셋팅 끝 [가맹점 상황에 맞게 수정해서 사용하세요]*************************************
 
@@ -60,6 +69,9 @@ for($i=0;$i<count($pd_ids);$i++) {
 $returnUrl = $host."serverReturn.php";
 $callbackUrl = $host."clientCallback.php";
 $cancelUrl = $host."cancel.php";
+/*if($pay_oid){
+    $callbackUrl.="?pay_oid=".$pay_oid;
+}*/
 
 // 랜덤 함수(입력 길이에 맞게 아래 문자들중에 리턴)
 function GenerateString($length)
@@ -79,8 +91,6 @@ function GenerateString($length)
 
     return $string_generated;
 }
-
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -91,13 +101,14 @@ function GenerateString($length)
         body, tr, td {font-size:9pt; font-family:굴림,verdana; color:#433F37; line-height:19px;}
         table, img {border:none}
     </style>
-    <title>표준결제창 테스트 페이지</title>
+    <title>표준결제창 페이지</title>
     <!-- 테스트용 -->
-    <script type="text/javascript" src="https://testpg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js"></script>
+    <!-- script type="text/javascript" src="https://testpg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js"></script-->
     <!-- 운영환경용 -->
-    <!--<script type="text/javascript" src="https://pg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js" ></script>-->
+    <script type="text/javascript" src="https://pg.mainpay.co.kr/csStdPayment/resources/script/v1/c2StdPay.js" ></script>
 </head>
 <body bgcolor="#FFFFFF" text="#242424" leftmargin="0" topmargin="15" marginwidth="0" marginheight="0" bottommargin="0" rightmargin="0" onload="C2StdPay.pay()">
+<!--<body bgcolor="#FFFFFF" text="#242424" leftmargin="0" topmargin="15" marginwidth="0" marginheight="0" bottommargin="0" rightmargin="0" >-->
 <div style="padding:10px;width:100%;font-size:13px;color: #000000;background-color: #efefef;text-align: center">
     <strong>C`SQUARE 표준결제 결제요청 샘플  </strong>
 </div>
@@ -106,17 +117,8 @@ function GenerateString($length)
         <td bgcolor="6095BC" align="center" >
             <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF" style="padding:20px">
                 <tr>
-                    <td>
-                        이 페이지는 표준결제창 개발을 위한 샘플 페이지 입니다..<br/>
-                        <br/>
-                        <font color="#336699"><strong>함께 제공되는 메뉴얼을 참조하여 개발하시기 바랍니다.</strong></font>
-
-                        <br/><br/>
-                    </td>
-                </tr>
-                <tr>
                     <td >
-                        <!--<button id="btn_pay" onclick="C2StdPay.pay()" style="padding:10px">결제요청</button>-->
+                        <button id="btn_pay" onclick="C2StdPay.pay()" style="padding:10px">결제요청</button>
                     </td>
                 </tr>
                 <tr>
@@ -124,7 +126,6 @@ function GenerateString($length)
                         <table>
                             <tr>
                                 <td style="text-align:left;">
-
                                     <!-- ##########################-->
                                     <!-- #### 중요 : form 명칭 변경 금지 #####-->
                                     <!-- ##########################-->
@@ -137,7 +138,7 @@ function GenerateString($length)
 
                                             <br/><b>server</b> :
                                             [  0 : Test 서버, 1 : Real 서버]
-                                            <br/><input  style="width:100%;" name="server" value="0" >
+                                            <br/><input  style="width:100%;" name="server" value="1" >
 
                                             <br/><b>mbrId</b> :
                                             <br/><input  style="width:100%;" name="mbrId" value="<?php echo $mbrId?>">

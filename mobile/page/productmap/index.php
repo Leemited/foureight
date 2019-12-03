@@ -1,6 +1,7 @@
 <?php
 include_once("../../../common.php");
-//검색 기본값
+include_once (G5_MOBILE_PATH."/index.set.php");
+/*//검색 기본값
 $search = "p.pd_status = 0 and p.pd_blind < 10 and p.pd_blind_status = 0";
 
 if($set_type){
@@ -32,7 +33,7 @@ if($order_sort){
         if($order_sorts[$i]=="pd_date"){
             if($actives[$i] == 1){
                 $checked[$i] = "checked";
-                $ods[] = " p.pd_date desc";
+                $ods[] = " p.pd_update desc";
             }
             $order_item[$i] = '<label class="align" id="sortable" for="pd_date">'.
                 '<input type="checkbox" name="orders[]" value="pd_date" id="pd_date" '.$checked[$i].'>'.
@@ -86,10 +87,29 @@ if($order_sort){
     }
 }
 
-if($_SESSION["lat"] && $_SESSION["lng"]){
-    $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
-}else if($member["mb_1"] && $member["mb_1"]){
-    $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$member["mb_1"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$member["mb_2"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$member["mb_1"]}))), SQRT(1 - POW(SIN(RADIANS({$member["mb_1"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$member["mb_2"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$member["mb_1"]})))) AS distance";
+if(($_SESSION["lat"] && $_SESSION["lng"]) || ($lat && $lng)){
+    if($lat && $lng) {
+        $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$lat} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$lng} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$lat}))), SQRT(1 - POW(SIN(RADIANS({$lat} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$lng} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$lat})))) AS distance";
+    }
+    if($_SESSION["lat"] && $_SESSION["lng"]){
+        $sel = " , 6371 * 2 * ATAN2(SQRT(POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]}))), SQRT(1 - POW(SIN(RADIANS({$_SESSION["lat"]} - p.pd_lat)/2), 2) + POW(SIN(RADIANS({$_SESSION["lng"]} - p.pd_lng)/2), 2) * COS(RADIANS(p.pd_lat)) * COS(RADIANS({$_SESSION["lat"]})))) AS distance";
+    }
+}
+
+
+if($mb_level){
+    //$search .= " and m.mb_level = 4 ";
+}else{
+    $search .= " and m.mb_level = 2 ";
+}
+
+$ss_id = session_id();
+if($member["mb_id"]){
+    $wished_id = $member["mb_id"];
+    $search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$member[mb_id]}') ";
+}else{
+    $wished_id = $ss_id;
+    $search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$ss_id}') ";
 }
 
 $total=sql_fetch("select count(*) as cnt from `product` where {$search} ");
@@ -99,19 +119,12 @@ $total=$total['cnt'];
 $rows=10;
 $start=($page-1)*$rows;
 $total_page=ceil($total/$rows);
-$ss_id = session_id();
-if($member["mb_id"]){
-    $wished_id = $member["mb_id"];
-    $search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$member[mb_id]}') ";
-}else{
-    $wished_id = $ss_id;
-    $search .= " and p.pd_id not in (select pd_id from `my_trash` where mb_id = '{$ss_id}') ";
-}
+
 $sql = "select * {$sel} from `product` as p left join `g5_member` as m on p.mb_id = m.mb_id where {$search} {$od} ";
 $res = sql_query($sql);
 while($row = sql_fetch_array($res)){
-    $pro[] = $row;
-}
+    $list[] = $row;
+}*/
 include_once(G5_MOBILE_PATH."/head.map.php");
 
 ?>
@@ -123,11 +136,11 @@ include_once(G5_MOBILE_PATH."/head.map.php");
     #map .wrap .info p{padding-top:2vw;font-weight:bold;font-size:4vw;text-align:center;}
     #map .wrap .button_area{width:100%;text-align:center;padding-top:3vw;}
     #map .wrap .button_area input{padding:1vw;font-size:3vw;border:none;-webkit-border-radius:5vw;-moz-border-radius:5vw;border-radius:5vw;background-color:#ffe700;color:#000;width:calc(100% - 2vw)}
-    #map_list{position:absolute;bottom:0;display:none;width:100%;height:32vh;left:0;z-index:10;overflow:hidden;}
+    #map_list{position:absolute;bottom:0;display:none;width:100%;height:36vh;left:0;z-index:10;overflow:hidden;}
     #map_list ul{overflow-y:scroll;height:100%;}
     #map_list li.item{position:relative;clear:both;padding:1px;width:calc(100% - 2px);-webkit-box-shadow:  0 0 2px RGBA(0,0,0,0.4);-moz-box-shadow:  0 0 2px RGBA(0,0,0,0.4);box-shadow:  0 0 2px RGBA(0,0,0,0.4);margin-bottom: 1vw;display: inline-block;overflow: hidden}
     #map_list li.item .item_images{width:35vw;height:26vw;float:left}
-    #map_list li.item .info{float: left;width: calc(65vw - 8px);position: relative;height:26vw;}
+    #map_list li.item .info{float: left;width: calc(65vw - 2px);position: relative;height:26vw;}
     #map_list li.item .info .top{background: #eee;position: absolute;top: 0;width: 100%;height: 6vw;}
     #map_list li.item .info .top h2{font-size: 4vw;position: absolute;left: 1vw;top: 1vw;color: #565656;}
     #map_list li.item .info .top div{position: relative;text-align: right;height: 100%;}
@@ -138,20 +151,20 @@ include_once(G5_MOBILE_PATH."/head.map.php");
     #map_list li.item .info .bottom h2{font-size: 4vw;padding: 1vw 2vw;word-break: keep-all}
     #map_list li.item .info .bottom .price{font-size:4.3vw;width:100%;text-align:right;}
 </style>
-<div class="wrap" style="height:calc(100vh - 35vw);">
+<div class="wrap" style="height:calc(100vh - 29vw);">
     <?php if($stx || $searchActive == "search"){?>
         <div id="map_list" style="display:block;">
             <ul>
-                <?php for($i=0;$i<count($pro);$i++){
-                    if($pro[$i]["pd_lat"]==0 && $pro[$i]["pd_lng"]==0){
+                <?php for($i=0;$i<count($list);$i++){
+                    if($list[$i]["pd_lat"]==0 && $list[$i]["pd_lng"]==0){
                         $dist = "정보없음";
                     }else {
-                        $dist = round($pro[$i]["distance"],1) . "km";
+                        $dist = round($list[$i]["distance"],1) . "km";
                     }
-                    if($pro[$i]["pd_date"]) {
-                        $loc_data = $pro[$i]["pd_date"];
-                        if($pro[$i]["pd_update"]){
-                            $loc_data = $pro[$i]["pd_update"];
+                    if($list[$i]["pd_date"]) {
+                        $loc_data = $list[$i]["pd_date"];
+                        if($list[$i]["pd_update"]){
+                            $loc_data = $list[$i]["pd_update"];
                         }
                         $now = date("Y-m-d H:i:s");
                         $time_gep = round((strtotime($now) - strtotime($loc_data)) / 3600);
@@ -166,8 +179,8 @@ include_once(G5_MOBILE_PATH."/head.map.php");
                         $time_gep = "정보 없음";
                     }?>
                     <li onclick="mapCenter('<?php echo $i;?>')" class="item">
-                        <?php if($pro[$i]["pd_images"]!=""){
-                            $img = explode(",",$pro[$i]["pd_images"]);
+                        <?php if($list[$i]["pd_images"]!=""){
+                            $img = explode(",",$list[$i]["pd_images"]);
                             $img[0] = trim($img[0]);
                             $img1 = get_images(G5_DATA_PATH."/product/".$img[0],'','');
                             if(is_file(G5_DATA_PATH."/product/".$img1)){
@@ -180,14 +193,14 @@ include_once(G5_MOBILE_PATH."/head.map.php");
                                     <?php }?>
                                 </div>
                             <?php }else{
-                                $tags = explode("#",$pro[$i]["pd_tag"]);
+                                $tags = explode("#",$list[$i]["pd_tag"]);
                                 $rand = rand(1,13);
                                 ?>
                                 <div class="bg rand_bg<?php echo $rand;?> item_images" >
                                     <div class="tags">
                                         <?php for($k=0;$k<count($tags);$k++){
                                             $rand_font = rand(3,6);
-                                            if($tags[$k]!=""){
+                                            if(trim($tags[$k])!=""){
                                                 ?>
                                                 <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
                                             <?php } }?>
@@ -196,14 +209,14 @@ include_once(G5_MOBILE_PATH."/head.map.php");
                                 </div>
                             <?php }?>
                         <?php }else{
-                            $tags = explode("#",$pro[$i]["pd_tag"]);
+                            $tags = explode("#",$list[$i]["pd_tag"]);
                             $rand = rand(1,13);
                             ?>
                             <div class="bg rand_bg<?php echo $rand;?> item_images" >
                                 <div class="tags">
                                     <?php for($k=0;$k<count($tags);$k++){
                                         $rand_font = rand(3,6);
-                                        if($tags[$k]!=""){
+                                        if(trim($tags[$k])!=""){
                                             ?>
                                             <div class="rand_size<?php echo $rand_font;?>">#<?php echo $tags[$k];?></div>
                                         <?php } }?>
@@ -212,8 +225,8 @@ include_once(G5_MOBILE_PATH."/head.map.php");
                             </div>
                         <?php }?>
                         <div class="info">
-                            <?php if($pro[$i]["pd_name"]) {
-                                switch ($pro[$i]["pd_type2"]) {
+                            <?php if($list[$i]["pd_name"]) {
+                                switch ($list[$i]["pd_type2"]) {
                                     case "4":
                                         $pt2 = "[삽니다]";
                                         break;
@@ -221,22 +234,22 @@ include_once(G5_MOBILE_PATH."/head.map.php");
                             }
                             ?>
                             <div class="top">
-                                <h2><?php echo ($pro[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
+                                <h2><?php echo ($list[$i]["mb_level"]==4)?"<img src='".G5_IMG_URL."/ic_pro.svg'>":"　";?></h2>
                                 <div>
                                     <ul>
-                                        <?php if($app && $app2 || $pro[$i]["distance"]){?>
+                                        <?php if($app && $app2 || $list[$i]["distance"]){?>
                                         <li><img src="<?php echo G5_IMG_URL?>/ic_loc_list.svg" alt=""><?php echo $dist;?></li>
                                         <?php }?>
-                                        <li><img src="<?php echo G5_IMG_URL?>/ic_hit_list.svg" alt=""> <?php echo $pro[$i]["pd_hits"];?></li>
+                                        <li><img src="<?php echo G5_IMG_URL?>/ic_hit_list.svg" alt=""> <?php echo $list[$i]["pd_hits"];?></li>
                                         <li><?php echo $time_gep;?></li>
                                     </ul>
                                     <div class="clear"></div>
                                 </div>
                             </div>
                             <div class="bottom">
-                                <h2><?php echo $pt2. " " . $pro[$i]["pd_name"];?></h2>
+                                <h2><?php echo $pt2. " " . $list[$i]["pd_name"];?></h2>
                                 <div class="price">
-                                    <?php echo number_format($pro[$i]["pd_price"]);?> 원
+                                    <?php echo number_format($list[$i]["pd_price"]);?> 원
                                 </div>
                             </div>
                         </div>
@@ -288,19 +301,19 @@ var mapContainer = document.getElementById('map'), // 지도를 표시할 div
 map = new daum.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
 
 if(lat && lng) {
-    <?php if(count($pro) > 0) {?>
+    <?php if(count($list) > 0) {?>
     // 마커를 표시할 위치와 title 객체 배열입니다
     var positions = [
-        <?php for($i=0;$i<count($pro);$i++){
-            if($pro[$i]["pd_lat"] && $pro[$i]["pd_lng"]){
-            $imgs = explode(",",$pro[$i]["pd_images"]);
+        <?php for($i=0;$i<count($list);$i++){
+            if($list[$i]["pd_lat"] && $list[$i]["pd_lng"]){
+            $imgs = explode(",",$list[$i]["pd_images"]);
             ?>
         {
-            title: "<?php echo $pro[$i]["pd_name"];?>",
-            price: "<?php echo $pro[$i]["pd_price"];?>",
-            latlng: new daum.maps.LatLng('<?php echo $pro[$i]["pd_lat"];?>','<?php echo $pro[$i]["pd_lng"];?>'),
+            title: "<?php echo $list[$i]["pd_name"];?>",
+            price: "<?php echo $list[$i]["pd_price"];?>",
+            latlng: new daum.maps.LatLng('<?php echo $list[$i]["pd_lat"];?>','<?php echo $list[$i]["pd_lng"];?>'),
             image: "<?php echo $imgs[0];?>",
-            pd_id : "<?php echo $pro[$i]["pd_id"];?>"
+            pd_id : "<?php echo $list[$i]["pd_id"];?>"
         },
         <?php } } ?>
         {
@@ -447,6 +460,10 @@ function setLocation(lat,lng){
     // 지도 중심을 부드럽게 이동시킵니다
     // 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동합니다
     map.panTo(moveLatLon);
+}
+
+function fnlist(num,fn_list_type){
+    map.refresh();
 }
 
 $(".category ul > li").click(function(){

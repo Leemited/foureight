@@ -16,7 +16,7 @@ $back_url=G5_MOBILE_URL."/page/mypage/settings.php";
 ?>
 <style>
 body{overflow: hidden}
-#settings{height:calc(100vh - 30vw);overflow-y:scroll;position:relative}
+#settings{height:calc(100vh - 28vw);overflow-y:scroll;position:relative}
 #settings .setting_wrap ul li{padding:2.88vw;}
 </style>
 <div class="sub_head">
@@ -37,6 +37,7 @@ body{overflow: hidden}
                         <?php /*if($app){*/?><!--
                         <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(1);">
                         --><?php /*}*/?>
+                        <img src="<?php echo G5_IMG_URL?>/ic_close_locset.svg" alt="" onclick="mapDelete(1)">
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(1)">
                     </div>
                 </li>
@@ -46,6 +47,7 @@ body{overflow: hidden}
                         <?php /*if($app){*/?><!--
                             <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(2);">
                         --><?php /*}*/?>
+                        <img src="<?php echo G5_IMG_URL?>/ic_close_locset.svg" alt="" onclick="mapDelete(2)">
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(2)">
                     </div>
                 </li>
@@ -55,6 +57,7 @@ body{overflow: hidden}
                         <?php /*if($app){*/?><!--
                             <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(3);">
                         --><?php /*}*/?>
+                        <img src="<?php echo G5_IMG_URL?>/ic_close_locset.svg" alt="" onclick="mapDelete(3)">
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(3)">
                     </div>
                 </li>
@@ -64,6 +67,7 @@ body{overflow: hidden}
                         <?php /*if($app){*/?><!--
                             <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(4);">
                         --><?php /*}*/?>
+                        <img src="<?php echo G5_IMG_URL?>/ic_close_locset.svg" alt="" onclick="mapDelete(4)">
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(4)">
                     </div>
                 </li>
@@ -73,13 +77,14 @@ body{overflow: hidden}
                         <?php /*if($app){*/?><!--
                             <img src="<?php /*echo G5_IMG_URL*/?>/view_pin_black.svg" alt="" onclick="nowLoc(5);">
                         --><?php /*}*/?>
+                        <img src="<?php echo G5_IMG_URL?>/ic_close_locset.svg" alt="" onclick="mapDelete(5)">
                         <img src="<?php echo G5_IMG_URL?>/ic_search.svg" alt="" onclick="mapSelect(5)">
                     </div>
                 </li>
 			</ul>
-			<div class="btn_group">
+<!--			<div class="btn_group">
 				<input type="button" value="등록" class="setting_btn" onclick="fnSubmit()" >
-			</div>
+			</div>-->
 		</div>
     <form action="<?php echo G5_MOBILE_URL?>/page/mypage/my_location_update.php" method="post" name="mylocation_form" >
         <input type="hidden" name="mylocation[]" id="location1" value="<?php echo ($mylocations[0])?$mylocations[0]:"";?>">
@@ -269,7 +274,7 @@ body{overflow: hidden}
     }
 
     var mapon = false;
-    function mapSelect(num){
+    function mapSelect(num,haskey){
         if($("#locs"+num).val()==""){
             alert("거래위치를 입력해주세요");
             return false;
@@ -305,20 +310,70 @@ body{overflow: hidden}
         //$("#addr").val('');
         $("#map_sel").css({"bottom": "-100vw","top":"unset","height":"100vw"});
         mapon = false;*/
-        console.log(lat+"//"+lng);
         var num = $("#setnum").val();
-        $("#locs"+num).val(locitem);
-        $("#location"+num).val(locitem);
-        $("#mylat"+num).val($("#changelat").val());
-        $("#mylng"+num).val($("#changelng").val());
-        $("#map_sel").css({"bottom": "-100vh","top":"unset","height":"100vw"});
-        $(".loclist").html('');
-        $("#setnum").val('');
-        $("#addr").val('');
-        mapon = false;
-        locitem="";
-        setMarkers(null);
-        markers = [];
+
+        $.ajax({
+            url:g5_url+'/mobile/page/ajax/ajax.my_location_update.php',
+            method:"post",
+            data:{locitem:locitem,mylat:$("#changelat").val(),mylng:$("#changelng").val(),num:num}
+        }).done(function(data){
+            console.log(data);
+            if(data=="1"){
+                alert("선택된 위치가 없습니다.");
+                return false;
+            }else if(data=="2"){
+                alert("등록정보 오류 입니다.");
+                return false;
+            }else if(data=="4"){
+                alert("업데이트 오류 입니다.");
+                return false;
+            }else {
+                $("#locs" + num).val(locitem);
+                $("#location" + num).val(locitem);
+                $("#mylat" + num).val($("#changelat").val());
+                $("#mylng" + num).val($("#changelng").val());
+                $("#map_sel").css({"bottom": "-100vh", "top": "unset", "height": "100vw"});
+                $(".loclist").html('');
+                $("#setnum").val('');
+                $("#addr").val('');
+                mapon = false;
+                locitem = "";
+                setMarkers(null);
+                markers = [];
+            }
+        });
+    }
+
+    function mapDelete(num){
+        var locitem = $("#locs"+num).val();
+        $.ajax({
+            url:g5_url+'/mobile/page/ajax/ajax.my_location_delete.php',
+            method:"post",
+            data:{num:num,locitem:locitem}
+        }).done(function(data){
+            if(data=="1"){
+                alert("삭제할 위치를 선택해주세요.");
+            }else if(data=="2"){
+                alert("삭제할 위치의 정보가 없습니다.");
+            }else if(data=="4"){
+                alert("삭제 오류입니다.");
+            }else{
+                $("#locs" + num).val('');
+                $("#location" + num).val('');
+                $("#mylat" + num).val('');
+                $("#mylng" + num).val('');
+                $(".loclist").html('');
+                $("#setnum").val('');
+                $("#addr").val('');
+                mapon = false;
+                locitem = "";
+                setMarkers(null);
+                markers = [];
+                $("#debug").addClass("active");
+                $("#debug").html("거래위치가 삭제되었습니다.");
+                setTimeout(removeDebug, 1500);
+            }
+        });
     }
 
     function nowLoc(num){
