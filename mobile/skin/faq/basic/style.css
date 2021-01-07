@@ -1,0 +1,38 @@
+@charset "utf-8";
+
+#bo_cate {margin:0 10px}
+#bo_cate h2 {position:absolute;font-size:0;line-height:0;overflow:hidden}
+#bo_cate ul {margin-bottom:10px;padding-left:1px;zoom:1}
+#bo_cate ul:after {display:block;visibility:hidden;clear:both;content:""}
+#bo_cate li {float:left;margin-bottom:-1px}
+#bo_cate a {display:block;position:relative;margin-left:-1px;padding:6px 0 5px;width:90px;border:1px solid #ddd;background:#f7f7f7;color:#888;text-align:center;letter-spacing:-0.1em;line-height:1.2em;cursor:pointer}
+#bo_cate a:focus, #bo_cate a:hover, #bo_cate a:active {text-decoration:none}
+#bo_cate #bo_cate_on {z-index:2;border:1px solid #565e60;background:#fff;color:#565e60;font-weight:bold}
+.faq_cate ul li{float:left;width:33.33%;padding:3vw 0;font-size:2.4vw;border-bottom:2px solid #ccc;text-align:center;background-color:#fff;}
+.faq_cate ul li.active{border-bottom:2px solid #000;font-weight:bold;}
+#faq_wrap {background-color:#fff;}
+#faq_wrap h2 {position:absolute;font-size:0;text-indent:-9999em;line-height:0;overflow:hidden}
+.faq_admin {margin:0 5px;text-align:right}
+#faq_wrap p {line-height:1.8em}
+#faq_wrap ol {margin:0;padding:0;list-style:none}
+#faq_con, .empty_table {border-top: 0;height: 100%;overflow: auto;width:100%;}
+#faq_con, .empty_table div{width:100%;vertical-align: middle;text-align: center;}
+#faq_con li{background-color: #fff;border-bottom:1px solid #ddd;background-image:url("../../../../img/admin-menu-arrow.png");background-position:calc(100% - 4vw) center;background-repeat:no-repeat;background-size:4vw 4vw;}
+#faq_con li.view{}
+#faq_con li .left{width:25%;float:left;text-align: center;}
+#faq_con li .right{width:75%;float:left}
+#faq_con li .right-align{width:calc(100% - 14vw);padding:7vw;word-break: keep-all;text-align: left;font-size:3.6vw;line-height: 5vw;}
+/*#faq_con li .right-align > p{padding-left:10px;text-indent: -15px;}*/
+#faq_con h3 a {display:block;padding:4vw 1vw 4vw 0;font-size:3.2vw;text-align: left;letter-spacing: -1px;}
+#faq_con h3 a p{margin:0 !important;line-height:normal !important;font-size:3vw !important;}
+#faq_con h3 a p span{margin:0 !important;line-height:normal !important;font-size:3vw !important;}
+#faq_con li .left h3 a{color:#a0a0a0;font-weight: normal;font-size:3vw !important;text-align: center}
+#faq_con li .left h3 a p{margin:0 !important;line-height:normal !important;font-size:3vw !important;}
+#faq_con .con_inner {display:none;padding:2vw 0;line-height:1.8em;font-size:2.4vw;background-color: #f3f3f3;border-top:1px solid #fdfdfd}
+#faq_con .con_closer {margin:10px 0 0;text-align:right}
+#faq_con .closer_btn {margin:0;padding:10px;background:#fff;border:1px solid #ddd;}
+#faq_con .closer_btn img{width:3vw}
+.faq_tolist {padding:0 10px;text-align:right}
+.faq_img {text-align:center}
+
+#faq_sch {text-align:center}
